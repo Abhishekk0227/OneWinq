@@ -7,14 +7,14 @@ import { CreatePostModal } from '@/components/posts/CreatePostModal'
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen flex bg-muted/30">
+    <div className="min-h-screen flex bg-muted/30 w-full overflow-x-clip">
       {/* Sidebar for Desktop */}
       <AppSidebar />
 
       {/* Main Workspace Area */}
-      <div className="flex flex-1 flex-col min-w-0 pb-16 lg:pb-0">
+      <div className="flex flex-1 flex-col min-w-0 pb-16 lg:pb-0 overflow-x-clip">
         <AppHeader />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in-50 duration-200">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in-50 duration-200 min-w-0">
           <Outlet />
         </main>
       </div>

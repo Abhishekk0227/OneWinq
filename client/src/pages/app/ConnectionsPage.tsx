@@ -154,7 +154,7 @@ export default function ConnectionsPage() {
   return (
     <div className="space-y-8 text-left max-w-5xl mx-auto pb-16">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Professional Network
@@ -173,7 +173,7 @@ export default function ConnectionsPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="connected" className="w-full space-y-6">
-        <TabsList className="w-full sm:w-auto justify-start">
+        <TabsList className="justify-start">
           <TabsTrigger value="connected">
             Connected ({connections.length})
           </TabsTrigger>

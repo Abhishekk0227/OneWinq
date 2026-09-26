@@ -92,7 +92,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="dark min-h-screen flex flex-col md:flex-row bg-[#0b0b10] text-white">
+    <div className="dark min-h-screen flex flex-col md:flex-row bg-[#0b0b10] text-white w-full overflow-x-clip">
       {/* Mobile Top Header / Menu Bar */}
       <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-white/10 bg-[#101016]/95 px-4 backdrop-blur-md md:hidden">
         <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export function AdminLayout() {
       </aside>
 
       {/* Admin Content View */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 md:p-10 max-w-7xl w-full mx-auto overflow-y-auto">
+      <main className="flex-1 min-w-0 p-3.5 sm:p-6 md:p-10 max-w-7xl w-full mx-auto overflow-y-auto overflow-x-clip">
         <Outlet />
       </main>
     </div>

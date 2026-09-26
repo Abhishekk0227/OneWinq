@@ -63,13 +63,13 @@ export default function AdminReportsPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex items-center gap-2 bg-[#161620] p-1 rounded-xl border border-white/10 text-xs">
-          <Filter className="h-3.5 w-3.5 text-white/40 ml-2" />
+        <div className="flex items-center gap-1.5 bg-[#161620] p-1 rounded-xl border border-white/10 text-xs overflow-x-auto no-scrollbar max-w-full min-w-0">
+          <Filter className="h-3.5 w-3.5 text-white/40 ml-2 shrink-0" />
           {['ALL', 'PENDING', 'REVIEWING', 'RESOLVED', 'DISMISSED'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors shrink-0 whitespace-nowrap ${
                 statusFilter === st
                   ? 'bg-primary text-white font-bold'
                   : 'text-white/60 hover:text-white'

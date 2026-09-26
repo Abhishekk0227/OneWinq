@@ -222,7 +222,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 text-left max-w-5xl mx-auto pb-16">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
             <Settings className="h-3.5 w-3.5" />
@@ -238,7 +238,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="account" className="w-full space-y-6">
-        <TabsList className="w-full sm:w-auto justify-start">
+        <TabsList className="justify-start">
           <TabsTrigger value="account">Account & Handle</TabsTrigger>
           <TabsTrigger value="privacy">Privacy & Discovery</TabsTrigger>
           <TabsTrigger value="security">Security & Sessions</TabsTrigger>
@@ -282,8 +282,8 @@ export default function SettingsPage() {
             </form>
           </div>
 
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
+          <div className="rounded-3xl border border-border bg-card p-4 sm:p-8 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Account Details</h2>
                 <p className="text-xs text-muted-foreground">Personal details associated with your OneWinq account</p>
@@ -293,6 +293,7 @@ export default function SettingsPage() {
                 size="sm"
                 onClick={() => setIsEmailModalOpen(true)}
                 leftIcon={<Mail className="h-3.5 w-3.5" />}
+                className="w-full sm:w-auto"
               >
                 Change Email Address
               </Button>
@@ -313,8 +314,8 @@ export default function SettingsPage() {
 
         {/* 2. Privacy & Discovery */}
         <TabsContent value="privacy" className="space-y-6">
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
+          <div className="rounded-3xl border border-border bg-card p-4 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
               <div>
                 <h2 className="text-lg font-bold text-foreground">Discovery & Search Visibility</h2>
                 <p className="text-xs text-muted-foreground">Control how peer professionals find and connect with you.</p>
@@ -323,6 +324,7 @@ export default function SettingsPage() {
                 size="sm"
                 isLoading={updatePrivacyMutation.isPending}
                 onClick={handleSavePrivacy}
+                className="w-full sm:w-auto"
               >
                 Save Preferences
               </Button>

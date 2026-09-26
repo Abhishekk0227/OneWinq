@@ -284,7 +284,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8 text-left max-w-5xl mx-auto pb-20 transition-colors duration-300 rounded-3xl">
       {/* Top Banner: Status & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
@@ -303,10 +303,10 @@ export default function ProfilePage() {
               href={`/u/${user?.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-semibold hover:underline inline-flex items-center gap-1 text-sm font-mono"
+              className="text-primary font-semibold hover:underline inline-flex items-center gap-1 text-sm font-mono max-w-full overflow-hidden"
             >
-              <span>onewinq.me/u/{user?.username}</span>
-              <ExternalLink className="h-3 w-3" />
+              <span className="truncate">onewinq.me/u/{user?.username}</span>
+              <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
             {activeUserCard ? (
               <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono flex items-center gap-1">
@@ -386,7 +386,7 @@ export default function ProfilePage() {
       )}
 
       {/* Mode Switcher Control Bar */}
-      <div className="p-6 rounded-3xl bg-card border border-border shadow-sm space-y-4">
+      <div className="p-4 sm:p-6 rounded-3xl bg-card border border-border shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-bold text-foreground">
@@ -397,12 +397,12 @@ export default function ProfilePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-2xl bg-muted p-1 text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex max-w-full overflow-x-auto no-scrollbar rounded-2xl bg-muted p-1 text-xs font-semibold">
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
                   activeMode === VISIBILITY_MODE.PUBLIC
                     ? 'bg-card text-foreground shadow-sm font-bold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -415,7 +415,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
                   activeMode === VISIBILITY_MODE.PROFESSIONAL
                     ? 'bg-card text-primary shadow-sm font-bold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -428,7 +428,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
                   activeMode === VISIBILITY_MODE.PRIVATE
                     ? 'bg-card text-foreground shadow-sm font-bold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -444,6 +444,7 @@ export default function ProfilePage() {
               size="sm"
               onClick={() => setIsTempModalOpen(true)}
               leftIcon={<Clock className="h-3.5 w-3.5" />}
+              className="shrink-0"
             >
               Temporary Mode
             </Button>
@@ -717,8 +718,8 @@ export default function ProfilePage() {
 
           {/* Sections Menu Bar (Sticky on scroll, optimized for mobile responsiveness) */}
           {availableSections.length > 1 && (
-            <div className="sticky top-0 z-20 -mx-4 sm:mx-0 p-2 sm:p-2.5 rounded-none sm:rounded-2xl bg-card/95 backdrop-blur-md border-y sm:border border-border/80 shadow-md my-4">
-              <div className="flex items-center justify-between gap-2">
+            <div className="sticky top-0 z-20 -mx-3 sm:mx-0 p-2 sm:p-2.5 rounded-none sm:rounded-2xl bg-card/95 backdrop-blur-md border-y sm:border border-border/80 shadow-md my-4">
+              <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-lg bg-muted/70 text-foreground font-bold text-xs border border-border/40">
                   <Layers className="h-3.5 w-3.5 text-primary" />
                   <span className="hidden xs:inline">Sections</span>
@@ -728,7 +729,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Horizontal Scrollable Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1 py-0.5">
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1 py-0.5 min-w-0">
                   {availableSections.map((sec) => {
                     const isActive = activeSection === sec.id
                     return (

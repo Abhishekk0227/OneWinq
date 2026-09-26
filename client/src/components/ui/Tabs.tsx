@@ -49,13 +49,15 @@ export function TabsList({
   children: React.ReactNode
 }) {
   return (
-    <div
-      className={cn(
-        'inline-flex h-11 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground',
-        className
-      )}
-    >
-      {children}
+    <div className="w-full overflow-x-auto no-scrollbar py-0.5 min-w-0">
+      <div
+        className={cn(
+          'inline-flex h-11 items-center justify-start sm:justify-center rounded-xl bg-muted p-1 text-muted-foreground min-w-max',
+          className
+        )}
+      >
+        {children}
+      </div>
     </div>
   )
 }
@@ -79,7 +81,7 @@ export function TabsTrigger({
       type="button"
       onClick={() => context.setActiveTab(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all duration-150 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all duration-150 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 shrink-0 select-none',
         isActive
           ? 'bg-card text-foreground shadow-sm font-semibold'
           : 'hover:text-foreground text-muted-foreground',
