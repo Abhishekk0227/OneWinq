@@ -1,4 +1,4 @@
-import argon2 from 'argon2';
+import { hash, verify, Algorithm } from '@node-rs/argon2';
 import { config } from '../../config/env.js';
 
 // ---------------------------------------------------------------------------
@@ -6,7 +6,7 @@ import { config } from '../../config/env.js';
 // ---------------------------------------------------------------------------
 
 const ARGON2_OPTIONS = {
-  type: argon2.argon2id,
+  algorithm: Algorithm.Argon2id,
   memoryCost: config.argon2.memoryCost,
   timeCost: config.argon2.timeCost,
   parallelism: config.argon2.parallelism,
@@ -19,7 +19,7 @@ const ARGON2_OPTIONS = {
  * @returns {Promise<string>} Argon2id hash
  */
 export async function hashPassword(password) {
-  return argon2.hash(password, ARGON2_OPTIONS);
+  return hash(password, ARGON2_OPTIONS);
 }
 
 /**
@@ -30,7 +30,7 @@ export async function hashPassword(password) {
  * @returns {Promise<boolean>}
  */
 export async function verifyPassword(password, hash) {
-  return argon2.verify(hash, password);
+  return verify(hash, password);
 }
 
 // ---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ let _dummyHash = null;
 async function getDummyHash() {
   if (!_dummyHash) {
     // Pre-compute once and cache.
-    _dummyHash = await argon2.hash('__dummy_timing_prevention_seed__', ARGON2_OPTIONS);
+    _dummyHash = await hash('__dummy_timing_prevention_seed__', ARGON2_OPTIONS);
   }
   return _dummyHash;
 }
@@ -61,7 +61,7 @@ async function getDummyHash() {
 export async function performDummyVerify() {
   const hash = await getDummyHash();
   // This will always fail (wrong password) but takes same time as a real verify.
-  return argon2.verify(hash, '__wrong_password_that_never_matches__').catch(() => false);
+  return verify(hash, '__wrong_password_that_never_matches__').catch(() => false);
 }
 
 export const passwordService = {

@@ -1,4 +1,4 @@
-import argon2 from 'argon2';
+import { hash as argon2Hash, verify as argon2Verify, Algorithm } from '@node-rs/argon2';
 import { config } from '../../config/env.js';
 import { OtpChallenge } from './otpChallenge.model.js';
 import { generateOtp } from '../../utils/otp.js';
@@ -19,7 +19,7 @@ import { ERROR_CODE, OTP_PURPOSE } from '../../config/constants.js';
 // ---------------------------------------------------------------------------
 
 const OTP_HASH_OPTIONS = {
-  type: argon2.argon2id,
+  algorithm: Algorithm.Argon2id,
   memoryCost: 32768, // 32 MB
   timeCost: 2,
   parallelism: 1,
@@ -43,7 +43,7 @@ export async function issueOtp({ email, userId = null, purpose, displayName }) {
   const rawOtp = generateOtp();
 
   // 3. Hash it
-  const otpHash = await argon2.hash(rawOtp, OTP_HASH_OPTIONS);
+  const otpHash = await argon2Hash(rawOtp, OTP_HASH_OPTIONS);
 
   // 4. Build expiry
   const expiresAt = new Date(Date.now() + config.otp.expiresMinutes * 60 * 1_000);
@@ -147,7 +147,7 @@ export async function verifyOtp({ email, purpose, rawOtp }) {
   );
 
   // Verify hash
-  const isValid = await argon2.verify(challenge.otpHash, rawOtp).catch(() => false);
+  const isValid = await argon2Verify(challenge.otpHash, rawOtp).catch(() => false);
 
   if (!isValid) {
     // Re-check if max attempts now reached

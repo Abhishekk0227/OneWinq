@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
-import argon2 from 'argon2';
+import { hash as argon2Hash, verify as argon2Verify, Algorithm } from '@node-rs/argon2';
 import { config } from '../../config/env.js';
 import { AuthenticationError } from '../../shared/errors.js';
 import { ERROR_CODE } from '../../config/constants.js';
@@ -13,7 +13,7 @@ import { ERROR_CODE } from '../../config/constants.js';
 // Lower cost than passwords — refresh tokens are long and random (high entropy),
 // so cracking resistance comes from randomness, not hashing cost.
 const REFRESH_HASH_OPTIONS = {
-  type: argon2.argon2id,
+  algorithm: Algorithm.Argon2id,
   memoryCost: 19456, // 19 MB — sufficient for high-entropy tokens
   timeCost: 2,
   parallelism: 1,
@@ -79,7 +79,7 @@ export function generateTokenFamily() {
  */
 export async function generateRefreshToken() {
   const rawToken = `${randomUUID()}${randomUUID()}`; // ~288 bits of randomness
-  const hash = await argon2.hash(rawToken, REFRESH_HASH_OPTIONS);
+  const hash = await argon2Hash(rawToken, REFRESH_HASH_OPTIONS);
   return { rawToken, hash };
 }
 
@@ -91,7 +91,7 @@ export async function generateRefreshToken() {
  * @returns {Promise<boolean>}
  */
 export async function verifyRefreshToken(rawToken, hash) {
-  return argon2.verify(hash, rawToken).catch(() => false);
+  return argon2Verify(hash, rawToken).catch(() => false);
 }
 
 // ---------------------------------------------------------------------------
