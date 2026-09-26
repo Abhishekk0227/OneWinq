@@ -53,12 +53,12 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-card/85 px-3 sm:px-6 backdrop-blur-md">
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         {/* Mobile Hamburger Menu Button */}
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
-          className="rounded-xl p-2 text-foreground bg-muted/60 hover:bg-muted active:scale-95 transition-all lg:hidden flex items-center justify-center border border-border/60 shadow-xs"
+          className="rounded-xl p-2 text-foreground bg-muted/60 hover:bg-muted active:scale-95 transition-all lg:hidden flex items-center justify-center border border-border/60 shadow-xs shrink-0"
           aria-label="Open navigation menu"
           title="Open Menu"
         >
@@ -77,18 +77,18 @@ export function AppHeader() {
         </button>
 
         {/* Mobile Brand Logo */}
-        <Link to="/app" className="lg:hidden flex items-center mr-1 select-none">
+        <Link to="/app" className="lg:hidden flex items-center select-none shrink-0">
           <span className="text-xl font-black tracking-tight text-foreground lowercase">
             one<span className="text-primary">winq</span>
           </span>
         </Link>
 
-        {/* Workspace Title & Badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground hidden sm:inline">
+        {/* Workspace Title & Badge — desktop only */}
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="text-sm font-semibold text-foreground hidden lg:inline">
             Workspace
           </span>
-          <span className="text-muted-foreground text-xs hidden sm:inline">/</span>
+          <span className="text-muted-foreground text-xs hidden lg:inline">/</span>
           {isStaff ? (
             <Link to="/admin">
               <Badge
@@ -117,13 +117,13 @@ export function AppHeader() {
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
-        {/* Admin/Staff Console Direct Button */}
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        {/* Admin/Staff Console Direct Button — hidden on mobile (accessible via drawer) */}
         {isStaff && (
           <Link
             to="/admin"
             className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all',
+              'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all',
               user?.role === 'SUPPORT'
                 ? 'bg-sky-600 hover:bg-sky-700'
                 : 'bg-primary hover:bg-primary-hover'

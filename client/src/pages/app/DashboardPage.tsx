@@ -178,9 +178,9 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-8 text-left pb-24">
+    <div className="w-full max-w-6xl mx-auto space-y-5 sm:space-y-8 text-left pb-24">
       {/* 1. Hero Identity Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-6 lg:p-8 shadow-sm">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
             />
             <div className="space-y-1.5 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground break-words leading-tight">
                   Welcome back, {user?.displayName}
                 </h1>
                 {primaryIdentity && (
@@ -215,29 +215,29 @@ export default function DashboardPage() {
               </p>
 
               {/* Profile Link preview bar */}
-              <div className="flex flex-wrap items-center gap-2 pt-2">
-                <span className="text-xs font-medium text-muted-foreground">Your Profile Link:</span>
+              <div className="flex items-center gap-2 pt-2 max-w-full overflow-hidden">
+                <span className="text-xs font-medium text-muted-foreground shrink-0">Link:</span>
                 <a
                   href={`/u/${user?.username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-mono text-primary font-semibold hover:underline inline-flex items-center gap-1 bg-primary-soft px-2.5 py-1 rounded-lg"
+                  className="text-xs font-mono text-primary font-semibold hover:underline inline-flex items-center gap-1 bg-primary-soft px-2.5 py-1 rounded-lg min-w-0 overflow-hidden"
                 >
-                  <span>onewinq.me/u/{user?.username}</span>
-                  <ExternalLink className="h-3 w-3" />
+                  <span className="truncate">onewinq.me/u/{user?.username}</span>
+                  <ExternalLink className="h-3 w-3 shrink-0" />
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Quick Actions at Top Right */}
-          <div className="flex items-center flex-wrap gap-2.5 shrink-0">
+          {/* Quick Actions — full width on mobile, right-aligned on lg */}
+          <div className="flex items-center flex-wrap gap-2 w-full lg:w-auto">
             <Button
               variant="default"
               size="sm"
               onClick={() => openModal('CREATE_POST')}
               leftIcon={<Plus className="h-4 w-4 stroke-[2.5]" />}
-              className="bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-sm shadow-primary/25 font-bold"
+              className="bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-sm shadow-primary/25 font-bold flex-1 sm:flex-none"
             >
               New Post
             </Button>
@@ -247,6 +247,7 @@ export default function DashboardPage() {
               size="sm"
               onClick={() => setIsShareModalOpen(true)}
               leftIcon={<Share2 className="h-4 w-4" />}
+              className="flex-1 sm:flex-none"
             >
               Share QR
             </Button>
@@ -256,6 +257,7 @@ export default function DashboardPage() {
               size="sm"
               onClick={handleCopyLink}
               leftIcon={isCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+              className="flex-1 sm:flex-none"
             >
               {isCopied ? 'Copied' : 'Copy Link'}
             </Button>
@@ -267,6 +269,7 @@ export default function DashboardPage() {
                 isLoading={publishMutation.isPending}
                 onClick={() => publishMutation.mutate()}
                 leftIcon={<Sparkles className="h-4 w-4 text-primary" />}
+                className="flex-1 sm:flex-none"
               >
                 Publish Live
               </Button>
@@ -276,7 +279,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 2. Key Performance Indicators (KPI Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI 1: Profile Views */}
         <div className="rounded-3xl border border-border bg-card p-5 shadow-sm space-y-2 relative overflow-hidden group hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between">
@@ -357,28 +360,28 @@ export default function DashboardPage() {
       </div>
 
       {/* 3. Fast Actions Bar */}
-      <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
         <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
           Quick Launch:
         </span>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link to="/app/feed">
-            <Button size="sm" variant="outline" leftIcon={<Flame className="h-3.5 w-3.5 text-primary" />}>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+          <Link to="/app/feed" className="w-full sm:w-auto">
+            <Button size="sm" variant="outline" leftIcon={<Flame className="h-3.5 w-3.5 text-primary" />} className="w-full sm:w-auto">
               Create Post
             </Button>
           </Link>
-          <Link to="/app/profile/edit">
-            <Button size="sm" variant="outline" leftIcon={<Edit3 className="h-3.5 w-3.5 text-primary" />}>
+          <Link to="/app/profile/edit" className="w-full sm:w-auto">
+            <Button size="sm" variant="outline" leftIcon={<Edit3 className="h-3.5 w-3.5 text-primary" />} className="w-full sm:w-auto">
               Edit Identity
             </Button>
           </Link>
-          <Link to="/app/cards">
-            <Button size="sm" variant="outline" leftIcon={<CreditCard className="h-3.5 w-3.5 text-emerald-500" />}>
+          <Link to="/app/cards" className="w-full sm:w-auto">
+            <Button size="sm" variant="outline" leftIcon={<CreditCard className="h-3.5 w-3.5 text-emerald-500" />} className="w-full sm:w-auto">
               Manage Cards
             </Button>
           </Link>
-          <Link to="/app/network">
-            <Button size="sm" variant="outline" leftIcon={<Compass className="h-3.5 w-3.5 text-violet-500" />}>
+          <Link to="/app/network" className="w-full sm:w-auto">
+            <Button size="sm" variant="outline" leftIcon={<Compass className="h-3.5 w-3.5 text-violet-500" />} className="w-full sm:w-auto">
               Discover People
             </Button>
           </Link>
@@ -386,7 +389,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 4. Main Two-Column Activity & Health Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
         {/* Left Column (8 cols): Connection Requests & Recent Posts */}
         <div className="lg:col-span-8 space-y-6">
           {/* Pending Connection Requests */}
