@@ -2,6 +2,7 @@ import { config } from '../../config/env.js';
 import { EMAIL_CATEGORY } from '../../config/constants.js';
 import { ConsoleAdapter } from './adapters/consoleAdapter.js';
 import { SendgridAdapter } from './adapters/sendgridAdapter.js';
+import { SmtpAdapter } from './adapters/smtpAdapter.js';
 import logger from '../../utils/logger.js';
 import {
   emailVerificationTemplate,
@@ -47,8 +48,7 @@ function selectAdapter() {
       // TODO: implement SES adapter
       throw new Error('SES email adapter is not yet implemented.');
     case 'smtp':
-      // TODO: implement SMTP adapter
-      throw new Error('SMTP email adapter is not yet implemented.');
+      return new SmtpAdapter();
     case 'console':
     default:
       if (config.isProduction) {
