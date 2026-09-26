@@ -1,0 +1,105 @@
+/**
+ * OneWinq Centralized Design Tokens
+ * Primary Palette: PURPLE + WHITE + EDITORIAL BLACK
+ */
+
+:root {
+  /* Brand Royal Amethyst & Purple Spectrum (HSL) based on Vector Gradient Color Set */
+  --primary-50: 270 85% 98%;   /* Softest lilac mist */
+  --primary-100: 270 80% 95%;  /* Light lavender tint */
+  --primary-200: 271 75% 88%;  /* Silky lilac */
+  --primary-300: 272 70% 77%;  /* Gentle amethyst */
+  --primary-400: 271 66% 64%;  /* Vibrant royal violet */
+  --primary-500: 270 65% 52%;  /* Main Brand Royal Purple #7932D9 */
+  --primary-600: 271 72% 43%;  /* Deep amethyst hover #5F1EBD */
+  --primary-700: 273 78% 33%;  /* Imperial violet active #461191 */
+  --primary-800: 274 80% 23%;  /* Midnight royal purple #2E0B64 */
+  --primary-900: 275 85% 15%;  /* Deepest twilight violet #1B053C */
+
+  /* Core Semantic Tokens */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 7%;      /* Rich editorial near-black #101014 */
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 7%;
+  --card-hover: 270 50% 99%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 7%;
+
+  --primary: 270 65% 52%;
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 271 72% 43%;
+  --primary-soft: 270 80% 96%;
+  --primary-muted: 271 75% 91%;
+
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 10% 7%;
+
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+
+  --accent: 270 80% 96%;
+  --accent-foreground: 270 65% 52%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 152 76% 40%;
+  --success-foreground: 0 0% 100%;
+  --success-soft: 150 80% 96%;
+
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --warning-soft: 45 100% 96%;
+
+  --info: 217 91% 60%;
+  --info-foreground: 0 0% 100%;
+  --info-soft: 215 100% 96%;
+
+  --border: 240 6% 91%;
+  --input: 240 6% 90%;
+  --ring: 270 65% 52%;
+
+  /* Radii */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.625rem; /* 10px */
+  --radius-lg: 0.875rem; /* 14px */
+  --radius-xl: 1.25rem;  /* 20px */
+  --radius-2xl: 1.5rem;  /* 24px */
+}
+
+/* Dark mode token overrides: Luxurious Midnight Imperial Purple */
+.dark {
+  --background: 270 24% 7%;      /* Deep obsidian plum #120B1C */
+  --foreground: 270 15% 98%;
+
+  --card: 270 20% 11%;          /* Rich amethyst slate #1D142B */
+  --card-foreground: 270 15% 98%;
+  --card-hover: 270 22% 15%;
+
+  --popover: 270 20% 11%;
+  --popover-foreground: 270 15% 98%;
+
+  --primary: 270 72% 64%;        /* Glowing royal amethyst */
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 270 76% 56%;
+  --primary-soft: 273 45% 18%;
+  --primary-muted: 273 40% 24%;
+
+  --secondary: 270 15% 16%;
+  --secondary-foreground: 270 15% 98%;
+
+  --muted: 270 15% 15%;
+  --muted-foreground: 270 10% 65%;
+
+  --accent: 273 45% 18%;
+  --accent-foreground: 270 72% 64%;
+
+  --destructive: 0 75% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 270 15% 20%;
+  --input: 270 15% 20%;
+  --ring: 270 72% 64%;
+}

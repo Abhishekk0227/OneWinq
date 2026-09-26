@@ -1,0 +1,97 @@
+/**
+ * Application-wide constants and enums mirroring the OneWinq server contracts.
+ */
+
+export const ACCOUNT_STATE = {
+  ACTIVE: 'ACTIVE',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+  DEACTIVATED: 'DEACTIVATED',
+  SUSPENDED: 'SUSPENDED',
+  DELETION_PENDING: 'DELETION_PENDING',
+  PERMANENTLY_DELETED: 'PERMANENTLY_DELETED',
+} as const
+export type AccountState = typeof ACCOUNT_STATE[keyof typeof ACCOUNT_STATE]
+
+export const VISIBILITY_MODE = {
+  PUBLIC: 'PUBLIC',
+  PROFESSIONAL: 'PROFESSIONAL',
+  PRIVATE: 'PRIVATE',
+} as const
+export type VisibilityMode = typeof VISIBILITY_MODE[keyof typeof VISIBILITY_MODE]
+
+export const SECTION_VISIBILITY = {
+  PUBLIC: 'PUBLIC',
+  PROFESSIONAL: 'PROFESSIONAL',
+  PRIVATE: 'PRIVATE',
+} as const
+export type SectionVisibility = typeof SECTION_VISIBILITY[keyof typeof SECTION_VISIBILITY]
+
+export const PROFILE_STATE = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+} as const
+export type ProfileState = typeof PROFILE_STATE[keyof typeof PROFILE_STATE]
+
+export const CONNECTION_STATE = {
+  NONE: 'NONE',
+  PENDING_SENT: 'PENDING_SENT',
+  PENDING_RECEIVED: 'PENDING_RECEIVED',
+  CONNECTED: 'CONNECTED',
+  BLOCKED: 'BLOCKED',
+} as const
+export type ConnectionState = typeof CONNECTION_STATE[keyof typeof CONNECTION_STATE]
+
+export const CARD_STATE = {
+  UNASSIGNED: 'UNASSIGNED',
+  RESERVED: 'RESERVED',
+  ASSIGNED: 'ASSIGNED',
+  ACTIVE: 'ACTIVE',
+  BLOCKED: 'BLOCKED',
+  LOST: 'LOST',
+  REPLACED: 'REPLACED',
+} as const
+export type CardState = typeof CARD_STATE[keyof typeof CARD_STATE]
+
+export const ORDER_STATE = {
+  CREATED: 'CREATED',
+  PAID: 'PAID',
+  PROCESSING: 'PROCESSING',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+} as const
+export type OrderState = typeof ORDER_STATE[keyof typeof ORDER_STATE]
+
+export const PLAN_TIER = {
+  FREE: 'FREE',
+  PRO: 'PRO',
+  BUSINESS: 'BUSINESS',
+  ENTERPRISE: 'ENTERPRISE',
+} as const
+export type PlanTier = typeof PLAN_TIER[keyof typeof PLAN_TIER]
+
+export const ADMIN_ROLE = {
+  ADMIN: 'ADMIN',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  SUPPORT: 'SUPPORT',
+  USER: 'USER',
+} as const
+export type AdminRole = typeof ADMIN_ROLE[keyof typeof ADMIN_ROLE]
+
+export const NOTIFICATION_TYPE = {
+  CONNECTION_REQUEST: 'CONNECTION_REQUEST',
+  CONNECTION_ACCEPTED: 'CONNECTION_ACCEPTED',
+  NEW_MESSAGE: 'NEW_MESSAGE',
+  PROFILE_VIEW: 'PROFILE_VIEW',
+  CARD_ACTIVATED: 'CARD_ACTIVATED',
+  ORDER_UPDATE: 'ORDER_UPDATE',
+  SUBSCRIPTION_UPDATE: 'SUBSCRIPTION_UPDATE',
+  SYSTEM_ANNOUNCEMENT: 'SYSTEM_ANNOUNCEMENT',
+  SECURITY_ALERT: 'SECURITY_ALERT',
+  REPORT_RESPONSE: 'REPORT_RESPONSE',
+  TICKET_RESPONSE: 'TICKET_RESPONSE',
+  POST_LIKE: 'POST_LIKE',
+  POST_COMMENT: 'POST_COMMENT',
+} as const
+export type NotificationType = typeof NOTIFICATION_TYPE[keyof typeof NOTIFICATION_TYPE]
+
