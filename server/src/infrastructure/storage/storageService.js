@@ -1,13 +1,19 @@
 import { config } from '../../config/env.js';
 import { LocalStorageAdapter } from './localStorageAdapter.js';
 import { S3StorageAdapter } from './s3StorageAdapter.js';
+import { CloudinaryAdapter } from '../cloudinary/cloudinaryAdapter.js';
 import logger from '../../utils/logger.js';
 
 class StorageService {
   constructor() {
     const provider = config.storage?.provider || 'local';
 
-    if (provider === 's3') {
+    if (provider === 'cloudinary') {
+      logger.info('[StorageService] Initialized Cloudinary storage adapter', {
+        cloudName: config.cloudinary?.cloudName,
+      });
+      this.adapter = new CloudinaryAdapter();
+    } else if (provider === 's3') {
       logger.info('[StorageService] Initialized S3 storage adapter', {
         bucket: config.storage.s3?.bucket,
         region: config.storage.s3?.region,
