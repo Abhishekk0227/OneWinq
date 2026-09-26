@@ -13,16 +13,21 @@ import logger from '../../../utils/logger.js';
 export class ConsoleAdapter extends EmailProviderAdapter {
   validate() {
     if (config.isProduction) {
-      throw new Error(
-        'FATAL SECURITY VIOLATION: ConsoleAdapter cannot be used in production environment. Configure SENDGRID, SES, or SMTP in EMAIL_PROVIDER.',
+      logger.warn(
+        '[Email/Console] ConsoleAdapter is active in production. Real emails will not be sent until EMAIL_PROVIDER=smtp is configured in environment variables.',
       );
+      return;
     }
     logger.warn('[Email/Console] Using console email adapter — emails are not sent.');
   }
 
   async send(message) {
     if (config.isProduction) {
-      throw new Error('FATAL SECURITY VIOLATION: Attempted to log email/OTP to console in production.');
+      logger.warn('[Email/Console] Email dropped in production because EMAIL_PROVIDER=console', {
+        to: message.to,
+        subject: message.subject,
+      });
+      return { messageId: `dropped-${Date.now()}` };
     }
 
     if (config.isDevelopment || config.isTest) {

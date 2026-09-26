@@ -7,8 +7,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "cd client && npm install && npm run build",
-    "vercel-build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install --include=dev && npm run build",
+    "vercel-build": "cd client && npm install --include=dev && npm run build",
     "start": "node server/server.js"
   },
   "dependencies": {

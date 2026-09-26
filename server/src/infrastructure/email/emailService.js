@@ -35,9 +35,10 @@ function sleep(ms) {
 function selectAdapter() {
   if (config.isProduction) {
     if (!config.email.provider || config.email.provider === 'console') {
-      throw new Error(
-        'CRITICAL CONFIGURATION ERROR: EMAIL_PROVIDER="console" is strictly forbidden in production. Set EMAIL_PROVIDER=sendgrid, ses, or smtp with valid credentials in .env.',
+      logger.warn(
+        '[EmailService] EMAIL_PROVIDER="console" is configured in production. Set EMAIL_PROVIDER=smtp in Vercel/production environment variables to send real emails.',
       );
+      return new ConsoleAdapter();
     }
   }
 

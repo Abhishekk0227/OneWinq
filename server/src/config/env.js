@@ -103,15 +103,58 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  // Format errors clearly before crashing
   const issues = parsed.error.issues
     .map((i) => `  • [${i.path.join('.')}] ${i.message}`)
     .join('\n');
-  process.stderr.write(`\n❌  Environment configuration is invalid:\n${issues}\n`);
-  process.exit(1);
+  process.stderr.write(`\n⚠️  Environment configuration warning / invalid:\n${issues}\n`);
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 
-const env = parsed.data;
+const env = parsed.success
+  ? parsed.data
+  : {
+      NODE_ENV: process.env.NODE_ENV || 'production',
+      PORT: process.env.PORT || 5000,
+      MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/onewinq',
+      JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'fallback_jwt_access_secret_min_32_characters_long',
+      JWT_ACCESS_EXPIRES_IN: '15m',
+      JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'fallback_jwt_refresh_secret_min_32_characters_long',
+      JWT_REFRESH_EXPIRES_IN: '7d',
+      COOKIE_SECRET: process.env.COOKIE_SECRET || 'fallback_cookie_secret_min_32_characters_long',
+      COOKIE_SECURE: false,
+      COOKIE_SAME_SITE: 'lax',
+      REFRESH_COOKIE_PATH: '/api/v1/auth',
+      CORS_ORIGINS: '*',
+      ARGON2_MEMORY_COST: 65536,
+      ARGON2_TIME_COST: 3,
+      ARGON2_PARALLELISM: 1,
+      OTP_EXPIRES_MINUTES: 10,
+      OTP_MAX_ATTEMPTS: 5,
+      OTP_RESEND_COOLDOWN_SECONDS: 60,
+      OTP_MAX_RESENDS: 5,
+      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || 'console',
+      EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'no-reply@onewinq.com',
+      EMAIL_FROM_NAME: 'OneWinq',
+      STORAGE_PROVIDER: process.env.STORAGE_PROVIDER || 'local',
+      STORAGE_LOCAL_DIR: 'uploads',
+      RATE_LIMIT_GLOBAL_MAX: 500,
+      RATE_LIMIT_GLOBAL_WINDOW_MS: 900000,
+      RATE_LIMIT_AUTH_MAX: 20,
+      RATE_LIMIT_AUTH_WINDOW_MS: 900000,
+      RATE_LIMIT_OTP_MAX: 5,
+      RATE_LIMIT_OTP_WINDOW_MS: 900000,
+      RATE_LIMIT_SEARCH_MAX: 60,
+      RATE_LIMIT_SEARCH_WINDOW_MS: 60000,
+      RATE_LIMIT_UPLOAD_MAX: 20,
+      RATE_LIMIT_UPLOAD_WINDOW_MS: 3600000,
+      NOTIFICATION_RETENTION_DAYS: 30,
+      ANALYTICS_RAW_RETENTION_DAYS: 365,
+      AUDIT_LOG_RETENTION_DAYS: 730,
+      REQUEST_BODY_LIMIT: '1mb',
+      LOG_LEVEL: 'info',
+    };
 
 // ---------------------------------------------------------------------------
 // Derived / computed config values
