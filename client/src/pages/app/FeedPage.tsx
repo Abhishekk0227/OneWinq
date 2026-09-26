@@ -99,49 +99,33 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6 text-left pb-24 px-1 sm:px-0">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            <Flame className="h-3.5 w-3.5" />
-            <span>Community Feed</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Feed & Discussions
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Share updates, ask questions, and connect with people in your network.
-          </p>
-        </div>
-      </div>
-
-      {/* Post Composer Card */}
-      <div className="rounded-3xl border border-border bg-card p-4 sm:p-6 shadow-sm space-y-4 w-full max-w-full overflow-hidden">
-        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+    <div className="w-full max-w-xl mx-auto space-y-3.5 text-left pb-24 px-2 sm:px-0">
+      {/* Compact Post Composer */}
+      <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 shadow-xs w-full max-w-full overflow-hidden">
+        <div className="flex items-start gap-3 min-w-0">
           <Avatar
             src={user?.avatarUrl}
             fallback={user?.displayName}
             alt={user?.displayName}
-            size="md"
-            className="rounded-2xl mt-0.5 shrink-0"
+            size="sm"
+            className="rounded-xl mt-0.5 shrink-0 ring-1 ring-border"
           />
-          <div className="flex-1 space-y-3 min-w-0">
+          <div className="flex-1 space-y-2.5 min-w-0">
             <textarea
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
-              placeholder={`What's on your mind, ${user?.displayName || 'there'}?`}
-              rows={3}
-              className="w-full resize-none rounded-2xl border border-input bg-muted/30 p-3 sm:p-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder={`What's on your mind, ${user?.displayName?.split(' ')[0] || 'there'}?`}
+              rows={2}
+              className="w-full resize-none rounded-xl border border-input/60 bg-muted/20 hover:bg-muted/30 focus:bg-background p-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 transition-colors leading-relaxed"
             />
 
             {/* Media Attachment Previews */}
             {mediaList.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="flex flex-wrap gap-2 pt-0.5">
                 {mediaList.map((m, idx) => (
                   <div
                     key={idx}
-                    className="relative group rounded-xl overflow-hidden border border-border bg-black/50 h-20 w-20 flex items-center justify-center"
+                    className="relative group rounded-xl overflow-hidden border border-border bg-black/50 h-16 w-16 flex items-center justify-center shrink-0"
                   >
                     {m.type === 'IMAGE' ? (
                       <img src={m.url} alt="Attached" className="h-full w-full object-cover" />
@@ -151,7 +135,8 @@ export default function FeedPage() {
                     <button
                       type="button"
                       onClick={() => setMediaList((prev) => prev.filter((_, i) => i !== idx))}
-                      className="absolute top-1 right-1 p-1 rounded-full bg-black/70 text-white hover:bg-rose-600 transition-colors"
+                      className="absolute top-1 right-1 p-0.5 rounded-full bg-black/75 text-white hover:bg-rose-600 transition-colors"
+                      title="Remove media"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -161,8 +146,8 @@ export default function FeedPage() {
             )}
 
             {/* Composer Footer Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-border">
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {/* Upload Image */}
                 <input
                   ref={imageInputRef}
@@ -172,16 +157,16 @@ export default function FeedPage() {
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   className="hidden"
                 />
-                <Button
+                <button
                   type="button"
-                  variant="subtle"
-                  size="sm"
                   disabled={isUploading}
                   onClick={() => imageInputRef.current?.click()}
-                  leftIcon={<Image className="h-4 w-4 text-primary" />}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+                  title="Add photo"
                 >
-                  Photo
-                </Button>
+                  <Image className="h-3.5 w-3.5 text-primary" />
+                  <span className="hidden xs:inline">Photo</span>
+                </button>
 
                 {/* Upload Video */}
                 <input
@@ -191,22 +176,22 @@ export default function FeedPage() {
                   accept="video/mp4,video/webm,video/quicktime"
                   className="hidden"
                 />
-                <Button
+                <button
                   type="button"
-                  variant="subtle"
-                  size="sm"
                   disabled={isUploading}
                   onClick={() => videoInputRef.current?.click()}
-                  leftIcon={<Video className="h-4 w-4 text-emerald-500" />}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
+                  title="Add video"
                 >
-                  Video
-                </Button>
+                  <Video className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="hidden xs:inline">Video</span>
+                </button>
 
                 {/* Visibility selector */}
                 <select
                   value={postVisibility}
                   onChange={(e) => setPostVisibility(e.target.value as any)}
-                  className="text-xs font-semibold rounded-xl border border-input bg-muted/50 px-2.5 py-1.5 text-foreground focus:outline-none max-w-[140px] truncate"
+                  className="text-[11px] font-semibold rounded-lg border border-input/60 bg-muted/40 px-2 py-1 text-foreground focus:outline-none"
                 >
                   <option value="PUBLIC">🌐 Public</option>
                   <option value="CONNECTIONS_ONLY">👥 Connections</option>
@@ -218,27 +203,29 @@ export default function FeedPage() {
                 onClick={handleCreatePost}
                 isLoading={createPostMutation.isPending || isUploading}
                 size="sm"
-                className="w-full sm:w-auto"
-                leftIcon={<Send className="h-3.5 w-3.5" />}
+                className="h-8 px-3 rounded-xl text-xs font-semibold shadow-xs shrink-0"
+                leftIcon={<Send className="h-3 w-3" />}
               >
-                {isUploading ? 'Uploading Media...' : 'Publish Post'}
+                {isUploading ? 'Uploading...' : 'Post'}
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Clean Single Stream Community Feed */}
+      {/* Unified Timeline Feed Stream */}
       {isLoading ? (
-        <LoadingScreen message="Loading feed updates..." />
+        <LoadingScreen message="Loading feed..." />
       ) : posts.length === 0 ? (
-        <EmptyState
-          icon={<Flame className="h-8 w-8" />}
-          title="No posts yet"
-          description="Be the first in the network to share an insight or project update!"
-        />
+        <div className="rounded-2xl border border-border bg-card p-8">
+          <EmptyState
+            icon={<Flame className="h-7 w-7" />}
+            title="No posts yet"
+            description="Be the first to share an update or insight with your network!"
+          />
+        </div>
       ) : (
-        <div className="space-y-5">
+        <div className="rounded-2xl border border-border bg-card shadow-xs divide-y divide-border/60 overflow-hidden">
           {posts.map((post) => (
             <PostCard key={post._id} post={post} onRefresh={() => refetch()} />
           ))}
