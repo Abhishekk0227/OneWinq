@@ -71,9 +71,13 @@ export const profileApi = {
   deleteIdentity: (id: string) =>
     apiClient.delete<never, ApiResponse<null>>(`/profiles/me/identities/${id}`),
 
-  // Public Profile
+  // Public Profile — by username
   getPublicProfile: (username: string) =>
     apiClient.get<never, ApiResponse<PublicProfileResponse>>(`/public/u/${username}`),
+
+  // Public Profile — by physical card code (card-first identity URL: /p/c/:cardCode)
+  getPublicProfileByCard: (cardCode: string) =>
+    apiClient.get<never, ApiResponse<PublicProfileResponse>>(`/public/p/c/${cardCode}`),
 
   // Profile Templates & Dynamic Recommendations
   getTemplates: (params?: { category?: string }) =>

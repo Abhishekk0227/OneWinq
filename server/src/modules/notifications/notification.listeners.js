@@ -4,6 +4,7 @@ import { notificationService } from './notification.service.js';
 import { User } from '../users/user.model.js';
 import { Report } from '../moderation/report.model.js';
 import { Ticket } from '../support/ticket.model.js';
+import { getOrCreateProfile } from '../profiles/profile.service.js';
 import logger from '../../utils/logger.js';
 
 let listenersInitialized = false;
@@ -135,14 +136,27 @@ export function initNotificationListeners() {
       const { cardCode, cardUid, userId, orderNumber } = payload;
       const code = cardCode || cardUid || 'NFC-CARD';
 
+      // Card-first identity: ensure the user has a draft profile ready to fill in.
+      // This is non-blocking — the card is already activated even if this fails.
+      try {
+        await getOrCreateProfile(userId);
+        logger.info('Draft profile initialized on card activation', { userId, cardCode: code });
+      } catch (profileErr) {
+        logger.warn('Could not initialize draft profile on card activation', {
+          userId,
+          cardCode: code,
+          error: profileErr.message,
+        });
+      }
+
       await notificationService.createNotification({
         recipientId: userId,
         type: NOTIFICATION_TYPE.CARD_ACTIVATED,
         title: 'Smart Card Linked Successfully! 💳',
-        body: `Physical NFC Card (${code}) has been bound to your account and is now active.${orderNumber ? ` (Order #${orderNumber})` : ''}`,
+        body: `Physical NFC Card (${code}) has been bound to your account and is now active.${orderNumber ? ` (Order #${orderNumber})` : ''} Complete your profile to go live.`,
         entityType: 'card',
         entityId: code,
-        linkUrl: '/app/cards',
+        linkUrl: '/app/profile',
         metadata: {
           cardCode: code,
           orderNumber,

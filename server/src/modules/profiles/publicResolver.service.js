@@ -190,3 +190,65 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
 
   return result;
 }
+
+/**
+ * Resolve a public profile via a physical card code.
+ * This is the primary public-facing URL for card-first identities: /p/c/:cardCode
+ *
+ * Resolution order:
+ *   1. Look up the Card by cardCode / cardUid / cardId
+ *   2. Verify card is ACTIVE and has an assigned user
+ *   3. Delegate to resolvePublicProfile(username, context) for the full pipeline
+ *
+ * @param {string} cardIdentifier - Raw card code from URL
+ * @param {{ viewerId?: string, ip?: string, userAgent?: string }} context
+ */
+export async function resolveProfileByCardCode(cardIdentifier, context = {}) {
+  if (!cardIdentifier) {
+    throw new NotFoundError('Card not found');
+  }
+
+  const identifier = cardIdentifier.trim().toUpperCase();
+
+  const card = await Card.findOne({
+    $or: [
+      { cardCode: identifier },
+      { cardUid: identifier },
+      { cardId: identifier },
+    ],
+  }).lean();
+
+  if (!card) {
+    throw new NotFoundError('Card not found');
+  }
+
+  // Card must be active — blocked/lost/unassigned cards don't resolve to a profile
+  const cardState = card.state || card.status;
+  if (cardState !== CARD_STATE.ACTIVE) {
+    throw new NotFoundError('This card is not active');
+  }
+
+  const assignedUserId = card.assignedTo || card.assignedUser || card.userId;
+  if (!assignedUserId) {
+    throw new NotFoundError('This card has not been assigned to a user');
+  }
+
+  // Find the user for this card
+  const user = await User.findById(assignedUserId)
+    .select('username accountState')
+    .lean();
+
+  if (!user || user.accountState !== ACCOUNT_STATE.ACTIVE) {
+    throw new NotFoundError('Profile not found');
+  }
+
+  // Delegate to the full 12-step resolver pipeline using the username.
+  // This automatically applies: card-gating, visibility, blocking, mode, etc.
+  const result = await resolvePublicProfile(user.username, context);
+
+  // Annotate the result with the card code used to reach this profile
+  result.resolvedViaCard = identifier;
+  result.canonicalCardUrl = `/p/c/${identifier.toLowerCase()}`;
+
+  return result;
+}

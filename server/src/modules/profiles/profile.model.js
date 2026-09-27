@@ -366,6 +366,17 @@ const profileSchema = new Schema(
       type: Date,
       default: null,
     },
+
+    // Card-first identity: the card code that activated this profile's public access.
+    // Null until the user activates a physical OneWinq card and publishes their profile.
+    linkedCardCode: {
+      type: String,
+      default: null,
+      trim: true,
+      uppercase: true,
+      index: true,
+      sparse: true,
+    },
   },
   {
     timestamps: true,

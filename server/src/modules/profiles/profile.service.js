@@ -4,6 +4,7 @@ import { ProfessionalIdentity } from './professionalIdentity.model.js';
 import { UsernameHistory } from './usernameHistory.model.js';
 import { isUsernameReserved } from './reservedUsername.model.js';
 import { User } from '../users/user.model.js';
+import { Card } from '../cards/card.model.js';
 import { filterProfileByVisibility } from './visibilityResolver.js';
 import { getRecommendationsForProfessions } from '../professions/profession.service.js';
 import { ProfileTemplate } from './profileTemplate.model.js';
@@ -330,8 +331,38 @@ export async function updateProfileDraft(userId, data, personaId = null) {
 
 /**
  * Promote the current draft to the published state.
+ *
+ * CARD-FIRST GATE: The user must have at least one active physical OneWinq card
+ * before their profile can be published and made publicly accessible.
  */
 export async function publishProfile(userId, personaId = null) {
+  // Enforce card-first identity rule
+  const activeCard = await Card.findOne({
+    $and: [
+      {
+        $or: [
+          { assignedUser: userId },
+          { userId },
+          { assignedTo: userId },
+        ],
+      },
+      {
+        $or: [
+          { state: 'ACTIVE' },
+          { status: 'ACTIVE' },
+        ],
+      },
+    ],
+  }).select('cardCode cardUid cardId').lean();
+
+  if (!activeCard) {
+    throw new AppError(
+      'A physical OneWinq card must be activated before your profile can be published. Order and activate your card to unlock your public identity.',
+      ERROR_CODE.FORBIDDEN,
+      403,
+    );
+  }
+
   const profile = await getOrCreateProfile(userId, personaId);
 
   // Take a clean JSON snapshot of the persona profile
@@ -374,15 +405,22 @@ export async function publishProfile(userId, personaId = null) {
     temporaryMode: profile.temporaryMode ? profile.temporaryMode.toObject() : null,
   };
 
+  // Store the card code that unlocked this identity
+  const cardCode = activeCard.cardCode || activeCard.cardUid || activeCard.cardId;
   profile.publishedData = snapshot;
   profile.state = PROFILE_STATE.PUBLISHED;
   profile.publishedAt = new Date();
+  if (cardCode && !profile.linkedCardCode) {
+    profile.linkedCardCode = cardCode.toUpperCase();
+  }
 
   await profile.save();
 
   if (profile.avatarUrl) {
     await User.findByIdAndUpdate(userId, { avatarUrl: profile.avatarUrl });
   }
+
+  logger.info('Profile published (card-gated)', { userId, cardCode: profile.linkedCardCode });
 
   return profile;
 }

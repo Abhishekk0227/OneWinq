@@ -293,3 +293,25 @@ export async function resolvePublicProfileController(req, res, next) {
     return next(err);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Card-Code Public Resolver — GET /api/v1/public/p/c/:cardCode
+// ---------------------------------------------------------------------------
+
+export async function resolveProfileByCardController(req, res, next) {
+  try {
+    const cardCode = req.params.cardCode;
+    const context = {
+      viewerId: req.user?.id || null,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    };
+    const profileData = await publicResolverService.resolveProfileByCardCode(cardCode, context);
+    return sendSuccess(res, {
+      message: 'Profile retrieved successfully.',
+      data: profileData,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}

@@ -22,6 +22,7 @@ import {
   deleteIdentityController,
   changeUsernameController,
   resolvePublicProfileController,
+  resolveProfileByCardController,
 } from './profile.controller.js';
 import {
   validate,
@@ -86,7 +87,10 @@ profileRouter.delete('/me/identities/:id', deleteIdentityController);
 
 export const publicProfileRouter = Router();
 
-// GET /api/v1/public/u/:username
+// GET /api/v1/public/u/:username — resolve profile by username
 publicProfileRouter.get('/u/:username', optionalAuthenticate, resolvePublicProfileController);
+
+// GET /api/v1/public/p/c/:cardCode — resolve profile by physical card code (card-first identity URL)
+publicProfileRouter.get('/p/c/:cardCode', optionalAuthenticate, resolveProfileByCardController);
 
 export default profileRouter;
