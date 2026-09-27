@@ -670,6 +670,7 @@ class AdminService {
         cardCode: card.cardCode || card.cardUid,
         cardUid: card.cardUid || card.cardCode,
         url,
+        activationCode: card.metadata?.rawSecret || null,
         nfcUid: card.nfcUid || null,
         edition: card.edition || (card.material ? card.material.toUpperCase() : 'PVC'),
         material: card.material || 'pvc',
@@ -753,6 +754,7 @@ class AdminService {
         url,
         edition,
         status: CARD_STATE.UNASSIGNED,
+        activationCode: rawSecret,
       });
     }
 
@@ -775,10 +777,10 @@ class AdminService {
       }
     }
 
-    // Build CSV content: cardId,url
-    const csvRows = ['cardId,url'];
+    // Build CSV content: cardId,activationCode,url
+    const csvRows = ['cardId,activationCode,url'];
     for (const item of generatedList) {
-      csvRows.push(`${item.cardId},${item.url}`);
+      csvRows.push(`${item.cardId},${item.activationCode},${item.url}`);
     }
     const csv = csvRows.join('\n');
 

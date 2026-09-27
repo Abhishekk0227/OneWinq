@@ -48,7 +48,7 @@ export default function AdminCardsPage() {
   const [generationNotes, setGenerationNotes] = React.useState('')
   const [generatedBatch, setGeneratedBatch] = React.useState<{
     count: number
-    cards: Array<{ cardId: string; url: string; edition: string; status: string }>
+    cards: Array<{ cardId: string; url: string; edition: string; status: string; activationCode?: string }>
     csv: string
   } | null>(null)
 
@@ -607,19 +607,33 @@ export default function AdminCardsPage() {
                   className="bg-emerald-600 hover:bg-emerald-500 text-white"
                   leftIcon={<Download className="h-4 w-4" />}
                 >
-                  Download CSV (cardId,url)
+                  Download CSV (cardId, activationCode, url)
                 </Button>
               </div>
 
               {/* Preview List */}
-              <div className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs font-mono space-y-1">
+              <div className="max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs font-mono space-y-1">
                 {generatedBatch.cards.map((c) => (
-                  <div key={c.cardId} className="flex justify-between items-center px-2 py-1 hover:bg-white/5 rounded">
+                  <div key={c.cardId} className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 px-2.5 py-1.5 hover:bg-white/5 rounded">
                     <span className="text-white font-bold">{c.cardId}</span>
-                    <span className="text-white/50">{c.url}</span>
+                    {c.activationCode && (
+                      <div className="flex items-center gap-1.5 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30">
+                        <span className="text-[10px] text-purple-300">Code:</span>
+                        <span className="text-white font-mono font-bold">{c.activationCode}</span>
+                        <button
+                          onClick={() => copyToClipboard(c.activationCode!, `Copied ${c.cardId} activation code`)}
+                          className="text-purple-300 hover:text-white"
+                          title="Copy activation code"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                    <span className="text-white/50 truncate max-w-xs">{c.url}</span>
                     <button
                       onClick={() => copyToClipboard(c.url, `Copied ${c.cardId} URL`)}
                       className="text-white/40 hover:text-white"
+                      title="Copy URL"
                     >
                       <Copy className="h-3 w-3" />
                     </button>
@@ -717,6 +731,29 @@ export default function AdminCardsPage() {
                     </a>
                   </div>
                 </div>
+
+                {/* Secret Activation Code Box */}
+                {activeDetailsCard.activationCode && (
+                  <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] text-purple-300 uppercase font-bold block">
+                        Secret Activation Code (for card packaging / invoice)
+                      </span>
+                      <span className="font-mono text-white text-sm font-extrabold tracking-wider block">
+                        {activeDetailsCard.activationCode}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(activeDetailsCard.activationCode, 'Activation code copied!')}
+                      className="text-purple-300 hover:text-white hover:bg-purple-500/20 shrink-0"
+                      leftIcon={<Copy className="h-3 w-3" />}
+                    >
+                      Copy Code
+                    </Button>
+                  </div>
+                )}
 
                 {/* Assigned User Information */}
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
