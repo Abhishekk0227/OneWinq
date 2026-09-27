@@ -170,7 +170,6 @@ export default function DashboardPage() {
     0
   const totalConnections = connectionsData?.data?.connections?.length || 0
   const pendingRequests = pendingRequestsData?.data?.requests || []
-  const cards = cardsData?.data?.cards || []
   const primaryCard = cards.find((c: any) => c.state === 'ACTIVE') || cards[0]
   const totalCardTaps =
     analyticsData?.data?.overview?.nfcTaps ??
