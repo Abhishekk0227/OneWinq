@@ -7,6 +7,7 @@ import { ProfessionalIdentity } from '../profiles/professionalIdentity.model.js'
 import { POST_STATE, COMMENT_STATE, APP_EVENT } from '../../config/constants.js';
 import { NotFoundError, ForbiddenError, ValidationError } from '../../shared/errors.js';
 import { eventBus } from '../../events/eventBus.js';
+import { filterToCardActive } from '../cards/cardGate.js';
 
 /**
  * Helper to enrich an array of posts with isLiked, isSaved, and author's primary profession.
@@ -138,6 +139,11 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
     if (!author) {
       throw new NotFoundError('User not found');
     }
+    // Card-gate: do not reveal posts from users without an active card
+    const activeSet = await filterToCardActive([author._id]);
+    if (!activeSet.has(author._id.toString())) {
+      throw new NotFoundError('User not found');
+    }
     query = { authorId: author._id, state: POST_STATE.ACTIVE };
   }
 
@@ -151,7 +157,26 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
     Post.countDocuments(query),
   ]);
 
-  const posts = await enrichPosts(rawPosts, viewerId);
+  // Card-gate: for public/all feeds and per-author feeds, suppress posts from
+  // authors who have not yet activated a physical card.
+  // 'my' and 'archived' filters are owner-only views — no gating needed.
+  let gatedPosts = rawPosts;
+  if (filter !== 'my' && filter !== 'archived') {
+    const authorIds = [...new Set(
+      rawPosts
+        .map((p) => p.authorId?._id?.toString() || p.authorId?.toString())
+        .filter(Boolean),
+    )];
+    if (authorIds.length > 0) {
+      const cardActiveSet = await filterToCardActive(authorIds);
+      gatedPosts = rawPosts.filter((p) => {
+        const aid = p.authorId?._id?.toString() || p.authorId?.toString();
+        return aid && cardActiveSet.has(aid);
+      });
+    }
+  }
+
+  const posts = await enrichPosts(gatedPosts, viewerId);
 
   return {
     posts,
@@ -178,6 +203,16 @@ export async function getPostById(postId, viewerId) {
 
   if (post.state === POST_STATE.ARCHIVED && (!viewerId || post.authorId._id.toString() !== viewerId.toString())) {
     throw new NotFoundError('Post is archived');
+  }
+
+  // Card-gate: do not serve posts from users who haven't activated a physical card.
+  // Exception: the post owner can always see their own posts.
+  const authorId = post.authorId?._id?.toString() || post.authorId?.toString();
+  if (!viewerId || viewerId.toString() !== authorId) {
+    const activeSet = await filterToCardActive([authorId]);
+    if (!activeSet.has(authorId)) {
+      throw new NotFoundError('Post not found');
+    }
   }
 
   const [enriched] = await enrichPosts([post], viewerId);

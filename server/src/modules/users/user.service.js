@@ -1,6 +1,7 @@
 import { User } from './user.model.js';
 import { NotFoundError, AppError } from '../../shared/errors.js';
 import { ERROR_CODE, ACCOUNT_STATE } from '../../config/constants.js';
+import { hasActiveCard, filterToCardActive } from '../cards/cardGate.js';
 
 export const userService = {
   /**
@@ -16,6 +17,8 @@ export const userService = {
 
   /**
    * Get public details of a user by ID.
+   * Card-gate: returns 404 if the user has no active physical card.
+   * Anti-enumeration: response is identical to a non-existent user.
    */
   async getUserById(userId) {
     const user = await User.findOne({
@@ -23,6 +26,11 @@ export const userService = {
       accountState: { $in: [ACCOUNT_STATE.ACTIVE] },
     });
     if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    // Card-first identity: the user does not publicly exist until card is active
+    const cardActive = await hasActiveCard(userId);
+    if (!cardActive) {
       throw new NotFoundError('User not found');
     }
     return user.toSafeObject();
@@ -70,6 +78,7 @@ export const userService = {
 
   /**
    * List users with pagination and search (for discovery and directory).
+   * Card-gate: only users with an active physical card are visible.
    */
   async listUsers({ query, limit = 20, cursor = null }) {
     const filter = {
@@ -90,12 +99,17 @@ export const userService = {
     }
 
     const pageSize = Math.min(Number(limit) || 20, 50);
+    // Over-fetch to compensate for card-gate filtering
     const users = await User.find(filter)
       .sort({ createdAt: -1 })
-      .limit(pageSize + 1);
+      .limit(pageSize * 3);
 
-    const hasMore = users.length > pageSize;
-    const results = hasMore ? users.slice(0, pageSize) : users;
+    // Card-gate: only expose users who have an active physical card
+    const activeSet = await filterToCardActive(users.map((u) => u._id));
+    const gated = users.filter((u) => activeSet.has(u._id.toString()));
+
+    const hasMore = gated.length > pageSize;
+    const results = hasMore ? gated.slice(0, pageSize) : gated;
     const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
 
     return {

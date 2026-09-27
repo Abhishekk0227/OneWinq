@@ -5,6 +5,7 @@ import { ProfessionalIdentity } from '../profiles/professionalIdentity.model.js'
 import { getBlockedUserIds, getConnectionStatus } from '../connections/connection.service.js';
 import { Connection, getCanonicalUserPair } from '../connections/connection.model.js';
 import { filterProfileByVisibility } from '../profiles/visibilityResolver.js';
+import { filterToCardActive } from '../cards/cardGate.js';
 import { ACCOUNT_STATE, PROFILE_STATE } from '../../config/constants.js';
 
 /**
@@ -58,10 +59,10 @@ export async function searchDiscovery(
     ];
   }
 
-  // Fetch candidate users
+  // Fetch candidate users (over-fetch to allow post-filtering)
   const candidateUsers = await User.find(userFilter)
     .sort({ _id: -1 })
-    .limit(limit * 2) // Over-fetch to allow post-filtering on profile criteria
+    .limit(limit * 4) // Over-fetch to allow card-gate + profile criteria filtering
     .select('displayName username avatarUrl appearInDiscovery')
     .lean();
 
@@ -74,7 +75,20 @@ export async function searchDiscovery(
     };
   }
 
-  const candidateUserIds = candidateUsers.map((u) => u._id);
+  // Card-gate: only users with an active physical card are publicly visible
+  const cardActiveSet = await filterToCardActive(candidateUsers.map((u) => u._id));
+  const cardGatedUsers = candidateUsers.filter((u) => cardActiveSet.has(u._id.toString()));
+
+  if (cardGatedUsers.length === 0) {
+    return {
+      results: [],
+      users: [],
+      nextCursor: null,
+      hasNextPage: false,
+    };
+  }
+
+  const candidateUserIds = cardGatedUsers.map((u) => u._id);
 
   // 3. Fetch profiles for candidate users (support published and active profiles)
   const profileFilter = {
@@ -128,7 +142,7 @@ export async function searchDiscovery(
   // 4. Assemble and filter result cards
   const validCards = [];
 
-  for (const user of candidateUsers) {
+  for (const user of cardGatedUsers) {
     const uStr = user._id.toString();
     const profile = profileMap.get(uStr);
     const profileSource = profile?.publishedData || profile || {};
