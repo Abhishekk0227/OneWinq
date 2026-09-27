@@ -283,209 +283,194 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 text-left max-w-5xl mx-auto pb-20 transition-colors duration-300 rounded-3xl">
-      {/* Top Banner: Status & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              My Profile
-            </h1>
-            <Badge
-              variant={profile.state === 'PUBLISHED' ? 'success' : 'warning'}
-              className="text-[11px] font-bold"
-            >
-              {profile.state}
-            </Badge>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 pt-0.5">
-            <span className="text-sm text-muted-foreground">Your profile link:</span>
-            {activeUserCard ? (
-              <a
-                href={`/p/c/${activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary font-semibold hover:underline inline-flex items-center gap-1 text-sm font-mono max-w-full overflow-hidden"
+      {/* Unified Executive Command Header */}
+      <div className="rounded-3xl bg-card border border-border shadow-xs overflow-hidden">
+        {/* Main Header Row */}
+        <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                My Profile
+              </h1>
+              <Badge
+                variant={profile.state === 'PUBLISHED' ? 'success' : 'warning'}
+                className="text-[11px] font-bold"
               >
-                <span className="truncate">
-                  onewinq.me/p/c/{activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}
-                </span>
-                <ExternalLink className="h-3 w-3 shrink-0" />
-              </a>
-            ) : (
-              <span className="text-xs font-mono text-muted-foreground/60 italic">
-                — unlocks after card activation
-              </span>
-            )}
-            {activeUserCard ? (
-              <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono flex items-center gap-1">
-                <Wifi className="h-2.5 w-2.5" />
-                <span>NFC LIVE: {activeUserCard.cardCode}</span>
+                {profile.state}
               </Badge>
-            ) : (
-              <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-semibold flex items-center gap-1">
-                <span>Card Activation Pending</span>
-              </Badge>
-            )}
-          </div>
-
-        </div>
-
-        <div className="flex items-center flex-wrap gap-2.5">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setIsPreviewOpen(true)
-              refetchPreview()
-            }}
-            leftIcon={<Eye className="h-4 w-4" />}
-          >
-            Preview Live
-          </Button>
-
-          {profile.state === 'DRAFT' && (
-            <Button
-              variant="default"
-              size="sm"
-              isLoading={publishMutation.isPending}
-              onClick={() => publishMutation.mutate()}
-              leftIcon={<CheckCircle2 className="h-4 w-4" />}
-            >
-              Publish Changes
-            </Button>
-          )}
-
-          <Link to="/app/profile/edit">
-            <Button
-              variant="subtle"
-              size="sm"
-              leftIcon={<Edit3 className="h-4 w-4" />}
-            >
-              Edit Profile
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Card-Gating Status Banner */}
-      {!activeUserCard && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-950 dark:text-amber-200 shadow-xs">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 font-bold text-sm">
-              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>Physical OneWinq Smart Card Required to Go Live</span>
+              {activeUserCard ? (
+                <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono flex items-center gap-1">
+                  <Wifi className="h-2.5 w-2.5" />
+                  <span>NFC LIVE: {activeUserCard.cardCode}</span>
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-semibold flex items-center gap-1">
+                  <span>Card Activation Pending</span>
+                </Badge>
+              )}
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-              Your handle is claimed, but your public profile is card-gated — it remains private and inaccessible until your physical OneWinq NFC Card is activated. Once active, your card code becomes your public URL.
-            </p>
+
+            {/* Profile Link or Status */}
+            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs">
+              <span className="text-muted-foreground font-medium">Public link:</span>
+              {activeUserCard ? (
+                <a
+                  href={`/p/c/${activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary font-semibold hover:underline inline-flex items-center gap-1 font-mono"
+                >
+                  <span>onewinq.me/p/c/{activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}</span>
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                </a>
+              ) : (
+                <span className="font-mono text-muted-foreground/70 italic">
+                  Private — unlocks once your OneWinq NFC Card is activated
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link to="/app/cards">
-              <Button size="sm" variant="default" className="text-xs h-8">
-                Activate Card
+
+          {/* Quick Actions */}
+          <div className="flex items-center flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsPreviewOpen(true)
+                refetchPreview()
+              }}
+              leftIcon={<Eye className="h-4 w-4" />}
+            >
+              Preview Live
+            </Button>
+
+            {profile.state === 'DRAFT' && (
+              <Button
+                variant="default"
+                size="sm"
+                isLoading={publishMutation.isPending}
+                onClick={() => publishMutation.mutate()}
+                leftIcon={<CheckCircle2 className="h-4 w-4" />}
+              >
+                Publish Changes
               </Button>
-            </Link>
-            <Link to="/orders">
-              <Button size="sm" variant="outline" className="text-xs h-8">
-                Order Card
+            )}
+
+            <Link to="/app/profile/edit">
+              <Button
+                variant="subtle"
+                size="sm"
+                leftIcon={<Edit3 className="h-4 w-4" />}
+              >
+                Edit Profile
               </Button>
             </Link>
           </div>
         </div>
-      )}
 
-      {/* Mode Switcher Control Bar */}
-      <div className="p-4 sm:p-6 rounded-3xl bg-card border border-border shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-base font-bold text-foreground">
-              Active Presentation Mode
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Directly controls what public or network visitors see on your live link.
-            </p>
+        {/* Card Activation Strip (Only when card activation is pending) */}
+        {!activeUserCard && (
+          <div className="px-5 py-2.5 bg-amber-500/10 border-t border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-amber-950 dark:text-amber-200">
+            <div className="flex items-center gap-2 font-medium">
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span>Physical OneWinq Smart Card Required to Go Live — Your profile is currently private.</span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link to="/app/cards">
+                <Button size="sm" variant="default" className="text-xs h-7 px-2.5">
+                  Activate Card
+                </Button>
+              </Link>
+              <Link to="/app/orders">
+                <Button size="sm" variant="outline" className="text-xs h-7 px-2.5">
+                  Order Card
+                </Button>
+              </Link>
+            </div>
           </div>
+        )}
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex max-w-full overflow-x-auto no-scrollbar rounded-2xl bg-muted p-1 text-xs font-semibold">
+        {/* Secondary Control Bar: Presentation Mode & Temporary Mode */}
+        <div className="px-5 py-3 bg-muted/20 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-muted-foreground font-semibold shrink-0">
+              Presentation Mode:
+            </span>
+            <div className="inline-flex rounded-xl bg-muted p-1 font-semibold">
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs ${
                   activeMode === VISIBILITY_MODE.PUBLIC
-                    ? 'bg-card text-foreground shadow-sm font-bold'
+                    ? 'bg-card text-foreground shadow-xs font-bold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Eye className="h-3.5 w-3.5 text-primary" />
+                <Eye className="h-3 w-3 text-primary" />
                 <span>Public</span>
               </button>
 
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs ${
                   activeMode === VISIBILITY_MODE.PROFESSIONAL
-                    ? 'bg-card text-primary shadow-sm font-bold'
+                    ? 'bg-card text-primary shadow-xs font-bold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Briefcase className="h-3.5 w-3.5 text-primary" />
+                <Briefcase className="h-3 w-3 text-primary" />
                 <span>Professional</span>
               </button>
 
               <button
                 onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)}
                 disabled={setModeMutation.isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all shrink-0 whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all text-xs ${
                   activeMode === VISIBILITY_MODE.PRIVATE
-                    ? 'bg-card text-foreground shadow-sm font-bold'
+                    ? 'bg-card text-foreground shadow-xs font-bold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Lock className="h-3.5 w-3.5 text-primary" />
+                <Lock className="h-3 w-3 text-primary" />
                 <span>Private</span>
               </button>
             </div>
+          </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsTempModalOpen(true)}
-              leftIcon={<Clock className="h-3.5 w-3.5" />}
-              className="shrink-0"
-            >
-              Temporary Mode
-            </Button>
+          <div className="flex items-center gap-2">
+            {profile.temporaryMode && profile.temporaryMode.mode ? (
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span>
+                  Temp <strong>{profile.temporaryMode.mode}</strong> until{' '}
+                  {new Date(profile.temporaryMode.expiresAt).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+                <button
+                  disabled={cancelTemporaryModeMutation.isPending}
+                  onClick={() => cancelTemporaryModeMutation.mutate()}
+                  className="text-destructive hover:underline ml-1 font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsTempModalOpen(true)}
+                leftIcon={<Clock className="h-3 w-3" />}
+                className="text-xs h-7 text-muted-foreground hover:text-foreground"
+              >
+                Temporary Mode
+              </Button>
+            )}
           </div>
         </div>
-
-        {/* Temporary Mode Alert Card */}
-        {profile.temporaryMode && profile.temporaryMode.mode && (
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-primary/10 text-xs text-primary border border-primary/20">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 shrink-0" />
-              <span>
-                <strong>Temporary {profile.temporaryMode.mode} Mode</strong> active until{' '}
-                {new Date(profile.temporaryMode.expiresAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}{' '}
-                (reverts automatically to {profile.temporaryMode.fallbackMode}).
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              isLoading={cancelTemporaryModeMutation.isPending}
-              onClick={() => cancelTemporaryModeMutation.mutate()}
-              className="text-xs text-destructive hover:bg-destructive/10 h-7"
-            >
-              <XCircle className="h-3.5 w-3.5 mr-1" />
-              Cancel Early
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Main Profile Canvas Overview */}

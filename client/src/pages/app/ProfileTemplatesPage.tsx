@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Crown,
   Lock,
+  ChevronDown,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -25,6 +26,7 @@ export default function ProfileTemplatesPage() {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedCategory, setSelectedCategory] = React.useState('all')
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = React.useState(false)
 
   // 1. Fetch user profile
   const { data: profileData, isLoading: isProfileLoading } = useQuery({
@@ -140,94 +142,102 @@ export default function ProfileTemplatesPage() {
         </div>
       </div>
 
-      {/* Basic Universal Template Active Banner */}
-      <div className="p-5 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3.5 text-xs text-amber-950 dark:text-amber-200 shadow-xs">
-        <div className="w-9 h-9 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-          <Lock className="h-4.5 w-4.5" />
+      {/* Consolidated Template Notice */}
+      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+            <Lock className="h-4 w-4" />
+          </div>
+          <div>
+            <strong className="text-foreground font-bold block">
+              Basic Universal Template Active
+            </strong>
+            <p className="text-muted-foreground leading-relaxed">
+              Your profile currently uses the Universal Template. You can customize your bio, contact details, and social links in the Profile Builder. Specialized industry templates (Engineer, Doctor, Creator) are locked and rolling out soon.
+            </p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <strong className="text-foreground font-bold text-sm block">
-            Basic Universal Template Active for All Accounts
-          </strong>
-          <p className="text-muted-foreground leading-relaxed text-xs">
-            All user profiles currently utilize the <strong>Basic Universal Template</strong> with fixed, essential fields (Bio, Contact Details, and Social Profiles). Industry-specific templates (Engineer, Doctor, Founder, Creator, etc.) are locked and <strong>Coming Soon... for now</strong>!
-          </p>
-        </div>
+        <Link to="/app/profile/edit" className="shrink-0 self-end sm:self-center">
+          <Button variant="outline" size="sm" className="text-xs h-8">
+            Profile Builder
+          </Button>
+        </Link>
       </div>
 
-      {/* Safety & Non-Destructive Reassurance Alert */}
-      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 flex items-start gap-3.5 text-xs text-muted-foreground">
-        <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <strong className="text-foreground font-semibold">
-            Universal Smart Profile:
-          </strong>
-          <p>
-            Your profile is powered by the Basic Universal Template. You can customize your bio, contact information, and social links freely in the Profile Builder.
-          </p>
-        </div>
-      </div>
-
-      {/* Dynamic Recommendation Breakdown Card */}
+      {/* Dynamic Recommendation Breakdown Card (Collapsible) */}
       {recommendations && (
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-border">
-            <div className="flex items-center gap-2">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setIsRecommendationsOpen(!isRecommendationsOpen)}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer text-left"
+            >
               <Sparkles className="h-4 w-4 text-amber-500" />
-              <h3 className="font-bold text-foreground text-sm">
+              <h3 className="font-bold text-foreground text-xs sm:text-sm">
                 Synthesized Recommendations for Your Profile
               </h3>
-            </div>
+              <Badge variant="subtle" className="text-[10px] px-1.5 py-0">
+                {recommendations.combinedRecommendations?.length || 0} recommended
+              </Badge>
+              <ChevronDown
+                className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${
+                  isRecommendationsOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
             <Link to="/app/profile/edit">
-              <Button variant="ghost" size="sm" className="text-xs gap-1">
-                <span>Customize Sections in Builder</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+              <Button variant="ghost" size="sm" className="text-xs h-7 gap-1">
+                <span>Builder</span>
+                <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-muted/20 border border-border space-y-2">
-              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Existing Active Sections ({recommendations.existingSections?.length || 0})</span>
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {(recommendations.existingSections || []).map((sec) => (
-                  <Badge key={sec} variant="outline" className="capitalize text-xs bg-background">
-                    ✓ {sec.replace(/_/g, ' ')}
-                  </Badge>
-                ))}
-                {(!recommendations.existingSections || recommendations.existingSections.length === 0) && (
-                  <span className="text-xs text-muted-foreground">No sections created yet.</span>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-muted/20 border border-border space-y-2">
-              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <Crown className="h-3.5 w-3.5 text-primary" />
-                <span>Recommended by Active Template + Roles ({recommendations.combinedRecommendations?.length || 0})</span>
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {(recommendations.combinedRecommendations || []).map((sec) => {
-                  const isExisting = recommendations.existingSections?.includes(sec)
-                  return (
-                    <Badge
-                      key={sec}
-                      variant={isExisting ? 'default' : 'outline'}
-                      className={`capitalize text-xs ${
-                        isExisting ? 'bg-primary/15 text-primary border-primary/30' : 'bg-background'
-                      }`}
-                    >
-                      {isExisting ? '✓ ' : '+ '}
-                      {sec.replace(/_/g, ' ')}
+          {isRecommendationsOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-border animate-in fade-in duration-200">
+              <div className="p-3.5 rounded-xl bg-muted/20 border border-border space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Existing Active Sections ({recommendations.existingSections?.length || 0})</span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(recommendations.existingSections || []).map((sec) => (
+                    <Badge key={sec} variant="outline" className="capitalize text-xs bg-background">
+                      ✓ {sec.replace(/_/g, ' ')}
                     </Badge>
-                  )
-                })}
+                  ))}
+                  {(!recommendations.existingSections || recommendations.existingSections.length === 0) && (
+                    <span className="text-xs text-muted-foreground">No sections created yet.</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-muted/20 border border-border space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Crown className="h-3.5 w-3.5 text-primary" />
+                  <span>Recommended by Active Template + Roles ({recommendations.combinedRecommendations?.length || 0})</span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(recommendations.combinedRecommendations || []).map((sec) => {
+                    const isExisting = recommendations.existingSections?.includes(sec)
+                    return (
+                      <Badge
+                        key={sec}
+                        variant={isExisting ? 'default' : 'outline'}
+                        className={`capitalize text-xs ${
+                          isExisting ? 'bg-primary/15 text-primary border-primary/30' : 'bg-background'
+                        }`}
+                      >
+                        {isExisting ? '✓ ' : '+ '}
+                        {sec.replace(/_/g, ' ')}
+                      </Badge>
+                    )
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
