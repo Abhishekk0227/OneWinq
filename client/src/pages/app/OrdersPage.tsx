@@ -265,23 +265,19 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="space-y-10 text-left max-w-5xl mx-auto pb-20">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            <Package className="h-3.5 w-3.5" />
-            <span>Shipping & Delivery</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="space-y-6 text-left max-w-5xl mx-auto pb-20">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Order NFC Cards
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Order physical NFC smart cards connected directly to your profile with instant ₹100 promotional discount.
+          <p className="text-xs text-muted-foreground">
+            Custom physical NFC smart cards linked directly to your digital profile.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Link to="/app/cards">
             <Button size="sm" variant="outline" leftIcon={<ArrowLeft className="h-4 w-4" />}>
               Manage Cards
@@ -292,7 +288,7 @@ export default function OrdersPage() {
             size="sm"
             leftIcon={<Plus className="h-4 w-4" />}
           >
-            Order Physical Card
+            Order Card
           </Button>
         </div>
       </div>

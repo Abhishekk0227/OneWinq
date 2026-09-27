@@ -84,26 +84,22 @@ export default function CardsPage() {
   }
 
   return (
-    <div className="space-y-10 text-left max-w-5xl mx-auto pb-20">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            <Wifi className="h-3.5 w-3.5" />
-            <span>Card & Device Management</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Manage Cards
+    <div className="space-y-6 text-left max-w-5xl mx-auto pb-20">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Smart Cards
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Configure your physical OneWinq NFC smart cards, activation codes, and digital tap QR.
+          <p className="text-xs text-muted-foreground">
+            Your physical OneWinq NFC cards, activation codes, and tap routing.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Link to="/app/orders">
             <Button size="sm" variant="outline" leftIcon={<ShoppingBag className="h-4 w-4" />}>
-              Order Smart Card
+              Order Card
             </Button>
           </Link>
           <Button
@@ -118,22 +114,19 @@ export default function CardsPage() {
       </div>
 
       {/* Hardware Store Callout */}
-      <section className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
-            <Sparkles className="h-4 w-4" />
-            <span>Order Physical Cards</span>
+      <section className="p-4 sm:p-5 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-primary font-bold text-xs uppercase tracking-wider">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Hardware Shop</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-foreground">
-            Need a new or replacement physical smart card?
-          </h3>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-            Choose from Matte PVC (₹500), Artisan Bamboo (₹1,000), or Stealth Metal (₹1,500) editions delivered directly to your address.
+          <p className="text-xs text-muted-foreground">
+            Matte PVC (₹500), Artisan Bamboo (₹1,000), or Stealth Metal (₹1,500) editions delivered to your address.
           </p>
         </div>
         <Link to="/app/orders" className="shrink-0">
-          <Button variant="default" size="sm" className="whitespace-nowrap shadow-sm" leftIcon={<ShoppingBag className="h-4 w-4" />} rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
-            Visit Hardware Shop
+          <Button variant="default" size="sm" className="text-xs h-8" rightIcon={<ArrowRight className="h-3 w-3" />}>
+            Order Cards
           </Button>
         </Link>
       </section>

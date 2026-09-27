@@ -263,34 +263,35 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6 text-left max-w-4xl mx-auto pb-20">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            <Bell className="h-3.5 w-3.5" />
-            <span>Activity Feed</span>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Notifications
+            </h1>
+            {unreadCount > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary">
+                {unreadCount} unread
+              </span>
+            )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Notifications
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Stay updated with messages, connection requests, orders, card status, post interactions, and support updates.
+          <p className="text-xs text-muted-foreground">
+            Activity, connection requests, orders, and system updates.
           </p>
         </div>
 
         {unreadCount > 0 && (
-          <div className="shrink-0 flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              isLoading={markAllMutation.isPending}
-              onClick={() => markAllMutation.mutate()}
-              leftIcon={<CheckCheck className="h-4 w-4" />}
-              className="rounded-xl border-border hover:bg-primary-soft hover:text-primary transition-all shadow-xs"
-            >
-              Mark All as Read ({unreadCount})
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            isLoading={markAllMutation.isPending}
+            onClick={() => markAllMutation.mutate()}
+            leftIcon={<CheckCheck className="h-3.5 w-3.5" />}
+            className="text-xs h-8"
+          >
+            Mark All Read
+          </Button>
         )}
       </div>
 

@@ -220,19 +220,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 text-left max-w-5xl mx-auto pb-16">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            <Settings className="h-3.5 w-3.5" />
-            <span>Preferences & Security</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Account Settings
+    <div className="space-y-6 text-left max-w-5xl mx-auto pb-16">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Settings
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your permanent handle, security keys, discovery privacy, and data ownership.
+          <p className="text-xs text-muted-foreground">
+            Manage your account, handle, security, and privacy preferences.
           </p>
         </div>
       </div>

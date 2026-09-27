@@ -65,30 +65,26 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="space-y-8 text-left max-w-6xl mx-auto pb-16">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span>Telemetry & Insights</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Profile Analytics
+    <div className="space-y-6 text-left max-w-6xl mx-auto pb-16">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Analytics
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Measure your digital identity reach, real-world card taps, and engagement.
+          <p className="text-xs text-muted-foreground">
+            Profile views, NFC taps, QR scans, and audience engagement telemetry.
           </p>
         </div>
 
-        <div className="inline-flex rounded-2xl bg-muted p-1 text-xs font-semibold">
+        <div className="inline-flex rounded-xl bg-muted p-1 text-xs font-semibold">
           {(['7d', '30d', '90d'] as const).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg transition-all text-xs cursor-pointer ${
                 timeRange === range
-                  ? 'bg-card text-foreground shadow-sm font-bold'
+                  ? 'bg-card text-foreground shadow-xs font-bold'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >

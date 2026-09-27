@@ -152,19 +152,19 @@ export default function ConnectionsPage() {
   }
 
   return (
-    <div className="space-y-8 text-left max-w-5xl mx-auto pb-16">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-8 rounded-3xl bg-card border border-border shadow-sm">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Professional Network
+    <div className="space-y-6 text-left max-w-5xl mx-auto pb-16">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            Connections
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your direct connections, incoming inquiries, and peer trust circles.
+          <p className="text-xs text-muted-foreground">
+            Manage your direct connections, incoming requests, and peer network.
           </p>
         </div>
 
-        <Link to="/app/network">
+        <Link to="/app/discovery">
           <Button size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
             Discover People
           </Button>
