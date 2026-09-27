@@ -46,8 +46,12 @@ export const cardService = {
       throw new AppError('Card is already active on your account', ERROR_CODE.CONFLICT, 409);
     }
 
-    // Verify activation code against secretHash
-    const isValid = await verifyPassword(activationCode, card.secretHash);
+    // Verify activation code against secretHash (case-insensitive for hex codes)
+    const codeToVerify = (activationCode || '').trim();
+    let isValid = await verifyPassword(codeToVerify, card.secretHash);
+    if (!isValid && codeToVerify !== codeToVerify.toUpperCase()) {
+      isValid = await verifyPassword(codeToVerify.toUpperCase(), card.secretHash);
+    }
     if (!isValid) {
       throw new AppError('Invalid activation code for this card', ERROR_CODE.VALIDATION_ERROR, 400);
     }

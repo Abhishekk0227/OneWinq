@@ -269,7 +269,7 @@ export default function CardsPage() {
         <DialogHeader>
           <DialogTitle>Activate OneWinq NFC Card</DialogTitle>
           <DialogDescription>
-            Enter the OneWinq Card Code and 6-digit activation code found on your physical card packaging.
+            Enter the OneWinq Card Code and secret activation code found on your card packaging or invoice.
           </DialogDescription>
         </DialogHeader>
 
@@ -281,7 +281,7 @@ export default function CardsPage() {
             <Input
               value={cardUidInput}
               onChange={(e) => setCardUidInput(e.target.value.toUpperCase().trim())}
-              placeholder="e.g. OWQ-PVC-0009482"
+              placeholder="e.g. OWQ-CARD-000002"
             />
           </div>
 
@@ -292,7 +292,7 @@ export default function CardsPage() {
             <Input
               value={activationCodeInput}
               onChange={(e) => setActivationCodeInput(e.target.value.trim())}
-              placeholder="6-digit secret code"
+              placeholder="Enter secret activation code"
             />
           </div>
 
