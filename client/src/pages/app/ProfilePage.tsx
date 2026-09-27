@@ -299,15 +299,23 @@ export default function ProfilePage() {
           </div>
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
             <span className="text-sm text-muted-foreground">Your profile link:</span>
-            <a
-              href={`/u/${user?.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary font-semibold hover:underline inline-flex items-center gap-1 text-sm font-mono max-w-full overflow-hidden"
-            >
-              <span className="truncate">onewinq.me/u/{user?.username}</span>
-              <ExternalLink className="h-3 w-3 shrink-0" />
-            </a>
+            {activeUserCard ? (
+              <a
+                href={`/p/c/${activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold hover:underline inline-flex items-center gap-1 text-sm font-mono max-w-full overflow-hidden"
+              >
+                <span className="truncate">
+                  onewinq.me/p/c/{activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}
+                </span>
+                <ExternalLink className="h-3 w-3 shrink-0" />
+              </a>
+            ) : (
+              <span className="text-xs font-mono text-muted-foreground/60 italic">
+                — unlocks after card activation
+              </span>
+            )}
             {activeUserCard ? (
               <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono flex items-center gap-1">
                 <Wifi className="h-2.5 w-2.5" />
@@ -319,6 +327,7 @@ export default function ProfilePage() {
               </Badge>
             )}
           </div>
+
         </div>
 
         <div className="flex items-center flex-wrap gap-2.5">
@@ -367,7 +376,7 @@ export default function ProfilePage() {
               <span>Physical OneWinq Smart Card Required to Go Live</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-              Your handle is claimed, but your public profile (<span className="font-mono text-primary font-semibold">/u/{user?.username}</span>) is card-gated with a reserved preview until your physical OneWinq NFC Card is activated.
+              Your handle is claimed, but your public profile is card-gated — it remains private and inaccessible until your physical OneWinq NFC Card is activated. Once active, your card code becomes your public URL.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -505,11 +514,21 @@ export default function ProfilePage() {
               className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
             />
             <div className="flex items-center gap-2 pt-2">
-              <Link to={`/u/${user?.username}`} target="_blank">
-                <Button variant="outline" size="sm" leftIcon={<Eye className="h-3.5 w-3.5" />}>
+              {activeUserCard ? (
+                <a
+                  href={`/p/c/${activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" size="sm" leftIcon={<Eye className="h-3.5 w-3.5" />}>
+                    View Live
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="outline" size="sm" leftIcon={<Eye className="h-3.5 w-3.5" />} disabled>
                   View Live
                 </Button>
-              </Link>
+              )}
               <Link to="/app/profile/edit">
                 <Button variant="default" size="sm" leftIcon={<Edit3 className="h-3.5 w-3.5" />}>
                   Edit Profile

@@ -16,9 +16,11 @@ import {
   Flame,
   LayoutTemplate,
   Plus,
+  Wifi,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
+import { cardsApi } from '@/features/cards/api/cards.api'
 import { queryKeys } from '@/lib/query/queryKeys'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
@@ -35,6 +37,16 @@ export function AppSidebar() {
     refetchInterval: 30000,
   })
   const unreadCount = unreadData?.data?.unreadCount ?? unreadData?.data?.count ?? 0
+
+  // Card-first identity: resolve public link from active card (data cached by DashboardPage/ProfilePage)
+  const { data: cardsData } = useQuery({
+    queryKey: queryKeys.cards.list,
+    queryFn: () => cardsApi.listCards(),
+    staleTime: 60_000,
+  })
+  const cards = (cardsData?.data as any)?.cards || []
+  const activeCard = cards.find((c: any) => c.state === 'ACTIVE' || c.status === 'ACTIVE')
+  const activeCardCode = activeCard?.cardCode?.toLowerCase() || activeCard?.cardUid?.toLowerCase()
 
   const navItems = [
     { label: 'Home Feed', to: '/app', icon: Flame, end: true },
@@ -181,18 +193,31 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* User public link quick action */}
-      {user?.username && !isSidebarCollapsed && (
+      {/* User public link quick action — card-first identity */}
+      {!isSidebarCollapsed && (
         <div className="p-4 border-t border-border">
-          <a
-            href={`/u/${user.username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/60 hover:bg-primary-soft text-primary text-xs font-semibold transition-colors group"
-          >
-            <span className="truncate">onewinq.me/u/{user.username}</span>
-            <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70 group-hover:opacity-100" />
-          </a>
+          {activeCardCode ? (
+            <a
+              href={`/p/c/${activeCardCode}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/60 hover:bg-primary-soft text-primary text-xs font-semibold transition-colors group"
+            >
+              <span className="flex items-center gap-1.5 min-w-0">
+                <Wifi className="h-3 w-3 shrink-0" />
+                <span className="truncate">onewinq.me/p/c/{activeCardCode}</span>
+              </span>
+              <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70 group-hover:opacity-100" />
+            </a>
+          ) : (
+            <NavLink
+              to="/app/cards"
+              className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xs font-semibold transition-colors group"
+            >
+              <span className="truncate">Activate card to go live</span>
+              <CreditCard className="h-3.5 w-3.5 shrink-0 opacity-70 group-hover:opacity-100" />
+            </NavLink>
+          )}
         </div>
       )}
     </aside>

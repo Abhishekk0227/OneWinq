@@ -131,9 +131,19 @@ export default function DashboardPage() {
   const identities = profileData?.data?.identities || profile?.identities || []
   const primaryIdentity = identities.find((i: any) => i.isPrimary) || identities[0]
 
-  const vanityUrl = `${window.location.origin}/u/${user?.username}`
+  const cards = (cardsData?.data as any)?.cards || []
+  const activeUserCard = cards.find((c: any) => c.state === 'ACTIVE' || c.status === 'ACTIVE')
+
+  const cardCode = activeUserCard?.cardCode?.toLowerCase() || activeUserCard?.cardUid?.toLowerCase()
+  const vanityUrl = cardCode
+    ? `${window.location.origin}/p/c/${cardCode}`
+    : null
 
   const handleCopyLink = () => {
+    if (!vanityUrl) {
+      toast.error('Activate your physical card first to unlock your public link.')
+      return
+    }
     navigator.clipboard.writeText(vanityUrl)
     setIsCopied(true)
     toast.success('Profile link copied to clipboard!')
@@ -217,15 +227,21 @@ export default function DashboardPage() {
               {/* Profile Link preview bar */}
               <div className="flex items-center gap-2 pt-2 max-w-full overflow-hidden">
                 <span className="text-xs font-medium text-muted-foreground shrink-0">Link:</span>
-                <a
-                  href={`/u/${user?.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-mono text-primary font-semibold hover:underline inline-flex items-center gap-1 bg-primary-soft px-2.5 py-1 rounded-lg min-w-0 overflow-hidden"
-                >
-                  <span className="truncate">onewinq.me/u/{user?.username}</span>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                </a>
+                {activeUserCard && cardCode ? (
+                  <a
+                    href={`/p/c/${cardCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-mono text-primary font-semibold hover:underline inline-flex items-center gap-1 bg-primary-soft px-2.5 py-1 rounded-lg min-w-0 overflow-hidden"
+                  >
+                    <span className="truncate">onewinq.me/p/c/{cardCode}</span>
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                  </a>
+                ) : (
+                  <span className="text-xs font-mono text-muted-foreground/50 italic px-2.5 py-1">
+                    Unlocks after card activation
+                  </span>
+                )}
               </div>
             </div>
           </div>

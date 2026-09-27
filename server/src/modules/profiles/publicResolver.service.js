@@ -72,38 +72,10 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     .lean();
 
   if (!activeCard) {
-    // Record profile-view event asynchronously
-    eventBus.publish(APP_EVENT.PROFILE_VIEWED, {
-      profileUserId: user._id.toString(),
-      profileUsername: user.username,
-      viewerId: context.viewerId || null,
-      ip: context.ip || null,
-      userAgent: context.userAgent || null,
-      timestamp: new Date(),
-    });
-
-    // If no active card exists, profile details remain strictly locked.
-    // Return safe reserved identity metadata for the branded card-activation splash screen.
-    return {
-      user: {
-        id: user._id.toString(),
-        _id: user._id.toString(),
-        username: user.username,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl || null,
-        primaryProfession: user.displayName,
-        identities: [],
-      },
-      hasActiveCard: false,
-      isCardGated: true,
-      cardStatus: 'CARD_REQUIRED',
-      activeCard: null,
-      profile: null,
-      activePersona: null,
-      connectionState: 'NONE',
-      connectionStatus: 'NONE',
-      connectionId: null,
-    };
+    // No active card → hard 404. The /u/:username URL does not exist yet.
+    // Username-based public access is only unlocked after physical card activation.
+    // Anti-enumeration: identical response to a non-existent user.
+    throw new NotFoundError('Profile not found');
   }
 
   // 6. Check published profile (resolve currently ACTIVE persona)
