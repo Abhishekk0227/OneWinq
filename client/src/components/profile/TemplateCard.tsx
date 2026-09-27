@@ -16,6 +16,14 @@ import {
   Palette,
   Minus,
   Lock,
+  Terminal,
+  Activity,
+  Stethoscope,
+  TrendingUp,
+  Award,
+  Star,
+  ShieldCheck,
+  Share2,
 } from 'lucide-react'
 import { toast } from '@/stores/toastStore'
 
@@ -57,71 +65,369 @@ function getTemplateIcon(slug: string) {
   }
 }
 
-// Visual mini-wireframe for profile layout
-function LayoutMiniWireframe({ heroStyle = 'clean' }: { heroStyle?: string }) {
-  return (
-    <div className="w-full h-20 rounded-xl bg-muted/40 border border-border/80 p-2 flex flex-col justify-between overflow-hidden relative select-none">
-      {heroStyle === 'banner' && (
-        <div className="space-y-1.5">
-          <div className="w-full h-5 rounded-md bg-primary/20" />
-          <div className="flex items-center gap-1.5 px-1">
-            <div className="w-5 h-5 rounded-full bg-primary/40 -mt-2 ring-1 ring-background" />
-            <div className="w-16 h-2 rounded bg-foreground/20" />
+interface ProfessionPreviewProps {
+  slug: string
+  category?: string
+  name: string
+}
+
+// Profession-specific visual background preview
+function ProfessionVisualPreview({ slug, category, name }: ProfessionPreviewProps) {
+  switch (slug) {
+    case 'engineer':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-cyan-500/30 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/90 text-cyan-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500/90 inline-block" />
+              <span className="w-2 h-2 rounded-full bg-amber-500/90 inline-block" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500/90 inline-block" />
+              <span className="text-[10px] font-mono text-cyan-300/80 ml-1">system.config.ts</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] font-mono bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded-full">
+              <Terminal className="h-2.5 w-2.5 text-cyan-400" />
+              <span>ONLINE</span>
+            </span>
+          </div>
+
+          <div className="font-mono text-[10px] space-y-0.5 leading-snug">
+            <p className="text-slate-400">
+              <span className="text-purple-400">const</span> engineer = <span className="text-emerald-400">new</span> SystemsArchitect()
+            </p>
+            <p className="text-cyan-300 truncate">
+              <span className="text-slate-500">&gt; </span>stack: [&quot;React&quot;, &quot;Node&quot;, &quot;Cloud&quot;, &quot;AI&quot;]
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-[9px] font-mono text-cyan-300">
+              DevOps
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-[9px] font-mono text-cyan-300">
+              Full-Stack
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-[9px] font-mono text-cyan-300">
+              Microservices
+            </span>
           </div>
         </div>
-      )}
-      {heroStyle === 'split' && (
-        <div className="flex gap-2 h-full items-center">
-          <div className="w-7 h-7 rounded-lg bg-primary/30 shrink-0" />
-          <div className="flex-1 space-y-1">
-            <div className="w-3/4 h-2.5 rounded bg-foreground/20" />
-            <div className="w-1/2 h-2 rounded bg-muted-foreground/30" />
+      )
+
+    case 'doctor':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-emerald-500/30 bg-gradient-to-br from-slate-950 via-teal-950/80 to-emerald-950/90 text-emerald-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                <Stethoscope className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-200">Clinical Identity</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <Activity className="h-2.5 w-2.5 text-emerald-400 animate-pulse" />
+              <span>BPM: 74</span>
+            </span>
+          </div>
+
+          <div className="w-full flex items-center py-0.5">
+            <svg className="w-full h-5 text-emerald-400 stroke-current opacity-85" viewBox="0 0 240 24" fill="none">
+              <path
+                d="M0,12 L55,12 L62,5 L68,20 L74,7 L80,16 L86,12 L150,12 L157,4 L163,21 L169,6 L175,15 L181,12 L240,12"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-[9px] font-medium text-emerald-300">
+              Verified MD
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-[9px] font-medium text-emerald-300">
+              Consultations
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/30 text-[9px] font-medium text-emerald-300">
+              Medical Board
+            </span>
           </div>
         </div>
-      )}
-      {heroStyle === 'media' && (
-        <div className="space-y-1 h-full flex flex-col justify-between">
-          <div className="flex gap-1.5 items-center">
-            <div className="w-6 h-6 rounded-full bg-pink-500/30" />
-            <div className="w-20 h-2.5 rounded bg-foreground/20" />
+      )
+
+    case 'founder':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-violet-500/30 bg-gradient-to-br from-slate-950 via-indigo-950/80 to-purple-950/90 text-purple-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-purple-500/20 text-purple-300 flex items-center justify-center">
+                <Rocket className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-purple-200">Venture &amp; Leadership</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <TrendingUp className="h-2.5 w-2.5 text-amber-400" />
+              <span>340% YoY</span>
+            </span>
           </div>
-          <div className="grid grid-cols-3 gap-1">
-            <div className="h-7 rounded bg-pink-500/10 border border-pink-500/20" />
-            <div className="h-7 rounded bg-pink-500/10 border border-pink-500/20" />
-            <div className="h-7 rounded bg-pink-500/10 border border-pink-500/20" />
-          </div>
-        </div>
-      )}
-      {heroStyle === 'compact' && (
-        <div className="flex items-center justify-between h-full px-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-slate-500/30" />
-            <div className="w-14 h-2 rounded bg-foreground/20" />
-          </div>
-          <div className="flex gap-1">
-            <div className="w-4 h-4 rounded bg-muted" />
-            <div className="w-4 h-4 rounded bg-muted" />
-          </div>
-        </div>
-      )}
-      {heroStyle === 'clean' && (
-        <div className="space-y-1.5 pt-0.5">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-xl bg-blue-500/30" />
-            <div className="space-y-0.5 flex-1">
-              <div className="w-20 h-2 rounded bg-foreground/25" />
-              <div className="w-12 h-1.5 rounded bg-muted-foreground/30" />
+
+          <div className="flex items-center justify-between px-1">
+            <div>
+              <div className="text-[11px] font-bold text-white tracking-wide">NextGen Tech Inc.</div>
+              <div className="text-[9px] text-purple-300/80">Founder &amp; CEO • Series A</div>
+            </div>
+            <div className="w-12 h-5 flex items-end gap-1">
+              <span className="w-2.5 h-2 rounded-t bg-purple-500/40" />
+              <span className="w-2.5 h-3.5 rounded-t bg-purple-500/60" />
+              <span className="w-2.5 h-5 rounded-t bg-amber-400" />
             </div>
           </div>
-          <div className="flex gap-1 pt-1">
-            <div className="w-10 h-2.5 rounded bg-muted-foreground/15" />
-            <div className="w-10 h-2.5 rounded bg-muted-foreground/15" />
-            <div className="w-10 h-2.5 rounded bg-muted-foreground/15" />
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-purple-950/80 border border-purple-500/30 text-[9px] font-medium text-purple-300">
+              Pitch Deck
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-purple-950/80 border border-purple-500/30 text-[9px] font-medium text-purple-300">
+              Angel Advisory
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-purple-950/80 border border-purple-500/30 text-[9px] font-medium text-purple-300">
+              Keynote
+            </span>
           </div>
         </div>
-      )}
-    </div>
-  )
+      )
+
+    case 'creator':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-rose-500/30 bg-gradient-to-br from-slate-950 via-rose-950/70 to-purple-950/90 text-rose-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-rose-500/20 text-rose-300 flex items-center justify-center">
+                <Palette className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-rose-200">Creator Media Studio</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded-full">
+              <Sparkles className="h-2.5 w-2.5 text-rose-400" />
+              <span>4K Media</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="h-7 rounded-md bg-gradient-to-tr from-pink-500/30 to-purple-500/20 border border-pink-500/30 flex items-center justify-center text-[8px] font-medium text-pink-200 shadow-xs">
+              Reels
+            </div>
+            <div className="h-7 rounded-md bg-gradient-to-tr from-amber-500/30 to-rose-500/20 border border-amber-500/30 flex items-center justify-center text-[8px] font-medium text-amber-200 shadow-xs">
+              Design
+            </div>
+            <div className="h-7 rounded-md bg-gradient-to-tr from-violet-500/30 to-indigo-500/20 border border-violet-500/30 flex items-center justify-center text-[8px] font-medium text-violet-200 shadow-xs">
+              Brands
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/30 text-[9px] font-medium text-rose-300">
+              Media Kit
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/30 text-[9px] font-medium text-rose-300">
+              Collabs
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-500/30 text-[9px] font-medium text-rose-300">
+              Portfolio
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'student':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-teal-500/30 bg-gradient-to-br from-slate-950 via-teal-950/70 to-blue-950/90 text-teal-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-teal-500/20 text-teal-300 flex items-center justify-center">
+                <GraduationCap className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-teal-200">University &amp; Honors</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-teal-500/15 text-teal-300 border border-teal-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <Award className="h-2.5 w-2.5 text-teal-400" />
+              <span>GPA 3.9</span>
+            </span>
+          </div>
+
+          <div className="px-1">
+            <div className="text-[11px] font-semibold text-white truncate">Computer Science &amp; Systems</div>
+            <div className="text-[9px] text-teal-300/80 flex items-center gap-1 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 inline-block" />
+              <span>Class of 2026 • Dean&apos;s Honor List</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-teal-950/80 border border-teal-500/30 text-[9px] font-medium text-teal-300">
+              Research
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-teal-950/80 border border-teal-500/30 text-[9px] font-medium text-teal-300">
+              Coursework
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-teal-950/80 border border-teal-500/30 text-[9px] font-medium text-teal-300">
+              Projects
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'academic':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-amber-500/35 bg-gradient-to-br from-slate-950 via-amber-950/60 to-slate-900 text-amber-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                <BookOpen className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-amber-200">Faculty &amp; Research</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <Award className="h-2.5 w-2.5 text-amber-400" />
+              <span>Peer-Reviewed</span>
+            </span>
+          </div>
+
+          <div className="px-1">
+            <div className="text-[10.5px] font-medium text-amber-100 truncate">&ldquo;Advances in Machine Intelligence&rdquo;</div>
+            <div className="text-[9px] text-amber-300/80 font-mono mt-0.5">h-index: 24 • 1,280+ Citations</div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Publications
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Laboratory
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-amber-950/80 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Conferences
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'executive':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-amber-500/35 bg-gradient-to-br from-slate-950 via-zinc-900 to-amber-950/40 text-amber-100 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                <Crown className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-amber-200">Executive &amp; Board</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full">
+              <ShieldCheck className="h-2.5 w-2.5 text-amber-400" />
+              <span>C-Suite</span>
+            </span>
+          </div>
+
+          <div className="px-1">
+            <div className="text-[11px] font-bold text-white tracking-wide">Enterprise Strategy &amp; Governance</div>
+            <div className="text-[9px] text-amber-300/80 mt-0.5">Global P&amp;L • Board Director • M&amp;A</div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Board Seats
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Global Scale
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-amber-500/30 text-[9px] font-medium text-amber-300">
+              Press
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'freelancer-consultant':
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-orange-500/30 bg-gradient-to-br from-slate-950 via-amber-950/70 to-orange-950/80 text-amber-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-orange-500/20 text-orange-300 flex items-center justify-center">
+                <UserCheck className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-orange-200">Consulting &amp; Advisory</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+              <span>5.0 (50+ Reviews)</span>
+            </span>
+          </div>
+
+          <div className="px-1">
+            <div className="text-[11px] font-semibold text-white">Fractional Strategy &amp; Delivery</div>
+            <div className="text-[9px] text-amber-300/80 flex items-center gap-1 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+              <span>Available for Client Bookings</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-orange-950/80 border border-orange-500/30 text-[9px] font-medium text-orange-300">
+              Book Call
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-orange-950/80 border border-orange-500/30 text-[9px] font-medium text-orange-300">
+              Retainers
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-orange-950/80 border border-orange-500/30 text-[9px] font-medium text-orange-300">
+              Case Studies
+            </span>
+          </div>
+        </div>
+      )
+
+    case 'professional':
+    default:
+      return (
+        <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden p-2.5 sm:p-3 border border-blue-500/35 bg-gradient-to-br from-slate-950 via-blue-950/80 to-indigo-950/90 text-blue-200 flex flex-col justify-between shadow-inner select-none transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded-md bg-blue-500/20 text-blue-300 flex items-center justify-center">
+                <Briefcase className="h-2.5 w-2.5" />
+              </div>
+              <span className="text-[10px] font-semibold text-blue-200">{name || 'Universal Smart Identity'}</span>
+            </div>
+            <span className="flex items-center gap-1 text-[9px] bg-blue-500/15 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded-full font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span>NFC Active</span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-black shadow-xs">
+                1Q
+              </div>
+              <div>
+                <div className="text-[11px] font-bold text-white leading-tight">Universal Profile</div>
+                <div className="text-[8.5px] text-blue-300/80 font-mono">onewinq.me/live</div>
+              </div>
+            </div>
+            <Share2 className="h-3.5 w-3.5 text-blue-400/80" />
+          </div>
+
+          <div className="flex items-center gap-1 overflow-hidden">
+            <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/30 text-[9px] font-medium text-blue-300">
+              Bio &amp; Contact
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/30 text-[9px] font-medium text-blue-300">
+              Social Links
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-blue-950/80 border border-blue-500/30 text-[9px] font-medium text-blue-300">
+              Instant Share
+            </span>
+          </div>
+        </div>
+      )
+  }
 }
 
 export function TemplateCard({
@@ -139,7 +445,6 @@ export function TemplateCard({
       ? propIsLocked
       : (template.isLocked !== undefined ? Boolean(template.isLocked) : true))
   const icon = getTemplateIcon(template.slug)
-  const heroStyle = template.layoutConfig?.heroStyle || 'clean'
 
   return (
     <div
@@ -208,11 +513,13 @@ export function TemplateCard({
           </div>
         </div>
 
-        {/* Visual Wireframe Preview */}
+        {/* Profession-specific visual background preview */}
         {!compact && (
-          <div className={isLocked ? 'opacity-60 filter grayscale-[40%]' : ''}>
-            <LayoutMiniWireframe heroStyle={heroStyle} />
-          </div>
+          <ProfessionVisualPreview
+            slug={template.slug}
+            category={template.category}
+            name={template.name}
+          />
         )}
 
         {/* Description */}
