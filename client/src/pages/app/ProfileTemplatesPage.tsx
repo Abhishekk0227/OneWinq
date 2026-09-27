@@ -101,64 +101,55 @@ export default function ProfileTemplatesPage() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-8 text-left pb-24">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-              <LayoutTemplate className="h-3.5 w-3.5" />
-              <span>Profile Presentation Templates</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Choose How to Present Your Identity
+    <div className="w-full max-w-6xl mx-auto space-y-5 text-left pb-24">
+      {/* Sleek Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl border border-border bg-card shadow-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Profile Templates
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
-              Templates define your foundational layout structure and baseline section recommendations. Choose any template below — your content is always preserved, and you can switch anytime.
-            </p>
+            <Badge variant="subtle" className="text-xs">
+              Layouts
+            </Badge>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Select a presentation layout for your identity. Your content and data are always preserved when switching.
+          </p>
+        </div>
 
-          {/* Active Template Status Badge */}
-          {activeTemplate && (
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1.5 shrink-0 min-w-[220px]">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                Current Active Template
+        {/* Current Active Template Pill */}
+        {activeTemplate && (
+          <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-muted/40 border border-border shrink-0 self-start sm:self-center">
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                Active Template
               </span>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground text-base">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground text-xs sm:text-sm">
                   {activeTemplate.name}
                 </span>
-                <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                <Badge variant="default" className="text-[9px] px-1 py-0 h-4">
                   Active
                 </Badge>
               </div>
-              <span className="text-xs text-muted-foreground capitalize block">
-                Category: {activeTemplate.category}
-              </span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Consolidated Template Notice */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
-            <Lock className="h-4 w-4" />
+      <div className="p-3.5 sm:p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+            <Lock className="h-3.5 w-3.5" />
           </div>
-          <div>
-            <strong className="text-foreground font-bold block">
-              Basic Universal Template Active
-            </strong>
-            <p className="text-muted-foreground leading-relaxed">
-              Your profile currently uses the Universal Template. You can customize your bio, contact details, and social links in the Profile Builder. Specialized industry templates (Engineer, Doctor, Creator) are locked and rolling out soon.
-            </p>
-          </div>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            <strong className="text-foreground">Universal Template Active:</strong> Customize your bio, contact details, and social links in the Profile Builder. Specialized industry templates (Engineer, Doctor, Creator) are rolling out soon.
+          </p>
         </div>
         <Link to="/app/profile/edit" className="shrink-0 self-end sm:self-center">
-          <Button variant="outline" size="sm" className="text-xs h-8">
+          <Button variant="outline" size="sm" className="text-xs h-7 px-3">
             Profile Builder
           </Button>
         </Link>
