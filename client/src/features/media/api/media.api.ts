@@ -88,6 +88,8 @@ export const mediaApi = {
       throw new Error('Upload initialization did not return a valid upload URL.')
     }
 
+    let finalPublicUrl = publicUrl
+
     if (fields && Object.keys(fields).length > 0) {
       // Multipart form upload (e.g. Cloudinary, S3 presigned POST)
       const formData = new FormData()
@@ -111,6 +113,17 @@ export const mediaApi = {
         }
         throw new Error(errMessage)
       }
+
+      try {
+        const resBody = await uploadRes.json()
+        if (resBody?.secure_url) {
+          finalPublicUrl = resBody.secure_url
+        } else if (resBody?.url) {
+          finalPublicUrl = resBody.url
+        }
+      } catch {
+        // Fall back to precomputed publicUrl
+      }
     } else {
       // Direct raw upload (e.g. LocalStorageAdapter or S3 presigned PUT)
       const uploadRes = await fetch(uploadUrl, {
@@ -130,6 +143,6 @@ export const mediaApi = {
     // Confirm with backend
     await this.confirmUpload(mediaId)
 
-    return { mediaId, publicUrl }
+    return { mediaId, publicUrl: finalPublicUrl }
   },
 }

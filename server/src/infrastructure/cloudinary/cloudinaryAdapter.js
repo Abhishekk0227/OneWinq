@@ -27,11 +27,16 @@ export class CloudinaryAdapter extends StorageAdapter {
    */
   async generateUploadUrl({ key, contentType: _contentType, expiresInSeconds: _expiresInSeconds = 900 }) {
     const timestamp = Math.round(Date.now() / 1000);
-    const paramsToSign = `public_id=${key}&timestamp=${timestamp}${this.apiSecret}`;
+    // Cloudinary expects public_id without the file extension so it delivers at <public_id>.<extension>
+    const extMatch = key.match(/\.[a-zA-Z0-9]+$/);
+    const ext = extMatch ? extMatch[0] : '';
+    const cleanPublicId = ext ? key.slice(0, -ext.length) : key;
+
+    const paramsToSign = `public_id=${cleanPublicId}&timestamp=${timestamp}${this.apiSecret}`;
     const signature = crypto.createHash('sha1').update(paramsToSign).digest('hex');
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/auto/upload`;
-    const publicUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/${key}`;
+    const publicUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/${cleanPublicId}${ext}`;
 
     return {
       uploadUrl,
@@ -39,7 +44,7 @@ export class CloudinaryAdapter extends StorageAdapter {
       fields: {
         api_key: this.apiKey,
         timestamp,
-        public_id: key,
+        public_id: cleanPublicId,
         signature,
         resource_type: 'auto',
       },
