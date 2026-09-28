@@ -575,6 +575,11 @@ export default function ProfileEditPage() {
   const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Avatar image must be smaller than 5MB')
+      if (avatarInputRef.current) avatarInputRef.current.value = ''
+      return
+    }
     try {
       setUploadingAvatar(true)
       const res = await mediaApi.uploadFile(file, 'PROFILE_PHOTO')
@@ -585,8 +590,9 @@ export default function ProfileEditPage() {
         setUser({ ...user, avatarUrl: res.publicUrl })
       }
       toast.success('Avatar updated successfully!')
-    } catch {
-      toast.error('Failed to upload avatar image')
+    } catch (err: any) {
+      console.error('[AvatarUploadError]', err)
+      toast.error(err?.message || 'Failed to upload avatar image')
     } finally {
       setUploadingAvatar(false)
       if (avatarInputRef.current) avatarInputRef.current.value = ''
@@ -596,6 +602,11 @@ export default function ProfileEditPage() {
   const handleCoverFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Cover banner image must be smaller than 10MB')
+      if (coverInputRef.current) coverInputRef.current.value = ''
+      return
+    }
     try {
       setUploadingCover(true)
       const res = await mediaApi.uploadFile(file, 'PROFILE_COVER')
@@ -603,8 +614,9 @@ export default function ProfileEditPage() {
       await profileApi.updateDraft({ coverUrl: res.publicUrl })
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
       toast.success('Cover banner updated!')
-    } catch {
-      toast.error('Failed to upload cover banner')
+    } catch (err: any) {
+      console.error('[CoverUploadError]', err)
+      toast.error(err?.message || 'Failed to upload cover banner')
     } finally {
       setUploadingCover(false)
       if (coverInputRef.current) coverInputRef.current.value = ''

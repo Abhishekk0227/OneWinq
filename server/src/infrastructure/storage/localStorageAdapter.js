@@ -6,7 +6,14 @@ import logger from '../../utils/logger.js';
 export class LocalStorageAdapter extends StorageAdapter {
   constructor(options = {}) {
     super();
-    this.uploadDir = options.uploadDir || path.resolve(process.cwd(), 'uploads');
+    // Consistently resolve directory whether running from root or server/
+    const defaultDir = fs.existsSync(path.resolve(process.cwd(), 'server', 'uploads'))
+      ? path.resolve(process.cwd(), 'server', 'uploads')
+      : path.resolve(process.cwd(), 'uploads');
+
+    this.uploadDir = options.uploadDir
+      ? path.resolve(process.cwd(), options.uploadDir)
+      : defaultDir;
 
     try {
       if (!fs.existsSync(this.uploadDir)) {
@@ -20,13 +27,20 @@ export class LocalStorageAdapter extends StorageAdapter {
     }
   }
 
+  getBaseUrl() {
+    if (process.env.SERVER_URL) return process.env.SERVER_URL.replace(/\/+$/, '');
+    if (process.env.BACKEND_URL) return process.env.BACKEND_URL.replace(/\/+$/, '');
+    const port = process.env.PORT || 5000;
+    return `http://localhost:${port}`;
+  }
+
   getRelativeKey(key) {
     if (!key) return '';
     return key.replace(/^(\/)?uploads\//, '').replace(/^\//, '');
   }
 
   async generateUploadUrl({ key, mimeType }) {
-    const baseUrl = process.env.APP_URL || 'http://localhost:5000';
+    const baseUrl = this.getBaseUrl();
     const relKey = this.getRelativeKey(key);
     const publicUrl = `${baseUrl}/uploads/${relKey}`;
     const uploadUrl = `${baseUrl}/api/v1/media/upload-local?key=${encodeURIComponent(key)}`;
@@ -42,7 +56,7 @@ export class LocalStorageAdapter extends StorageAdapter {
   }
 
   async generateDownloadUrl(key) {
-    const baseUrl = process.env.APP_URL || 'http://localhost:5000';
+    const baseUrl = this.getBaseUrl();
     const relKey = this.getRelativeKey(key);
     return `${baseUrl}/uploads/${relKey}`;
   }

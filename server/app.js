@@ -27,6 +27,7 @@ import conversationRouter from './src/modules/conversations/conversation.routes.
 import { notificationRoutes } from './src/modules/notifications/notification.routes.js';
 import { initNotificationListeners } from './src/modules/notifications/notification.listeners.js';
 import path from 'path';
+import fs from 'fs';
 import { config } from './src/config/env.js';
 import { cardRoutes } from './src/modules/cards/card.routes.js';
 import { cardController } from './src/modules/cards/card.controller.js';
@@ -163,6 +164,10 @@ apiRouter.use('/posts', postRoutes);
 app.get('/c/:cardUid', cardController.resolveTap);
 
 // Serve local uploads statically with cross-origin headers
+const uploadsStaticDir = fs.existsSync(path.resolve(process.cwd(), 'server', 'uploads'))
+  ? path.resolve(process.cwd(), 'server', 'uploads')
+  : path.resolve(process.cwd(), config.storage?.localDir || 'uploads');
+
 app.use(
   '/uploads',
   (req, res, next) => {
@@ -170,7 +175,7 @@ app.use(
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   },
-  express.static(path.resolve(process.cwd(), config.storage?.localDir || 'uploads')),
+  express.static(uploadsStaticDir),
 );
 
 // Initialize background event listeners

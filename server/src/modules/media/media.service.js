@@ -19,7 +19,7 @@ export const mediaService = {
     const timestamp = Date.now();
     const storageKey = `uploads/${purpose.toLowerCase()}/${userId}/${timestamp}-${cleanFilename}`;
 
-    const { uploadUrl, method, headers, publicUrl } =
+    const { uploadUrl, method, headers, fields, publicUrl } =
       await storageService.generateUploadUrl({
         key: storageKey,
         mimeType,
@@ -44,6 +44,7 @@ export const mediaService = {
       uploadUrl,
       method,
       headers,
+      fields,
       publicUrl,
       storageKey,
     };

@@ -5,9 +5,48 @@ export interface UploadPresignedResponse {
   mediaId: string
   uploadUrl: string
   method: string
-  headers: Record<string, string>
+  headers?: Record<string, string>
+  fields?: Record<string, string | number>
   publicUrl: string
   storageKey: string
+}
+
+export type MediaPurpose =
+  | 'PROFILE_PHOTO'
+  | 'PROFILE_COVER'
+  | 'PROFILE_SECTION'
+  | 'MESSAGE_ATTACHMENT'
+  | 'POST_MEDIA'
+  | 'CARD_MEDIA'
+  | 'SUPPORT_EVIDENCE'
+  | 'REPORT_EVIDENCE'
+
+function resolveMimeType(file: File): string {
+  if (file.type && file.type !== 'application/octet-stream') {
+    return file.type.toLowerCase()
+  }
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  switch (ext) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg'
+    case 'png':
+      return 'image/png'
+    case 'webp':
+      return 'image/webp'
+    case 'gif':
+      return 'image/gif'
+    case 'svg':
+      return 'image/svg+xml'
+    case 'pdf':
+      return 'application/pdf'
+    case 'mp4':
+      return 'video/mp4'
+    case 'webm':
+      return 'video/webm'
+    default:
+      return file.type || 'application/octet-stream'
+  }
 }
 
 export const mediaApi = {
@@ -33,28 +72,59 @@ export const mediaApi = {
   /**
    * Helper function to execute full upload cycle for a browser File object.
    */
-  async uploadFile(file: File, purpose: 'PROFILE_PHOTO' | 'PROFILE_COVER' | 'PROFILE_SECTION' | 'MESSAGE_ATTACHMENT') {
+  async uploadFile(file: File, purpose: MediaPurpose) {
+    const mimeType = resolveMimeType(file)
     const initRes = await this.initiateUpload({
       purpose,
       filename: file.name,
-      mimeType: file.type || 'application/octet-stream',
+      mimeType,
       sizeBytes: file.size,
     })
 
-    const { mediaId, uploadUrl, method, headers, publicUrl } = initRes.data
+    const payload = (initRes as any)?.data || initRes
+    const { mediaId, uploadUrl, method, headers, fields, publicUrl } = payload as UploadPresignedResponse
 
-    // Upload directly using fetch
-    const uploadRes = await fetch(uploadUrl, {
-      method: method || 'PUT',
-      headers: {
-        'Content-Type': file.type,
-        ...(headers || {}),
-      },
-      body: file,
-    })
+    if (!uploadUrl) {
+      throw new Error('Upload initialization did not return a valid upload URL.')
+    }
 
-    if (!uploadRes.ok) {
-      throw new Error(`Upload failed with status ${uploadRes.status}`)
+    if (fields && Object.keys(fields).length > 0) {
+      // Multipart form upload (e.g. Cloudinary, S3 presigned POST)
+      const formData = new FormData()
+      Object.entries(fields).forEach(([k, v]) => {
+        formData.append(k, String(v))
+      })
+      formData.append('file', file)
+
+      const uploadRes = await fetch(uploadUrl, {
+        method: method || 'POST',
+        body: formData,
+      })
+
+      if (!uploadRes.ok) {
+        let errMessage = `Upload failed with status ${uploadRes.status}`
+        try {
+          const errBody = await uploadRes.json()
+          if (errBody?.error?.message) errMessage = errBody.error.message
+        } catch {
+          // ignore parsing error
+        }
+        throw new Error(errMessage)
+      }
+    } else {
+      // Direct raw upload (e.g. LocalStorageAdapter or S3 presigned PUT)
+      const uploadRes = await fetch(uploadUrl, {
+        method: method || 'PUT',
+        headers: {
+          'Content-Type': mimeType,
+          ...(headers || {}),
+        },
+        body: file,
+      })
+
+      if (!uploadRes.ok) {
+        throw new Error(`Upload failed with status ${uploadRes.status}`)
+      }
     }
 
     // Confirm with backend

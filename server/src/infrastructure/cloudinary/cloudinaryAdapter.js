@@ -31,9 +31,11 @@ export class CloudinaryAdapter extends StorageAdapter {
     const signature = crypto.createHash('sha1').update(paramsToSign).digest('hex');
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${this.cloudName}/auto/upload`;
+    const publicUrl = `https://res.cloudinary.com/${this.cloudName}/image/upload/${key}`;
 
     return {
       uploadUrl,
+      method: 'POST',
       fields: {
         api_key: this.apiKey,
         timestamp,
@@ -41,6 +43,7 @@ export class CloudinaryAdapter extends StorageAdapter {
         signature,
         resource_type: 'auto',
       },
+      publicUrl,
       key,
     };
   }
