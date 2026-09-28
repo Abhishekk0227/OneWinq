@@ -61,10 +61,22 @@ export class LocalStorageAdapter extends StorageAdapter {
     return `${baseUrl}/uploads/${relKey}`;
   }
 
+  assertSafePath(key) {
+    const relKey = this.getRelativeKey(key);
+    if (!relKey || relKey.includes('..') || path.isAbsolute(relKey)) {
+      throw new Error(`[SecurityException] Path traversal detected: key '${key}' contains forbidden path elements.`);
+    }
+    const fullPath = path.resolve(this.uploadDir, relKey);
+    const resolvedUploadDir = path.resolve(this.uploadDir);
+    if (!fullPath.startsWith(resolvedUploadDir + path.sep) && fullPath !== resolvedUploadDir) {
+      throw new Error(`[SecurityException] Path traversal detected: key '${key}' escapes upload directory.`);
+    }
+    return fullPath;
+  }
+
   async saveObject(key, buffer) {
     try {
-      const relKey = this.getRelativeKey(key);
-      const fullPath = path.resolve(this.uploadDir, relKey);
+      const fullPath = this.assertSafePath(key);
       const dir = path.dirname(fullPath);
 
       if (!fs.existsSync(dir)) {
@@ -82,16 +94,9 @@ export class LocalStorageAdapter extends StorageAdapter {
 
   async deleteObject(key) {
     try {
-      const relKey = this.getRelativeKey(key);
-      const fullPath = path.resolve(this.uploadDir, relKey);
+      const fullPath = this.assertSafePath(key);
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
-        return true;
-      }
-      // Fallback check in case key was saved with literal 'uploads/' prefix
-      const literalPath = path.resolve(this.uploadDir, key);
-      if (fs.existsSync(literalPath)) {
-        fs.unlinkSync(literalPath);
         return true;
       }
     } catch (err) {

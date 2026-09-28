@@ -9,8 +9,13 @@ async function bootstrapAdmin() {
   const emailValue = emailFlag
     ? emailFlag.split('=')[1]
     : process.argv.slice(2).find((a) => !a.startsWith('-')) ||
-      process.env.ADMIN_BOOTSTRAP_EMAIL ||
-      'kundanmheta8210@gmail.com';
+      process.env.ADMIN_BOOTSTRAP_EMAIL;
+
+  if (!emailValue) {
+    console.error('Error: Missing email argument.\nUsage: node scripts/adminBootstrap.js --email=admin@example.com');
+    process.exitCode = 1;
+    return;
+  }
 
   const targetEmail = emailValue.trim().toLowerCase();
 
@@ -18,18 +23,7 @@ async function bootstrapAdmin() {
   await connectDatabase();
 
   try {
-    let user = await User.findOne({ email: new RegExp(`^${targetEmail}$`, 'i') });
-
-    // If not found, check if typo between mheta and mehta
-    if (!user) {
-      if (targetEmail.includes('mheta')) {
-        const altEmail = targetEmail.replace('mheta', 'mehta');
-        user = await User.findOne({ email: new RegExp(`^${altEmail}$`, 'i') });
-      } else if (targetEmail.includes('mehta')) {
-        const altEmail = targetEmail.replace('mehta', 'mheta');
-        user = await User.findOne({ email: new RegExp(`^${altEmail}$`, 'i') });
-      }
-    }
+    let user = await User.findOne({ email: targetEmail });
 
 
     if (!user) {

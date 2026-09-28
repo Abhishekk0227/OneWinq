@@ -19,6 +19,10 @@ export const mediaController = {
         return res.status(400).json({ error: 'Storage key is required for upload' });
       }
       const key = decodeURIComponent(rawKey);
+      if (key.includes('..') || !key.startsWith('uploads/')) {
+        return res.status(400).json({ error: 'Invalid or unauthorized storage key format' });
+      }
+
       await storageService.saveObject(key, req.body);
       return res.status(200).json({ success: true, message: 'File uploaded successfully' });
     } catch (err) {
