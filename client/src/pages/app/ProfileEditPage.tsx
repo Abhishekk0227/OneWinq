@@ -1112,21 +1112,28 @@ export default function ProfileEditPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Avatar Box */}
-              <div className="space-y-3 p-4 rounded-2xl border border-border/80 bg-muted/20">
-                <span className="text-xs font-bold text-foreground">Avatar / Profile Picture</span>
+              <div className="p-4 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground">Avatar / Profile Picture</span>
+                  {avatarUrl && (
+                    <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20">
+                      Uploaded
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-4">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
                       alt="Avatar Preview"
-                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20 shadow-sm"
+                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20 shadow-sm shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground">
+                    <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0">
                       <Camera className="h-6 w-6" />
                     </div>
                   )}
-                  <div className="space-y-2 flex-1">
+                  <div className="space-y-1.5 flex-1">
                     <input
                       ref={avatarInputRef}
                       type="file"
@@ -1134,38 +1141,72 @@ export default function ProfileEditPage() {
                       className="hidden"
                       onChange={handleAvatarFile}
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      isLoading={uploadingAvatar}
-                      onClick={() => avatarInputRef.current?.click()}
-                      leftIcon={<Upload className="h-3.5 w-3.5" />}
-                    >
-                      Upload Picture
-                    </Button>
-                    <Input
-                      value={avatarUrl}
-                      onChange={(e) => setAvatarUrl(e.target.value)}
-                      placeholder="Or enter direct image URL..."
-                      className="text-xs"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        isLoading={uploadingAvatar}
+                        onClick={() => avatarInputRef.current?.click()}
+                        leftIcon={<Upload className="h-3.5 w-3.5" />}
+                      >
+                        {avatarUrl ? 'Change Picture' : 'Upload Picture'}
+                      </Button>
+                      {avatarUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={async () => {
+                            setAvatarUrl('')
+                            await profileApi.updateDraft({ avatarUrl: null })
+                            queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
+                            if (user) {
+                              setUser({ ...user, avatarUrl: null })
+                            }
+                            toast.success('Avatar removed')
+                          }}
+                          leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      PNG, JPG, or WebP up to 5MB. Square recommended.
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Cover Banner Box */}
-              <div className="space-y-3 p-4 rounded-2xl border border-border/80 bg-muted/20">
-                <span className="text-xs font-bold text-foreground">Cover Banner Image</span>
-                <div className="space-y-2">
+              <div className="p-4 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground">Cover Banner Image</span>
                   {coverUrl && (
-                    <img
-                      src={coverUrl}
-                      alt="Cover Preview"
-                      className="w-full h-20 rounded-xl object-cover border border-border"
-                    />
+                    <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20">
+                      Uploaded
+                    </Badge>
                   )}
-                  <div className="flex items-center gap-2">
+                </div>
+                <div className="space-y-3">
+                  {coverUrl ? (
+                    <div className="relative group rounded-xl overflow-hidden border border-border">
+                      <img
+                        src={coverUrl}
+                        alt="Cover Preview"
+                        className="w-full h-20 object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-20 rounded-xl border border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/30">
+                      <span className="text-xs flex items-center gap-1.5 text-muted-foreground">
+                        <ImageIcon className="h-4 w-4" /> No cover banner set
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2">
                     <input
                       ref={coverInputRef}
                       type="file"
@@ -1173,22 +1214,38 @@ export default function ProfileEditPage() {
                       className="hidden"
                       onChange={handleCoverFile}
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      isLoading={uploadingCover}
-                      onClick={() => coverInputRef.current?.click()}
-                      leftIcon={<ImageIcon className="h-3.5 w-3.5" />}
-                    >
-                      Upload Banner
-                    </Button>
-                    <Input
-                      value={coverUrl}
-                      onChange={(e) => setCoverUrl(e.target.value)}
-                      placeholder="Or enter banner URL..."
-                      className="text-xs flex-1"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        isLoading={uploadingCover}
+                        onClick={() => coverInputRef.current?.click()}
+                        leftIcon={<ImageIcon className="h-3.5 w-3.5" />}
+                      >
+                        {coverUrl ? 'Change Banner' : 'Upload Banner'}
+                      </Button>
+                      {coverUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={async () => {
+                            setCoverUrl('')
+                            await profileApi.updateDraft({ coverUrl: null })
+                            queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
+                            toast.success('Cover banner removed')
+                          }}
+                          leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground hidden sm:block">
+                      1200×400 recommended. Max 10MB.
+                    </p>
                   </div>
                 </div>
               </div>
