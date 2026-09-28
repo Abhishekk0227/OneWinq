@@ -168,6 +168,7 @@ export const cardService = {
       cardId: card.cardId || card.cardCode || card.cardUid,
       url: card.url,
       displayName: user.displayName,
+      username: user.username,
       // Card-first identity: redirect to card-code URL, never to username URL
       redirectUrl: `/p/c/${(card.cardCode || card.cardUid).toLowerCase()}`,
       customSlug: card.customSlug,
