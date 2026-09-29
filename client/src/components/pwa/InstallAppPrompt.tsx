@@ -12,6 +12,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = 'onewinq_pwa_dismissed'
+const DISMISS_COOLDOWN_MS = 24 * 60 * 60 * 1000 // 24 hours cooldown after dismiss
+
 export function triggerPWAInstall() {
   window.dispatchEvent(new CustomEvent('onewinq-trigger-pwa-install'))
 }
@@ -23,24 +25,27 @@ export function InstallAppPrompt() {
   const [showIOSInstructions, setShowIOSInstructions] = React.useState(false)
 
   React.useEffect(() => {
-    // 1. Check if already installed / standalone
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true ||
-      document.referrer.includes('android-app://')
+    try {
+      // 1. Check if already installed / standalone
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://')
 
-    if (isStandalone) {
-      return
-    }
-
-    // 2. Check dismiss cooldown
-    const lastDismissed = localStorage.getItem(DISMISS_KEY)
-    if (lastDismissed) {
-      const timeSinceDismiss = Date.now() - parseInt(lastDismissed, 10)
-      if (timeSinceDismiss < DISMISS_COOLDOWN_MS) {
+      if (isStandalone) {
         return
       }
-    }
+
+      // 2. Check dismiss cooldown
+      const lastDismissed = localStorage.getItem(DISMISS_KEY)
+      if (lastDismissed) {
+        const timeSinceDismiss = Date.now() - parseInt(lastDismissed, 10)
+        if (timeSinceDismiss < DISMISS_COOLDOWN_MS) {
+          return
+        }
+      }
 
     // 3. Detect iOS Safari
     const ua = window.navigator.userAgent.toLowerCase()
@@ -91,6 +96,9 @@ export function InstallAppPrompt() {
       window.removeEventListener('appinstalled', handleAppInstalled)
       window.removeEventListener('onewinq-trigger-pwa-install', handleTrigger)
       clearTimeout(timer)
+    }
+    } catch (err) {
+      console.warn('[PWA] Error in prompt effect:', err)
     }
   }, [])
 
