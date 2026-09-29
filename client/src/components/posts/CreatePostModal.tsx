@@ -98,48 +98,49 @@ export function CreatePostModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <div className="relative">
-        <DialogHeader className="pb-3 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center text-primary">
+      <div className="relative min-w-0">
+        <DialogHeader className="pb-3 border-b border-border pr-8">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center text-primary shrink-0">
               <Sparkles className="h-4 w-4" />
             </div>
-            <div>
-              <DialogTitle className="text-lg font-bold text-foreground">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">
                 Create New Post
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogDescription className="text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
                 Broadcast insights, milestones, or questions to your professional circle.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-3 sm:pt-4">
           {/* Author snippet & Visibility picker */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 min-w-0">
               <Avatar
                 size="sm"
                 src={user?.avatarUrl}
                 fallback={user?.displayName || user?.username}
                 alt={user?.displayName}
+                className="shrink-0"
               />
-              <div className="leading-tight">
-                <div className="text-sm font-bold text-foreground">
+              <div className="leading-tight min-w-0">
+                <div className="text-xs sm:text-sm font-bold text-foreground truncate max-w-[130px] sm:max-w-[200px]">
                   {user?.displayName || user?.username}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[11px] sm:text-xs text-muted-foreground truncate max-w-[130px] sm:max-w-[200px]">
                   @{user?.username}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border text-xs">
+            <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-xl bg-muted/60 border border-border text-xs shrink-0">
               <button
                 type="button"
                 onClick={() => setVisibility('PUBLIC')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
                   visibility === 'PUBLIC'
                     ? 'bg-card text-foreground shadow-sm font-bold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -151,7 +152,7 @@ export function CreatePostModal() {
               <button
                 type="button"
                 onClick={() => setVisibility('CONNECTIONS_ONLY')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
                   visibility === 'CONNECTIONS_ONLY'
                     ? 'bg-card text-foreground shadow-sm font-bold'
                     : 'text-muted-foreground hover:text-foreground'
@@ -171,7 +172,7 @@ export function CreatePostModal() {
               placeholder="What would you like to share with the community today?"
               rows={4}
               maxLength={5000}
-              className="w-full resize-none rounded-2xl border border-border bg-card p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all custom-scrollbar leading-relaxed"
+              className="w-full resize-none rounded-2xl border border-border bg-card p-3 sm:p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all custom-scrollbar leading-relaxed"
             />
             <div className="text-[11px] text-muted-foreground/70 text-right pr-1">
               {content.length}/5000
@@ -230,15 +231,15 @@ export function CreatePostModal() {
           />
 
           {/* Action Toolbar */}
-          <div className="pt-2 border-t border-border flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
+          <div className="pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 disabled={isUploading}
                 onClick={() => imageInputRef.current?.click()}
-                className="text-xs text-muted-foreground hover:text-foreground h-9 px-2.5"
+                className="text-xs text-muted-foreground hover:text-foreground h-8 sm:h-9 px-2 sm:px-2.5"
                 leftIcon={<ImageIcon className="h-4 w-4 text-primary" />}
               >
                 Photo
@@ -249,25 +250,26 @@ export function CreatePostModal() {
                 size="sm"
                 disabled={isUploading}
                 onClick={() => videoInputRef.current?.click()}
-                className="text-xs text-muted-foreground hover:text-foreground h-9 px-2.5"
+                className="text-xs text-muted-foreground hover:text-foreground h-8 sm:h-9 px-2 sm:px-2.5"
                 leftIcon={<Video className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
               >
                 Video
               </Button>
               {isUploading && (
-                <div className="flex items-center gap-1.5 text-xs text-primary font-medium pl-2">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <div className="flex items-center gap-1.5 text-xs text-primary font-medium pl-1">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
                   <span>Uploading...</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={closeModal}
+                className="flex-1 sm:flex-initial text-xs sm:text-sm h-8 sm:h-9 px-3"
               >
                 Cancel
               </Button>
@@ -276,7 +278,7 @@ export function CreatePostModal() {
                 size="sm"
                 isLoading={createPostMutation.isPending}
                 disabled={isUploading || (!content.trim() && mediaList.length === 0)}
-                className="font-bold shadow-md shadow-primary/20 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm h-8 sm:h-9 px-3.5 font-bold shadow-md shadow-primary/20 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 whitespace-nowrap"
                 leftIcon={<Send className="h-3.5 w-3.5" />}
               >
                 Publish Post

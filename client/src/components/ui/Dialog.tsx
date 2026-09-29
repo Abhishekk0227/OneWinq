@@ -29,7 +29,7 @@ export function Dialog({ open, onOpenChange, children, className }: DialogProps)
   if (!open) {return null}
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
@@ -39,13 +39,13 @@ export function Dialog({ open, onOpenChange, children, className }: DialogProps)
       {/* Modal Dialog Box */}
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-2xl bg-card dark:bg-[#121218] text-foreground dark:text-white p-6 shadow-2xl border border-border/80 dark:border-white/10 transition-all max-h-[90vh] overflow-y-auto custom-scrollbar animate-in fade-in-0 zoom-in-95',
+          'relative z-50 w-full max-w-lg min-w-0 rounded-2xl bg-card dark:bg-[#121218] text-foreground dark:text-white p-4 sm:p-6 shadow-2xl border border-border/80 dark:border-white/10 transition-all max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar animate-in fade-in-0 zoom-in-95 my-auto',
           className
         )}
       >
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white transition-colors"
+          className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-lg p-1.5 text-muted-foreground hover:bg-muted dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white transition-colors z-10"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
