@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/query/queryClient'
 import { AuthProvider } from './AuthProvider'
 import { ToastContainer } from '@/components/ui/ToastContainer'
+import { InstallAppPrompt } from '@/components/pwa/InstallAppPrompt'
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         {children}
         <ToastContainer />
+        <InstallAppPrompt />
       </AuthProvider>
     </QueryClientProvider>
   )

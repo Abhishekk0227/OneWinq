@@ -21,7 +21,9 @@ import {
   ExternalLink,
   Plus,
   Edit3,
+  Download,
 } from 'lucide-react'
+import { triggerPWAInstall } from '@/components/pwa/InstallAppPrompt'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
 import { Avatar } from '@/components/ui/Avatar'
@@ -320,6 +322,31 @@ export function MobileMenuDrawer() {
             </div>
           )}
         </nav>
+
+        {/* Install App Shortcut Banner */}
+        <div className="px-3 py-2 border-t border-border bg-card/30">
+          <button
+            type="button"
+            onClick={() => {
+              handleClose()
+              triggerPWAInstall()
+            }}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/25 text-primary text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-1 rounded-lg bg-primary/20">
+                <Download className="h-3.5 w-3.5" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold leading-tight">Install OneWinq App</div>
+                <div className="text-[10px] text-muted-foreground font-normal">Fast, offline-ready home screen app</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary text-white">
+              Install
+            </span>
+          </button>
+        </div>
 
         {/* Drawer Footer with Logout */}
         <div className="p-4 border-t border-border bg-card/50 flex items-center justify-between">
