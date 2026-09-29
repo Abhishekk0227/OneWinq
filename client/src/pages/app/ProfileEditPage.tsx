@@ -840,120 +840,106 @@ export default function ProfileEditPage() {
 
 
   return (
-    <div className="space-y-8 text-left max-w-5xl mx-auto pb-20">
-      {/* Top Header & Sticky Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-card border border-border shadow-sm sticky top-20 z-10 backdrop-blur-md">
-        <div className="flex items-center gap-3">
+    <div className="space-y-4 sm:space-y-5 text-left max-w-5xl mx-auto pb-20">
+      {/* Top Header & Sticky Actions (Compact) */}
+      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-card/95 border border-border shadow-xs sticky top-16 sm:top-20 z-20 backdrop-blur-md">
+        <div className="flex items-center gap-2.5 min-w-0">
           <Link to="/app/profile">
-            <Button variant="ghost" size="icon-sm">
+            <Button variant="ghost" size="icon-sm" className="h-8 w-8 shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
               Profile Builder
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Configure your multi-faceted professional identity and presentation style.
+            <p className="text-[11px] sm:text-xs text-muted-foreground truncate hidden sm:block">
+              Configure your professional identity and presentation style
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
             isLoading={saveMutation.isPending}
             onClick={handleSaveDraft}
+            className="h-8 sm:h-9 text-xs px-2.5 sm:px-3"
             leftIcon={<Save className="h-3.5 w-3.5" />}
           >
-            Save Draft
+            <span className="hidden sm:inline">Save Draft</span>
+            <span className="sm:hidden">Save</span>
           </Button>
 
           <Button
             size="sm"
             isLoading={publishMutation.isPending || saveMutation.isPending}
             onClick={handlePublishLive}
-            leftIcon={<CheckCircle2 className="h-4 w-4" />}
+            className="h-8 sm:h-9 text-xs px-3 sm:px-3.5 font-bold shadow-xs bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
+            leftIcon={<CheckCircle2 className="h-3.5 w-3.5" />}
           >
-            Publish Live
+            <span className="hidden sm:inline">Publish Live</span>
+            <span className="sm:hidden">Publish</span>
           </Button>
         </div>
       </div>
 
-      {/* Basic Universal Template Active Banner */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/25 flex items-start sm:items-center justify-between gap-4 text-amber-950 dark:text-amber-200 shadow-xs">
-        <div className="flex items-start sm:items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-            <Lock className="h-4.5 w-4.5" />
+      {/* Compact Status Notice (Replaces the two massive beige cards) */}
+      <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-amber-950 dark:text-amber-200">
+        <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+          <div className="h-6 w-6 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+            <Lock className="h-3.5 w-3.5" />
           </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-foreground text-sm">
-                Basic Universal Template Active
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-bold text-foreground">Universal Template Active</span>
+              <span className="text-muted-foreground text-[10px] hidden sm:inline">•</span>
+              <span className="text-muted-foreground text-[11px] sm:text-xs">
+                {!activeUserCard ? (
+                  <>Link <span className="font-mono text-primary font-semibold">/u/{user?.username}</span> reserved in preview mode until NFC card is activated</>
+                ) : (
+                  <>Fixed essential fields active. Custom sections coming soon.</>
+                )}
               </span>
-              <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-600 bg-amber-500/10 font-bold">
-                Fixed Fields
-              </Badge>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Your profile is using the universal layout with fixed essential fields (Identity, Bio, Contact Information, and Social Links). Advanced custom sections and specialty templates are locked and <strong>Coming Soon... for now</strong>!
-            </p>
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setIsTemplateModalOpen(true)}
-          className="text-xs h-8 shrink-0 border-amber-500/30 text-amber-600 hover:bg-amber-500/10 flex items-center gap-1"
-        >
-          <Lock className="h-3 w-3" />
-          <span>View Templates</span>
-        </Button>
-      </div>
-
-      {/* Card-Gating Status Banner */}
-      {!activeUserCard && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-950 dark:text-amber-200 shadow-xs">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 font-bold text-sm">
-              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>Card-Gated Live URL — Physical Smart Card Required</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
-              You can edit and preview your personas freely, but your public link (<span className="font-mono text-primary font-semibold">/u/{user?.username}</span>) remains in reserved preview mode until your physical OneWinq NFC Card is activated.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+          {!activeUserCard && (
             <Link to="/app/cards">
-              <Button size="sm" variant="default" className="text-xs h-8">
+              <Button size="sm" variant="default" className="text-[11px] h-7 px-2.5">
                 Activate Card
               </Button>
             </Link>
-            <Link to="/orders">
-              <Button size="sm" variant="outline" className="text-xs h-8">
-                Order Card
-              </Button>
-            </Link>
-          </div>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="text-[11px] h-7 px-2.5 border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 flex items-center gap-1"
+          >
+            <Lock className="h-3 w-3" />
+            <span>Templates</span>
+          </Button>
         </div>
-      )}
+      </div>
 
-      {/* Profession Persona Switcher Bar */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <Briefcase className="h-5 w-5" />
+      {/* Profession Persona Switcher Bar (Responsive) */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+            <Briefcase className="h-4.5 w-4.5" />
           </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground font-semibold">Active Persona:</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+              <span className="text-xs text-muted-foreground font-semibold shrink-0">Active Persona:</span>
               <select
                 value={selectedPersonaId || ''}
                 onChange={(e) => setSelectedPersonaId(e.target.value)}
-                className="bg-muted/80 text-foreground font-bold text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-border focus:ring-2 focus:ring-primary outline-none"
+                className="w-full sm:w-auto max-w-full bg-muted/80 text-foreground font-bold text-xs sm:text-sm px-2.5 py-1.5 rounded-xl border border-border focus:ring-2 focus:ring-primary outline-none truncate"
               >
                 {personas.map((per: any) => (
                   <option key={per.id || per._id} value={per.id || per._id}>
@@ -962,15 +948,15 @@ export default function ProfileEditPage() {
                 ))}
               </select>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Each profession has its own independent template and content. Only the LIVE profile is shown on <span className="font-mono text-primary">/u/{user?.username}</span> and NFC cards.
+            <p className="text-[11px] text-muted-foreground mt-1 break-words leading-tight">
+              Only the LIVE profile is shown on <span className="font-mono text-primary font-medium">/u/{user?.username}</span> and NFC cards.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center flex-wrap gap-2 shrink-0 self-end md:self-center">
+        <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border/50">
           {activeUserCard && (
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
               <Wifi className="h-3 w-3 animate-pulse" />
               <span>NFC: {activeUserCard.cardCode || activeUserCard.cardUid}</span>
             </span>
@@ -982,15 +968,15 @@ export default function ProfileEditPage() {
               size="sm"
               isLoading={switchActiveMutation.isPending}
               onClick={() => switchActiveMutation.mutate(selectedPersonaId)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 text-xs shadow-xs"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 text-xs h-7 px-2.5 shadow-xs"
             >
               <Check className="h-3.5 w-3.5" />
-              <span>Make this Profile Live</span>
+              <span>Make Live</span>
             </Button>
           )}
 
           {profileData?.data?.profile?.isActive && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Live Profile
             </span>
@@ -998,11 +984,12 @@ export default function ProfileEditPage() {
 
           <Badge
             variant="outline"
-            className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[11px] font-semibold flex items-center gap-1.5 py-1.5 px-3"
+            className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] sm:text-[11px] font-semibold flex items-center gap-1 py-1 px-2.5"
             title="Multi-profession profiles are locked and coming soon"
           >
             <Lock className="h-3 w-3" />
-            <span>Multiple Personas (Coming Soon)</span>
+            <span className="hidden sm:inline">Multiple Personas (Coming Soon)</span>
+            <span className="sm:hidden">Multi-Personas (Soon)</span>
           </Badge>
 
           {personas.length > 1 && selectedPersonaId && (
@@ -1017,9 +1004,9 @@ export default function ProfileEditPage() {
                   deletePersonaMutation.mutate(selectedPersonaId)
                 }
               }}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
