@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { User } from '../users/user.model.js';
+import { ADMIN_ROLE } from '../../config/constants.js';
 import { CardBatch } from '../cards/cardBatch.model.js';
 import { Card } from '../cards/card.model.js';
 import { CardCounter, getNextCardSequenceBlock } from '../cards/cardCounter.model.js';
@@ -147,9 +148,31 @@ class AdminService {
       );
     }
 
+    // Fetch the caller to determine their actual role.
+    const callerUser = await User.findById(adminId).select('role');
+    const callerRole = callerUser?.role;
+
+    // Only SUPER_ADMIN may assign SUPER_ADMIN to anyone.
+    if (role === ADMIN_ROLE.SUPER_ADMIN && callerRole !== ADMIN_ROLE.SUPER_ADMIN) {
+      throw new AppError(
+        'Only a Super Administrator can grant the Super Admin role.',
+        ERROR_CODE.FORBIDDEN,
+        HTTP.FORBIDDEN
+      );
+    }
+
     const user = await User.findById(targetUserId);
     if (!user) {
       throw new AppError('Target user not found', ERROR_CODE.NOT_FOUND, HTTP.NOT_FOUND);
+    }
+
+    // Only SUPER_ADMIN may demote or modify an existing SUPER_ADMIN.
+    if (user.role === ADMIN_ROLE.SUPER_ADMIN && callerRole !== ADMIN_ROLE.SUPER_ADMIN) {
+      throw new AppError(
+        'Only a Super Administrator can modify another Super Administrator account.',
+        ERROR_CODE.FORBIDDEN,
+        HTTP.FORBIDDEN
+      );
     }
 
     const previousRole = user.role;
@@ -670,7 +693,7 @@ class AdminService {
         cardCode: card.cardCode || card.cardUid,
         cardUid: card.cardUid || card.cardCode,
         url,
-        activationCode: card.metadata?.rawSecret || null,
+        // activationCode is NOT stored in the database (one-time export only at generation time).
         nfcUid: card.nfcUid || null,
         edition: card.edition || (card.material ? card.material.toUpperCase() : 'PVC'),
         material: card.material || 'pvc',
@@ -746,7 +769,9 @@ class AdminService {
         userId: null,
         transferCount: 0,
         hasBeenTransferred: false,
-        metadata: notes ? { notes, rawSecret } : { rawSecret },
+        // rawSecret is intentionally NOT stored in the database.
+        // It is returned once in the API response / CSV for admin export only.
+        metadata: notes ? { notes } : {},
       });
 
       generatedList.push({

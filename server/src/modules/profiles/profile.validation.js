@@ -1,10 +1,19 @@
 import { z } from 'zod';
+import sanitizeHtml from 'sanitize-html';
 import { VISIBILITY_MODE, SECTION_VISIBILITY, USERNAME } from '../../config/constants.js';
 import { ValidationError } from '../../shared/errors.js';
 
+/**
+ * Strips all HTML tags and attributes from a string using a robust parser.
+ * Configured to allow zero tags — the output is always plain text.
+ */
 function sanitizeText(val) {
-  if (typeof val !== 'string') {return val;}
-  return val.replace(/<[^>]*>?/gm, '').trim();
+  if (typeof val !== 'string') { return val; }
+  return sanitizeHtml(val, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'discard',
+  }).trim();
 }
 
 function normalizeUrlString(val) {

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../src/infrastructure/database/connection.js';
 import logger from '../src/utils/logger.js';
 import * as migration001 from './001_initial_indexes.js';
+import * as migration002 from './002_purge_card_raw_secrets.js';
 
 const migrationSchema = new mongoose.Schema(
   {
@@ -13,7 +14,7 @@ const migrationSchema = new mongoose.Schema(
 
 const MigrationRecord = mongoose.model('SchemaMigration', migrationSchema);
 
-const MIGRATIONS = [migration001];
+const MIGRATIONS = [migration001, migration002];
 
 async function runMigrations() {
   logger.info('[Migrations] Starting migration runner...');
