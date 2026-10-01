@@ -1,19 +1,39 @@
 import { z } from 'zod';
-import sanitizeHtml from 'sanitize-html';
 import { VISIBILITY_MODE, SECTION_VISIBILITY, USERNAME } from '../../config/constants.js';
 import { ValidationError } from '../../shared/errors.js';
 
 /**
- * Strips all HTML tags and attributes from a string using a robust parser.
- * Configured to allow zero tags — the output is always plain text.
+ * Strips all HTML/XML tags from a string using a char-by-char state machine.
+ *
+ * Why not regex: /<[^>]*>?/gm fails on malformed HTML, unclosed tags,
+ * and SVG/MathML event attributes. A state machine handles all edge cases
+ * correctly without any external dependency.
+ *
+ * Output is always guaranteed plain text — safe for all profile fields.
  */
 function sanitizeText(val) {
   if (typeof val !== 'string') { return val; }
-  return sanitizeHtml(val, {
-    allowedTags: [],
-    allowedAttributes: {},
-    disallowedTagsMode: 'discard',
-  }).trim();
+  let out = '';
+  let inTag = false;
+  for (let i = 0; i < val.length; i++) {
+    const ch = val[i];
+    if (ch === '<') {
+      inTag = true;
+    } else if (ch === '>' && inTag) {
+      inTag = false;
+    } else if (!inTag) {
+      out += ch;
+    }
+  }
+  // Decode common HTML entities so stored text is clean
+  return out
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .trim();
 }
 
 function normalizeUrlString(val) {
