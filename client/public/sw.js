@@ -1,5 +1,5 @@
-// OneWinq Service Worker v2 - Resilient PWA caching
-const CACHE_NAME = 'onewinq-v2';
+// OneWinq Service Worker v3 - Force cache invalidation & brand asset refresh
+const CACHE_NAME = 'onewinq-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

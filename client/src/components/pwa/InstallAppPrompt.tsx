@@ -188,7 +188,7 @@ export function InstallAppPrompt() {
               {/* App Icon */}
               <div className="relative shrink-0">
                 <img
-                  src="/icon-192.png"
+                  src="/onewinq-192.png?v=3"
                   alt="OneWinq App Icon"
                   className="w-12 h-12 rounded-xl shadow-md border border-white/10 object-contain bg-[#0B0B0F]"
                 />
