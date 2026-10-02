@@ -36,9 +36,11 @@ export function BrandLogo({
         )}
         title="OneWinq"
       >
-        <span className="h-9 w-9 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary font-black flex items-center justify-center text-sm tracking-tighter border border-primary/20">
-          1w
-        </span>
+        <img
+          src="/favicon.png"
+          alt="OneWinq"
+          className="h-8 w-8 rounded-xl object-contain shadow-xs"
+        />
       </Link>
     )
   }

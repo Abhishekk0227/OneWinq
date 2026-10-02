@@ -12,6 +12,7 @@ import { queryKeys } from '@/lib/query/queryKeys'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
+import { BrandLogo } from '@/components/navigation/BrandLogo'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'
 import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { ErrorState } from '@/components/common/ErrorState'
@@ -203,12 +204,8 @@ export default function PublicProfilePage() {
         {/* Floating Top Banner */}
         <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
           <div className="container mx-auto flex max-w-4xl items-center justify-between gap-2">
-            <Link to="/" className="flex items-center gap-2 text-sm font-extrabold text-foreground shrink-0">
-              <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-primary to-primary-600 text-white flex items-center justify-center text-xs font-black shadow-sm shadow-primary/30">
-                1W
-              </div>
-              <span className="hidden sm:inline">OneWinq</span>
-            </Link>
+            <BrandLogo to="/" imgClassName="h-6 sm:h-7" />
+
 
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
@@ -265,10 +262,7 @@ export default function PublicProfilePage() {
               {/* Top Row: OneWinq Brand + Contactless Wifi Icon */}
               <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center font-black text-xs text-white shadow-sm">
-                    1W
-                  </div>
-                  <span className="font-extrabold tracking-tight text-sm text-zinc-100">OneWinq Smart</span>
+                  <BrandLogo to="/" variant="white" imgClassName="h-5 sm:h-6" />
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold tracking-wider uppercase">
@@ -420,12 +414,8 @@ export default function PublicProfilePage() {
       {/* Floating Top Banner / Navigation */}
       <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
         <div className="container mx-auto flex max-w-4xl items-center justify-between gap-2">
-          <Link to="/" className="flex items-center gap-2 text-sm font-extrabold text-foreground shrink-0">
-            <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-primary to-primary-600 text-white flex items-center justify-center text-xs font-black shadow-sm shadow-primary/30">
-              1W
-            </div>
-            <span className="hidden sm:inline">OneWinq</span>
-          </Link>
+          <BrandLogo to="/" imgClassName="h-6 sm:h-7" />
+
 
           <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Theme Switcher: Light ☀️ / Dark 🌙 */}
