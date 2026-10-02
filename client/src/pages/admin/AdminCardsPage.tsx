@@ -209,13 +209,13 @@ export default function AdminCardsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={exportCurrentInventoryCsv}
-            className="border-white/15 bg-white/5 text-white hover:bg-white/10"
-            leftIcon={<Download className="h-3.5 w-3.5" />}
+            className="border-white/15 bg-white/5 text-white hover:bg-white/10 flex-1 sm:flex-initial"
+            leftIcon={<Download className="h-3.5 w-3.5 shrink-0" />}
           >
             Export Inventory CSV
           </Button>
@@ -223,7 +223,8 @@ export default function AdminCardsPage() {
           <Button
             size="sm"
             onClick={() => setActiveTab('generate')}
-            leftIcon={<Plus className="h-4 w-4" />}
+            className="flex-1 sm:flex-initial"
+            leftIcon={<Plus className="h-4 w-4 shrink-0" />}
           >
             Generate Cards
           </Button>
@@ -574,10 +575,10 @@ export default function AdminCardsPage() {
               <p>
                 Each physical NFC card is provisioned with a globally unique Card ID and public resolution URL:
               </p>
-              <div className="p-3 rounded-xl bg-black/40 font-mono text-[11px] text-white/80 space-y-1">
-                <div>cardId,url</div>
-                <div className="text-primary">OWQ-CARD-000001,https://onewinq.com/p/c/OWQ-CARD-000001</div>
-                <div className="text-primary">OWQ-CARD-000002,https://onewinq.com/p/c/OWQ-CARD-000002</div>
+              <div className="p-3 rounded-xl bg-black/40 font-mono text-[11px] text-white/80 space-y-1 overflow-x-auto scrollbar-thin">
+                <div className="whitespace-nowrap text-white/60">cardId,url</div>
+                <div className="text-primary whitespace-nowrap">OWQ-CARD-000001,https://onewinq.com/p/c/OWQ-CARD-000001</div>
+                <div className="text-primary whitespace-nowrap">OWQ-CARD-000002,https://onewinq.com/p/c/OWQ-CARD-000002</div>
               </div>
               <p className="text-[11px] text-white/50 leading-relaxed">
                 The external card factory programs the generated URLs onto the physical NFC chips. When a user or client taps the card, OneWinq resolves the card ID and opens the assigned user's live profile.
@@ -587,12 +588,12 @@ export default function AdminCardsPage() {
 
           {/* Generated Result Banner & CSV Download */}
           {generatedBatch && (
-            <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-4">
+            <div className="p-5 sm:p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-emerald-400">
-                  <CheckCircle2 className="h-5 w-5" />
+                  <CheckCircle2 className="h-5 w-5 shrink-0" />
                   <span className="font-bold text-sm">
-                    {generatedBatch.count} Cards Generated Successfully!
+                    {generatedBatch.count} {generatedBatch.count === 1 ? 'Card' : 'Cards'} Generated Successfully!
                   </span>
                 </div>
 
@@ -604,39 +605,47 @@ export default function AdminCardsPage() {
                       `onewinq-cards-${generatedBatch.cards[0]?.cardId}-to-${generatedBatch.cards[generatedBatch.cards.length - 1]?.cardId}.csv`
                     )
                   }
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white"
-                  leftIcon={<Download className="h-4 w-4" />}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto h-auto py-2 px-3 text-xs"
+                  leftIcon={<Download className="h-4 w-4 shrink-0" />}
                 >
-                  Download CSV (cardId, activationCode, url)
+                  Download CSV
                 </Button>
               </div>
 
               {/* Preview List */}
-              <div className="max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs font-mono space-y-1">
+              <div className="max-h-56 overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-2 text-xs font-mono space-y-1.5 scrollbar-thin">
                 {generatedBatch.cards.map((c) => (
-                  <div key={c.cardId} className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 px-2.5 py-1.5 hover:bg-white/5 rounded">
-                    <span className="text-white font-bold">{c.cardId}</span>
-                    {c.activationCode && (
-                      <div className="flex items-center gap-1.5 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30">
-                        <span className="text-[10px] text-purple-300">Code:</span>
-                        <span className="text-white font-mono font-bold">{c.activationCode}</span>
-                        <button
-                          onClick={() => copyToClipboard(c.activationCode!, `Copied ${c.cardId} activation code`)}
-                          className="text-purple-300 hover:text-white"
-                          title="Copy activation code"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
-                    <span className="text-white/50 truncate max-w-xs">{c.url}</span>
-                    <button
-                      onClick={() => copyToClipboard(c.url, `Copied ${c.cardId} URL`)}
-                      className="text-white/40 hover:text-white"
-                      title="Copy URL"
-                    >
-                      <Copy className="h-3 w-3" />
-                    </button>
+                  <div
+                    key={c.cardId}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 hover:bg-white/5 rounded-lg border border-white/5 bg-white/[0.02]"
+                  >
+                    <div className="flex items-center justify-between sm:justify-start gap-2 flex-wrap">
+                      <span className="text-white font-bold tracking-wide">{c.cardId}</span>
+                      {c.activationCode && (
+                        <div className="flex items-center gap-1.5 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30">
+                          <span className="text-[10px] text-purple-300">Code:</span>
+                          <span className="text-white font-mono font-bold text-xs">{c.activationCode}</span>
+                          <button
+                            onClick={() => copyToClipboard(c.activationCode!, `Copied ${c.cardId} activation code`)}
+                            className="text-purple-300 hover:text-white p-0.5 transition-colors"
+                            title="Copy activation code"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 min-w-0 justify-between sm:justify-end">
+                      <span className="text-white/50 truncate text-[11px] font-mono">{c.url}</span>
+                      <button
+                        onClick={() => copyToClipboard(c.url, `Copied ${c.cardId} URL`)}
+                        className="text-white/40 hover:text-white p-1 rounded hover:bg-white/5 shrink-0 transition-colors"
+                        title="Copy URL"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

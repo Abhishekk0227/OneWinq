@@ -329,7 +329,9 @@ export function MobileMenuDrawer() {
             type="button"
             onClick={() => {
               handleClose()
-              triggerPWAInstall()
+              setTimeout(() => {
+                triggerPWAInstall()
+              }, 120)
             }}
             className="w-full flex items-center justify-between p-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/25 text-primary text-xs font-semibold transition-colors cursor-pointer"
           >

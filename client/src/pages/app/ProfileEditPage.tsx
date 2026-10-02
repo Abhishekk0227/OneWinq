@@ -842,15 +842,15 @@ export default function ProfileEditPage() {
   return (
     <div className="space-y-4 sm:space-y-5 text-left max-w-5xl mx-auto pb-20">
       {/* Top Header & Sticky Actions (Compact) */}
-      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-card/95 border border-border shadow-xs sticky top-16 sm:top-20 z-20 backdrop-blur-md">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <Link to="/app/profile">
-            <Button variant="ghost" size="icon-sm" className="h-8 w-8 shrink-0">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-card/95 border border-border shadow-xs sticky top-16 sm:top-20 z-20 backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+          <Link to="/app/profile" className="shrink-0">
+            <Button variant="ghost" size="icon-sm" className="h-8 w-8">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
+            <h1 className="text-sm sm:text-lg font-bold tracking-tight text-foreground truncate">
               Profile Builder
             </h1>
             <p className="text-[11px] sm:text-xs text-muted-foreground truncate hidden sm:block">
@@ -859,24 +859,26 @@ export default function ProfileEditPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
             isLoading={saveMutation.isPending}
             onClick={handleSaveDraft}
-            className="h-8 sm:h-9 text-xs px-2.5 sm:px-3"
+            className="h-8 sm:h-9 text-xs px-2 sm:px-3"
             leftIcon={<Save className="h-3.5 w-3.5" />}
+            title="Save Draft"
+            aria-label="Save Draft"
           >
             <span className="hidden sm:inline">Save Draft</span>
-            <span className="sm:hidden">Save</span>
+            <span className="sm:hidden hidden xs:inline">Save</span>
           </Button>
 
           <Button
             size="sm"
             isLoading={publishMutation.isPending || saveMutation.isPending}
             onClick={handlePublishLive}
-            className="h-8 sm:h-9 text-xs px-3 sm:px-3.5 font-bold shadow-xs bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
+            className="h-8 sm:h-9 text-xs px-2.5 sm:px-3.5 font-bold shadow-xs bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
             leftIcon={<CheckCircle2 className="h-3.5 w-3.5" />}
           >
             <span className="hidden sm:inline">Publish Live</span>
@@ -1108,7 +1110,7 @@ export default function ProfileEditPage() {
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3.5 sm:gap-4">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
@@ -1120,7 +1122,7 @@ export default function ProfileEditPage() {
                       <Camera className="h-6 w-6" />
                     </div>
                   )}
-                  <div className="space-y-1.5 flex-1">
+                  <div className="space-y-1.5 flex-1 min-w-0 w-full">
                     <input
                       ref={avatarInputRef}
                       type="file"
@@ -1128,7 +1130,7 @@ export default function ProfileEditPage() {
                       className="hidden"
                       onChange={handleAvatarFile}
                     />
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         type="button"
                         variant="outline"
@@ -1136,6 +1138,7 @@ export default function ProfileEditPage() {
                         isLoading={uploadingAvatar}
                         onClick={() => avatarInputRef.current?.click()}
                         leftIcon={<Upload className="h-3.5 w-3.5" />}
+                        className="text-xs h-8"
                       >
                         {avatarUrl ? 'Change Picture' : 'Upload Picture'}
                       </Button>
@@ -1144,7 +1147,7 @@ export default function ProfileEditPage() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="text-muted-foreground hover:text-destructive"
+                          className="text-muted-foreground hover:text-destructive text-xs h-8"
                           onClick={async () => {
                             setAvatarUrl('')
                             await profileApi.updateDraft({ avatarUrl: null })
@@ -1201,7 +1204,7 @@ export default function ProfileEditPage() {
                       className="hidden"
                       onChange={handleCoverFile}
                     />
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         type="button"
                         variant="outline"
@@ -1209,6 +1212,7 @@ export default function ProfileEditPage() {
                         isLoading={uploadingCover}
                         onClick={() => coverInputRef.current?.click()}
                         leftIcon={<ImageIcon className="h-3.5 w-3.5" />}
+                        className="text-xs h-8"
                       >
                         {coverUrl ? 'Change Banner' : 'Upload Banner'}
                       </Button>
@@ -1217,7 +1221,7 @@ export default function ProfileEditPage() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="text-muted-foreground hover:text-destructive"
+                          className="text-muted-foreground hover:text-destructive text-xs h-8"
                           onClick={async () => {
                             setCoverUrl('')
                             await profileApi.updateDraft({ coverUrl: null })
@@ -1326,15 +1330,15 @@ export default function ProfileEditPage() {
                 </div>
 
                 {/* Active Template Showcase */}
-                <div className="p-4 rounded-2xl border border-border/80 bg-background/60 flex items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl border border-border/80 bg-background/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <LayoutTemplate className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-xs text-muted-foreground font-medium">Active Presentation Template</div>
-                      <div className="text-sm font-bold text-foreground truncate flex items-center gap-2">
-                        <span>Basic Universal Template</span>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="text-xs text-muted-foreground font-medium">Active Template</div>
+                      <div className="text-sm font-bold text-foreground flex items-center gap-2 flex-wrap">
+                        <span>Basic Universal</span>
                         <Badge variant="subtle" className="text-[10px] text-primary bg-primary/10">
                           Active
                         </Badge>
@@ -1346,7 +1350,7 @@ export default function ProfileEditPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsTemplateModalOpen(true)}
-                    className="text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 h-8 shrink-0 flex items-center gap-1"
+                    className="text-xs text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 h-8 shrink-0 flex items-center gap-1 self-start sm:self-auto"
                   >
                     <Lock className="h-3 w-3" />
                     <span>View Templates</span>

@@ -579,11 +579,11 @@ export default function PublicProfilePage() {
         {/* Profile Identity Card */}
         <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
           {profile.coverUrl ? (
-            <div className="w-full h-44 sm:h-60 bg-muted relative">
+            <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
               <img
                 src={profile.coverUrl}
                 alt="Cover Banner"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-center"
               />
             </div>
           ) : null}

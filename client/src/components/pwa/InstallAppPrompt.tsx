@@ -26,7 +26,7 @@ export function InstallAppPrompt() {
 
   React.useEffect(() => {
     try {
-      // 1. Check if already installed / standalone
+      // 1. Detect device & standalone mode
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.matchMedia('(display-mode: fullscreen)').matches ||
@@ -34,69 +34,67 @@ export function InstallAppPrompt() {
         (window.navigator as any).standalone === true ||
         document.referrer.includes('android-app://')
 
-      if (isStandalone) {
-        return
+      const ua = window.navigator.userAgent.toLowerCase()
+      const isIosDevice = /iphone|ipad|ipod/.test(ua)
+      const isSafari = /safari/.test(ua) && !/chrome|crios|fxios|edgios/.test(ua)
+      if (isIosDevice) {
+        setIsIOS(true)
       }
 
-      // 2. Check dismiss cooldown
-      const lastDismissed = localStorage.getItem(DISMISS_KEY)
-      if (lastDismissed) {
-        const timeSinceDismiss = Date.now() - parseInt(lastDismissed, 10)
-        if (timeSinceDismiss < DISMISS_COOLDOWN_MS) {
-          return
+      // 2. Capture beforeinstallprompt for Chrome / Android / Edge
+      const handleBeforeInstallPrompt = (e: Event) => {
+        e.preventDefault()
+        setDeferredPrompt(e as BeforeInstallPromptEvent)
+        // Gentle delay after page load if not dismissed
+        const lastDismissed = localStorage.getItem(DISMISS_KEY)
+        const isDismissed = lastDismissed && (Date.now() - parseInt(lastDismissed, 10)) < DISMISS_COOLDOWN_MS
+        if (!isStandalone && !isDismissed) {
+          setTimeout(() => {
+            setIsVisible(true)
+          }, 1500)
         }
       }
 
-    // 3. Detect iOS Safari
-    const ua = window.navigator.userAgent.toLowerCase()
-    const isIosDevice = /iphone|ipad|ipod/.test(ua)
-    const isSafari = /safari/.test(ua) && !/chrome|crios|fxios|edgios/.test(ua)
-    if (isIosDevice) {
-      setIsIOS(true)
-    }
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // 4. Capture beforeinstallprompt for Chrome / Android / Edge
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Gentle delay after page load so it's not jarring
-      setTimeout(() => {
+      // 3. Listen for manual trigger from drawer/menu (ALWAYS active)
+      const handleTrigger = () => {
         setIsVisible(true)
-      }, 1500)
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-
-    // For iOS or browsers where prompt event doesn't fire immediately, show after 2.5s
-    const timer = setTimeout(() => {
-      if (isIosDevice && isSafari) {
-        setIsVisible(true)
-      } else if (!isStandalone) {
-        // Show banner anyway with install trigger
-        setIsVisible(true)
+        if (isIosDevice) {
+          setShowIOSInstructions(true)
+        }
       }
-    }, 2500)
+      window.addEventListener('onewinq-trigger-pwa-install', handleTrigger)
 
-    // Listen for manual trigger from drawer/menu
-    const handleTrigger = () => {
-      setIsVisible(true)
-    }
-    window.addEventListener('onewinq-trigger-pwa-install', handleTrigger)
+      // 4. Auto-show timer only if not standalone and not dismissed
+      let timer: any = null
+      const lastDismissed = localStorage.getItem(DISMISS_KEY)
+      const isDismissed = lastDismissed && (Date.now() - parseInt(lastDismissed, 10)) < DISMISS_COOLDOWN_MS
 
-    // Listen for app installed
-    const handleAppInstalled = () => {
-      setIsVisible(false)
-      setDeferredPrompt(null)
-      localStorage.setItem(DISMISS_KEY, Date.now().toString())
-    }
-    window.addEventListener('appinstalled', handleAppInstalled)
+      if (!isStandalone && !isDismissed) {
+        timer = setTimeout(() => {
+          if (isIosDevice && isSafari) {
+            setIsVisible(true)
+          } else {
+            setIsVisible(true)
+          }
+        }, 2500)
+      }
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-      window.removeEventListener('appinstalled', handleAppInstalled)
-      window.removeEventListener('onewinq-trigger-pwa-install', handleTrigger)
-      clearTimeout(timer)
-    }
+      // 5. Listen for app installed
+      const handleAppInstalled = () => {
+        setIsVisible(false)
+        setDeferredPrompt(null)
+        localStorage.setItem(DISMISS_KEY, Date.now().toString())
+      }
+      window.addEventListener('appinstalled', handleAppInstalled)
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+        window.removeEventListener('appinstalled', handleAppInstalled)
+        window.removeEventListener('onewinq-trigger-pwa-install', handleTrigger)
+        if (timer) clearTimeout(timer)
+      }
     } catch (err) {
       console.warn('[PWA] Error in prompt effect:', err)
     }

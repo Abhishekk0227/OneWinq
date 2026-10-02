@@ -274,29 +274,29 @@ export default function DiscoveryPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 pt-4 border-t border-border">
-                  <Link to={`/u/${person.username}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full text-xs">
+                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
+                  <Link to={`/u/${person.username}`} className="flex-1 min-w-[95px]">
+                    <Button variant="outline" size="sm" className="w-full text-xs h-8">
                       View Profile
                     </Button>
                   </Link>
 
                   {person.connectionState === 'CONNECTED' ? (
-                    <>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <Button
                         size="sm"
                         variant="default"
-                        className="text-xs shrink-0 bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-semibold"
+                        className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-semibold h-8 px-2.5"
                         isLoading={startingChatUserId === targetId}
                         onClick={() => handleStartMessage(targetId)}
                         leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
                       >
                         Message
                       </Button>
-                      <Badge variant="success" className="py-1 px-2.5 shrink-0">
+                      <Badge variant="success" className="py-1 px-2 text-[11px] font-medium whitespace-nowrap">
                         Connected
                       </Badge>
-                    </>
+                    </div>
                   ) : person.connectionState === 'PENDING_SENT' ? (
                     <div className="flex items-center gap-1.5 shrink-0">
                       <Badge variant="subtle" className="py-1 px-2.5 text-[11px]">

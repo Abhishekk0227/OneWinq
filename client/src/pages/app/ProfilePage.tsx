@@ -311,26 +311,26 @@ export default function ProfilePage() {
       <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
         {/* Cover Banner */}
         {profile.coverUrl ? (
-          <div className="w-full h-44 sm:h-56 bg-muted relative">
+          <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
             <img
               src={profile.coverUrl}
               alt="Cover Banner"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
             />
           </div>
         ) : (
-          <div className="w-full h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b border-border" />
+          <div className="w-full h-28 sm:h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b border-border" />
         )}
 
-        <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
+        <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
           {/* Avatar and Top Actions Bar */}
-          <div className="flex flex-wrap items-end justify-between gap-4 -mt-12 sm:-mt-16">
+          <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4 -mt-10 sm:-mt-16">
             <Avatar
               src={profile.avatarUrl}
               fallback={user?.displayName}
               alt={user?.displayName}
               size="2xl"
-              className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
+              className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
             />
 
             {/* Canvas Actions Bar */}
@@ -537,7 +537,15 @@ export default function ProfilePage() {
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
                 >
                   <Briefcase className="h-3 w-3" />
-                  <span>Set Up Universal Profile</span>
+                  <span>
+                    {activeMode === VISIBILITY_MODE.PRIVATE
+                      ? 'Set Up Private Profile'
+                      : activeMode === VISIBILITY_MODE.PUBLIC
+                      ? 'Set Up Public Profile'
+                      : activeMode === VISIBILITY_MODE.PROFESSIONAL
+                      ? 'Set Up Professional Profile'
+                      : 'Set Up Universal Profile'}
+                  </span>
                 </Link>
               </div>
             )}
@@ -1150,30 +1158,75 @@ export default function ProfilePage() {
           {isPreviewLoading ? (
             <div className="p-8 text-center text-xs text-muted-foreground">Generating preview snapshot...</div>
           ) : (
-            <div className="p-4 rounded-2xl border border-border bg-card max-h-96 overflow-y-auto space-y-3">
-              <div className="text-xs font-bold text-primary">
-                Previewing as: {previewMode}
+            <div className="space-y-3">
+              {/* Mini Profile Card Preview */}
+              <div className="rounded-2xl border border-border bg-card overflow-hidden text-left shadow-sm">
+                {profile.coverUrl ? (
+                  <div className="w-full h-20 bg-muted overflow-hidden">
+                    <img src={profile.coverUrl} alt="Banner" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-full h-14 bg-gradient-to-r from-primary/20 via-primary/10 to-muted" />
+                )}
+                <div className="p-4 pt-0 space-y-2">
+                  <div className="flex items-end justify-between -mt-6">
+                    <Avatar
+                      src={profile.avatarUrl}
+                      fallback={user?.displayName}
+                      alt={user?.displayName}
+                      size="lg"
+                      className="rounded-2xl ring-4 ring-card shadow-md bg-card shrink-0"
+                    />
+                    <Badge variant={previewMode === 'PROFESSIONAL' ? 'subtle' : previewMode === 'PUBLIC' ? 'success' : 'outline'} className="text-[10px] font-bold uppercase">
+                      {previewMode} Mode
+                    </Badge>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-foreground leading-tight">{user?.displayName}</h4>
+                    <span className="text-xs text-muted-foreground font-mono">@{user?.username}</span>
+                  </div>
+                  <p className="text-xs font-medium text-foreground/90">
+                    {previewData?.data?.preview?.profile?.headline || profile.headline || 'No headline set yet'}
+                  </p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {previewData?.data?.preview?.profile?.bio || profile.bio || 'No bio added yet'}
+                  </p>
+                </div>
               </div>
-              <div className="text-sm font-semibold text-foreground">
-                {previewData?.data?.preview?.profile?.headline || profile.headline || 'No Headline'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {previewData?.data?.preview?.profile?.bio || profile.bio || 'No bio'}
-              </p>
-              <div className="text-xs text-muted-foreground pt-2">
-                Visible Sections:{' '}
-                <strong>
-                  {Object.keys(previewData?.data?.preview?.profile || {}).filter(
-                    (k) => Array.isArray((previewData?.data?.preview?.profile as any)[k]) && (previewData?.data?.preview?.profile as any)[k].length > 0
-                  ).join(', ') || 'Standard Core'}
-                </strong>
+
+              {/* Mode Explanation */}
+              <div className="p-3 rounded-xl bg-muted/50 border border-border/60 text-xs text-muted-foreground text-left">
+                {previewMode === 'PUBLIC' && (
+                  <span><strong>Public Mode:</strong> Visible to anyone on the web. Visitors see your core identity, bio, social links, and public sections.</span>
+                )}
+                {previewMode === 'PROFESSIONAL' && (
+                  <span><strong>Professional Mode:</strong> Optimized for networking. Visitors see your career credentials, professional contact, and portfolio.</span>
+                )}
+                {previewMode === 'PRIVATE' && (
+                  <span><strong>Private Mode:</strong> Your profile is locked/hidden from general public browsing. Only accessible via smart NFC card tap or direct approval.</span>
+                )}
               </div>
             </div>
           )}
         </div>
 
-        <DialogFooter>
-          <Button onClick={() => setIsPreviewOpen(false)}>Done Previewing</Button>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          {user?.username && (
+            <Link
+              to={`/u/${user.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <Button variant="outline" size="sm" className="w-full text-xs gap-1.5">
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Open Live Public Page</span>
+              </Button>
+            </Link>
+          )}
+          <Button size="sm" onClick={() => setIsPreviewOpen(false)} className="w-full sm:w-auto text-xs">
+            Done Previewing
+          </Button>
         </DialogFooter>
       </Dialog>
     </div>

@@ -422,12 +422,12 @@ export default function AdminOrdersPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenStatus(order)}
-                      className="border-white/15 bg-white/5 text-white hover:bg-white/10 text-xs h-8"
+                      className="border-white/15 bg-white/5 text-white hover:bg-white/10 text-xs h-8 flex-1 sm:flex-initial"
                     >
                       Update Status
                     </Button>
@@ -436,7 +436,7 @@ export default function AdminOrdersPage() {
                       size="sm"
                       onClick={() => handleOpenFulfill(order)}
                       leftIcon={<Zap className="h-3.5 w-3.5" />}
-                      className="bg-primary hover:bg-primary-600 text-white text-xs h-8 shadow-xs"
+                      className="bg-primary hover:bg-primary-600 text-white text-xs h-8 shadow-xs flex-1 sm:flex-initial whitespace-nowrap"
                     >
                       {hasAssignedCard ? 'Re-assign / Re-ship' : 'Fulfill & Assign Card'}
                     </Button>

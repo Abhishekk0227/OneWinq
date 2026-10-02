@@ -501,26 +501,26 @@ export default function DashboardPage() {
 
           {/* User's Recent Community Posts & Discussions */}
           <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-border flex-wrap">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
                   <Flame className="h-4 w-4" />
                 </div>
-                <h2 className="text-base font-bold text-foreground">
-                  My Recent Community Posts
+                <h2 className="text-sm sm:text-base font-bold text-foreground whitespace-nowrap">
+                  Recent Posts
                 </h2>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => openModal('CREATE_POST')}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <Plus className="h-3 w-3 stroke-[2.5]" />
                   <span>New Post</span>
                 </button>
-                <Link to="/app/feed" className="text-xs font-semibold text-muted-foreground hover:text-foreground">
-                  Go to Feed →
+                <Link to="/app/feed" className="text-xs font-semibold text-muted-foreground hover:text-foreground whitespace-nowrap">
+                  Feed →
                 </Link>
               </div>
             </div>

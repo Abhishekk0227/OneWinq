@@ -498,44 +498,32 @@ export default function AdminTemplatesPage() {
               }`}
             >
               <div className="space-y-3">
-                {/* Top Row: Multi-select Checkbox + Title + Status Badges */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-start gap-2.5">
+                {/* Top Row: Multi-select Checkbox + Slug + Status Badges */}
+                <div className="flex items-center justify-between gap-2 flex-wrap pb-0.5">
+                  <div className="flex items-center gap-2 min-w-0">
                     {/* Checkbox (Universal is protected from batch actions) */}
                     {!isUniversal ? (
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleSelect(tplId)}
-                        className="mt-1 rounded border-white/20 bg-[#101016] text-primary h-4 w-4 cursor-pointer"
+                        className="rounded border-white/20 bg-[#101016] text-primary h-4 w-4 cursor-pointer shrink-0"
                         title="Select for bulk lock/unlock"
                       />
                     ) : (
-                      <div className="mt-1 w-4 h-4 flex items-center justify-center text-neutral-600" title="Core Universal template">
+                      <div className="w-4 h-4 flex items-center justify-center text-neutral-600 shrink-0" title="Core Universal template">
                         •
                       </div>
                     )}
-
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <h3 className="font-bold text-white text-base">{tpl.name}</h3>
-                        {tpl.isFeatured && (
-                          <Badge variant="default" className="text-[10px] px-1.5 py-0 bg-amber-500/20 text-amber-300 border-amber-500/30">
-                            <Star className="h-2.5 w-2.5 mr-0.5 fill-amber-300" />
-                            Featured
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="font-mono text-xs text-primary">/{tpl.slug}</span>
-                    </div>
+                    <span className="font-mono text-xs text-primary font-medium truncate">/{tpl.slug}</span>
                   </div>
 
                   {/* Lock / Unlock Status Badges */}
-                  <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex items-center gap-1.5 flex-wrap shrink-0">
                     {isUniversal ? (
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-2 py-0.5 border-emerald-500/30 text-emerald-300 bg-emerald-500/10 flex items-center gap-1 font-medium"
+                        className="text-[10px] px-2 py-0.5 border-emerald-500/30 text-emerald-300 bg-emerald-500/10 flex items-center gap-1 font-medium whitespace-nowrap"
                       >
                         <ShieldCheck className="h-3 w-3 text-emerald-400" />
                         Universal Live
@@ -543,7 +531,7 @@ export default function AdminTemplatesPage() {
                     ) : isCardLocked ? (
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-2 py-0.5 border-amber-500/30 text-amber-300 bg-amber-500/10 flex items-center gap-1 font-medium"
+                        className="text-[10px] px-2 py-0.5 border-amber-500/30 text-amber-300 bg-amber-500/10 flex items-center gap-1 font-medium whitespace-nowrap"
                       >
                         <Lock className="h-3 w-3 text-amber-400" />
                         Locked (Coming Soon)
@@ -551,7 +539,7 @@ export default function AdminTemplatesPage() {
                     ) : (
                       <Badge
                         variant="outline"
-                        className="text-[10px] px-2 py-0.5 border-emerald-500/30 text-emerald-300 bg-emerald-500/10 flex items-center gap-1 font-medium"
+                        className="text-[10px] px-2 py-0.5 border-emerald-500/30 text-emerald-300 bg-emerald-500/10 flex items-center gap-1 font-medium whitespace-nowrap"
                       >
                         <Unlock className="h-3 w-3 text-emerald-400" />
                         Unlocked (Live)
@@ -560,11 +548,22 @@ export default function AdminTemplatesPage() {
 
                     <Badge
                       variant={(tpl.status || '').toLowerCase() === 'active' ? 'default' : 'secondary'}
-                      className="text-[9px] uppercase px-1.5 py-0"
+                      className="text-[9px] uppercase px-1.5 py-0.5 whitespace-nowrap"
                     >
                       {tpl.status}
                     </Badge>
                   </div>
+                </div>
+
+                {/* Title + Featured Badge Row */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-white text-base leading-snug">{tpl.name}</h3>
+                  {tpl.isFeatured && (
+                    <Badge variant="default" className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-300 border-amber-500/30 flex items-center gap-1 shrink-0">
+                      <Star className="h-2.5 w-2.5 fill-amber-300" />
+                      Featured
+                    </Badge>
+                  )}
                 </div>
 
                 <p className="text-xs text-neutral-400 line-clamp-2">{tpl.description}</p>
@@ -603,7 +602,7 @@ export default function AdminTemplatesPage() {
               </div>
 
               {/* Admin Action Buttons & Lock Toggle */}
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+              <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -614,7 +613,7 @@ export default function AdminTemplatesPage() {
                   Preview
                 </Button>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {/* One-click Lock / Unlock Toggle Button */}
                   {!isUniversal ? (
                     isCardLocked ? (
