@@ -282,7 +282,7 @@ const profileSchema = new Schema(
     state: {
       type: String,
       enum: Object.values(PROFILE_STATE),
-      default: PROFILE_STATE.DRAFT,
+      default: PROFILE_STATE.PUBLISHED,
       index: true,
     },
     activeMode: {

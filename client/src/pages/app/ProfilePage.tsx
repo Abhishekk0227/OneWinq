@@ -456,20 +456,6 @@ export default function ProfilePage() {
                 Preview
               </Button>
 
-              {/* Publish Changes (if draft) */}
-              {profile.state === 'DRAFT' && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  isLoading={publishMutation.isPending}
-                  onClick={() => publishMutation.mutate()}
-                  leftIcon={<CheckCircle2 className="h-3.5 w-3.5" />}
-                  className="text-xs h-8"
-                >
-                  Publish
-                </Button>
-              )}
-
               {/* Edit Profile */}
               <Link to="/app/profile/edit">
                 <Button
@@ -491,14 +477,6 @@ export default function ProfilePage() {
                 {user?.displayName}
               </h2>
               <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
-              {profile.state === 'DRAFT' && (
-                <Badge
-                  variant="warning"
-                  className="text-[10px] font-bold"
-                >
-                  Draft Changes
-                </Badge>
-              )}
 
               {activeUserCard ? (
                 <a

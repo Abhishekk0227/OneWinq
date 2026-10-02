@@ -85,12 +85,15 @@ export async function getOrCreateProfile(userId, personaId = null) {
       templateSlug: defaultTemplate ? defaultTemplate.slug : 'professional',
       templateId: defaultTemplate ? defaultTemplate._id : null,
       isActive: true,
-      state: PROFILE_STATE.DRAFT,
+      state: PROFILE_STATE.PUBLISHED,
       activeMode: VISIBILITY_MODE.PUBLIC,
     });
     if (defaultTemplate) {
       profile.templateId = defaultTemplate;
     }
+    profile.publishedData = buildSnapshotFromProfile(profile);
+    profile.publishedAt = new Date();
+    await profile.save();
   } else if (!profile.templateId) {
     try {
       const defaultTemplate = await profileTemplateService.getDefaultTemplate();
@@ -103,6 +106,14 @@ export async function getOrCreateProfile(userId, personaId = null) {
     } catch {
       // Safe fallback
     }
+  }
+
+  // Ensure publishedData is always initialized
+  if (!profile.publishedData) {
+    profile.publishedData = buildSnapshotFromProfile(profile);
+    profile.publishedAt = profile.publishedAt || new Date();
+    profile.state = PROFILE_STATE.PUBLISHED;
+    await profile.save();
   }
   return profile;
 }
@@ -157,7 +168,7 @@ export async function createPersona(userId, { personaName, professionTitle, temp
     templateSlug: resolvedSlug,
     templateId: template ? template._id : null,
     isActive: false,
-    state: PROFILE_STATE.DRAFT,
+    state: PROFILE_STATE.PUBLISHED,
     activeMode: VISIBILITY_MODE.PUBLIC,
     headline: resolvedTitle,
     contact: copyFromActive && activePersona.contact ? activePersona.contact.toObject() : {},
@@ -183,6 +194,9 @@ export async function createPersona(userId, { personaName, professionTitle, temp
   if (template) {
     newPersona.templateId = template;
   }
+  newPersona.publishedData = buildSnapshotFromProfile(newPersona);
+  newPersona.publishedAt = new Date();
+  await newPersona.save();
   return newPersona;
 }
 
@@ -322,107 +336,145 @@ export async function updateProfileDraft(userId, data, personaId = null) {
     { new: true, runValidators: true },
   ).populate('templateId');
 
-  if (updated && updated.state === PROFILE_STATE.PUBLISHED) {
-    return await publishProfile(userId, updated._id);
-  }
-
-  return updated;
+  // Immediately sync & publish live — all saves are instantly live
+  return await syncAndPublishProfile(userId, updated);
 }
 
 /**
- * Promote the current draft to the published state.
- *
- * CARD-FIRST GATE: The user must have at least one active physical OneWinq card
- * before their profile can be published and made publicly accessible.
+ * Build a clean JSON snapshot of the persona profile.
+ * Safe for both Mongoose documents and lean objects.
  */
-export async function publishProfile(userId, personaId = null) {
-  // Enforce card-first identity rule
-  const activeCard = await Card.findOne({
-    $and: [
-      {
-        $or: [
-          { assignedUser: userId },
-          { userId },
-          { assignedTo: userId },
-        ],
-      },
-      {
-        $or: [
-          { state: 'ACTIVE' },
-          { status: 'ACTIVE' },
-        ],
-      },
-    ],
-  }).select('cardCode cardUid cardId').lean();
-
-  if (!activeCard) {
-    throw new AppError(
-      'A physical OneWinq card must be activated before your profile can be published. Order and activate your card to unlock your public identity.',
-      ERROR_CODE.FORBIDDEN,
-      403,
-    );
-  }
-
-  const profile = await getOrCreateProfile(userId, personaId);
-
-  // Take a clean JSON snapshot of the persona profile
-  const snapshot = {
-    personaName: profile.personaName,
-    professionTitle: profile.professionTitle,
-    templateSlug: profile.templateSlug || profile.templateId?.slug || 'professional',
-    templateId: profile.templateId?._id || profile.templateId,
-    headline: profile.headline,
-    bio: profile.bio,
-    avatarUrl: profile.avatarUrl,
-    avatarVisibility: profile.avatarVisibility,
-    coverUrl: profile.coverUrl,
-    location: profile.location ? profile.location.toObject() : {},
-    contact: profile.contact ? profile.contact.toObject() : {},
-    socialLinks: profile.socialLinks.map((s) => s.toObject()),
-    education: profile.education.map((s) => s.toObject()),
-    experience: profile.experience.map((s) => s.toObject()),
-    skills: profile.skills.map((s) => s.toObject()),
-    projects: profile.projects.map((s) => s.toObject()),
-    certifications: profile.certifications.map((s) => s.toObject()),
-    services: profile.services.map((s) => s.toObject()),
-    awards: profile.awards.map((s) => s.toObject()),
-    publications: profile.publications.map((s) => s.toObject()),
-    achievements: (profile.achievements || []).map((s) => s.toObject()),
-    mediaGallery: (profile.mediaGallery || []).map((s) => s.toObject()),
-    blogs: (profile.blogs || []).map((s) => s.toObject()),
-    research: (profile.research || []).map((s) => s.toObject()),
-    courses: (profile.courses || []).map((s) => s.toObject()),
-    speaking: (profile.speaking || []).map((s) => s.toObject()),
-    organizations: (profile.organizations || []).map((s) => s.toObject()),
-    teaching: (profile.teaching || []).map((s) => s.toObject()),
-    customSections: profile.customSections.map((s) => s.toObject()),
-    sectionVisibility: Object.fromEntries(profile.sectionVisibility),
-    fieldVisibility: profile.fieldVisibility instanceof Map
-      ? Object.fromEntries(profile.fieldVisibility)
-      : (profile.fieldVisibility || {}),
-    sectionOrder: profile.sectionOrder,
-    activeMode: profile.activeMode,
-    temporaryMode: profile.temporaryMode ? profile.temporaryMode.toObject() : null,
+export function buildSnapshotFromProfile(profile) {
+  if (!profile) return {};
+  const toObj = (item) => {
+    if (!item) return item;
+    if (typeof item.toObject === 'function') return item.toObject();
+    return item;
+  };
+  const toArrayOfObj = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(toObj);
   };
 
-  // Store the card code that unlocked this identity
-  const cardCode = activeCard.cardCode || activeCard.cardUid || activeCard.cardId;
+  const loc = toObj(profile.location) || {};
+  const contact = toObj(profile.contact) || {};
+  const secVis = profile.sectionVisibility instanceof Map
+    ? Object.fromEntries(profile.sectionVisibility)
+    : (profile.sectionVisibility && typeof profile.sectionVisibility === 'object'
+        ? (typeof profile.sectionVisibility.toObject === 'function' ? profile.sectionVisibility.toObject() : profile.sectionVisibility)
+        : {});
+
+  const fieldVis = profile.fieldVisibility instanceof Map
+    ? Object.fromEntries(profile.fieldVisibility)
+    : (profile.fieldVisibility && typeof profile.fieldVisibility === 'object'
+        ? (typeof profile.fieldVisibility.toObject === 'function' ? profile.fieldVisibility.toObject() : profile.fieldVisibility)
+        : {});
+
+  return {
+    personaName: profile.personaName || 'Primary Profile',
+    professionTitle: profile.professionTitle || '',
+    templateSlug: profile.templateSlug || profile.templateId?.slug || 'professional',
+    templateId: profile.templateId?._id || profile.templateId || null,
+    headline: profile.headline || '',
+    bio: profile.bio || '',
+    avatarUrl: profile.avatarUrl || null,
+    avatarVisibility: profile.avatarVisibility || 'PUBLIC',
+    coverUrl: profile.coverUrl || null,
+    location: loc,
+    contact: contact,
+    socialLinks: toArrayOfObj(profile.socialLinks),
+    education: toArrayOfObj(profile.education),
+    experience: toArrayOfObj(profile.experience),
+    skills: toArrayOfObj(profile.skills),
+    projects: toArrayOfObj(profile.projects),
+    certifications: toArrayOfObj(profile.certifications),
+    services: toArrayOfObj(profile.services),
+    awards: toArrayOfObj(profile.awards),
+    publications: toArrayOfObj(profile.publications),
+    achievements: toArrayOfObj(profile.achievements),
+    mediaGallery: toArrayOfObj(profile.mediaGallery),
+    blogs: toArrayOfObj(profile.blogs),
+    research: toArrayOfObj(profile.research),
+    courses: toArrayOfObj(profile.courses),
+    speaking: toArrayOfObj(profile.speaking),
+    organizations: toArrayOfObj(profile.organizations),
+    teaching: toArrayOfObj(profile.teaching),
+    customSections: toArrayOfObj(profile.customSections),
+    sectionVisibility: secVis,
+    fieldVisibility: fieldVis,
+    sectionOrder: Array.isArray(profile.sectionOrder) ? profile.sectionOrder : [
+      'about',
+      'experience',
+      'education',
+      'skills',
+      'projects',
+      'certifications',
+      'services',
+      'socialLinks',
+      'contact',
+    ],
+    activeMode: profile.activeMode || 'PUBLIC',
+    temporaryMode: toObj(profile.temporaryMode) || null,
+  };
+}
+
+/**
+ * Synchronize profile data into publishedData and mark as published.
+ */
+export async function syncAndPublishProfile(userId, profile) {
+  if (!profile) return null;
+
+  const snapshot = buildSnapshotFromProfile(profile);
+
+  try {
+    const activeCard = await Card.findOne({
+      $and: [
+        {
+          $or: [
+            { assignedUser: userId },
+            { userId },
+            { assignedTo: userId },
+          ],
+        },
+        {
+          $or: [
+            { state: 'ACTIVE' },
+            { status: 'ACTIVE' },
+          ],
+        },
+      ],
+    }).select('cardCode cardUid cardId').lean();
+
+    const cardCode = activeCard ? (activeCard.cardCode || activeCard.cardUid || activeCard.cardId) : null;
+    if (cardCode && !profile.linkedCardCode) {
+      profile.linkedCardCode = cardCode.toUpperCase();
+    }
+  } catch (err) {
+    logger.warn('Failed to query card for profile sync', { userId, error: err.message });
+  }
+
   profile.publishedData = snapshot;
   profile.state = PROFILE_STATE.PUBLISHED;
   profile.publishedAt = new Date();
-  if (cardCode && !profile.linkedCardCode) {
-    profile.linkedCardCode = cardCode.toUpperCase();
-  }
 
   await profile.save();
 
   if (profile.avatarUrl) {
-    await User.findByIdAndUpdate(userId, { avatarUrl: profile.avatarUrl });
+    try {
+      await User.findByIdAndUpdate(userId, { avatarUrl: profile.avatarUrl });
+    } catch {}
   }
 
-  logger.info('Profile published (card-gated)', { userId, cardCode: profile.linkedCardCode });
-
+  logger.info('Profile synced and published live', { userId, personaId: profile._id });
   return profile;
+}
+
+/**
+ * Promote profile to published state (now automatically called on every save).
+ */
+export async function publishProfile(userId, personaId = null) {
+  const profile = await getOrCreateProfile(userId, personaId);
+  return await syncAndPublishProfile(userId, profile);
 }
 
 /**

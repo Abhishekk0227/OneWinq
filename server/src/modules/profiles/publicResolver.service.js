@@ -9,6 +9,7 @@ import { Connection, getCanonicalUserPair } from '../connections/connection.mode
 import { isBlockedMutual } from '../connections/connection.service.js';
 import { NotFoundError } from '../../shared/errors.js';
 import { ACCOUNT_STATE, PROFILE_STATE, CARD_STATE, APP_EVENT } from '../../config/constants.js';
+import { buildSnapshotFromProfile } from './profile.service.js';
 
 /**
  * Public profile resolver service.
@@ -78,21 +79,22 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     throw new NotFoundError('Profile not found');
   }
 
-  // 6. Check published profile (resolve currently ACTIVE persona)
+  // 6. Check profile (resolve currently ACTIVE persona, or fallback to latest)
   let profile = await Profile.findOne({ userId: user._id, isActive: true }).populate('templateId').lean();
-  if (!profile || profile.state !== PROFILE_STATE.PUBLISHED || !profile.publishedData) {
-    // Fallback to any published profile for this user
-    profile = await Profile.findOne({ userId: user._id, state: PROFILE_STATE.PUBLISHED, publishedData: { $ne: null } })
+  if (!profile) {
+    profile = await Profile.findOne({ userId: user._id })
+      .sort({ updatedAt: -1 })
       .populate('templateId')
       .lean();
   }
 
-  if (!profile || profile.state !== PROFILE_STATE.PUBLISHED || !profile.publishedData) {
+  if (!profile) {
     throw new NotFoundError('Profile not found');
   }
 
   // 7, 8, 9, 10. Resolve active mode & filter sections / fields
-  const filteredData = filterProfileByVisibility(profile.publishedData);
+  const snapshotData = profile.publishedData || buildSnapshotFromProfile(profile);
+  const filteredData = filterProfileByVisibility(snapshotData);
   const activeTemplateSlug = profile.templateSlug || profile.templateId?.slug || filteredData.templateSlug || 'professional';
   const activeTitle = profile.professionTitle || profile.personaName || filteredData.professionTitle || '';
 

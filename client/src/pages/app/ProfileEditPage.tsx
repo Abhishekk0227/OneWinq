@@ -255,7 +255,7 @@ export default function ProfileEditPage() {
       if (displayName.trim() && user) {
         setUser({ ...user, displayName: displayName.trim(), avatarUrl: avatarUrl || user.avatarUrl })
       }
-      toast.success('Draft saved successfully!')
+      toast.success('Profile saved & updated live!')
     },
     onError: (err: unknown) => {
       const apiErr = err as { message?: string }
@@ -530,8 +530,8 @@ export default function ProfileEditPage() {
     )
   }
 
-  // Save Draft
-  const handleSaveDraft = async () => {
+  // Save Profile (Immediately Live)
+  const handleSaveProfile = async () => {
     const cleanedSocialLinks = socialLinks
       .map((s) => ({
         ...s,
@@ -565,15 +565,6 @@ export default function ProfileEditPage() {
       organizations,
       customSections,
     })
-  }
-
-  const handlePublishLive = async () => {
-    try {
-      await handleSaveDraft()
-      publishMutation.mutate(selectedPersonaId || undefined)
-    } catch {
-      // Error handled by saveMutation toast
-    }
   }
 
   // Upload Handlers
@@ -866,28 +857,14 @@ export default function ProfileEditPage() {
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <Button
-            variant="outline"
             size="sm"
             isLoading={saveMutation.isPending}
-            onClick={handleSaveDraft}
-            className="h-8 sm:h-9 text-xs px-2 sm:px-3"
+            onClick={handleSaveProfile}
+            className="h-8 sm:h-9 text-xs px-3 sm:px-4 font-bold shadow-xs bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white"
             leftIcon={<Save className="h-3.5 w-3.5" />}
-            title="Save Draft"
-            aria-label="Save Draft"
           >
-            <span className="hidden sm:inline">Save Draft</span>
-            <span className="sm:hidden hidden xs:inline">Save</span>
-          </Button>
-
-          <Button
-            size="sm"
-            isLoading={publishMutation.isPending || saveMutation.isPending}
-            onClick={handlePublishLive}
-            className="h-8 sm:h-9 text-xs px-2.5 sm:px-3.5 font-bold shadow-xs bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
-            leftIcon={<CheckCircle2 className="h-3.5 w-3.5" />}
-          >
-            <span className="hidden sm:inline">Publish Live</span>
-            <span className="sm:hidden">Publish</span>
+            <span className="hidden sm:inline">Save Changes</span>
+            <span className="sm:hidden">Save</span>
           </Button>
         </div>
       </div>
