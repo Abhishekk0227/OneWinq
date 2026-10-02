@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { PublicNavbar } from '@/components/navigation/PublicNavbar'
+import { BrandLogo } from '@/components/navigation/BrandLogo'
 import {
   ArrowRight,
   ArrowDownRight,
@@ -676,9 +677,7 @@ export default function LandingPage() {
 
           {/* Minimalist Footer matching user screenshot */}
           <div className="border-t border-purple-100/80 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-zinc-600">
-            <div className="font-bold text-zinc-950 text-base tracking-tight lowercase">
-              onewinq
-            </div>
+            <BrandLogo variant="dark" imgClassName="h-6" />
 
             <div className="flex items-center gap-8 font-medium">
               <a href="#profiles" className="hover:text-zinc-950 transition-colors">Profiles</a>

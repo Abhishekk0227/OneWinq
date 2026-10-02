@@ -22,6 +22,7 @@ import { authApi } from '@/features/auth/api/auth.api'
 import { toast } from '@/stores/toastStore'
 import { disconnectSocket } from '@/lib/socket/socketClient'
 import { cn } from '@/lib/utils/cn'
+import { BrandLogo } from './BrandLogo'
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -77,11 +78,7 @@ export function AppHeader() {
         </button>
 
         {/* Mobile Brand Logo */}
-        <Link to="/app" className="lg:hidden flex items-center select-none shrink-0">
-          <span className="text-xl font-black tracking-tight text-foreground lowercase">
-            one<span className="text-primary">winq</span>
-          </span>
-        </Link>
+        <BrandLogo to="/app" className="lg:hidden shrink-0" imgClassName="h-6 sm:h-7" />
 
         {/* Workspace Title & Badge — desktop only */}
         <div className="hidden sm:flex items-center gap-2">

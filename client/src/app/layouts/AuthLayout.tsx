@@ -12,7 +12,7 @@ export function AuthLayout() {
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-96 w-96 rounded-full bg-primary-600/15 blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
-          <BrandLogo className="text-white brightness-125" />
+          <BrandLogo variant="white" imgClassName="h-8" />
         </div>
 
         <div className="relative z-10 my-auto max-w-lg space-y-6">

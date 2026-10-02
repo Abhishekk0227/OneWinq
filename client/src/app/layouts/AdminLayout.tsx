@@ -105,7 +105,7 @@ export function AdminLayout() {
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="flex items-center gap-2">
-            <BrandLogo className="text-white" />
+            <BrandLogo to="/admin" variant="white" imgClassName="h-6 sm:h-7" />
             <span className={cn('text-[10px] font-bold tracking-wider px-2 py-0.5 rounded text-white uppercase', roleBadgeBg)}>
               {roleBadgeLabel}
             </span>
@@ -136,7 +136,7 @@ export function AdminLayout() {
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <BrandLogo className="text-white" />
+                  <BrandLogo to="/admin" variant="white" imgClassName="h-6 sm:h-7" />
                   <span className={cn('text-[10px] font-bold tracking-wider px-2 py-0.5 rounded text-white uppercase', roleBadgeBg)}>
                     {roleBadgeLabel}
                   </span>
@@ -217,7 +217,7 @@ export function AdminLayout() {
       <aside className="hidden md:flex md:w-64 border-r border-white/10 bg-[#101016] p-4 flex-col justify-between h-screen sticky top-0 shrink-0 select-none">
         <div className="space-y-6">
           <div className="px-3 py-2 flex items-center justify-between">
-            <BrandLogo className="text-white" />
+            <BrandLogo to="/admin" variant="white" imgClassName="h-7 sm:h-8" />
             <span className={cn('text-[10px] font-bold tracking-wider px-2 py-0.5 rounded text-white uppercase', roleBadgeBg)}>
               {roleBadgeLabel}
             </span>

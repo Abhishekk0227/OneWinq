@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { ArrowRight, LayoutDashboard } from 'lucide-react'
+import { BrandLogo } from './BrandLogo'
 
 export function PublicNavbar() {
   const { isAuthenticated, user } = useAuthStore()
@@ -8,12 +9,8 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-50 w-full bg-transparent">
       <div className="container mx-auto flex h-20 items-center justify-between px-6 lg:px-12">
-        {/* Brand Logo - clean lowercase onewinq */}
-        <Link to="/" className="flex items-center gap-2 group select-none">
-          <span className="text-2xl font-bold tracking-tight text-white lowercase">
-            onewinq
-          </span>
-        </Link>
+        {/* Brand Logo */}
+        <BrandLogo to="/" variant="white" imgClassName="h-7 sm:h-8" />
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center space-x-9 text-sm font-medium text-white/80">
