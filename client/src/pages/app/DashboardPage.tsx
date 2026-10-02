@@ -656,7 +656,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Linked NFC Smart Card Widget */}
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
+          <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border">
               <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <CreditCard className="h-3.5 w-3.5 text-primary" />
@@ -668,26 +668,50 @@ export default function DashboardPage() {
             </div>
 
             {primaryCard ? (
-              <div className="rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white p-4.5 space-y-4 border border-zinc-800 shadow-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
-                    OneWinq Pass
-                  </span>
-                  <Wifi className="h-4 w-4 text-emerald-400" />
-                </div>
-                <div className="pt-2 space-y-0.5">
-                  <div className="font-extrabold text-sm tracking-tight truncate">
-                    {user?.displayName}
+              <Link to="/app/cards" className="block group">
+                <div className="relative rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-5 border border-zinc-800 shadow-md flex flex-col justify-between min-h-[175px] overflow-hidden transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-lg">
+                  {/* Subtle Ambient Glow & Radial Grid */}
+                  <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                  <div
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                      backgroundSize: '16px 16px',
+                    }}
+                  />
+
+                  {/* Top Header */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
+                      OneWinq Pass
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <Wifi className="h-4 w-4 text-emerald-400" />
+                    </div>
                   </div>
-                  <div className="text-[11px] text-zinc-400 font-mono truncate">
-                    @{user?.username}
+
+                  {/* Middle Identity */}
+                  <div className="my-auto py-2 relative z-10 space-y-0.5">
+                    <div className="font-extrabold text-base sm:text-lg tracking-tight text-white truncate">
+                      {user?.displayName}
+                    </div>
+                    <div className="text-xs text-zinc-400 font-mono truncate">
+                      @{user?.username}
+                    </div>
+                  </div>
+
+                  {/* Bottom Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400 relative z-10">
+                    <span className="truncate max-w-[150px]">
+                      Card: {primaryCard.label || 'Primary Card'}
+                    </span>
+                    <span className="font-bold text-emerald-400 shrink-0">
+                      {primaryCard.tapCount || 0} Taps
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-800 text-[10px] text-zinc-400">
-                  <span>Card: {primaryCard.label || 'Primary Card'}</span>
-                  <span className="font-bold text-emerald-400">{primaryCard.tapCount || 0} Taps</span>
-                </div>
-              </div>
+              </Link>
             ) : (
               <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5 text-center space-y-3">
                 <p className="text-xs text-muted-foreground">
