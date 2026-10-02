@@ -582,7 +582,7 @@ export default function PublicProfilePage() {
             {profile.coverUrl ? (
               <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
                 <Avatar
-                  src={profile.avatarUrl}
+                  src={profile.avatarUrl || profileUser?.avatarUrl}
                   fallback={profileUser.displayName}
                   alt={profileUser.displayName}
                   size="2xl"
@@ -617,7 +617,7 @@ export default function PublicProfilePage() {
             <div className={profile.coverUrl ? "space-y-3" : "flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"}>
               {!profile.coverUrl && (
                 <Avatar
-                  src={profile.avatarUrl}
+                  src={profile.avatarUrl || profileUser?.avatarUrl}
                   fallback={profileUser.displayName}
                   alt={profileUser.displayName}
                   size="2xl"

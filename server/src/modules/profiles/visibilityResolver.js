@@ -60,11 +60,10 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
    */
   function isVisible(configuredVisibility) {
     if (!configuredVisibility) {return true;}
+    // Public sections and fields are baseline and always visible in all modes
+    if (configuredVisibility === SECTION_VISIBILITY.PUBLIC) {return true;}
+    // Content specifically matching current mode (e.g. PROFESSIONAL in PROFESSIONAL mode, PRIVATE in PRIVATE mode)
     if (configuredVisibility === effectiveMode) {return true;}
-    // Public sections can be shown in Professional mode as baseline
-    if (effectiveMode === VISIBILITY_MODE.PROFESSIONAL && configuredVisibility === SECTION_VISIBILITY.PUBLIC) {
-      return true;
-    }
     return false;
   }
 

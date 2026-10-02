@@ -912,24 +912,32 @@ export default function ProfileEditPage() {
       </div>
 
       {/* Profession Persona Switcher Bar (Responsive) */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 shadow-xs">
         <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
           <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
             <Briefcase className="h-4.5 w-4.5" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 min-w-0">
               <span className="text-xs text-muted-foreground font-semibold shrink-0">Active Persona:</span>
               <select
                 value={selectedPersonaId || ''}
                 onChange={(e) => setSelectedPersonaId(e.target.value)}
-                className="w-full sm:w-auto max-w-full bg-muted/80 text-foreground font-bold text-xs sm:text-sm px-2.5 py-1.5 rounded-xl border border-border focus:ring-2 focus:ring-primary outline-none truncate"
+                className="w-full sm:w-auto max-w-xs sm:max-w-sm bg-muted/80 text-foreground font-bold text-xs sm:text-sm px-2.5 py-1.5 rounded-xl border border-border focus:ring-2 focus:ring-primary outline-none truncate"
               >
-                {personas.map((per: any) => (
-                  <option key={per.id || per._id} value={per.id || per._id}>
-                    {per.personaName || per.professionTitle || 'Profile'} {per.isActive ? '★ (LIVE ON URL & NFC)' : ''}
-                  </option>
-                ))}
+                {personas.map((per: any) => {
+                  const title =
+                    per.professionTitle && per.personaName === 'Basic Universal Template'
+                      ? per.professionTitle
+                      : per.personaName && per.personaName !== 'Basic Universal Template'
+                      ? per.personaName
+                      : per.professionTitle || 'Universal Profile'
+                  return (
+                    <option key={per.id || per._id} value={per.id || per._id}>
+                      {title} {per.isActive ? '★ (LIVE)' : ''}
+                    </option>
+                  )
+                })}
               </select>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1 break-words leading-tight">
@@ -938,9 +946,9 @@ export default function ProfileEditPage() {
           </div>
         </div>
 
-        <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border/50">
+        <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-border/50">
           {activeUserCard && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold whitespace-nowrap">
               <Wifi className="h-3 w-3 animate-pulse" />
               <span>NFC: {activeUserCard.cardCode || activeUserCard.cardUid}</span>
             </span>
