@@ -60,6 +60,9 @@ export default function ProfilePage() {
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false)
   const [previewMode, setPreviewMode] = React.useState<VisibilityMode>(VISIBILITY_MODE.PUBLIC)
 
+  // Active presentation mode state for instant UI responsiveness
+  const [selectedMode, setSelectedMode] = React.useState<VisibilityMode | null>(null)
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.profile.me,
     queryFn: () => profileApi.getMyProfile(),
@@ -83,8 +86,23 @@ export default function ProfilePage() {
   const setModeMutation = useMutation({
     mutationFn: (mode: VisibilityMode) => profileApi.setActiveMode(mode),
     onSuccess: (res) => {
-      queryClient.setQueryData(queryKeys.profile.me, res)
-      toast.success(`Switched active presentation to ${res.data.profile.activeMode} mode.`)
+      const newMode = (res.data?.profile?.activeMode || res.data?.activeMode) as VisibilityMode | undefined
+      if (newMode) setSelectedMode(newMode)
+      queryClient.setQueryData(queryKeys.profile.me, (old: any) => {
+        if (!old) return res
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            profile: {
+              ...(old.data?.profile || {}),
+              activeMode: newMode,
+            },
+          },
+        }
+      })
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
+      toast.success(`Switched active presentation to ${newMode || 'selected'} mode.`)
     },
     onError: (err: unknown) => {
       const apiErr = err as { message?: string }
@@ -146,7 +164,13 @@ export default function ProfilePage() {
 
   const profile = data?.data?.profile
   const identities: any[] = (data?.data as any)?.identities || profile?.identities || []
-  const activeMode = profile?.activeMode || VISIBILITY_MODE.PUBLIC
+  const rawMode = selectedMode || profile?.activeMode || VISIBILITY_MODE.PUBLIC
+  const currentMode: VisibilityMode =
+    String(rawMode).toUpperCase() === VISIBILITY_MODE.PRIVATE
+      ? VISIBILITY_MODE.PRIVATE
+      : String(rawMode).toUpperCase() === VISIBILITY_MODE.PROFESSIONAL
+      ? VISIBILITY_MODE.PROFESSIONAL
+      : VISIBILITY_MODE.PUBLIC
 
   // Dynamic Available Sections for Mobile & Responsive Menu Bar
   const availableSections = React.useMemo(() => {
@@ -339,10 +363,13 @@ export default function ProfilePage() {
               <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
                 <button
                   type="button"
-                  onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)}
+                  onClick={() => {
+                    setSelectedMode(VISIBILITY_MODE.PUBLIC)
+                    setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
+                  }}
                   disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs ${
-                    activeMode === VISIBILITY_MODE.PUBLIC
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                    currentMode === VISIBILITY_MODE.PUBLIC
                       ? 'bg-card text-foreground shadow-xs font-bold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
@@ -354,10 +381,13 @@ export default function ProfilePage() {
 
                 <button
                   type="button"
-                  onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)}
+                  onClick={() => {
+                    setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
+                    setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
+                  }}
                   disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs ${
-                    activeMode === VISIBILITY_MODE.PROFESSIONAL
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                    currentMode === VISIBILITY_MODE.PROFESSIONAL
                       ? 'bg-card text-primary shadow-xs font-bold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
@@ -369,10 +399,13 @@ export default function ProfilePage() {
 
                 <button
                   type="button"
-                  onClick={() => setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)}
+                  onClick={() => {
+                    setSelectedMode(VISIBILITY_MODE.PRIVATE)
+                    setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
+                  }}
                   disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs ${
-                    activeMode === VISIBILITY_MODE.PRIVATE
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                    currentMode === VISIBILITY_MODE.PRIVATE
                       ? 'bg-card text-foreground shadow-xs font-bold'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
@@ -535,18 +568,22 @@ export default function ProfilePage() {
             ) : (
               <div className="pt-1">
                 <Link
-                  to="/app/profile/edit"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                  to={`/app/profile/edit?mode=${currentMode.toLowerCase()}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shadow-xs cursor-pointer"
                 >
-                  <Briefcase className="h-3 w-3" />
+                  {currentMode === VISIBILITY_MODE.PRIVATE ? (
+                    <Lock className="h-3 w-3 text-primary shrink-0" />
+                  ) : currentMode === VISIBILITY_MODE.PROFESSIONAL ? (
+                    <Briefcase className="h-3 w-3 text-primary shrink-0" />
+                  ) : (
+                    <Eye className="h-3 w-3 text-primary shrink-0" />
+                  )}
                   <span>
-                    {activeMode === VISIBILITY_MODE.PRIVATE
+                    {currentMode === VISIBILITY_MODE.PRIVATE
                       ? 'Set Up Private Profile'
-                      : activeMode === VISIBILITY_MODE.PUBLIC
-                      ? 'Set Up Public Profile'
-                      : activeMode === VISIBILITY_MODE.PROFESSIONAL
+                      : currentMode === VISIBILITY_MODE.PROFESSIONAL
                       ? 'Set Up Professional Profile'
-                      : 'Set Up Universal Profile'}
+                      : 'Set Up Public Profile'}
                   </span>
                 </Link>
               </div>
@@ -568,7 +605,11 @@ export default function ProfilePage() {
                     </Badge>
                   </div>
                   <span className="text-[11px] text-muted-foreground block line-clamp-1">
-                    Universal Smart Profile with fixed essential fields (Bio, Contact Details, and Social Profiles).
+                    {currentMode === VISIBILITY_MODE.PRIVATE
+                      ? 'Private Presentation: Sensitive personal & credential fields are shielded.'
+                      : currentMode === VISIBILITY_MODE.PROFESSIONAL
+                      ? 'Professional Presentation: Tailored for career, client networking, and credentials.'
+                      : 'Public Presentation: Universal identity, bio, and social channels visible to all.'}
                   </span>
                 </div>
               </div>
