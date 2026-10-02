@@ -190,7 +190,7 @@ export function InstallAppPrompt() {
                 <img
                   src="/icon-192.png"
                   alt="OneWinq App Icon"
-                  className="w-12 h-12 rounded-xl shadow-md border border-white/10 object-cover"
+                  className="w-12 h-12 rounded-xl shadow-md border border-white/10 object-contain bg-[#0B0B0F]"
                 />
                 <span className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-primary text-white">
                   <Sparkles className="h-2.5 w-2.5" />
