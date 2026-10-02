@@ -218,7 +218,7 @@ export function MobileMenuDrawer() {
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors truncate"
               >
-                <span className="truncate">View Public</span>
+                <span className="truncate">View Profile</span>
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </a>
             )}
