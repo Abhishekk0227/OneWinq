@@ -602,12 +602,6 @@ export default function PublicProfilePage() {
                   <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
                     {activeMode} MODE
                   </Badge>
-                  {activeCard?.cardCode && (
-                    <Badge variant="outline" className="text-[11px] font-mono border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 flex items-center gap-1">
-                      <Wifi className="h-3 w-3 animate-pulse" />
-                      <span>{activeCard.cardCode}</span>
-                    </Badge>
-                  )}
                   <span className="text-xs font-mono text-muted-foreground">
                     @{profileUser.username}
                   </span>
@@ -623,12 +617,6 @@ export default function PublicProfilePage() {
                   <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
                     {activeMode} MODE
                   </Badge>
-                  {activeCard?.cardCode && (
-                    <Badge variant="outline" className="text-[11px] font-mono border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 flex items-center gap-1">
-                      <Wifi className="h-3 w-3 animate-pulse" />
-                      <span>{activeCard.cardCode}</span>
-                    </Badge>
-                  )}
                 </div>
                 <div className="text-xs font-mono text-muted-foreground">
                   @{profileUser.username}

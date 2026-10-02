@@ -458,26 +458,28 @@ export default function ProfilePage() {
                 {user?.displayName}
               </h2>
               <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
-              <Badge
-                variant={profile.state === 'PUBLISHED' ? 'success' : 'warning'}
-                className="text-[10px] font-bold"
-              >
-                {profile.state}
-              </Badge>
+              {profile.state === 'DRAFT' && (
+                <Badge
+                  variant="warning"
+                  className="text-[10px] font-bold"
+                >
+                  Draft Changes
+                </Badge>
+              )}
 
               {activeUserCard ? (
                 <a
-                  href={`/p/c/${activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}`}
+                  href={`/u/${user?.username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs font-mono ml-auto"
+                  className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
                 >
-                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono flex items-center gap-1">
+                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-semibold flex items-center gap-1">
                     <Wifi className="h-2.5 w-2.5" />
-                    <span>NFC LIVE: {activeUserCard.cardCode}</span>
+                    <span>NFC Active</span>
                   </Badge>
-                  <span className="hidden sm:inline">
-                    onewinq.me/p/c/{activeUserCard.cardCode?.toLowerCase() || activeUserCard.cardUid?.toLowerCase()}
+                  <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground">
+                    /u/{user?.username}
                   </span>
                   <ExternalLink className="h-3 w-3 shrink-0" />
                 </a>
