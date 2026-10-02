@@ -18,15 +18,26 @@ export default function CardTapRedirectPage() {
 
   const tapData = data?.data
 
+  // Resolve destination: always prioritize public profile /u/:username
+  const destination = tapData
+    ? tapData.username
+      ? `/u/${tapData.username}`
+      : tapData.redirectUrl &&
+        !tapData.redirectUrl.toLowerCase().includes('/p/c/') &&
+        !tapData.redirectUrl.toLowerCase().includes('/c/')
+      ? tapData.redirectUrl
+      : null
+    : null
+
   useEffect(() => {
-    if (tapData?.redirectUrl) {
-      // Smooth micro-delay to let the NFC feedback register, then navigate
+    if (destination) {
+      // Smooth micro-delay to let the NFC feedback register, then navigate to the profile
       const timer = setTimeout(() => {
-        navigate(tapData.redirectUrl, { replace: true })
-      }, 700)
+        navigate(destination, { replace: true })
+      }, 500)
       return () => clearTimeout(timer)
     }
-  }, [tapData, navigate])
+  }, [destination, navigate])
 
   if (isLoading) {
     return (
@@ -114,16 +125,41 @@ export default function CardTapRedirectPage() {
     )
   }
 
+  if (!destination) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground">
+        <div className="flex flex-col items-center space-y-6 max-w-md text-center p-8 rounded-3xl border border-border bg-card shadow-sm">
+          <div className="h-16 w-16 rounded-2xl flex items-center justify-center bg-primary/15 text-primary">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Profile Unavailable</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              No public profile is currently linked to this NFC card.
+            </p>
+          </div>
+          <div className="pt-2 w-full">
+            <Link to="/">
+              <Button variant="default" className="w-full" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                Go to OneWinq Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground">
       <div className="flex flex-col items-center space-y-6 max-w-sm text-center">
-        <div className="h-16 w-16 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white">
+        <div className="h-16 w-16 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white animate-pulse">
           <Wifi className="h-8 w-8" />
         </div>
 
         <div className="space-y-1.5">
           <h2 className="text-xl font-extrabold tracking-tight">
-            Connecting to {tapData.displayName}
+            Connecting to {tapData.displayName || tapData.username || 'Profile'}
           </h2>
           <p className="text-xs text-muted-foreground">
             Opening profile...

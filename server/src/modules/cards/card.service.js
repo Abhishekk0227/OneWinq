@@ -169,8 +169,7 @@ export const cardService = {
       url: card.url,
       displayName: user.displayName,
       username: user.username,
-      // Card-first identity: redirect to card-code URL, never to username URL
-      redirectUrl: `/p/c/${(card.cardCode || card.cardUid).toLowerCase()}`,
+      redirectUrl: `/u/${user.username}`,
       customSlug: card.customSlug,
       tapCount: card.tapCount,
     };
@@ -244,8 +243,8 @@ export const cardService = {
       cardCode: card.cardCode || card.cardUid,
       cardUid: card.cardUid,
       displayName: user.displayName,
-      // Card-first identity: redirect to card-code URL, never to username URL
-      redirectUrl: `/p/c/${(card.cardCode || card.cardUid).toLowerCase()}`,
+      username: user.username,
+      redirectUrl: `/u/${user.username}`,
       customSlug: card.customSlug,
       qrScanCount: card.qrScanCount,
     };
