@@ -637,8 +637,16 @@ export default function PublicProfilePage() {
                   )}
                 </div>
 
-              {/* Active Profession Title Badge */}
-              {(profile.professionTitle || (profile.identities && profile.identities.length > 0)) && (
+              {/* Active Profession Title Badge (Hidden in Basic Universal Template) */}
+              {!(!profile.templateSlug ||
+                profile.templateSlug === 'professional' ||
+                profile.templateSlug === 'universal' ||
+                profile.templateSlug === 'basic' ||
+                (profile as any).templateId?.slug === 'professional' ||
+                (profile as any).templateId?.name === 'Basic Universal Template' ||
+                profile.personaName === 'Basic Universal Template') &&
+                (profile.professionTitle || (profile.identities && profile.identities.length > 0)) &&
+                profile.professionTitle !== 'Basic Universal Template' && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs">
                     <Briefcase className="h-3.5 w-3.5" />

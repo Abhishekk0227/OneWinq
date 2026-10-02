@@ -96,11 +96,12 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
   const snapshotData = profile.publishedData || buildSnapshotFromProfile(profile);
   const filteredData = filterProfileByVisibility(snapshotData);
   const activeTemplateSlug = profile.templateSlug || profile.templateId?.slug || filteredData.templateSlug || 'professional';
-  const activeTitle = profile.professionTitle || profile.personaName || filteredData.professionTitle || '';
+  const rawTitle = profile.professionTitle || (profile.personaName !== 'Basic Universal Template' ? profile.personaName : '') || '';
+  const activeTitle = (rawTitle && rawTitle !== 'Basic Universal Template') ? rawTitle : '';
 
   filteredData.templateSlug = activeTemplateSlug;
   filteredData.templateId = profile.templateId || null;
-  filteredData.personaName = profile.personaName || 'Profile';
+  filteredData.personaName = profile.personaName && profile.personaName !== 'Basic Universal Template' ? profile.personaName : 'Profile';
   filteredData.professionTitle = activeTitle;
 
   // Check relationship relative to viewer
