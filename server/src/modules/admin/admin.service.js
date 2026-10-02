@@ -613,17 +613,20 @@ class AdminService {
       .populate('firstAssignedTo', 'username displayName email')
       .lean();
 
-    const baseUrl = (process.env.APP_URL || 'https://onewinq.com').replace(/\/+$/, '');
+    const baseUrl = (process.env.APP_URL || 'https://one-winq.vercel.app').replace(/\/+$/, '');
 
     return {
       cards: cards.map((c) => {
         const cardId = c.cardId || c.cardCode || c.cardUid;
+        const cardUrl = (!c.url || c.url.includes('localhost') || c.url.includes('127.0.0.1'))
+          ? `${baseUrl}/p/c/${cardId}`
+          : c.url;
         return {
           id: c._id.toString(),
           cardId,
           cardCode: c.cardCode || c.cardUid,
           cardUid: c.cardUid || c.cardCode,
-          url: c.url || `${baseUrl}/p/c/${cardId}`,
+          url: cardUrl,
           edition: c.edition || (c.material ? c.material.toUpperCase() : 'PVC'),
           material: c.material || 'pvc',
           status: c.state || c.status,
@@ -682,9 +685,11 @@ class AdminService {
       .populate('adminId', 'username displayName')
       .lean();
 
-    const baseUrl = (process.env.APP_URL || 'https://onewinq.com').replace(/\/+$/, '');
+    const baseUrl = (process.env.APP_URL || 'https://one-winq.vercel.app').replace(/\/+$/, '');
     const cardId = card.cardId || card.cardCode || card.cardUid;
-    const url = card.url || `${baseUrl}/p/c/${cardId}`;
+    const url = (!card.url || card.url.includes('localhost') || card.url.includes('127.0.0.1'))
+      ? `${baseUrl}/p/c/${cardId}`
+      : card.url;
 
     return {
       card: {

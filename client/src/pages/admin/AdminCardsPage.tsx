@@ -186,13 +186,32 @@ export default function AdminCardsPage() {
       toast.error('No card records to export.')
       return
     }
+    const getCardUrl = (rawUrl?: string, cardId?: string) => {
+      if (!rawUrl && !cardId) return ''
+      const origin = window.location.origin
+      if (!rawUrl || rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1')) {
+        return `${origin}/p/c/${cardId || ''}`
+      }
+      return rawUrl
+    }
+
     const rows = ['cardId,url,edition,status,assignedUser,createdAt']
     for (const c of cards) {
       const user = c.currentOwner ? c.currentOwner.email : 'UNASSIGNED'
-      rows.push(`"${c.cardId}","${c.url}","${c.edition}","${c.status}","${user}","${new Date(c.createdAt).toISOString()}"`)
+      const cardUrl = getCardUrl(c.url, c.cardId)
+      rows.push(`"${c.cardId}","${cardUrl}","${c.edition}","${c.status}","${user}","${new Date(c.createdAt).toISOString()}"`)
     }
     downloadCsv(rows.join('\n'), `onewinq-cards-inventory-${Date.now()}.csv`)
     toast.success('Inventory exported as CSV')
+  }
+
+  const getCardUrl = (rawUrl?: string, cardId?: string) => {
+    if (!rawUrl && !cardId) return ''
+    const origin = window.location.origin
+    if (!rawUrl || rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1')) {
+      return `${origin}/p/c/${cardId || ''}`
+    }
+    return rawUrl
   }
 
   const activeDetailsCard = cardDetailsData?.data?.card
@@ -359,26 +378,33 @@ export default function AdminCardsPage() {
                       <tr key={card.id} className="hover:bg-white/5 transition-colors">
                         {/* Card ID & URL */}
                         <td className="p-4">
-                          <div className="flex items-center gap-1.5 font-mono font-bold text-white text-[12px]">
-                            <span>{card.cardId}</span>
-                            <button
-                              onClick={() => copyToClipboard(card.url, `URL for ${card.cardId} copied!`)}
-                              title="Copy URL"
-                              className="text-white/40 hover:text-white transition-colors"
-                            >
-                              <Copy className="h-3 w-3" />
-                            </button>
-                            <a
-                              href={card.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              title="Open URL"
-                              className="text-white/40 hover:text-white transition-colors"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          </div>
-                          <div className="text-[10px] text-white/40 font-mono truncate max-w-xs">{card.url}</div>
+                          {(() => {
+                            const cardUrl = getCardUrl(card.url, card.cardId)
+                            return (
+                              <>
+                                <div className="flex items-center gap-1.5 font-mono font-bold text-white text-[12px]">
+                                  <span>{card.cardId}</span>
+                                  <button
+                                    onClick={() => copyToClipboard(cardUrl, `URL for ${card.cardId} copied!`)}
+                                    title="Copy URL"
+                                    className="text-white/40 hover:text-white transition-colors"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </button>
+                                  <a
+                                    href={cardUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title="Open URL"
+                                    className="text-white/40 hover:text-white transition-colors"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </div>
+                                <div className="text-[10px] text-white/40 font-mono truncate max-w-xs">{cardUrl}</div>
+                              </>
+                            )
+                          })()}
                         </td>
 
                         {/* Material */}
@@ -637,9 +663,9 @@ export default function AdminCardsPage() {
                     </div>
 
                     <div className="flex items-center gap-2 min-w-0 justify-between sm:justify-end">
-                      <span className="text-white/50 truncate text-[11px] font-mono">{c.url}</span>
+                      <span className="text-white/50 truncate text-[11px] font-mono">{getCardUrl(c.url, c.cardId)}</span>
                       <button
-                        onClick={() => copyToClipboard(c.url, `Copied ${c.cardId} URL`)}
+                        onClick={() => copyToClipboard(getCardUrl(c.url, c.cardId), `Copied ${c.cardId} URL`)}
                         className="text-white/40 hover:text-white p-1 rounded hover:bg-white/5 shrink-0 transition-colors"
                         title="Copy URL"
                       >
@@ -718,28 +744,33 @@ export default function AdminCardsPage() {
                 </div>
 
                 {/* Public URL Box */}
-                <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3">
-                  <div className="space-y-0.5 truncate">
-                    <span className="text-[10px] text-white/40 uppercase font-bold block">Public Card URL</span>
-                    <span className="font-mono text-white text-xs truncate block">{activeDetailsCard.url}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(activeDetailsCard.url, 'Card URL copied!')}
-                      className="text-white/70 hover:text-white"
-                      leftIcon={<Copy className="h-3 w-3" />}
-                    >
-                      Copy
-                    </Button>
-                    <a href={activeDetailsCard.url} target="_blank" rel="noreferrer">
-                      <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Button>
-                    </a>
-                  </div>
-                </div>
+                {(() => {
+                  const detailsCardUrl = getCardUrl(activeDetailsCard.url, activeDetailsCard.cardId)
+                  return (
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3">
+                      <div className="space-y-0.5 truncate">
+                        <span className="text-[10px] text-white/40 uppercase font-bold block">Public Card URL</span>
+                        <span className="font-mono text-white text-xs truncate block">{detailsCardUrl}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(detailsCardUrl, 'Card URL copied!')}
+                          className="text-white/70 hover:text-white"
+                          leftIcon={<Copy className="h-3 w-3" />}
+                        >
+                          Copy
+                        </Button>
+                        <a href={detailsCardUrl} target="_blank" rel="noreferrer">
+                          <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* Secret Activation Code Box */}
                 {activeDetailsCard.activationCode && (

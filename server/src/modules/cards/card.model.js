@@ -163,8 +163,10 @@ const cardSchema = new Schema(
         ret.cardId = ret.cardId || ret.cardCode || ret.cardUid;
         ret.cardCode = ret.cardCode || ret.cardId || ret.cardUid;
         ret.cardUid = ret.cardUid || ret.cardCode || ret.cardId;
-        const baseUrl = (process.env.APP_URL || 'https://onewinq.com').replace(/\/+$/, '');
-        ret.url = ret.url || `${baseUrl}/p/c/${ret.cardId}`;
+        const baseUrl = (process.env.APP_URL || 'https://one-winq.vercel.app').replace(/\/+$/, '');
+        if (!ret.url || ret.url.includes('localhost') || ret.url.includes('127.0.0.1')) {
+          ret.url = `${baseUrl}/p/c/${ret.cardId}`;
+        }
         ret.edition = ret.edition || (ret.material ? ret.material.toUpperCase() : 'PVC');
         ret.status = ret.state || ret.status;
         ret.state = ret.state || ret.status;
@@ -187,8 +189,8 @@ cardSchema.pre('save', function (next) {
     this.cardCode = primaryId;
     this.cardUid = primaryId;
   }
-  if (!this.url && primaryId) {
-    const baseUrl = (process.env.APP_URL || 'https://onewinq.com').replace(/\/+$/, '');
+  const baseUrl = (process.env.APP_URL || 'https://one-winq.vercel.app').replace(/\/+$/, '');
+  if ((!this.url || this.url.includes('localhost') || this.url.includes('127.0.0.1')) && primaryId) {
     this.url = `${baseUrl}/p/c/${primaryId}`;
   }
   if (this.material && !this.edition) {
