@@ -135,4 +135,7 @@ export const cardsApi = {
 
   getOrder: (id: string) =>
     apiClient.get<never, ApiResponse<{ order: CardOrder }>>(`/orders/${id}`),
+
+  cancelOrder: (id: string) =>
+    apiClient.patch<never, ApiResponse<{ order: CardOrder }>>(`/orders/${id}/cancel`),
 }

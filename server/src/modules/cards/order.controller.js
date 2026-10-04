@@ -46,6 +46,23 @@ export const orderController = {
   },
 
   /**
+   * PATCH /api/v1/orders/:id/cancel
+   */
+  async cancelOrder(req, res, next) {
+    try {
+      const order = await orderService.cancelOrder({
+        userId: req.user.id,
+        orderId: req.params.id,
+      });
+      return res.status(200).json(
+        successResponse({ order }, 'Order cancelled successfully.'),
+      );
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
    * GET /api/v1/orders
    */
   async listOrders(req, res, next) {

@@ -484,7 +484,7 @@ export default function AdminOrdersPage() {
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div>
                 <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
+                  <Package className="h-4 w-4 text-primary" />
                   <span>Fulfill Order {selectedOrder.orderNumber}</span>
                 </h3>
                 <p className="text-xs text-white/50">

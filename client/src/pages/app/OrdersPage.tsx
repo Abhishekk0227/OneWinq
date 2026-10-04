@@ -18,7 +18,6 @@ import {
   ArrowLeft,
   Wifi,
   CreditCard,
-  Sparkles,
   CheckCircle2,
   ShieldCheck,
   AlertCircle,
@@ -129,15 +128,24 @@ export default function OrdersPage() {
   ) => {
     const orderId = order.id || order._id
     const rzpOrderId = razorpayOrder?.id || order.razorpayOrderId
-    const keyId = razorpayOrder?.keyId
+    let keyId = razorpayOrder?.keyId
+
+    if (!keyId) {
+      try {
+        const configRes = await cardsApi.getPaymentConfig()
+        keyId = configRes.data?.razorpayKeyId
+      } catch (err) {
+        console.warn('Failed to fetch payment config:', err)
+      }
+    }
 
     // Check if a real registered key is present in environment (starts with rzp_test_ or rzp_live_ and not dummy)
     const hasLiveOrRealTestKey = Boolean(
       keyId &&
-        !keyId.includes('dummy') &&
-        !keyId.includes('placeholder') &&
-        (keyId.startsWith('rzp_test_') || keyId.startsWith('rzp_live_')) &&
-        keyId.length > 15,
+      !keyId.includes('dummy') &&
+      !keyId.includes('placeholder') &&
+      (keyId.startsWith('rzp_test_') || keyId.startsWith('rzp_live_')) &&
+      keyId.length > 15,
     )
 
     if (hasLiveOrRealTestKey) {
@@ -246,6 +254,19 @@ export default function OrdersPage() {
     },
   })
 
+  // Cancel order mutation (only allowed while order is in CREATED / Payment Pending state)
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => cardsApi.cancelOrder(orderId),
+    onSuccess: () => {
+      toast.success('Order has been cancelled successfully.')
+      queryClient.invalidateQueries({ queryKey: queryKeys.cards.orders })
+    },
+    onError: (err: unknown) => {
+      const apiErr = err as { message?: string }
+      toast.error(apiErr.message || 'Failed to cancel order.')
+    },
+  })
+
   // Pay existing unpaid order
   const handlePayExistingOrder = async (order: CardOrder) => {
     const rawAmt = order.amount ?? order.totalAmount ?? 0
@@ -337,6 +358,49 @@ export default function OrdersPage() {
               const displayAmt = rawAmt > 5000 ? Math.round(rawAmt / 100) : rawAmt
               const isPaid = ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(order.state)
               const isCreatedPending = order.state === 'CREATED'
+              const isCancelled = order.state === 'CANCELLED'
+
+              const statusMeta: Record<
+                string,
+                { label: string; badgeClass: string; icon: React.ReactNode }
+              > = {
+                CREATED: {
+                  label: 'Payment Pending',
+                  badgeClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                  icon: <AlertCircle className="h-3.5 w-3.5" />,
+                },
+                PAID: {
+                  label: 'Order Confirmed',
+                  badgeClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                  icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+                },
+                PROCESSING: {
+                  label: 'In Production',
+                  badgeClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+                  icon: <Package className="h-3.5 w-3.5" />,
+                },
+                SHIPPED: {
+                  label: 'Dispatched & In Transit',
+                  badgeClass: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+                  icon: <Truck className="h-3.5 w-3.5" />,
+                },
+                DELIVERED: {
+                  label: 'Delivered',
+                  badgeClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                  icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+                },
+                CANCELLED: {
+                  label: 'Order Cancelled',
+                  badgeClass: 'bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border-zinc-500/20',
+                  icon: <AlertCircle className="h-3.5 w-3.5" />,
+                },
+              }
+
+              const currentStatus = statusMeta[order.state] || {
+                label: order.state,
+                badgeClass: 'bg-muted text-muted-foreground border-border',
+                icon: <Package className="h-3.5 w-3.5" />,
+              }
 
               const tierNameMap: Record<string, string> = {
                 PVC: 'PVC Card',
@@ -368,29 +432,22 @@ export default function OrdersPage() {
                       </h3>
                       {order.discountAmount ? (
                         <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
-                          <Sparkles className="h-3 w-3" />
                           <span>Includes ₹{(order.discountAmount / 100).toLocaleString('en-IN')} promotional discount</span>
                         </div>
                       ) : null}
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      {isPaid ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          PAID
-                        </span>
-                      ) : (
-                        <Badge variant="subtle" className="font-bold uppercase">
-                          {order.state}
-                        </Badge>
-                      )}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold border ${currentStatus.badgeClass}`}>
+                        {currentStatus.icon}
+                        {currentStatus.label}
+                      </span>
 
                       <span className="text-base font-black text-foreground">
                         {symbol}{displayAmt.toLocaleString('en-IN')}
                       </span>
 
-                      {/* Pay Now Button if Unpaid in Test Mode */}
+                      {/* Pay Now Button (Only shown while Payment Pending) */}
                       {isCreatedPending && (
                         <Button
                           size="sm"
@@ -402,66 +459,86 @@ export default function OrdersPage() {
                           Pay with Razorpay
                         </Button>
                       )}
+
+                      {/* Cancel Order Button */}
+                      {!isCancelled && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!isCreatedPending || cancelOrderMutation.isPending}
+                          isLoading={cancelOrderMutation.isPending && cancelOrderMutation.variables === oId}
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to cancel this order?')) {
+                              cancelOrderMutation.mutate(oId)
+                            }
+                          }}
+                          className={`h-8 text-xs font-semibold ${isCreatedPending
+                              ? 'border-rose-500/40 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400'
+                              : 'opacity-50 cursor-not-allowed'
+                            }`}
+                          title={
+                            isCreatedPending
+                              ? 'Cancel this order'
+                              : 'Order is confirmed and in production. Cancellation disabled.'
+                          }
+                        >
+                          {isCreatedPending ? 'Cancel Order' : 'Cancel '}
+                        </Button>
+                      )}
                     </div>
                   </div>
 
                   {/* Delivery Stepper */}
-                  {order.state !== 'CANCELLED' && (
+                  {!isCancelled && (
                     <div className="py-2 px-1">
                       <div className="grid grid-cols-4 gap-2 text-center text-[10px] sm:text-[11px]">
                         {/* Step 1: Order Placed */}
                         <div className="space-y-1">
                           <div className="h-1.5 w-full rounded-full bg-primary" />
-                          <span className="font-bold text-foreground block">1. Placed</span>
+                          <span className="font-bold text-foreground block">1. Order Placed</span>
                         </div>
 
-                        {/* Step 2: Provisioning */}
+                        {/* Step 2: In Production */}
                         <div className="space-y-1">
                           <div
-                            className={`h-1.5 w-full rounded-full ${
-                              isPaid ? 'bg-primary' : 'bg-muted'
-                            }`}
+                            className={`h-1.5 w-full rounded-full ${isPaid ? 'bg-primary' : 'bg-muted'
+                              }`}
                           />
                           <span
-                            className={`font-semibold block ${
-                              isPaid ? 'text-foreground font-bold' : 'text-muted-foreground'
-                            }`}
+                            className={`font-semibold block ${isPaid ? 'text-foreground font-bold' : 'text-muted-foreground'
+                              }`}
                           >
-                            2. Provisioning
+                            2. In Production
                           </span>
                         </div>
 
-                        {/* Step 3: Shipped */}
+                        {/* Step 3: Dispatched */}
                         <div className="space-y-1">
                           <div
-                            className={`h-1.5 w-full rounded-full ${
-                              ['SHIPPED', 'DELIVERED'].includes(order.state)
+                            className={`h-1.5 w-full rounded-full ${['SHIPPED', 'DELIVERED'].includes(order.state)
                                 ? 'bg-primary'
                                 : 'bg-muted'
-                            }`}
+                              }`}
                           />
                           <span
-                            className={`font-semibold block ${
-                              ['SHIPPED', 'DELIVERED'].includes(order.state)
+                            className={`font-semibold block ${['SHIPPED', 'DELIVERED'].includes(order.state)
                                 ? 'text-foreground font-bold'
                                 : 'text-muted-foreground'
-                            }`}
+                              }`}
                           >
-                            3. In Transit
+                            3. Dispatched
                           </span>
                         </div>
 
                         {/* Step 4: Delivered */}
                         <div className="space-y-1">
                           <div
-                            className={`h-1.5 w-full rounded-full ${
-                              order.state === 'DELIVERED' ? 'bg-primary' : 'bg-muted'
-                            }`}
+                            className={`h-1.5 w-full rounded-full ${order.state === 'DELIVERED' ? 'bg-primary' : 'bg-muted'
+                              }`}
                           />
                           <span
-                            className={`font-semibold block ${
-                              order.state === 'DELIVERED' ? 'text-foreground font-bold' : 'text-muted-foreground'
-                            }`}
+                            className={`font-semibold block ${order.state === 'DELIVERED' ? 'text-foreground font-bold' : 'text-muted-foreground'
+                              }`}
                           >
                             4. Delivered
                           </span>
@@ -558,11 +635,10 @@ export default function OrdersPage() {
                   key={ed.id}
                   type="button"
                   onClick={() => setSelectedEditionId(ed.id)}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
-                    selectedEditionId === ed.id
+                  className={`p-3 rounded-2xl border text-left transition-all ${selectedEditionId === ed.id
                       ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
                       : 'border-border bg-card hover:border-border/80'
-                  }`}
+                    }`}
                 >
                   <div className="text-xs font-bold text-foreground truncate">{ed.name}</div>
                   <div className="flex items-baseline gap-1 mt-1">
@@ -589,7 +665,6 @@ export default function OrdersPage() {
             </div>
             <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
               <span className="font-medium flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5" />
                 Promotional Card Discount:
               </span>
               <span className="font-bold">-₹100</span>
@@ -722,7 +797,6 @@ export default function OrdersPage() {
 
               <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                 <span className="flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
                   Account Card Discount
                 </span>
                 <span>-₹{simulatorOrder.discountAmount.toLocaleString('en-IN')}</span>

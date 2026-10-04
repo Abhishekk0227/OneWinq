@@ -14,12 +14,12 @@ const CARD_PRICES_USD = Object.freeze({
 
 // Original base prices in paise (₹1 = 100 paise)
 const CARD_PRICES_INR = Object.freeze({
-  pvc: 50000,      // ₹500
-  wooden: 100000,  // ₹1,000
-  wood: 100000,
-  metallic: 150000,// ₹1,500
-  metal: 150000,
-  bamboo: 100000,
+  pvc: 59900,      // ₹599 original base -> ₹499 net after ₹100 discount
+  wooden: 109900,  // ₹1,099 original base -> ₹999 net after ₹100 discount
+  wood: 109900,
+  metallic: 159900,// ₹1,599 original base -> ₹1,499 net after ₹100 discount
+  metal: 159900,
+  bamboo: 109900,
 });
 
 // ₹100 discount in paise applied on each card purchase
@@ -216,7 +216,7 @@ export const orderService = {
    * List all orders for an authenticated user.
    */
   async listOrders(userId) {
-    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 }).lean();
+    const orders = await Order.find({ user: userId, state: { $ne: ORDER_STATE.CREATED } }).sort({ createdAt: -1 }).lean();
 
     return orders.map((o) => ({
       id: o._id.toString(),
@@ -271,6 +271,41 @@ export const orderService = {
       assignedCardUids: order.assignedCardUids,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
+    };
+  },
+
+  /**
+   * Cancel an order if it is still in CREATED (unpaid / initial placed) state.
+   */
+  async cancelOrder({ userId, orderId }) {
+    const order = await Order.findOne({ _id: orderId, user: userId });
+    if (!order) {
+      throw new NotFoundError('Order not found');
+    }
+
+    if (order.state !== ORDER_STATE.CREATED) {
+      throw new AppError(
+        'Order cannot be cancelled once payment has been completed or production has started.',
+        ERROR_CODE.INVALID_STATE_TRANSITION,
+        HTTP.BAD_REQUEST,
+      );
+    }
+
+    order.state = ORDER_STATE.CANCELLED;
+    await order.save();
+
+    eventBus.publish(APP_EVENT.ORDER_CANCELLED, {
+      orderId: order._id.toString(),
+      orderNumber: order.orderNumber,
+      userId: userId.toString(),
+      timestamp: new Date(),
+    });
+
+    return {
+      id: order._id.toString(),
+      _id: order._id.toString(),
+      orderNumber: order.orderNumber,
+      state: order.state,
     };
   },
 };

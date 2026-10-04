@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button'
-import { Sparkles, ShoppingBag } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
 
 export interface NfcCardEdition {
   id: 'pvc' | 'wooden' | 'metallic'
@@ -25,8 +25,8 @@ export const NFC_CARD_EDITIONS: NfcCardEdition[] = [
     name: 'PVC Card',
     tagline: 'LIGHTWEIGHT EVERYDAY CARRY',
     description: 'Clean, durable, and ready for every introduction.',
-    originalPrice: 500,
-    salePrice: 400,
+    originalPrice: 599,
+    salePrice: 499,
     discountAmount: 100,
     currency: 'INR',
     currencySymbol: '₹',
@@ -40,8 +40,8 @@ export const NFC_CARD_EDITIONS: NfcCardEdition[] = [
     name: 'Wooden Card',
     tagline: 'NATURAL STATEMENT PIECE',
     description: 'A warm, tactile card for a memorable first impression.',
-    originalPrice: 1000,
-    salePrice: 900,
+    originalPrice: 1099,
+    salePrice: 999,
     discountAmount: 100,
     currency: 'INR',
     currencySymbol: '₹',
@@ -55,8 +55,8 @@ export const NFC_CARD_EDITIONS: NfcCardEdition[] = [
     name: 'Metallic Card',
     tagline: 'PREMIUM LASTING FINISH',
     description: 'A refined metal finish for the moments that matter.',
-    originalPrice: 1500,
-    salePrice: 1400,
+    originalPrice: 1599,
+    salePrice: 1499,
     discountAmount: 100,
     currency: 'INR',
     currencySymbol: '₹',
@@ -130,7 +130,6 @@ export function NfcCardEditions({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
             <span>NFC Smart Card Editions</span>
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
@@ -257,7 +256,6 @@ export function NfcCardEditions({
                 </div>
 
                 <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-black tracking-wider uppercase text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  <Sparkles className="h-3 w-3" />
                   {edition.badge}
                 </div>
               </div>
@@ -274,7 +272,7 @@ export function NfcCardEditions({
                       onSelectEdition?.(edition)
                     }}
                   >
-                    Pre-Book {edition.name}
+                    Order {edition.name}
                   </Button>
                 </div>
               )}

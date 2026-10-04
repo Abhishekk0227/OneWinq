@@ -1107,6 +1107,8 @@ class AdminService {
     const filter = {};
     if (status && status !== 'ALL') {
       filter.state = status;
+    } else {
+      filter.state = { $ne: ORDER_STATE.CREATED };
     }
     if (q && q.trim()) {
       const term = q.trim();
