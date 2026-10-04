@@ -10,7 +10,6 @@ import { PublicOnlyRoute } from './PublicOnlyRoute'
 import { LoadingScreen } from '@/components/common/LoadingScreen'
 
 // Lazy loaded page components for optimal performance & code splitting
-const LandingPage = React.lazy(() => import('@/pages/landing/LandingPage'))
 const PublicProfilePage = React.lazy(() => import('@/pages/public/PublicProfilePage'))
 const CardTapRedirectPage = React.lazy(() => import('@/pages/public/CardTapRedirectPage'))
 
@@ -57,14 +56,10 @@ export const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      // Marketing Landing Page
+      // Direct root access to Login Page
       {
         index: true,
-        element: (
-          <Suspended>
-            <LandingPage />
-          </Suspended>
-        ),
+        element: <Navigate to="/login" replace />,
       },
 
       // Public Vanity Profile

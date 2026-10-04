@@ -1,6 +1,14 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
 import { config } from '../../config/env.js';
 import logger from '../../utils/logger.js';
+
+// Set public DNS servers to reliably resolve MongoDB Atlas SRV records on Windows
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (dnsErr) {
+  // Fallback gracefully if custom DNS cannot be configured
+}
 
 // ---------------------------------------------------------------------------
 // Mongoose connection with retry, observability, and graceful shutdown.
