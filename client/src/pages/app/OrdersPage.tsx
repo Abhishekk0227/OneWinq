@@ -587,15 +587,6 @@ export default function OrdersPage() {
                     </div>
 
                     <div className="space-y-1">
-                      {order.razorpayPaymentId && (
-                        <div>
-                          <span className="font-semibold text-foreground">Razorpay Payment ID:</span>
-                          <div className="font-mono text-xs text-muted-foreground truncate">
-                            {order.razorpayPaymentId}
-                          </div>
-                        </div>
-                      )}
-
                       {order.trackingNumber && (
                         <div>
                           <span className="font-semibold text-foreground">Courier Tracking:</span>
