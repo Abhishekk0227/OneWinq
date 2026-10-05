@@ -60,49 +60,98 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
    */
   function isVisible(configuredVisibility) {
     if (!configuredVisibility) {return true;}
-    // Public sections and fields are baseline and always visible in all modes
+    if (configuredVisibility === 'ALL') {return true;}
+    if (Array.isArray(configuredVisibility)) {
+      if (configuredVisibility.length === 0) return true;
+      if (configuredVisibility.includes('ALL')) return true;
+      if (configuredVisibility.includes(effectiveMode)) return true;
+      return false;
+    }
+    // Backward compatibility for legacy single-string visibility
     if (configuredVisibility === SECTION_VISIBILITY.PUBLIC) {return true;}
-    // Content specifically matching current mode (e.g. PROFESSIONAL in PROFESSIONAL mode, PRIVATE in PRIVATE mode)
     if (configuredVisibility === effectiveMode) {return true;}
     return false;
   }
 
+  // Extract mode-specific overrides if configured for the current effective mode
+  const modeData =
+    profileSnapshot.modeData instanceof Map
+      ? Object.fromEntries(profileSnapshot.modeData)
+      : profileSnapshot.modeData || {};
+  const modeOverride = modeData[effectiveMode] || {};
+
+  const effectiveDisplayName =
+    modeOverride.displayName !== undefined && modeOverride.displayName !== ''
+      ? modeOverride.displayName
+      : profileSnapshot.displayName || '';
+
+  const effectiveProfessionTitle =
+    modeOverride.professionTitle !== undefined && modeOverride.professionTitle !== ''
+      ? modeOverride.professionTitle
+      : profileSnapshot.professionTitle || '';
+
+  const effectiveHeadline =
+    modeOverride.headline !== undefined && modeOverride.headline !== ''
+      ? modeOverride.headline
+      : profileSnapshot.headline || '';
+
+  const effectiveBio =
+    modeOverride.bio !== undefined && modeOverride.bio !== ''
+      ? modeOverride.bio
+      : profileSnapshot.bio || '';
+
+  const effectiveAvatarUrl =
+    modeOverride.avatarUrl !== undefined && modeOverride.avatarUrl !== null
+      ? modeOverride.avatarUrl
+      : profileSnapshot.avatarUrl;
+
+  const effectiveCoverUrl =
+    modeOverride.coverUrl !== undefined && modeOverride.coverUrl !== null
+      ? modeOverride.coverUrl
+      : profileSnapshot.coverUrl;
+
   const result = {
-    headline: profileSnapshot.headline || '',
-    bio: isVisible(secVis.about) ? profileSnapshot.bio || '' : '',
-    avatarUrl: isVisible(profileSnapshot.avatarVisibility) ? profileSnapshot.avatarUrl : null,
-    coverUrl: profileSnapshot.coverUrl || null,
+    displayName: effectiveDisplayName,
+    professionTitle: effectiveProfessionTitle,
+    headline: effectiveHeadline,
+    bio: isVisible(secVis.about) ? effectiveBio : '',
+    avatarUrl: isVisible(profileSnapshot.avatarVisibility) ? effectiveAvatarUrl : null,
+    coverUrl: effectiveCoverUrl || null,
     effectiveMode,
     sections: {},
     customSections: [],
   };
 
-  // Location
-  if (isVisible(secVis.location) && profileSnapshot.location) {
+  // Location (with mode-level overrides)
+  if (isVisible(secVis.location) && (profileSnapshot.location || modeOverride.location)) {
+    const baseLoc = profileSnapshot.location || {};
+    const overLoc = modeOverride.location || {};
     result.location = {
-      city: profileSnapshot.location.city || '',
-      state: profileSnapshot.location.state || '',
-      country: profileSnapshot.location.country || '',
-      isRemote: Boolean(profileSnapshot.location.isRemote),
+      city: overLoc.city !== undefined && overLoc.city !== '' ? overLoc.city : (baseLoc.city || ''),
+      state: overLoc.state !== undefined && overLoc.state !== '' ? overLoc.state : (baseLoc.state || ''),
+      country: overLoc.country !== undefined && overLoc.country !== '' ? overLoc.country : (baseLoc.country || ''),
+      isRemote: overLoc.isRemote !== undefined ? Boolean(overLoc.isRemote) : Boolean(baseLoc.isRemote),
     };
   } else {
     result.location = null;
   }
 
-  // Contact (with field-level overrides)
-  if (isVisible(secVis.contact) && profileSnapshot.contact) {
+  // Contact (with field-level overrides and modeData contact overrides)
+  if (isVisible(secVis.contact) && (profileSnapshot.contact || modeOverride.contact)) {
+    const baseContact = profileSnapshot.contact || {};
+    const overContact = modeOverride.contact || {};
     const contact = {};
     if (isVisible(fldVis['contact.email'])) {
-      contact.email = profileSnapshot.contact.email || '';
+      contact.email = overContact.email !== undefined && overContact.email !== '' ? overContact.email : (baseContact.email || '');
     }
     if (isVisible(fldVis['contact.phone'])) {
-      contact.phone = profileSnapshot.contact.phone || '';
+      contact.phone = overContact.phone !== undefined && overContact.phone !== '' ? overContact.phone : (baseContact.phone || '');
     }
     if (isVisible(fldVis['contact.website'])) {
-      contact.website = profileSnapshot.contact.website || '';
+      contact.website = overContact.website !== undefined && overContact.website !== '' ? overContact.website : (baseContact.website || '');
     }
     if (isVisible(fldVis['contact.address'])) {
-      contact.address = profileSnapshot.contact.address || '';
+      contact.address = overContact.address !== undefined && overContact.address !== '' ? overContact.address : (baseContact.address || '');
     }
     result.contact = Object.keys(contact).length > 0 ? contact : null;
   } else {
@@ -111,12 +160,23 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
 
   // Social Links
   if (isVisible(secVis.socialLinks) && Array.isArray(profileSnapshot.socialLinks)) {
-    result.socialLinks = profileSnapshot.socialLinks.map((s) => ({
-      id: s.id,
-      platform: s.platform,
-      url: s.url,
-      label: s.label || '',
-    }));
+    result.socialLinks = profileSnapshot.socialLinks
+      .filter((s) => {
+        if (!s) return false;
+        if (s.modes && Array.isArray(s.modes) && s.modes.length > 0) {
+          return s.modes.includes(effectiveMode) || s.modes.includes('ALL');
+        }
+        if (s.visibility) {
+          return isVisible(s.visibility);
+        }
+        return true;
+      })
+      .map((s) => ({
+        id: s.id,
+        platform: s.platform,
+        url: s.url,
+        label: s.label || '',
+      }));
   } else {
     result.socialLinks = [];
   }
@@ -143,8 +203,18 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
 
   for (const key of structuredKeys) {
     if (isVisible(secVis[key]) && Array.isArray(profileSnapshot[key])) {
-      result.sections[key] = profileSnapshot[key];
-      result[key] = profileSnapshot[key];
+      const filtered = profileSnapshot[key].filter((item) => {
+        if (!item) return false;
+        if (item.modes && Array.isArray(item.modes) && item.modes.length > 0) {
+          return item.modes.includes(effectiveMode) || item.modes.includes('ALL');
+        }
+        if (item.visibility) {
+          return isVisible(item.visibility);
+        }
+        return true;
+      });
+      result.sections[key] = filtered;
+      result[key] = filtered;
     }
   }
 

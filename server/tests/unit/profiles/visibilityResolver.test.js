@@ -163,5 +163,50 @@ describe('visibilityResolver', () => {
       const privateResult = filterProfileByVisibility(hiddenAvatarProfile, VISIBILITY_MODE.PRIVATE);
       expect(privateResult.avatarUrl).toBe('https://example.com/avatar.jpg');
     });
+
+    it('supports array-based visibility across multiple modes', () => {
+      const multiModeProfile = {
+        ...sampleProfile,
+        sectionVisibility: {
+          ...sampleProfile.sectionVisibility,
+          experience: ['PUBLIC', 'PROFESSIONAL'],
+          services: ['PROFESSIONAL', 'PRIVATE'],
+        },
+      };
+
+      const publicRes = filterProfileByVisibility(multiModeProfile, VISIBILITY_MODE.PUBLIC);
+      expect(publicRes.sections.experience).toBeDefined();
+      expect(publicRes.sections.services).toBeUndefined();
+
+      const profRes = filterProfileByVisibility(multiModeProfile, VISIBILITY_MODE.PROFESSIONAL);
+      expect(profRes.sections.experience).toBeDefined();
+      expect(profRes.sections.services).toBeDefined();
+
+      const privateRes = filterProfileByVisibility(multiModeProfile, VISIBILITY_MODE.PRIVATE);
+      expect(privateRes.sections.experience).toBeUndefined(); // only in PUBLIC and PROFESSIONAL
+      expect(privateRes.sections.services).toBeDefined(); // explicitly included in PRIVATE
+    });
+
+    it('applies modeData overrides when configured for effective mode', () => {
+      const overrideProfile = {
+        ...sampleProfile,
+        bio: 'Universal standard bio',
+        headline: 'General Architect',
+        modeData: {
+          PROFESSIONAL: {
+            bio: 'Senior Executive Consultant with 15+ years experience',
+            headline: 'Principal Enterprise Consultant',
+          },
+        },
+      };
+
+      const publicRes = filterProfileByVisibility(overrideProfile, VISIBILITY_MODE.PUBLIC);
+      expect(publicRes.bio).toBe('Universal standard bio');
+      expect(publicRes.headline).toBe('General Architect');
+
+      const profRes = filterProfileByVisibility(overrideProfile, VISIBILITY_MODE.PROFESSIONAL);
+      expect(profRes.bio).toBe('Senior Executive Consultant with 15+ years experience');
+      expect(profRes.headline).toBe('Principal Enterprise Consultant');
+    });
   });
 });

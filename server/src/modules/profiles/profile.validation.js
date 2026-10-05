@@ -386,12 +386,16 @@ export const updateProfileSchema = z.object({
     )
     .optional(),
   sectionOrder: z.array(z.string()).optional(),
+  modeData: z.record(z.any()).optional(),
+  avatarVisibility: z.union([z.string(), z.array(z.string())]).optional(),
+  sectionVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
+  fieldVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
 });
 
 export const updateVisibilitySchema = z.object({
-  avatarVisibility: z.enum(Object.values(SECTION_VISIBILITY)).optional(),
-  sectionVisibility: z.record(z.enum(Object.values(SECTION_VISIBILITY))).optional(),
-  fieldVisibility: z.record(z.enum(Object.values(SECTION_VISIBILITY))).optional(),
+  avatarVisibility: z.union([z.string(), z.array(z.string())]).optional(),
+  sectionVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
+  fieldVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
 });
 
 export const setModeSchema = z.object({
