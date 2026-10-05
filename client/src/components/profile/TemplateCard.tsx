@@ -74,6 +74,8 @@ const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
   'freelancer-consultant': '/templates/freelancer-consultant.png',
   founder: '/templates/founder.png',
   creator: '/templates/creator.png',
+  student: '/templates/student.png',
+  professional: '/templates/professional.png',
 }
 
 interface ProfessionPreviewProps {
