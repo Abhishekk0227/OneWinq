@@ -51,6 +51,7 @@ import {
   Home,
   ArrowLeft,
   ChevronRight,
+  Menu,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
 
@@ -64,6 +65,7 @@ export default function PublicProfilePage() {
   const [isCopied, setIsCopied] = React.useState(false)
   const [isStartingChat, setIsStartingChat] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<string>('home')
+  const [isSectionsDrawerOpen, setIsSectionsDrawerOpen] = React.useState(false)
 
   // Profile theme state (Light ☀️ / Dark 🌙)
   const [profileTheme, setProfileTheme] = React.useState<'dark' | 'light'>(() => {
@@ -410,7 +412,8 @@ export default function PublicProfilePage() {
   const mediaGallery = profile.mediaGallery || profile.sections?.mediaGallery || []
   const customSections = profile.customSections || []
 
-  const hasExperience = experiences.length > 0 || education.length > 0
+  const hasExperience = experiences.length > 0
+  const hasEducation = education.length > 0
   const hasPortfolio = projects.length > 0 || services.length > 0 || organizations.length > 0
   const hasMedia = mediaGallery.length > 0 || publications.length > 0
   const hasPosts = userPosts.length > 0
@@ -418,7 +421,8 @@ export default function PublicProfilePage() {
 
   const profileTabs = [
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
-    ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length + education.length }] : []),
+    ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
+    ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
     ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
     ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + publications.length }] : []),
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
@@ -587,38 +591,7 @@ export default function PublicProfilePage() {
       </header>
 
       {/* Main Profile Canvas */}
-      <main className="container mx-auto max-w-6xl px-3 sm:px-6 pt-4 sm:pt-6 animate-in fade-in duration-300">
-        {/* Mobile Horizontal Section Navigation Bar */}
-        <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth pb-3 px-0.5">
-          {profileTabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-white shadow-xs font-bold'
-                    : 'bg-card text-foreground/80 hover:bg-muted border border-border/60'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                      isActive ? 'bg-white/20 text-white font-bold' : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
+      <main className="container mx-auto max-w-6xl px-3 sm:px-6 pt-6 animate-in fade-in duration-300">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-left">
           {/* Left Desktop Navigation Sidebar */}
           <div className="hidden md:block md:col-span-3 space-y-4">
@@ -677,18 +650,60 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Right Main Content Canvas */}
-          <div className="md:col-span-9 space-y-6 min-w-0 max-w-full">
-            {/* Dedicated Header for Non-Home Tabs */}
+          <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
+            {/* Mobile & Canvas Top Section Pills Bar with All Sections Menu */}
+            <div className="p-2 rounded-2xl bg-card border border-border/80 shadow-xs flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
+                {profileTabs.slice(0, 4).map((tab) => {
+                  const isActive = activeTab === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
+                      }`}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                      {tab.count !== undefined && (
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-background text-muted-foreground'
+                          }`}
+                        >
+                          {tab.count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsSectionsDrawerOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20 shrink-0 cursor-pointer"
+              >
+                <Menu className="h-3.5 w-3.5" />
+                <span>All ({profileTabs.length})</span>
+              </button>
+            </div>
+
+            {/* Dedicated Header for Non-Home Tabs (Responsive & Compact) */}
             {activeTab !== 'home' && (
-              <div className="rounded-2xl sm:rounded-3xl border border-border bg-card p-3.5 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="rounded-3xl border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 min-w-0 max-w-full overflow-hidden">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                   <button
                     type="button"
                     onClick={() => setActiveTab('home')}
-                    className="p-1.5 sm:p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
-                    title="Back to Home / Intro"
+                    className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
+                    title="Back to Profile Home"
                   >
-                    <ArrowLeft className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                    <ArrowLeft className="h-4 w-4" />
                   </button>
                   <div className="min-w-0 flex-1">
                     <h1 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 truncate">
@@ -696,7 +711,7 @@ export default function PublicProfilePage() {
                       <span className="truncate">{profileTabs.find((t) => t.id === activeTab)?.label}</span>
                     </h1>
                     <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                      @{profileUser.username}'s {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
+                      @{profileUser.username}'s dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
                     </p>
                   </div>
                 </div>
@@ -704,7 +719,7 @@ export default function PublicProfilePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('home')}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 ml-auto"
+                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 self-start xs:self-auto"
                 >
                   <span>Profile Home</span>
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -765,11 +780,11 @@ export default function PublicProfilePage() {
 
                     <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
                       <div className="min-w-0 max-w-full">
-                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                           {profileUser.displayName}
                         </h1>
                         {profile.headline && (
-                          <p className="text-sm sm:text-base font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
+                          <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
                             {profile.headline}
                           </p>
                         )}
@@ -912,6 +927,51 @@ export default function PublicProfilePage() {
                         {exp.description && (
                           <p className="text-xs text-muted-foreground leading-relaxed pt-1 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
                             {exp.description}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Education Section */}
+            {(activeTab === 'all' || activeTab === 'education') && education.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
+                    <GraduationCap className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education & Credentials</h2>
+                </div>
+                <div className="space-y-6 pt-2 min-w-0">
+                  {education.map((edu: any, idx: number) => {
+                    const dateStr = formatDateRange(
+                      edu.startMonth,
+                      edu.startYear,
+                      edu.endMonth,
+                      edu.endYear,
+                      edu.current,
+                      edu.startDate,
+                      edu.endDate
+                    )
+                    return (
+                      <div key={edu.id || idx} className="space-y-1 relative pl-4 border-l-2 border-primary/30 min-w-0 max-w-full">
+                        <div className="flex items-start justify-between gap-2 min-w-0">
+                          <h3 className="font-bold text-foreground text-sm break-words [overflow-wrap:anywhere] min-w-0">
+                            {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
+                          </h3>
+                          {dateStr && (
+                            <span className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md shrink-0">
+                              {dateStr}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
+                        {edu.description && (
+                          <p className="text-xs text-muted-foreground leading-relaxed pt-1 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+                            {edu.description}
                           </p>
                         )}
                       </div>
@@ -1404,6 +1464,61 @@ export default function PublicProfilePage() {
           >
             Send Request
           </Button>
+        </div>
+      </Dialog>
+
+      {/* All Profile Sections Menu Drawer */}
+      <Dialog open={isSectionsDrawerOpen} onOpenChange={setIsSectionsDrawerOpen}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-base font-bold">
+            <Menu className="h-4 w-4 text-primary" />
+            <span>All Profile Sections</span>
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            Navigate to any section tab on @{profileUser.username}'s profile.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2 py-3 max-h-[60vh] overflow-y-auto pr-1">
+          {profileTabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  setIsSectionsDrawerOpen(false)
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                  isActive
+                    ? 'border-primary bg-primary/10 text-primary font-bold shadow-xs'
+                    : 'border-border/80 bg-card hover:bg-muted hover:border-border text-foreground'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`p-2 rounded-xl ${isActive ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                    {tab.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold truncate">{tab.label}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">
+                      {tab.id === 'home' ? 'Main identity card, headline & bio' : `Dedicated ${tab.label.toLowerCase()} section`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {tab.count !== undefined && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-muted text-muted-foreground">
+                      {tab.count}
+                    </span>
+                  )}
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </button>
+            )
+          })}
         </div>
       </Dialog>
     </div>

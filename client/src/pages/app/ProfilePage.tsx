@@ -39,6 +39,7 @@ import {
   Home,
   ArrowLeft,
   ChevronRight,
+  Menu,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
@@ -186,22 +187,26 @@ export default function ProfilePage() {
   const publications = profile?.publications || profile?.sections?.publications || []
   const customSections = profile?.customSections || []
 
-  const hasExperience = experiences.length > 0 || education.length > 0
+  const hasExperience = experiences.length > 0
+  const hasEducation = education.length > 0
   const hasPortfolio = projects.length > 0 || services.length > 0
   const hasMedia = certifications.length > 0 || skills.length > 0 || awards.length > 0 || publications.length > 0
   const hasCustom = customSections.length > 0
+
+  const [isSectionsDrawerOpen, setIsSectionsDrawerOpen] = React.useState(false)
 
   const profileTabs = React.useMemo(() => {
     if (!profile) return []
     return [
       { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
-      ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length + education.length }] : []),
+      ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
+      ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
       ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length }] : []),
       ...(hasMedia ? [{ id: 'media', label: 'Credentials', icon: <Award className="h-4 w-4" />, count: certifications.length + skills.length + awards.length + publications.length }] : []),
       { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
       ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
-  }, [profile, hasExperience, hasPortfolio, hasMedia, hasCustom, experiences.length, education.length, projects.length, services.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
+  }, [profile, hasExperience, hasEducation, hasPortfolio, hasMedia, hasCustom, experiences.length, education.length, projects.length, services.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
 
   if (isLoading) {
     return <LoadingScreen message="Loading your identity..." />
@@ -242,37 +247,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      {/* Mobile Horizontal Section Navigation Bar */}
-      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth pb-1 px-0.5">
-        {profileTabs.map((tab) => {
-          const isActive = activeTab === tab.id
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
-                isActive
-                  ? 'bg-primary text-white shadow-xs font-bold'
-                  : 'bg-card text-foreground/80 hover:bg-muted border border-border/60'
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-              {tab.count !== undefined && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                    isActive ? 'bg-white/20 text-white font-bold' : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
 
       {/* Main Profile Canvas with Desktop Sidebar Navigation */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -333,18 +307,60 @@ export default function ProfilePage() {
         </div>
 
         {/* Right Main Content Canvas */}
-        <div className="md:col-span-9 space-y-6 min-w-0 max-w-full">
-          {/* Dedicated Header for Non-Home Tabs */}
+        <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
+          {/* Mobile & Canvas Top Section Pills Bar with All Sections Menu */}
+          <div className="p-2 rounded-2xl bg-card border border-border/80 shadow-xs flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
+              {profileTabs.slice(0, 4).map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-background text-muted-foreground'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsSectionsDrawerOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20 shrink-0 cursor-pointer"
+            >
+              <Menu className="h-3.5 w-3.5" />
+              <span>All ({profileTabs.length})</span>
+            </button>
+          </div>
+
+          {/* Dedicated Header for Non-Home Tabs (Responsive & Compact) */}
           {activeTab !== 'home' && (
-            <div className="rounded-2xl sm:rounded-3xl border border-border bg-card p-3.5 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="rounded-3xl border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 min-w-0 max-w-full overflow-hidden">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                 <button
                   type="button"
                   onClick={() => setActiveTab('home')}
-                  className="p-1.5 sm:p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
-                  title="Back to Home / Intro"
+                  className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
+                  title="Back to Profile Home"
                 >
-                  <ArrowLeft className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div className="min-w-0 flex-1">
                   <h1 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 truncate">
@@ -352,7 +368,7 @@ export default function ProfilePage() {
                     <span className="truncate">{profileTabs.find((t) => t.id === activeTab)?.label}</span>
                   </h1>
                   <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                    Your {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
+                    Dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} view
                   </p>
                 </div>
               </div>
@@ -360,7 +376,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('home')}
-                className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 ml-auto"
+                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 self-start xs:self-auto"
               >
                 <span>Profile Home</span>
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -511,7 +527,7 @@ export default function ProfilePage() {
                 {/* Header Info */}
                 <div id="section-overview" className="scroll-mt-28 space-y-3">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                       {user?.displayName}
                     </h2>
                     <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
@@ -803,10 +819,10 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* DEDICATED TAB: Experience & Education */}
+          {/* DEDICATED TAB: Work Experience */}
           {activeTab === 'experience' && (
             <div className="space-y-6">
-              {experiences.length > 0 && (
+              {experiences.length > 0 ? (
                 <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                     <Briefcase className="h-4 w-4 text-primary" />
@@ -845,9 +861,20 @@ export default function ProfilePage() {
                     })}
                   </div>
                 </div>
+              ) : (
+                <div className="p-8 rounded-3xl border border-dashed border-border bg-card text-center space-y-2">
+                  <Briefcase className="h-8 w-8 text-muted-foreground mx-auto" />
+                  <div className="text-sm font-semibold text-foreground">No Work Experience Added</div>
+                  <p className="text-xs text-muted-foreground">Work history items will appear here once added to your profile.</p>
+                </div>
               )}
+            </div>
+          )}
 
-              {education.length > 0 && (
+          {/* DEDICATED TAB: Education & Academics */}
+          {activeTab === 'education' && (
+            <div className="space-y-6">
+              {education.length > 0 ? (
                 <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                     <GraduationCap className="h-4 w-4 text-primary" />
@@ -884,6 +911,12 @@ export default function ProfilePage() {
                       )
                     })}
                   </div>
+                </div>
+              ) : (
+                <div className="p-8 rounded-3xl border border-dashed border-border bg-card text-center space-y-2">
+                  <GraduationCap className="h-8 w-8 text-muted-foreground mx-auto" />
+                  <div className="text-sm font-semibold text-foreground">No Education Added</div>
+                  <p className="text-xs text-muted-foreground">Academic qualifications will appear here once added to your profile.</p>
                 </div>
               )}
             </div>
@@ -1098,6 +1131,74 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* All Profile Sections Drawer Modal */}
+      <Dialog open={isSectionsDrawerOpen} onOpenChange={setIsSectionsDrawerOpen}>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Menu className="h-4 w-4 text-primary" />
+            <span>All Profile Sections</span>
+          </DialogTitle>
+          <DialogDescription>
+            Select any section to jump directly to its dedicated content.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2 py-2 max-h-[60vh] overflow-y-auto pr-1">
+          {profileTabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  setIsSectionsDrawerOpen(false)
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-primary text-white border-primary shadow-md'
+                    : 'bg-card border-border hover:bg-muted text-foreground'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`p-2 rounded-xl shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-muted text-primary'}`}>
+                    {tab.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold truncate">{tab.label}</div>
+                    <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
+                      {tab.id === 'home'
+                        ? 'Main identity overview & intro hero card'
+                        : tab.id === 'experience'
+                        ? 'Work history & professional roles'
+                        : tab.id === 'education'
+                        ? 'Academic qualifications & degrees'
+                        : tab.id === 'portfolio'
+                        ? 'Featured projects & services'
+                        : tab.id === 'media'
+                        ? 'Certifications, skills & awards'
+                        : tab.id === 'posts'
+                        ? 'Community posts & activity'
+                        : 'Custom section blocks'}
+                    </div>
+                  </div>
+                </div>
+
+                {tab.count !== undefined && (
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-mono font-bold shrink-0 ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </Dialog>
 
       {/* Temporary Mode Configuration Modal */}
       <Dialog open={isTempModalOpen} onOpenChange={setIsTempModalOpen}>
