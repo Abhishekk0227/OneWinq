@@ -1270,7 +1270,6 @@ export default function ProfileEditPage() {
               <TabsList className="inline-flex h-11 items-center justify-start rounded-2xl bg-muted/60 p-1 text-muted-foreground w-max gap-1 shrink-0 border border-border/40">
                 {visibleTabs.map((tab) => {
                   const Icon = tab.icon
-                  const isExtra = !defaultTabIds.includes(tab.id)
                   return (
                     <TabsTrigger
                       key={tab.id}
@@ -1279,25 +1278,6 @@ export default function ProfileEditPage() {
                     >
                       <Icon className="h-3.5 w-3.5" />
                       <span>{tab.label}</span>
-                      {isExtra && (
-                        <span className="text-[9px] px-1 py-0 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold tracking-wide">
-                          Extra
-                        </span>
-                      )}
-                      {isExtra && (
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          title={`Remove ${tab.label} section`}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleRemoveSection(tab.id, tab.label)
-                          }}
-                          className="ml-0.5 p-0.5 rounded-full hover:bg-destructive/20 hover:text-destructive text-muted-foreground transition-colors cursor-pointer"
-                        >
-                          <X className="h-3 w-3" />
-                        </span>
-                      )}
                     </TabsTrigger>
                   )
                 })}
