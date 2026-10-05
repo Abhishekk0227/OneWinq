@@ -56,15 +56,89 @@ import {
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
 
-function getSocialIcon(platform?: string, url?: string) {
+function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
-  if (name.includes('github')) return <Code className="h-4 w-4 text-purple-500 shrink-0" />
-  if (name.includes('linkedin')) return <Briefcase className="h-4 w-4 text-blue-600 shrink-0" />
-  if (name.includes('youtube')) return <Video className="h-4 w-4 text-red-500 shrink-0" />
-  if (name.includes('mail') || name.includes('@')) return <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
-  if (name.includes('phone') || name.includes('whatsapp')) return <Phone className="h-4 w-4 text-emerald-500 shrink-0" />
-  if (name.includes('site') || name.includes('web') || name.includes('http')) return <Globe className="h-4 w-4 text-sky-500 shrink-0" />
-  return <Share2 className="h-4 w-4 text-primary shrink-0" />
+
+  if (name.includes('instagram')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="6" fill="url(#ig-grad-pub)" />
+        <path d="M12 7.5C9.51472 7.5 7.5 9.51472 7.5 12C7.5 14.4853 9.51472 16.5 12 16.5C14.4853 16.5 16.5 14.4853 16.5 12C16.5 9.51472 14.4853 7.5 12 7.5ZM12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12C15 13.6569 13.6569 15 12 15Z" fill="white"/>
+        <circle cx="16.5" cy="7.5" r="1" fill="white"/>
+        <rect x="4.5" y="4.5" width="15" height="15" rx="4.5" stroke="white" strokeWidth="1.5"/>
+        <defs>
+          <radialGradient id="ig-grad-pub" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(6 22) rotate(-55) scale(25 25)">
+            <stop stopColor="#FFDD55"/>
+            <stop offset="0.2" stopColor="#FF543E"/>
+            <stop offset="0.4" stopColor="#C837AB"/>
+            <stop offset="0.7" stopColor="#5851DB"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    )
+  }
+
+  if (name.includes('linkedin')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#0A66C2">
+        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('twitter') || name.includes('x.com') || name.includes(' x ')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('github')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('youtube')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#FF0000">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('facebook')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#1877F2">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('whatsapp')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#25D366">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-1.199 4.38 4.542-1.192z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('telegram')) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="#24A1DE">
+        <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.331.016.118.034.349.02.542z"/>
+      </svg>
+    )
+  }
+
+  if (name.includes('site') || name.includes('web') || name.includes('http')) {
+    return <Globe className={`${className} text-sky-500`} />
+  }
+
+  return <Share2 className={`${className} text-primary`} />
 }
 
 export default function PublicProfilePage() {
@@ -449,18 +523,17 @@ export default function PublicProfilePage() {
           : 'bg-[#faf8fd] text-zinc-900'
       }`}
     >
-      {/* Floating Top Banner / Navigation */}
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
-        <div className="container mx-auto flex max-w-4xl items-center justify-between gap-2">
-          <BrandLogo to="/" imgClassName="h-6 sm:h-7" />
+      {/* Floating Top Banner / Navigation (Responsive & Tight Layout) */}
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
+        <div className="container mx-auto flex max-w-4xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
+          <BrandLogo to="/" imgClassName="h-5 sm:h-6 shrink-0" />
 
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
             {/* Theme Switcher: Light ☀️ / Dark 🌙 */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer shrink-0"
               title={`Switch to ${profileTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
               aria-label="Toggle profile theme"
             >
@@ -482,7 +555,7 @@ export default function PublicProfilePage() {
               size="sm"
               onClick={() => setIsShareModalOpen(true)}
               leftIcon={<Share2 className="h-3.5 w-3.5" />}
-              className="h-8 text-xs px-2.5 sm:px-3"
+              className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 shrink-0"
             >
               <span className="hidden sm:inline">Share</span>
             </Button>
@@ -592,8 +665,8 @@ export default function PublicProfilePage() {
             )}
 
             {isSelf && (
-              <Link to="/app/profile/edit">
-                <Button size="sm" variant="subtle" className="h-8 text-xs px-2.5 sm:px-3">
+              <Link to="/app/profile/edit" className="shrink-0">
+                <Button size="sm" variant="subtle" className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
                   Edit Identity
                 </Button>
               </Link>
@@ -833,7 +906,7 @@ export default function PublicProfilePage() {
                             title={s.label || s.platform || 'Social Link'}
                             className="p-2 sm:p-2.5 rounded-2xl bg-card hover:bg-muted text-foreground border border-border/80 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
                           >
-                            {getSocialIcon(s.platform, s.url)}
+                            <SocialBrandIcon platform={s.platform} url={s.url} />
                           </a>
                         ))}
                       </div>
@@ -1298,44 +1371,6 @@ export default function PublicProfilePage() {
                           <ExternalLink className="h-3.5 w-3.5 opacity-60 shrink-0" />
                         </a>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Education Card */}
-                {education.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
-                    <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                      <GraduationCap className="h-4 w-4 text-primary shrink-0" />
-                      <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education</h2>
-                    </div>
-                    <div className="space-y-3 pt-1 min-w-0">
-                      {education.map((edu: any, idx: number) => {
-                        const dateStr = formatDateRange(
-                          edu.startMonth,
-                          edu.startYear,
-                          edu.endMonth,
-                          edu.endYear,
-                          edu.current,
-                          edu.startDate,
-                          edu.endDate
-                        )
-                        return (
-                          <div key={edu.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2.5 last:pb-0 min-w-0 max-w-full">
-                            <div className="flex items-start justify-between gap-1 min-w-0">
-                              <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
-                              {dateStr && (
-                                <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                                  {dateStr}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-primary font-medium break-words [overflow-wrap:anywhere] min-w-0">
-                              {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ')}
-                            </div>
-                          </div>
-                        )
-                      })}
                     </div>
                   </div>
                 )}
