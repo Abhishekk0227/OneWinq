@@ -8,44 +8,46 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { AdminRoute } from './AdminRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 import { LoadingScreen } from '@/components/common/LoadingScreen'
+import { RouteErrorBoundary } from '@/components/common/RouteErrorBoundary'
+import { lazyWithRetry } from '@/lib/utils/lazyWithRetry'
 
-// Lazy loaded page components for optimal performance & code splitting
-const PublicProfilePage = React.lazy(() => import('@/pages/public/PublicProfilePage'))
-const CardTapRedirectPage = React.lazy(() => import('@/pages/public/CardTapRedirectPage'))
+// Lazy loaded page components with automatic retry fallback on chunk failure
+const PublicProfilePage = lazyWithRetry(() => import('@/pages/public/PublicProfilePage'))
+const CardTapRedirectPage = lazyWithRetry(() => import('@/pages/public/CardTapRedirectPage'))
 
 // Auth pages
-const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage'))
-const RegisterPage = React.lazy(() => import('@/pages/auth/RegisterPage'))
-const VerifyEmailPage = React.lazy(() => import('@/pages/auth/VerifyEmailPage'))
-const ForgotPasswordPage = React.lazy(() => import('@/pages/auth/ForgotPasswordPage'))
-const ResetPasswordPage = React.lazy(() => import('@/pages/auth/ResetPasswordPage'))
+const LoginPage = lazyWithRetry(() => import('@/pages/auth/LoginPage'))
+const RegisterPage = lazyWithRetry(() => import('@/pages/auth/RegisterPage'))
+const VerifyEmailPage = lazyWithRetry(() => import('@/pages/auth/VerifyEmailPage'))
+const ForgotPasswordPage = lazyWithRetry(() => import('@/pages/auth/ForgotPasswordPage'))
+const ResetPasswordPage = lazyWithRetry(() => import('@/pages/auth/ResetPasswordPage'))
 
 // App pages
-const DashboardPage = React.lazy(() => import('@/pages/app/DashboardPage'))
-const ProfilePage = React.lazy(() => import('@/pages/app/ProfilePage'))
-const ProfileEditPage = React.lazy(() => import('@/pages/app/ProfileEditPage'))
-const ProfileTemplatesPage = React.lazy(() => import('@/pages/app/ProfileTemplatesPage'))
-const FeedPage = React.lazy(() => import('@/pages/app/FeedPage'))
-const DiscoveryPage = React.lazy(() => import('@/pages/app/DiscoveryPage'))
-const ConnectionsPage = React.lazy(() => import('@/pages/app/ConnectionsPage'))
-const MessagesPage = React.lazy(() => import('@/pages/app/MessagesPage'))
-const NotificationsPage = React.lazy(() => import('@/pages/app/NotificationsPage'))
-const AnalyticsPage = React.lazy(() => import('@/pages/app/AnalyticsPage'))
-const CardsPage = React.lazy(() => import('@/pages/app/CardsPage'))
-const OrdersPage = React.lazy(() => import('@/pages/app/OrdersPage'))
-const SettingsPage = React.lazy(() => import('@/pages/app/SettingsPage'))
-const SupportPage = React.lazy(() => import('@/pages/app/SupportPage'))
+const DashboardPage = lazyWithRetry(() => import('@/pages/app/DashboardPage'))
+const ProfilePage = lazyWithRetry(() => import('@/pages/app/ProfilePage'))
+const ProfileEditPage = lazyWithRetry(() => import('@/pages/app/ProfileEditPage'))
+const ProfileTemplatesPage = lazyWithRetry(() => import('@/pages/app/ProfileTemplatesPage'))
+const FeedPage = lazyWithRetry(() => import('@/pages/app/FeedPage'))
+const DiscoveryPage = lazyWithRetry(() => import('@/pages/app/DiscoveryPage'))
+const ConnectionsPage = lazyWithRetry(() => import('@/pages/app/ConnectionsPage'))
+const MessagesPage = lazyWithRetry(() => import('@/pages/app/MessagesPage'))
+const NotificationsPage = lazyWithRetry(() => import('@/pages/app/NotificationsPage'))
+const AnalyticsPage = lazyWithRetry(() => import('@/pages/app/AnalyticsPage'))
+const CardsPage = lazyWithRetry(() => import('@/pages/app/CardsPage'))
+const OrdersPage = lazyWithRetry(() => import('@/pages/app/OrdersPage'))
+const SettingsPage = lazyWithRetry(() => import('@/pages/app/SettingsPage'))
+const SupportPage = lazyWithRetry(() => import('@/pages/app/SupportPage'))
 
 // Admin pages
-const AdminDashboardPage = React.lazy(() => import('@/pages/admin/AdminDashboardPage'))
-const AdminUsersPage = React.lazy(() => import('@/pages/admin/AdminUsersPage'))
-const AdminCardsPage = React.lazy(() => import('@/pages/admin/AdminCardsPage'))
-const AdminOrdersPage = React.lazy(() => import('@/pages/admin/AdminOrdersPage'))
-const AdminReportsPage = React.lazy(() => import('@/pages/admin/AdminReportsPage'))
-const AdminSupportPage = React.lazy(() => import('@/pages/admin/AdminSupportPage'))
-const AdminAuditPage = React.lazy(() => import('@/pages/admin/AdminAuditPage'))
-const AdminProfessionsPage = React.lazy(() => import('@/pages/admin/AdminProfessionsPage'))
-const AdminTemplatesPage = React.lazy(() => import('@/pages/admin/AdminTemplatesPage'))
+const AdminDashboardPage = lazyWithRetry(() => import('@/pages/admin/AdminDashboardPage'))
+const AdminUsersPage = lazyWithRetry(() => import('@/pages/admin/AdminUsersPage'))
+const AdminCardsPage = lazyWithRetry(() => import('@/pages/admin/AdminCardsPage'))
+const AdminOrdersPage = lazyWithRetry(() => import('@/pages/admin/AdminOrdersPage'))
+const AdminReportsPage = lazyWithRetry(() => import('@/pages/admin/AdminReportsPage'))
+const AdminSupportPage = lazyWithRetry(() => import('@/pages/admin/AdminSupportPage'))
+const AdminAuditPage = lazyWithRetry(() => import('@/pages/admin/AdminAuditPage'))
+const AdminProfessionsPage = lazyWithRetry(() => import('@/pages/admin/AdminProfessionsPage'))
+const AdminTemplatesPage = lazyWithRetry(() => import('@/pages/admin/AdminTemplatesPage'))
 
 function Suspended({ children }: { children: React.ReactNode }) {
   return <React.Suspense fallback={<LoadingScreen />}>{children}</React.Suspense>
@@ -55,6 +57,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <RootLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       // Direct root access to Login Page
       {
