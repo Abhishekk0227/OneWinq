@@ -90,6 +90,17 @@ app.use(globalRateLimiter);
 // Routes
 // ---------------------------------------------------------------------------
 
+// Root welcome endpoint
+app.get('/', (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: 'OneWinq API Server is running',
+    version: '0.1.0',
+    health: '/health',
+    apiV1: '/api/v1',
+  });
+});
+
 // Health checks (no /api/v1 prefix — load balancers need predictable paths)
 app.use('/health', healthRouter);
 
