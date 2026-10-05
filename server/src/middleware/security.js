@@ -38,7 +38,10 @@ const corsOptions = {
     // Allow requests with no origin (e.g. curl, Postman, server-to-server)
     if (!origin) { return callback(null, true); }
 
-    if (config.cors.origins.includes(origin)) {
+    if (
+      config.cors.origins.includes(origin) ||
+      (config.isDevelopment && (origin.includes('localhost') || origin.includes('127.0.0.1')))
+    ) {
       return callback(null, true);
     }
 

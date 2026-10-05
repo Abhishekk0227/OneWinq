@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    strictPort: true,
+    strictPort: false,
     proxy: {
       '/uploads': {
         target: 'http://localhost:5000',
