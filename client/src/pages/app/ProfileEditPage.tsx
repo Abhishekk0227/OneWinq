@@ -449,7 +449,7 @@ export default function ProfileEditPage() {
         setSelectedPersonaId(currentId)
       }
       setPersonaName(p.personaName || '')
-      setProfessionTitle(p.professionTitle || p.headline || '')
+      setProfessionTitle(p.professionTitle || '')
       if (u?.displayName) {
         setDisplayName(u.displayName)
       } else if (user?.displayName) {

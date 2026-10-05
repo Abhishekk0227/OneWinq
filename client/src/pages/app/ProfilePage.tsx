@@ -514,7 +514,9 @@ export default function ProfilePage() {
             {/* Professional Identities */}
             {identities && identities.length > 0 ? (
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                {identities.map((id: any, idx: number) => (
+                {identities
+                  .filter((id: any) => !profile?.headline || id.customTitle?.trim().toLowerCase() !== profile.headline.trim().toLowerCase())
+                  .map((id: any, idx: number) => (
                   <span
                     key={id._id || id.id || idx}
                     className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold ${

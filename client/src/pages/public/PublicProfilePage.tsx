@@ -640,7 +640,8 @@ export default function PublicProfilePage() {
               {/* Active Profession Title Badge */}
               {profile.professionTitle &&
                 profile.professionTitle !== 'Basic Universal Template' &&
-                profile.professionTitle !== 'Universal Profile' && (
+                profile.professionTitle !== 'Universal Profile' &&
+                profile.professionTitle.trim().toLowerCase() !== profile.headline?.trim().toLowerCase() && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs">
                     <Briefcase className="h-3.5 w-3.5" />
