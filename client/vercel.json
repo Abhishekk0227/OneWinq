@@ -1,11 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://one-winq-bs3m.vercel.app/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "https://one-winq-bs3m.vercel.app/api/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
