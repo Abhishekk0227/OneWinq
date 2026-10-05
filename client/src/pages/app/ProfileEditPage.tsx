@@ -1131,7 +1131,7 @@ export default function ProfileEditPage() {
   return (
     <div className="space-y-4 sm:space-y-5 text-left max-w-5xl mx-auto pb-20">
       {/* Top Header & Sticky Actions (Compact) */}
-      <div className="flex items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-card/95 border border-border shadow-xs sticky top-16 sm:top-20 z-20 backdrop-blur-md">
+      <div className="flex items-center justify-between gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl bg-card/95 border border-border shadow-xs sticky top-16 sm:top-20 z-10 backdrop-blur-md">
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
           <Link to="/app/profile" className="shrink-0">
             <Button variant="ghost" size="icon-sm" className="h-8 w-8">
