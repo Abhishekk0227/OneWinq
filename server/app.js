@@ -95,6 +95,7 @@ app.use('/health', healthRouter);
 
 // API v1 — modules mounted here as they are implemented
 const apiRouter = express.Router();
+apiRouter.use('/health', healthRouter);
 app.use('/api/v1', apiRouter);
 
 // Auth module

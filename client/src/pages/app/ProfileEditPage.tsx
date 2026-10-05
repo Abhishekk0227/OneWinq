@@ -372,13 +372,13 @@ export default function ProfileEditPage() {
   }
 
   const currentEmail = React.useMemo(() => {
-    if (activeProfileMode === 'ALL') return email
-    return modeData[activeProfileMode]?.contact?.email ?? email
-  }, [activeProfileMode, email, modeData])
+    if (activeProfileMode === 'ALL') return emailContact
+    return modeData[activeProfileMode]?.contact?.email ?? emailContact
+  }, [activeProfileMode, emailContact, modeData])
 
   const handleEmailChange = (val: string) => {
     if (activeProfileMode === 'ALL') {
-      setEmail(val)
+      setEmailContact(val)
     } else {
       setModeData((prev) => ({
         ...prev,
