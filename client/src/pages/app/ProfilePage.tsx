@@ -308,48 +308,6 @@ export default function ProfilePage() {
 
         {/* Right Main Content Canvas */}
         <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-          {/* Mobile & Canvas Top Section Pills Bar with All Sections Menu */}
-          <div className="p-2 rounded-2xl bg-card border border-border/80 shadow-xs flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
-              {profileTabs.slice(0, 4).map((tab) => {
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'bg-muted/60 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                    {tab.count !== undefined && (
-                      <span
-                        className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                          isActive ? 'bg-white/20 text-white' : 'bg-background text-muted-foreground'
-                        }`}
-                      >
-                        {tab.count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsSectionsDrawerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all border border-primary/20 shrink-0 cursor-pointer"
-            >
-              <Menu className="h-3.5 w-3.5" />
-              <span>All ({profileTabs.length})</span>
-            </button>
-          </div>
-
           {/* Dedicated Header for Non-Home Tabs (Responsive & Compact) */}
           {activeTab !== 'home' && (
             <div className="rounded-3xl border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 min-w-0 max-w-full overflow-hidden">
@@ -1366,6 +1324,43 @@ export default function ProfilePage() {
           </Button>
         </DialogFooter>
       </Dialog>
+
+      {/* Fixed Bottom Navigation Bar for Profile Sections */}
+      {profileTabs.length > 1 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0">
+          {profileTabs.slice(0, 3).map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
+                  isActive
+                    ? 'text-primary font-extrabold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
+                  {tab.icon}
+                </div>
+                <span className="truncate max-w-full">{tab.label}</span>
+              </button>
+            )
+          })}
+
+          <button
+            type="button"
+            onClick={() => setIsSectionsDrawerOpen(true)}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
+          >
+            <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              <Menu className="h-4 w-4" />
+            </div>
+            <span className="truncate max-w-full">All ({profileTabs.length})</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
