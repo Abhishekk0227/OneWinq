@@ -22,6 +22,13 @@ export const helmetMiddleware = helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin images/assets to be loaded by browser
 });
 
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https:\/\/.*\.vercel\.app$/,
+  /^https:\/\/onewinq\.com$/,
+  /^https:\/\/.*\.onewinq\.com$/,
+];
+
 /**
  * CORS — explicit allowlist only.
  * Wildcard origins are NEVER used.
@@ -32,6 +39,10 @@ const corsOptions = {
     if (!origin) { return callback(null, true); }
 
     if (config.cors.origins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    if (ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))) {
       return callback(null, true);
     }
 
