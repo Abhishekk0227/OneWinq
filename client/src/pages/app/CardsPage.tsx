@@ -20,8 +20,6 @@ import {
   Plus,
   Wifi,
   ShoppingBag,
-  Sparkles,
-  ArrowRight,
   ShieldCheck,
 } from 'lucide-react'
 import type { OneWinqCard } from '@/types/cards.types'
@@ -113,26 +111,8 @@ export default function CardsPage() {
         </div>
       </div>
 
-      {/* Hardware Store Callout */}
-      <section className="p-4 sm:p-5 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-primary font-bold text-xs uppercase tracking-wider">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Hardware Shop</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Matte PVC (₹500), Artisan Bamboo (₹1,000), or Stealth Metal (₹1,500) editions delivered to your address.
-          </p>
-        </div>
-        <Link to="/app/orders" className="shrink-0">
-          <Button variant="default" size="sm" className="text-xs h-8" rightIcon={<ArrowRight className="h-3 w-3" />}>
-            Order Cards
-          </Button>
-        </Link>
-      </section>
-
       {/* User's Activated Hardware Cards */}
-      <section className="space-y-6 pt-4 border-t border-border">
+      <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -154,7 +134,7 @@ export default function CardsPage() {
           <EmptyState
             icon={<CreditCard className="h-8 w-8" />}
             title="No activated cards yet"
-            description="Have a physical OneWinq card? Click Activate Card to claim it. Or order your laser-engraved NFC card from the Hardware Shop."
+            description="Have a physical OneWinq card? Click Activate Card to claim it."
             actionLabel="Activate Card Now"
             onAction={() => setIsActivateOpen(true)}
           />
