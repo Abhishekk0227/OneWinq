@@ -26,6 +26,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 1,
     isFeatured: true,
+    previewImage: '/templates/engineer.png',
   },
   {
     name: 'Doctor / Healthcare',
@@ -52,6 +53,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 2,
     isFeatured: true,
+    previewImage: '/templates/doctor.png',
   },
   {
     name: 'Founder / Entrepreneur',
@@ -155,6 +157,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 6,
     isFeatured: false,
+    previewImage: '/templates/executive.png',
   },
   {
     name: 'Academic Researcher',
@@ -182,6 +185,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 7,
     isFeatured: false,
+    previewImage: '/templates/academic.png',
   },
   {
     name: 'Freelancer / Consultant',
@@ -269,6 +273,11 @@ export async function seedDefaultTemplatesIfEmpty() {
         }
       } else if (existing.isLocked === undefined) {
         existing.isLocked = true;
+        changed = true;
+      }
+
+      if (tpl.previewImage && existing.previewImage !== tpl.previewImage) {
+        existing.previewImage = tpl.previewImage;
         changed = true;
       }
 
