@@ -59,6 +59,8 @@ import {
   ChevronRight,
   Wifi,
   Lock,
+  User,
+  ShieldCheck,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog'
@@ -423,10 +425,17 @@ export default function ProfileEditPage() {
 
   // Smooth tabs horizontal scrolling ref
   const tabsScrollRef = React.useRef<HTMLDivElement>(null)
+  const bottomTabsScrollRef = React.useRef<HTMLDivElement>(null)
   const scrollTabs = (direction: 'left' | 'right') => {
     if (tabsScrollRef.current) {
       const amount = direction === 'left' ? -240 : 240
       tabsScrollRef.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
+  const scrollBottomTabs = (direction: 'left' | 'right') => {
+    if (bottomTabsScrollRef.current) {
+      const amount = direction === 'left' ? -240 : 240
+      bottomTabsScrollRef.current.scrollBy({ left: amount, behavior: 'smooth' })
     }
   }
 
@@ -684,10 +693,21 @@ export default function ProfileEditPage() {
     return ['identity', 'privacy']
   }, [])
 
-  // Clean 2-Tab Structure: Universal Profile (All-in-One) + Visibility Rules
+  // Dedicated Tabs Structure for all Profile Sections
   const visibleTabs = React.useMemo(() => {
     return [
-      { id: 'identity', label: 'Universal Profile', icon: Sparkles },
+      { id: 'identity', label: 'Basic Profile', icon: User },
+      { id: 'social', label: 'Social & Contact', icon: Globe },
+      { id: 'ventures', label: 'Ventures', icon: Building2 },
+      { id: 'career', label: 'Experience', icon: Briefcase },
+      { id: 'education', label: 'Education', icon: GraduationCap },
+      { id: 'skills', label: 'Skills', icon: Code },
+      { id: 'projects', label: 'Projects', icon: Layers },
+      { id: 'services', label: 'Services', icon: Award },
+      { id: 'media', label: 'Media Showcase', icon: Video },
+      { id: 'certifications', label: 'Certifications', icon: ShieldCheck },
+      { id: 'awards', label: 'Awards & Papers', icon: Star },
+      { id: 'custom-blocks', label: 'Custom Sections', icon: FileText },
       { id: 'privacy', label: 'Visibility Rules', icon: Shield },
     ]
   }, [])
@@ -1678,6 +1698,17 @@ export default function ProfileEditPage() {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        </TabsContent>
+
+          {/* ================= TAB 2: SOCIAL & CONTACT DETAILS ================= */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+              <h3 className="text-base font-bold text-foreground pb-2 border-b border-border flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                <span>Social & Contact Information</span>
+              </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -1708,7 +1739,7 @@ export default function ProfileEditPage() {
                 </div>
               </div>
 
-              {/* Social Links List inside Tab 1 */}
+              {/* Social Links List */}
               <div className="pt-4 border-t border-border space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1802,8 +1833,11 @@ export default function ProfileEditPage() {
                 </div>
               </div>
             </div>
-          {/* ================= SECTION: MEDIA & CHANNELS ================= */}
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+          </TabsContent>
+
+          {/* ================= TAB: MEDIA & CHANNELS ================= */}
+          <TabsContent value="media" className="space-y-6">
+            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
                   <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -1924,10 +1958,11 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </div>
+          </TabsContent>
 
-          {/* ================= SECTION: VENTURES & ORGANIZATIONS ================= */}
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+          {/* ================= TAB: VENTURES & ORGANIZATIONS ================= */}
+          <TabsContent value="ventures" className="space-y-6">
+            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
                   <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -2055,8 +2090,10 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* Experience list */}
+          {/* ================= TAB: CAREER & WORK EXPERIENCE ================= */}
+          <TabsContent value="career" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2180,8 +2217,10 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: EDUCATION & ACADEMICS ================= */}
+          {/* ================= TAB: EDUCATION & ACADEMICS ================= */}
+          <TabsContent value="education" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2330,8 +2369,10 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: SKILLS & TECHNICAL STACK ================= */}
+          {/* ================= TAB: SKILLS & TECHNICAL STACK ================= */}
+          <TabsContent value="skills" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2420,8 +2461,10 @@ export default function ProfileEditPage() {
                 </div>
               )}
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: PROJECTS & PORTFOLIO ================= */}
+          {/* ================= TAB: PROJECTS & PORTFOLIO ================= */}
+          <TabsContent value="projects" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2503,8 +2546,10 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: SERVICES & PACKAGES ================= */}
+          {/* ================= TAB: SERVICES & PACKAGES ================= */}
+          <TabsContent value="services" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2586,8 +2631,10 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: CERTIFICATIONS & CREDENTIALS ================= */}
+          {/* ================= TAB: CERTIFICATIONS & CREDENTIALS ================= */}
+          <TabsContent value="certifications" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2670,8 +2717,10 @@ export default function ProfileEditPage() {
                 ))}
               </div>
             </div>
+          </TabsContent>
 
-            {/* ================= SECTION: AWARDS & HONORS ================= */}
+          {/* ================= TAB: AWARDS, HONORS & RESEARCH ================= */}
+          <TabsContent value="awards" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2802,7 +2851,10 @@ export default function ProfileEditPage() {
               </div>
             </div>
 
-            {/* ================= SECTION: CUSTOM SECTIONS ================= */}
+          </TabsContent>
+
+          {/* ================= TAB: CUSTOM SECTIONS ================= */}
+          <TabsContent value="custom-blocks" className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -3158,6 +3210,59 @@ export default function ProfileEditPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Sticky Fixed Bottom Navigation Bar for Mobile & Desktop Tab Navigation & Sliding */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-2xl p-2 sm:p-2.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => scrollBottomTabs('left')}
+            className="p-1.5 sm:p-2 rounded-xl border border-border bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0 transition-colors shadow-2xs cursor-pointer"
+            title="Slide tabs left"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          <div
+            ref={bottomTabsScrollRef}
+            className="flex-1 overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-1.5 py-1 px-1 touch-pan-x"
+          >
+            {visibleTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    const el = document.getElementById(`bottom-tab-${tab.id}`)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+                  }}
+                  id={`bottom-tab-${tab.id}`}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl shrink-0 transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-md scale-105 ring-2 ring-primary/30 font-bold'
+                      : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="whitespace-nowrap">{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollBottomTabs('right')}
+            className="p-1.5 sm:p-2 rounded-xl border border-border bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0 transition-colors shadow-2xs cursor-pointer"
+            title="Slide tabs right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
       {/* Create New Profession Persona Modal */}
       {isCreatePersonaOpen && (
