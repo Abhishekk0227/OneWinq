@@ -286,6 +286,135 @@ export default function ProfileEditPage() {
     }
   }
 
+  const currentProfessionTitle = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return professionTitle
+    return modeData[activeProfileMode]?.professionTitle ?? professionTitle
+  }, [activeProfileMode, professionTitle, modeData])
+
+  const handleProfessionTitleChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setProfessionTitle(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          professionTitle: val,
+        },
+      }))
+    }
+  }
+
+  const currentCity = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return city
+    return modeData[activeProfileMode]?.location?.city ?? city
+  }, [activeProfileMode, city, modeData])
+
+  const handleCityChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setCity(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          location: {
+            ...(prev[activeProfileMode]?.location || {}),
+            city: val,
+          },
+        },
+      }))
+    }
+  }
+
+  const currentCountry = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return country
+    return modeData[activeProfileMode]?.location?.country ?? country
+  }, [activeProfileMode, country, modeData])
+
+  const handleCountryChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setCountry(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          location: {
+            ...(prev[activeProfileMode]?.location || {}),
+            country: val,
+          },
+        },
+      }))
+    }
+  }
+
+  const currentPhone = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return phone
+    return modeData[activeProfileMode]?.contact?.phone ?? phone
+  }, [activeProfileMode, phone, modeData])
+
+  const handlePhoneChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setPhone(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          contact: {
+            ...(prev[activeProfileMode]?.contact || {}),
+            phone: val,
+          },
+        },
+      }))
+    }
+  }
+
+  const currentEmail = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return email
+    return modeData[activeProfileMode]?.contact?.email ?? email
+  }, [activeProfileMode, email, modeData])
+
+  const handleEmailChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setEmail(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          contact: {
+            ...(prev[activeProfileMode]?.contact || {}),
+            email: val,
+          },
+        },
+      }))
+    }
+  }
+
+  const currentWebsite = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return website
+    return modeData[activeProfileMode]?.contact?.website ?? website
+  }, [activeProfileMode, website, modeData])
+
+  const handleWebsiteChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setWebsite(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          contact: {
+            ...(prev[activeProfileMode]?.contact || {}),
+            website: val,
+          },
+        },
+      }))
+    }
+  }
+
   // Modals
   const [isCreatePersonaOpen, setIsCreatePersonaOpen] = React.useState(false)
   const [newPersonaTitle, setNewPersonaTitle] = React.useState('')
@@ -1644,18 +1773,28 @@ export default function ProfileEditPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">City</label>
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>City {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.city && (
+                      <span className="text-[10px] text-primary font-bold">Custom</span>
+                    )}
+                  </label>
                   <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    value={currentCity}
+                    onChange={(e) => handleCityChange(e.target.value)}
                     placeholder="Bangalore, San Francisco, etc."
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Country</label>
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>Country {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.country && (
+                      <span className="text-[10px] text-primary font-bold">Custom</span>
+                    )}
+                  </label>
                   <Input
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
+                    value={currentCountry}
+                    onChange={(e) => handleCountryChange(e.target.value)}
                     placeholder="India, USA, Germany..."
                   />
                 </div>
@@ -1663,18 +1802,28 @@ export default function ProfileEditPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Portfolio Website</label>
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>Portfolio Website {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.contact?.website && (
+                      <span className="text-[10px] text-primary font-bold">Custom</span>
+                    )}
+                  </label>
                   <Input
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
+                    value={currentWebsite}
+                    onChange={(e) => handleWebsiteChange(e.target.value)}
                     placeholder="https://yourwebsite.me"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-foreground">Direct Phone</label>
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>Direct Phone {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.contact?.phone && (
+                      <span className="text-[10px] text-primary font-bold">Custom</span>
+                    )}
+                  </label>
                   <Input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    value={currentPhone}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>

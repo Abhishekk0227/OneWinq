@@ -183,7 +183,7 @@ describe('visibilityResolver', () => {
       expect(profRes.sections.services).toBeDefined();
 
       const privateRes = filterProfileByVisibility(multiModeProfile, VISIBILITY_MODE.PRIVATE);
-      expect(privateRes.sections.experience).toBeDefined(); // public baseline included
+      expect(privateRes.sections.experience).toBeUndefined(); // only in PUBLIC and PROFESSIONAL
       expect(privateRes.sections.services).toBeDefined(); // explicitly included in PRIVATE
     });
 
