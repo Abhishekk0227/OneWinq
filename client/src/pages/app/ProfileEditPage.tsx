@@ -707,15 +707,15 @@ export default function ProfileEditPage() {
       }
     }
 
-    // Always preserve sections that already have user data
-    if (experience.length > 0) addTabIfDefined('career')
-    if (education.length > 0) addTabIfDefined('education')
-    if (skills.length > 0) addTabIfDefined('skills')
-    if (projects.length > 0) addTabIfDefined('projects')
-    if (mediaGallery.length > 0) addTabIfDefined('media')
-    if (organizations.length > 0) addTabIfDefined('ventures')
-    if (services.length > 0) addTabIfDefined('services')
-    if (certifications.length > 0) addTabIfDefined('certifications')
+    // Always include standard profile sections so all sections in Visibility Rules are directly editable
+    addTabIfDefined('career')
+    addTabIfDefined('education')
+    addTabIfDefined('skills')
+    addTabIfDefined('projects')
+    addTabIfDefined('services')
+    addTabIfDefined('certifications')
+    addTabIfDefined('media')
+    addTabIfDefined('ventures')
     if (publications.length > 0) addTabIfDefined('publications')
     if (awards.length > 0) addTabIfDefined('awards')
     if (customSections.length > 0) addTabIfDefined('custom-blocks')
