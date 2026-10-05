@@ -13,7 +13,14 @@ export function getSocket(): Socket | null {
 }
 
 export function connectSocket(token?: string): Socket | null {
-  if (!env.socketUrl) {
+  const targetUrl = env.socketUrl || ''
+  
+  // Vercel serverless functions do not host Socket.IO WebSocket servers.
+  // If socketUrl is empty or points to vercel.app frontend domain, do not connect socket to prevent 404 polling errors.
+  const isServerlessFrontend = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('vercel.app') && (!targetUrl || targetUrl.includes('vercel.app')))
+
+  if (!targetUrl || isServerlessFrontend) {
     return null
   }
 
@@ -24,47 +31,54 @@ export function connectSocket(token?: string): Socket | null {
     socketInstance = null
   }
 
-  socketInstance = io(env.socketUrl, {
-    withCredentials: true,
-    autoConnect: true,
-    auth: {
-      token: authToken,
-    },
-    reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 1000,
-  })
+  try {
+    socketInstance = io(targetUrl, {
+      withCredentials: true,
+      autoConnect: true,
+      auth: {
+        token: authToken,
+      },
+      reconnection: true,
+      reconnectionAttempts: 2,
+      reconnectionDelay: 2000,
+      transports: ['websocket', 'polling'],
+    })
 
-  socketInstance.on('connect', () => {
-    // On reconnect, reconcile server state
-    queryClient.invalidateQueries({ queryKey: ['conversations'] })
-    queryClient.invalidateQueries({ queryKey: ['notifications'] })
-  })
+    socketInstance.on('connect', () => {
+      // On reconnect, reconcile server state
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    })
 
-  const handleNotification = (payload?: any) => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() })
-    queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
-    queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    const handleNotification = (payload?: any) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
 
-    const item = payload?.notification || payload
-    if (item?.title) {
-      toast.info(item.message || item.body || 'You have a new notification', item.title)
+      const item = payload?.notification || payload
+      if (item?.title) {
+        toast.info(item.message || item.body || 'You have a new notification', item.title)
+      }
     }
+
+    socketInstance.on('notification_new', handleNotification)
+    socketInstance.on('notification:new', handleNotification)
+
+    socketInstance.on('new_message_notification', () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
+    })
+
+    socketInstance.on('connect_error', () => {
+      // Disconnect cleanly on failure (e.g., 404 or backend unavailable) to prevent polling noise
+      if (socketInstance) {
+        socketInstance.disconnect()
+        socketInstance = null
+      }
+    })
+  } catch {
+    socketInstance = null
   }
-
-  socketInstance.on('notification_new', handleNotification)
-  socketInstance.on('notification:new', handleNotification)
-
-  socketInstance.on('new_message_notification', () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list() })
-    queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
-  })
-
-  socketInstance.on('connect_error', (err) => {
-    if (err.message.includes('Authentication') || err.message.includes('token')) {
-      // Re-fetch token or let refresh cycle handle it
-    }
-  })
 
   return socketInstance
 }
