@@ -326,6 +326,10 @@ export async function updateProfileDraft(userId, data, personaId = null) {
   if (data.customSections !== undefined) {
     updates.customSections = ensureEntryIds(data.customSections);
   }
+  if (data.modeData !== undefined) { updates.modeData = data.modeData; }
+  if (data.avatarVisibility !== undefined) { updates.avatarVisibility = data.avatarVisibility; }
+  if (data.sectionVisibility !== undefined) { updates.sectionVisibility = data.sectionVisibility; }
+  if (data.fieldVisibility !== undefined) { updates.fieldVisibility = data.fieldVisibility; }
   if (data.sectionOrder !== undefined) {
     updates.sectionOrder = data.sectionOrder;
   }
@@ -415,6 +419,7 @@ export function buildSnapshotFromProfile(profile) {
     ],
     activeMode: profile.activeMode || 'PUBLIC',
     temporaryMode: toObj(profile.temporaryMode) || null,
+    modeData: toObj(profile.modeData) || {},
   };
 }
 

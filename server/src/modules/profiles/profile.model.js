@@ -299,9 +299,12 @@ const profileSchema = new Schema(
     bio: { type: String, trim: true, maxlength: 2000, default: '' },
     avatarUrl: { type: String, default: null },
     avatarVisibility: {
-      type: String,
-      enum: Object.values(SECTION_VISIBILITY),
+      type: Schema.Types.Mixed,
       default: SECTION_VISIBILITY.PUBLIC,
+    },
+    modeData: {
+      type: Schema.Types.Mixed,
+      default: () => ({}),
     },
     coverUrl: { type: String, default: null },
     location: { type: locationSchema, default: () => ({}) },
@@ -332,7 +335,7 @@ const profileSchema = new Schema(
     // Visibility configuration maps
     sectionVisibility: {
       type: Map,
-      of: String,
+      of: Schema.Types.Mixed,
       default: () => new Map(Object.entries(DEFAULT_SECTION_VISIBILITY)),
     },
     fieldVisibility: {

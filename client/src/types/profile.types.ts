@@ -173,10 +173,19 @@ export interface ContactInfo {
   address?: string
 }
 
+export type MultiModeVisibility = SectionVisibility | SectionVisibility[] | 'ALL' | string | string[]
+
+export interface ModeOverrideData {
+  headline?: string
+  bio?: string
+  avatarUrl?: string | null
+  coverUrl?: string | null
+}
+
 export interface ProfileVisibilitySettings {
-  avatarVisibility?: SectionVisibility
-  sectionVisibility?: Record<string, SectionVisibility>
-  fieldVisibility?: Record<string, SectionVisibility>
+  avatarVisibility?: MultiModeVisibility
+  sectionVisibility?: Record<string, MultiModeVisibility>
+  fieldVisibility?: Record<string, MultiModeVisibility>
 }
 
 export interface Profile {
@@ -188,6 +197,7 @@ export interface Profile {
   bio?: string
   avatarUrl?: string | null
   coverUrl?: string | null
+  modeData?: Record<string, ModeOverrideData>
   location?: LocationInfo
   contact?: ContactInfo
   socialLinks?: SocialLink[]
@@ -218,6 +228,9 @@ export interface Profile {
   template?: ProfileTemplate | null
   state: ProfileState
   visibility: ProfileVisibilitySettings
+  avatarVisibility?: MultiModeVisibility
+  sectionVisibility?: Record<string, MultiModeVisibility>
+  fieldVisibility?: Record<string, MultiModeVisibility>
   identities?: ProfessionalIdentity[]
   primaryIdentity?: ProfessionalIdentity | null
   createdAt?: string

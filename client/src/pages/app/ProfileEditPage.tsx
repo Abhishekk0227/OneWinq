@@ -28,6 +28,8 @@ import type {
   CustomSectionItem,
   MediaGalleryItem,
   OrganizationItem,
+  MultiModeVisibility,
+  ModeOverrideData,
 } from '@/types/profile.types'
 import {
   Save,
@@ -131,9 +133,158 @@ export default function ProfileEditPage() {
     return 'identity'
   })
 
-  // Visibility Settings State
-  const [avatarVisibility, setAvatarVisibility] = React.useState<SectionVisibility>(SECTION_VISIBILITY.PUBLIC)
-  const [sectionVisibility, setSectionVisibility] = React.useState<Record<string, SectionVisibility>>({})
+  // Visibility Settings State (Multi-Mode Support)
+  const [avatarVisibility, setAvatarVisibility] = React.useState<MultiModeVisibility>(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])
+  const [sectionVisibility, setSectionVisibility] = React.useState<Record<string, MultiModeVisibility>>({})
+  const [fieldVisibility, setFieldVisibility] = React.useState<Record<string, MultiModeVisibility>>({
+    'contact.phone': ['PRIVATE'],
+    'contact.email': ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
+    'contact.address': ['PRIVATE'],
+    'contact.website': ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
+  })
+  const [modeData, setModeData] = React.useState<Record<string, ModeOverrideData>>({
+    PUBLIC: {},
+    PROFESSIONAL: {},
+    PRIVATE: {},
+  })
+  const [activeProfileMode, setActiveProfileMode] = React.useState<'ALL' | 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE'>(() => {
+    if (modeParam === 'professional') return 'PROFESSIONAL'
+    if (modeParam === 'private') return 'PRIVATE'
+    if (modeParam === 'public') return 'PUBLIC'
+    return 'ALL'
+  })
+
+  const isModeActive = (val: MultiModeVisibility | undefined, mode: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE') => {
+    if (!val || val === 'ALL') return true
+    if (Array.isArray(val)) {
+      return val.includes('ALL') || val.includes(mode)
+    }
+    if (val === SECTION_VISIBILITY.PUBLIC) {
+      return true
+    }
+    return val === mode
+  }
+
+  const toggleSectionMode = (key: string, mode: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE') => {
+    setSectionVisibility((prev) => {
+      const current = prev[key]
+      let modes: string[] = []
+      if (!current || current === 'ALL') {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else if (Array.isArray(current)) {
+        modes = [...current]
+      } else if (current === SECTION_VISIBILITY.PUBLIC) {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else {
+        modes = [current]
+      }
+
+      if (modes.includes(mode)) {
+        modes = modes.filter((m) => m !== mode)
+      } else {
+        modes.push(mode)
+      }
+
+      return {
+        ...prev,
+        [key]: modes,
+      }
+    })
+  }
+
+  const toggleAvatarMode = (mode: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE') => {
+    setAvatarVisibility((prev) => {
+      let modes: string[] = []
+      if (!prev || prev === 'ALL') {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else if (Array.isArray(prev)) {
+        modes = [...prev]
+      } else if (prev === SECTION_VISIBILITY.PUBLIC) {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else {
+        modes = [prev as string]
+      }
+
+      if (modes.includes(mode)) {
+        modes = modes.filter((m) => m !== mode)
+      } else {
+        modes.push(mode)
+      }
+      return modes as any
+    })
+  }
+
+  const toggleFieldMode = (key: string, mode: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE') => {
+    setFieldVisibility((prev) => {
+      const current = prev[key]
+      let modes: string[] = []
+      if (!current || current === 'ALL') {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else if (Array.isArray(current)) {
+        modes = [...current]
+      } else if (current === SECTION_VISIBILITY.PUBLIC) {
+        modes = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+      } else {
+        modes = [current]
+      }
+
+      if (modes.includes(mode)) {
+        modes = modes.filter((m) => m !== mode)
+      } else {
+        modes.push(mode)
+      }
+
+      return {
+        ...prev,
+        [key]: modes,
+      }
+    })
+  }
+
+  const setAllSectionModes = (key: string) => {
+    setSectionVisibility((prev) => ({
+      ...prev,
+      [key]: ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
+    }))
+  }
+
+  const currentHeadline = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return headline
+    return modeData[activeProfileMode]?.headline ?? headline
+  }, [activeProfileMode, headline, modeData])
+
+  const currentBio = React.useMemo(() => {
+    if (activeProfileMode === 'ALL') return bio
+    return modeData[activeProfileMode]?.bio ?? bio
+  }, [activeProfileMode, bio, modeData])
+
+  const handleHeadlineChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setHeadline(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          headline: val,
+        },
+      }))
+    }
+  }
+
+  const handleBioChange = (val: string) => {
+    if (activeProfileMode === 'ALL') {
+      setBio(val)
+    } else {
+      setModeData((prev) => ({
+        ...prev,
+        [activeProfileMode]: {
+          ...(prev[activeProfileMode] || {}),
+          bio: val,
+        },
+      }))
+    }
+  }
 
   // Modals
   const [isCreatePersonaOpen, setIsCreatePersonaOpen] = React.useState(false)
@@ -238,8 +389,17 @@ export default function ProfileEditPage() {
         setCustomSections(p.customSections || [])
 
         if (p.visibility) {
-          setAvatarVisibility(p.visibility.avatarVisibility || (p as any).avatarVisibility || SECTION_VISIBILITY.PUBLIC)
-          setSectionVisibility(p.visibility.sectionVisibility || {})
+          setAvatarVisibility(p.visibility.avatarVisibility || (p as any).avatarVisibility || ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])
+          setSectionVisibility(p.visibility.sectionVisibility || (p as any).sectionVisibility || {})
+          setFieldVisibility(p.visibility.fieldVisibility || (p as any).fieldVisibility || {
+            'contact.phone': ['PRIVATE'],
+            'contact.email': ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
+            'contact.address': ['PRIVATE'],
+            'contact.website': ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
+          })
+        }
+        if (p.modeData) {
+          setModeData(p.modeData)
         }
       }
     }
@@ -550,6 +710,10 @@ export default function ProfileEditPage() {
       bio,
       avatarUrl: avatarUrl || null,
       coverUrl: coverUrl || null,
+      modeData,
+      avatarVisibility,
+      sectionVisibility,
+      fieldVisibility,
       location: { city, country },
       contact: { website: website?.trim() || '', phone, email: emailContact, address: addressContact },
       socialLinks: cleanedSocialLinks,
@@ -1246,14 +1410,115 @@ export default function ProfileEditPage() {
                 />
               </div>
 
+              {/* Presentation Mode Context Selector for Per-Profile Customization */}
+              <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <span>Per-Profile Customization</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Customize separate headline & bio for Public, Professional, or Private modes, or edit the shared default.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 p-1 bg-background/80 rounded-xl border border-border shadow-2xs self-start sm:self-auto flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setActiveProfileMode('ALL')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        activeProfileMode === 'ALL'
+                          ? 'bg-primary text-white shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Shared Default
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveProfileMode('PUBLIC')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        activeProfileMode === 'PUBLIC'
+                          ? 'bg-emerald-600 text-white shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Public
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveProfileMode('PROFESSIONAL')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        activeProfileMode === 'PROFESSIONAL'
+                          ? 'bg-blue-600 text-white shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Professional
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveProfileMode('PRIVATE')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                        activeProfileMode === 'PRIVATE'
+                          ? 'bg-purple-600 text-white shadow-2xs'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Private
+                    </button>
+                  </div>
+                </div>
+
+                {activeProfileMode !== 'ALL' && (
+                  <div className="flex items-center justify-between text-[11px] bg-background/60 px-3 py-1.5 rounded-xl border border-border/60">
+                    <span className="text-foreground/80">
+                      {modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline ? (
+                        <span className="text-primary font-medium">
+                          ✨ Custom {activeProfileMode.toLowerCase()} profile details active
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Currently showing shared details. Typing below creates a custom {activeProfileMode.toLowerCase()} version.
+                        </span>
+                      )}
+                    </span>
+                    {(modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModeData((prev) => ({
+                            ...prev,
+                            [activeProfileMode]: {},
+                          }))
+                          toast.info(`Reset to shared details for ${activeProfileMode.toLowerCase()} profile`)
+                        }}
+                        className="text-xs text-muted-foreground hover:text-destructive font-medium underline"
+                      >
+                        Reset to Shared
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-foreground">
-                  Primary Headline
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>
+                    Headline {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
+                  </span>
+                  {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.headline && (
+                    <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                  )}
                 </label>
                 <Input
-                  value={headline}
-                  onChange={(e) => setHeadline(e.target.value)}
-                  placeholder="e.g. Principal Systems Architect • Building Distributed Identity"
+                  value={currentHeadline}
+                  onChange={(e) => handleHeadlineChange(e.target.value)}
+                  placeholder={
+                    activeProfileMode !== 'ALL'
+                      ? `Specialized ${activeProfileMode.toLowerCase()} headline...`
+                      : "e.g. Principal Systems Architect • Building Distributed Identity"
+                  }
                 />
               </div>
 
@@ -1357,13 +1622,22 @@ export default function ProfileEditPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-foreground">
-                  About / Bio
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>
+                    About / Bio {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
+                  </span>
+                  {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.bio && (
+                    <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                  )}
                 </label>
                 <Textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell your story, background, and what drives your work..."
+                  value={currentBio}
+                  onChange={(e) => handleBioChange(e.target.value)}
+                  placeholder={
+                    activeProfileMode !== 'ALL'
+                      ? `Specialized ${activeProfileMode.toLowerCase()} bio for visitors in this mode...`
+                      : "Tell your story, background, and what drives your work..."
+                  }
                   rows={4}
                 />
               </div>
@@ -2859,31 +3133,94 @@ export default function ProfileEditPage() {
         {/* ================= TAB: VISIBILITY RULES ================= */}
         <TabsContent value="privacy" className="space-y-6">
           <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-base font-bold text-foreground">Visibility & Presentation Control</h3>
-              <p className="text-xs text-muted-foreground">
-                Set visibility permissions for sections and sensitive contact fields.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
+              <div>
+                <h3 className="text-base font-bold text-foreground">Multi-Profile Visibility Control</h3>
+                <p className="text-xs text-muted-foreground">
+                  Select exactly which profiles (Public, Professional, Private) each section and sensitive detail will appear on.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const allKeys = ['about', 'experience', 'education', 'skills', 'projects', 'media', 'ventures', 'services', 'certifications', 'socialLinks', 'contact']
+                    const updated: Record<string, MultiModeVisibility> = {}
+                    allKeys.forEach((k) => {
+                      updated[k] = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
+                    })
+                    setSectionVisibility(updated)
+                    setAvatarVisibility(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])
+                    toast.success('Enabled all sections on all 3 profile modes!')
+                  }}
+                  className="text-xs h-8"
+                >
+                  Show Everything Everywhere
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/20 text-xs">
+              {/* Avatar Visibility Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-border bg-muted/20 gap-3 text-xs">
                 <div>
-                  <div className="font-semibold text-foreground">Avatar Visibility</div>
-                  <div className="text-muted-foreground text-[11px]">Who can view your profile photo</div>
+                  <div className="font-bold text-foreground flex items-center gap-1.5">
+                    <Camera className="h-3.5 w-3.5 text-primary" />
+                    <span>Avatar Photo Visibility</span>
+                  </div>
+                  <div className="text-muted-foreground text-[11px]">Select which profiles your photo appears on</div>
                 </div>
-                <select
-                  value={avatarVisibility}
-                  onChange={(e) => setAvatarVisibility(e.target.value as any)}
-                  className="rounded-xl border border-input bg-background px-2.5 py-1 text-xs font-semibold"
-                >
-                  <option value={SECTION_VISIBILITY.PUBLIC}>PUBLIC</option>
-                  <option value={SECTION_VISIBILITY.PROFESSIONAL}>PROFESSIONAL</option>
-                  <option value={SECTION_VISIBILITY.PRIVATE}>PRIVATE</option>
-                </select>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => toggleAvatarMode('PUBLIC')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                      isModeActive(avatarVisibility, 'PUBLIC')
+                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
+                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {isModeActive(avatarVisibility, 'PUBLIC') && <Check className="h-3 w-3" />}
+                    <span>Public</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleAvatarMode('PROFESSIONAL')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                      isModeActive(avatarVisibility, 'PROFESSIONAL')
+                        ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
+                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {isModeActive(avatarVisibility, 'PROFESSIONAL') && <Check className="h-3 w-3" />}
+                    <span>Professional</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleAvatarMode('PRIVATE')}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                      isModeActive(avatarVisibility, 'PRIVATE')
+                        ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
+                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {isModeActive(avatarVisibility, 'PRIVATE') && <Check className="h-3 w-3" />}
+                    <span>Private</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAvatarVisibility(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])}
+                    className="px-2 py-1 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors underline"
+                  >
+                    All Modes
+                  </button>
+                </div>
               </div>
 
+              {/* Sections Multi-Mode Visibility */}
               {[
+                { key: 'about', label: 'About / Bio' },
                 { key: 'experience', label: 'Work Experience' },
                 { key: 'education', label: 'Education & Academics' },
                 { key: 'skills', label: 'Skills & Tech Stack' },
@@ -2892,31 +3229,138 @@ export default function ProfileEditPage() {
                 { key: 'ventures', label: 'Ventures & Organizations' },
                 { key: 'services', label: 'Services & Pricing' },
                 { key: 'certifications', label: 'Certifications' },
-              ].map((item) => (
-                <div
-                  key={item.key}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/20 text-xs"
-                >
-                  <div>
-                    <div className="font-semibold text-foreground">{item.label}</div>
-                    <div className="text-muted-foreground text-[11px]">Controls display in public mode</div>
-                  </div>
-                  <select
-                    value={sectionVisibility[item.key] || SECTION_VISIBILITY.PUBLIC}
-                    onChange={(e) =>
-                      setSectionVisibility((prev) => ({
-                        ...prev,
-                        [item.key]: e.target.value as any,
-                      }))
-                    }
-                    className="rounded-xl border border-input bg-background px-2.5 py-1 text-xs font-semibold"
+                { key: 'socialLinks', label: 'Social Profiles' },
+                { key: 'contact', label: 'Contact Card (General)' },
+              ].map((item) => {
+                const isPub = isModeActive(sectionVisibility[item.key], 'PUBLIC')
+                const isProf = isModeActive(sectionVisibility[item.key], 'PROFESSIONAL')
+                const isPriv = isModeActive(sectionVisibility[item.key], 'PRIVATE')
+
+                return (
+                  <div
+                    key={item.key}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border border-border bg-muted/20 gap-3 text-xs"
                   >
-                    <option value={SECTION_VISIBILITY.PUBLIC}>PUBLIC</option>
-                    <option value={SECTION_VISIBILITY.PROFESSIONAL}>PROFESSIONAL</option>
-                    <option value={SECTION_VISIBILITY.PRIVATE}>PRIVATE</option>
-                  </select>
+                    <div>
+                      <div className="font-bold text-foreground">{item.label}</div>
+                      <div className="text-muted-foreground text-[11px]">Choose which profiles display this section</div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => toggleSectionMode(item.key, 'PUBLIC')}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          isPub
+                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
+                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {isPub && <Check className="h-3 w-3" />}
+                        <span>Public</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleSectionMode(item.key, 'PROFESSIONAL')}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          isProf
+                            ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
+                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {isProf && <Check className="h-3 w-3" />}
+                        <span>Professional</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleSectionMode(item.key, 'PRIVATE')}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          isPriv
+                            ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
+                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {isPriv && <Check className="h-3 w-3" />}
+                        <span>Private</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAllSectionModes(item.key)}
+                        className="px-2 py-1 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors underline"
+                      >
+                        All Modes
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Sensitive Contact Fields */}
+              <div className="pt-4 border-t border-border space-y-3">
+                <div className="font-bold text-xs text-foreground uppercase tracking-wider text-muted-foreground">
+                  Sensitive Contact Fields
                 </div>
-              ))}
+                {[
+                  { key: 'contact.phone', label: 'Direct Phone Number', def: ['PRIVATE'] },
+                  { key: 'contact.email', label: 'Email Address', def: ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'] },
+                  { key: 'contact.website', label: 'Portfolio Website', def: ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'] },
+                  { key: 'contact.address', label: 'Physical Address', def: ['PRIVATE'] },
+                ].map((item) => {
+                  const val = fieldVisibility[item.key] ?? item.def
+                  const isPub = isModeActive(val, 'PUBLIC')
+                  const isProf = isModeActive(val, 'PROFESSIONAL')
+                  const isPriv = isModeActive(val, 'PRIVATE')
+
+                  return (
+                    <div
+                      key={item.key}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border border-border bg-muted/20 gap-3 text-xs"
+                    >
+                      <div>
+                        <div className="font-bold text-foreground">{item.label}</div>
+                        <div className="text-muted-foreground text-[11px]">Select profiles where this field is shown</div>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={() => toggleFieldMode(item.key, 'PUBLIC')}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                            isPub
+                              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
+                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          {isPub && <Check className="h-3 w-3" />}
+                          <span>Public</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleFieldMode(item.key, 'PROFESSIONAL')}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                            isProf
+                              ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
+                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          {isProf && <Check className="h-3 w-3" />}
+                          <span>Professional</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleFieldMode(item.key, 'PRIVATE')}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                            isPriv
+                              ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
+                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          {isPriv && <Check className="h-3 w-3" />}
+                          <span>Private</span>
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </TabsContent>

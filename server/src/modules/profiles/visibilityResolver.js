@@ -60,6 +60,14 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
    */
   function isVisible(configuredVisibility) {
     if (!configuredVisibility) {return true;}
+    if (configuredVisibility === 'ALL') {return true;}
+    if (Array.isArray(configuredVisibility)) {
+      if (configuredVisibility.length === 0) return true;
+      if (configuredVisibility.includes('ALL')) return true;
+      if (configuredVisibility.includes(SECTION_VISIBILITY.PUBLIC)) return true;
+      if (configuredVisibility.includes(effectiveMode)) return true;
+      return false;
+    }
     // Public sections and fields are baseline and always visible in all modes
     if (configuredVisibility === SECTION_VISIBILITY.PUBLIC) {return true;}
     // Content specifically matching current mode (e.g. PROFESSIONAL in PROFESSIONAL mode, PRIVATE in PRIVATE mode)
@@ -67,11 +75,38 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
     return false;
   }
 
+  // Extract mode-specific overrides if configured for the current effective mode
+  const modeData =
+    profileSnapshot.modeData instanceof Map
+      ? Object.fromEntries(profileSnapshot.modeData)
+      : profileSnapshot.modeData || {};
+  const modeOverride = modeData[effectiveMode] || {};
+
+  const effectiveHeadline =
+    modeOverride.headline !== undefined && modeOverride.headline !== ''
+      ? modeOverride.headline
+      : profileSnapshot.headline || '';
+
+  const effectiveBio =
+    modeOverride.bio !== undefined && modeOverride.bio !== ''
+      ? modeOverride.bio
+      : profileSnapshot.bio || '';
+
+  const effectiveAvatarUrl =
+    modeOverride.avatarUrl !== undefined && modeOverride.avatarUrl !== null
+      ? modeOverride.avatarUrl
+      : profileSnapshot.avatarUrl;
+
+  const effectiveCoverUrl =
+    modeOverride.coverUrl !== undefined && modeOverride.coverUrl !== null
+      ? modeOverride.coverUrl
+      : profileSnapshot.coverUrl;
+
   const result = {
-    headline: profileSnapshot.headline || '',
-    bio: isVisible(secVis.about) ? profileSnapshot.bio || '' : '',
-    avatarUrl: isVisible(profileSnapshot.avatarVisibility) ? profileSnapshot.avatarUrl : null,
-    coverUrl: profileSnapshot.coverUrl || null,
+    headline: effectiveHeadline,
+    bio: isVisible(secVis.about) ? effectiveBio : '',
+    avatarUrl: isVisible(profileSnapshot.avatarVisibility) ? effectiveAvatarUrl : null,
+    coverUrl: effectiveCoverUrl || null,
     effectiveMode,
     sections: {},
     customSections: [],
