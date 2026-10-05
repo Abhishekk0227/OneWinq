@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import type { ProfileTemplate } from '@/types/profile.types'
@@ -65,14 +66,39 @@ function getTemplateIcon(slug: string) {
   }
 }
 
+const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
+  engineer: '/templates/engineer.png',
+  doctor: '/templates/doctor.png',
+  executive: '/templates/executive.png',
+  academic: '/templates/academic.png',
+}
+
 interface ProfessionPreviewProps {
   slug: string
   category?: string
   name: string
+  previewImage?: string | null
 }
 
 // Profession-specific visual background preview
-function ProfessionVisualPreview({ slug, category, name }: ProfessionPreviewProps) {
+function ProfessionVisualPreview({ slug, category, name, previewImage }: ProfessionPreviewProps) {
+  const [imageError, setImageError] = React.useState(false)
+  const imageSrc = !imageError ? (previewImage || TEMPLATE_PREVIEW_IMAGES[slug]) : null
+
+  if (imageSrc) {
+    return (
+      <div className="relative w-full rounded-xl overflow-hidden border border-border/70 bg-muted/20 aspect-[2.22/1] select-none shadow-xs group-hover:shadow-md transition-all">
+        <img
+          src={imageSrc}
+          alt={name}
+          onError={() => setImageError(true)}
+          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+          loading="lazy"
+        />
+      </div>
+    )
+  }
+
   switch (slug) {
     case 'engineer':
       return (
@@ -519,6 +545,7 @@ export function TemplateCard({
             slug={template.slug}
             category={template.category}
             name={template.name}
+            previewImage={template.previewImage}
           />
         )}
 
