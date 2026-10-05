@@ -45,6 +45,9 @@ import {
   ArrowRight,
   CreditCard,
   Wifi,
+  LayoutGrid,
+  User,
+  Layers,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
 
@@ -57,6 +60,7 @@ export default function PublicProfilePage() {
   const [connectNote, setConnectNote] = React.useState('')
   const [isCopied, setIsCopied] = React.useState(false)
   const [isStartingChat, setIsStartingChat] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState<string>('all')
 
   // Profile theme state (Light ☀️ / Dark 🌙)
   const [profileTheme, setProfileTheme] = React.useState<'dark' | 'light'>(() => {
@@ -403,6 +407,22 @@ export default function PublicProfilePage() {
   const mediaGallery = profile.mediaGallery || profile.sections?.mediaGallery || []
   const customSections = profile.customSections || []
 
+  const hasExperience = experiences.length > 0 || education.length > 0
+  const hasPortfolio = projects.length > 0 || services.length > 0 || organizations.length > 0
+  const hasMedia = mediaGallery.length > 0 || publications.length > 0
+  const hasPosts = userPosts.length > 0
+  const hasCustom = customSections.length > 0
+
+  const profileTabs = [
+    { id: 'all', label: 'All', icon: <LayoutGrid className="h-4 w-4" /> },
+    { id: 'overview', label: 'Overview', icon: <User className="h-4 w-4" /> },
+    ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" /> }] : []),
+    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" /> }] : []),
+    ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" /> }] : []),
+    ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" /> }] : []),
+    ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" /> }] : []),
+  ]
+
   return (
     <div
       className={`min-h-screen transition-colors duration-300 pb-24 ${
@@ -625,13 +645,13 @@ export default function PublicProfilePage() {
                 />
               )}
 
-              <div className="flex-1 space-y-3">
-                <div>
-                  <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
+                <div className="min-w-0 max-w-full">
+                  <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                     {profileUser.displayName}
                   </h1>
                   {profile.headline && (
-                    <p className="text-base sm:text-lg font-medium text-primary mt-1">
+                    <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
                       {profile.headline}
                     </p>
                   )}
@@ -642,27 +662,27 @@ export default function PublicProfilePage() {
                 profile.professionTitle !== 'Basic Universal Template' &&
                 profile.professionTitle !== 'Universal Profile' &&
                 profile.professionTitle.trim().toLowerCase() !== profile.headline?.trim().toLowerCase() && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs">
-                    <Briefcase className="h-3.5 w-3.5" />
-                    <span>{profile.professionTitle}</span>
+                <div className="flex flex-wrap gap-2 pt-1 max-w-full">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs max-w-full break-words [overflow-wrap:anywhere]">
+                    <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.professionTitle}</span>
                   </span>
                 </div>
               )}
 
               {/* Bio */}
               {profile.bio && (
-                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed pt-2 max-w-2xl whitespace-pre-line">
+                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed pt-2 max-w-2xl whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
                   {profile.bio}
                 </p>
               )}
 
               {/* Location and Contact Info Pills */}
-              <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
                 {profile.location && (profile.location.city || profile.location.country) && (
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
-                    <span>
+                  <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">
                       {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
                       {profile.location.isRemote && ' (Remote)'}
                     </span>
@@ -674,32 +694,32 @@ export default function PublicProfilePage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => handleLinkClick(profile.contact!.website!, 'Website')}
-                    className="flex items-center gap-1.5 text-primary hover:underline"
+                    className="flex items-center gap-1.5 text-primary hover:underline min-w-0 max-w-full"
                   >
-                    <Globe className="h-3.5 w-3.5" />
-                    <span>Portfolio / Site</span>
-                    <ExternalLink className="h-2.5 w-2.5" />
+                    <Globe className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">Portfolio / Site</span>
+                    <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                   </a>
                 )}
                 {profile.contact?.email && (
                   <a
                     href={`mailto:${profile.contact.email}`}
-                    className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+                    className="flex items-center gap-1.5 hover:text-foreground transition-colors min-w-0 max-w-full"
                   >
-                    <Mail className="h-3.5 w-3.5" />
-                    <span>{profile.contact.email}</span>
+                    <Mail className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
                   </a>
                 )}
                 {profile.contact?.phone && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Phone className="h-3.5 w-3.5" />
-                    <span>{profile.contact.phone}</span>
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
+                    <Phone className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
                   </div>
                 )}
                 {profile.contact?.address && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
-                    <span>{profile.contact.address}</span>
+                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
                   </div>
                 )}
               </div>
@@ -708,20 +728,72 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
+        {/* Section Tabs Navigation Bar */}
+        {profileTabs.length > 1 && (
+          <div className="sticky top-14 z-20 p-2 rounded-2xl bg-card/95 backdrop-blur-md border border-border shadow-sm my-4 min-w-0 max-w-full">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5 min-w-0">
+              {profileTabs.map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Fixed Mobile Bottom Navigation Bar */}
+        {profileTabs.length > 1 && (
+          <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-lg border-t border-border shadow-2xl px-2 py-1.5 flex items-center justify-around min-w-0">
+            {profileTabs.map((tab) => {
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl text-[10px] font-bold transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? 'text-primary font-extrabold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <div className={`p-1 rounded-lg ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
+                    {tab.icon}
+                  </div>
+                  <span className="truncate max-w-[65px]">{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         {/* Dynamic Sections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
           {/* Left / Main Column */}
           <div className="md:col-span-8 space-y-8">
             {/* Experience Section */}
-            {experiences.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary-soft text-primary">
+            {(activeTab === 'all' || activeTab === 'experience') && experiences.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
                     <Briefcase className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">Experience & Career</h2>
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Experience & Career</h2>
                 </div>
-                <div className="space-y-6 pt-2">
+                <div className="space-y-6 pt-2 min-w-0">
                   {experiences.map((exp: any, idx: number) => {
                     const dateStr = formatDateRange(
                       exp.startMonth,
@@ -733,21 +805,21 @@ export default function PublicProfilePage() {
                       exp.endDate
                     )
                     return (
-                      <div key={exp.id || idx} className="space-y-1 relative pl-4 border-l-2 border-primary/30">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-bold text-foreground text-sm">{exp.role}</h3>
+                      <div key={exp.id || idx} className="space-y-1 relative pl-4 border-l-2 border-primary/30 min-w-0 max-w-full">
+                        <div className="flex items-start justify-between gap-2 min-w-0">
+                          <h3 className="font-bold text-foreground text-sm break-words [overflow-wrap:anywhere] min-w-0">{exp.role}</h3>
                           {dateStr && (
-                            <span className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md">
+                            <span className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md shrink-0">
                               {dateStr}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs font-semibold text-primary">
+                        <div className="text-xs font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">
                           {exp.company}
                           {exp.location ? ` • ${exp.location}` : ''}
                         </div>
                         {exp.description && (
-                          <p className="text-xs text-muted-foreground leading-relaxed pt-1 whitespace-pre-line">
+                          <p className="text-xs text-muted-foreground leading-relaxed pt-1 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
                             {exp.description}
                           </p>
                         )}
@@ -759,15 +831,15 @@ export default function PublicProfilePage() {
             )}
 
             {/* Projects Section */}
-            {projects.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary-soft text-primary">
+            {(activeTab === 'all' || activeTab === 'portfolio') && projects.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
                     <Sparkles className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">Featured Projects & Work</h2>
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects & Work</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 min-w-0">
                   {projects.map((proj: any, idx: number) => {
                     const dateStr = formatDateRange(
                       proj.startMonth,
@@ -779,10 +851,10 @@ export default function PublicProfilePage() {
                       proj.endDate
                     )
                     return (
-                      <div key={proj.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-2 hover:border-primary/40 transition-colors">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h3 className="font-bold text-sm text-foreground">{proj.title}</h3>
+                      <div key={proj.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-2 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
+                        <div className="flex items-start justify-between gap-2 min-w-0">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-sm text-foreground break-words [overflow-wrap:anywhere] min-w-0">{proj.title}</h3>
                             {dateStr && (
                               <span className="text-[10px] font-medium text-muted-foreground block">
                                 {dateStr}
@@ -795,14 +867,14 @@ export default function PublicProfilePage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => handleLinkClick(proj.url!, proj.title)}
-                              className="text-primary hover:text-primary-hover p-1"
+                              className="text-primary hover:text-primary-hover p-1 shrink-0"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           )}
                         </div>
                         {proj.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-3">
+                          <p className="text-xs text-muted-foreground line-clamp-3 break-words [overflow-wrap:anywhere] min-w-0">
                             {proj.description}
                           </p>
                         )}
@@ -814,27 +886,27 @@ export default function PublicProfilePage() {
             )}
 
             {/* Services Section */}
-            {services.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary-soft text-primary">
+            {(activeTab === 'all' || activeTab === 'portfolio') && services.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
                     <Sparkles className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">Services & Offerings</h2>
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services & Offerings</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 min-w-0">
                   {services.map((srv: any, idx: number) => (
-                    <div key={srv.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-sm text-foreground">{srv.title}</h3>
+                    <div key={srv.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-2 min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <h3 className="font-bold text-sm text-foreground break-words [overflow-wrap:anywhere] min-w-0">{srv.title}</h3>
                         {srv.priceRange && (
-                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md shrink-0">
                             {srv.priceRange}
                           </span>
                         )}
                       </div>
                       {srv.description && (
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere] min-w-0">
                           {srv.description}
                         </p>
                       )}
@@ -845,35 +917,35 @@ export default function PublicProfilePage() {
             )}
 
             {/* Publications Section */}
-            {publications.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary-soft text-primary">
+            {(activeTab === 'all' || activeTab === 'media') && publications.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
                     <FileText className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-bold text-foreground">Publications & Research</h2>
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Publications & Research</h2>
                 </div>
-                <div className="space-y-4 pt-2">
+                <div className="space-y-4 pt-2 min-w-0">
                   {publications.map((pub: any, idx: number) => (
-                    <div key={pub.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-bold text-sm text-foreground">{pub.title}</h3>
+                    <div key={pub.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-1 min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <h3 className="font-bold text-sm text-foreground break-words [overflow-wrap:anywhere] min-w-0">{pub.title}</h3>
                         {(pub.year || pub.date) && (
-                          <span className="text-[11px] font-semibold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md whitespace-nowrap">
+                          <span className="text-[11px] font-semibold text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
                             {formatMonthYear(pub.month, pub.year, pub.date)}
                           </span>
                         )}
                       </div>
-                      {pub.publisher && <div className="text-xs text-primary font-medium">{pub.publisher}</div>}
+                      {pub.publisher && <div className="text-xs text-primary font-medium break-words [overflow-wrap:anywhere] min-w-0">{pub.publisher}</div>}
                       {pub.url && (
                         <a
                           href={pub.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline pt-1"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline pt-1 min-w-0 max-w-full"
                         >
-                          <span>Read Publication</span>
-                          <ExternalLink className="h-3 w-3" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">Read Publication</span>
+                          <ExternalLink className="h-3 w-3 shrink-0" />
                         </a>
                       )}
                     </div>
@@ -883,43 +955,43 @@ export default function PublicProfilePage() {
             )}
 
             {/* Ventures & Organizations */}
-            {organizations.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            {(activeTab === 'all' || activeTab === 'portfolio') && organizations.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
                     <Building2 className="h-4 w-4" />
                   </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">Ventures & Organizations</h2>
-                    <p className="text-xs text-muted-foreground">Companies, startups, and initiatives founded or led</p>
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations</h2>
+                    <p className="text-xs text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Companies, startups, and initiatives founded or led</p>
                   </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 min-w-0">
                   {organizations.map((org: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2 hover:border-primary/40 transition-colors">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-bold text-foreground text-sm">{org.name}</span>
+                    <div key={idx} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <span className="font-bold text-foreground text-sm break-words [overflow-wrap:anywhere] min-w-0">{org.name}</span>
                         {org.stage && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase shrink-0">
                             {org.stage}
                           </span>
                         )}
                       </div>
                       {org.role && (
-                        <p className="text-xs font-medium text-foreground/80">{org.role}</p>
+                        <p className="text-xs font-medium text-foreground/80 break-words [overflow-wrap:anywhere] min-w-0">{org.role}</p>
                       )}
                       {org.tagline && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">{org.tagline}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0">{org.tagline}</p>
                       )}
                       {org.website && (
                         <a
                           href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline pt-1"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline pt-1 min-w-0 max-w-full"
                         >
-                          Visit website
-                          <ExternalLink className="h-3 w-3" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">Visit website</span>
+                          <ExternalLink className="h-3 w-3 shrink-0" />
                         </a>
                       )}
                     </div>
@@ -929,30 +1001,30 @@ export default function PublicProfilePage() {
             )}
 
             {/* Media & Channels */}
-            {mediaGallery.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            {(activeTab === 'all' || activeTab === 'media') && mediaGallery.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
                     <Video className="h-4 w-4" />
                   </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">Media & Channels</h2>
-                    <p className="text-xs text-muted-foreground">Featured videos, channels, and broadcasts</p>
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Media & Channels</h2>
+                    <p className="text-xs text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured videos, channels, and broadcasts</p>
                   </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 min-w-0">
                   {mediaGallery.map((media: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2 hover:border-primary/40 transition-colors">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-bold text-foreground text-sm">{media.title}</span>
+                    <div key={idx} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-start justify-between gap-2 min-w-0">
+                        <span className="font-bold text-foreground text-sm break-words [overflow-wrap:anywhere] min-w-0">{media.title}</span>
                         {media.platform && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground uppercase shrink-0">
                             {media.platform}
                           </span>
                         )}
                       </div>
                       {media.metrics && (
-                        <span className="inline-block text-[11px] font-medium text-primary bg-primary/5 px-2 py-0.5 rounded">
+                        <span className="inline-block text-[11px] font-medium text-primary bg-primary/5 px-2 py-0.5 rounded shrink-0">
                           {media.metrics}
                         </span>
                       )}
@@ -962,10 +1034,10 @@ export default function PublicProfilePage() {
                             href={media.url.startsWith('http') ? media.url : `https://${media.url}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline pt-1"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline pt-1 min-w-0 max-w-full"
                           >
-                            Watch / Listen
-                            <ExternalLink className="h-3 w-3" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">Watch / Listen</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" />
                           </a>
                         </div>
                       )}
@@ -976,17 +1048,17 @@ export default function PublicProfilePage() {
             )}
 
             {/* Custom Sections */}
-            {customSections.length > 0 && customSections.map((sec: any, idx: number) => (
-              <div key={sec.id || idx} className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="pb-2 border-b border-border">
-                  <h2 className="text-lg font-bold text-foreground">{sec.title}</h2>
+            {(activeTab === 'all' || activeTab === 'custom') && customSections.length > 0 && customSections.map((sec: any, idx: number) => (
+              <div key={sec.id || idx} className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="pb-2 border-b border-border min-w-0">
+                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{sec.title}</h2>
                   {sec.description && (
-                    <p className="text-xs text-muted-foreground">{sec.description}</p>
+                    <p className="text-xs text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{sec.description}</p>
                   )}
                 </div>
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 pt-2 min-w-0">
                   {sec.blocks?.map((block: any, bIdx: number) => (
-                    <div key={bIdx} className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
+                    <div key={bIdx} className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
                       {block.content}
                     </div>
                   ))}
@@ -995,24 +1067,24 @@ export default function PublicProfilePage() {
             ))}
 
             {/* Community Posts */}
-            {userPosts.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-border">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-primary-soft text-primary">
+            {(activeTab === 'all' || activeTab === 'posts') && userPosts.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
                       <Flame className="h-4 w-4" />
                     </div>
-                    <h2 className="text-lg font-bold text-foreground">Community Posts</h2>
+                    <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Community Posts</h2>
                   </div>
-                  <Link to="/app/feed" className="text-xs font-semibold text-primary hover:underline">
+                  <Link to="/app/feed" className="text-xs font-semibold text-primary hover:underline shrink-0">
                     View in Feed →
                   </Link>
                 </div>
-                <div className="space-y-4 pt-1">
+                <div className="space-y-4 pt-1 min-w-0">
                   {userPosts.slice(0, 3).map((post) => (
-                    <div key={post._id} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2">
+                    <div key={post._id} className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2 min-w-0 max-w-full overflow-hidden">
                       {post.content && (
-                        <p className="text-xs text-foreground/90 whitespace-pre-line leading-relaxed">
+                        <p className="text-xs text-foreground/90 whitespace-pre-line leading-relaxed break-words [overflow-wrap:anywhere] min-w-0">
                           {post.content}
                         </p>
                       )}
@@ -1025,16 +1097,16 @@ export default function PublicProfilePage() {
                           )}
                         </div>
                       )}
-                      <div className="flex items-center gap-4 text-[11px] text-muted-foreground pt-1">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-4 text-[11px] text-muted-foreground pt-1 min-w-0">
+                        <span className="flex items-center gap-1 shrink-0">
                           <Heart className="h-3 w-3 text-rose-500" />
                           <span>{post.likesCount || 0}</span>
                         </span>
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 shrink-0">
                           <MessageSquare className="h-3 w-3 text-primary" />
                           <span>{post.commentsCount || 0}</span>
                         </span>
-                        <Link to={`/app/feed#${post._id}`} className="text-primary hover:underline ml-auto font-medium">
+                        <Link to={`/app/feed#${post._id}`} className="text-primary hover:underline ml-auto font-medium shrink-0">
                           Discuss
                         </Link>
                       </div>
@@ -1046,125 +1118,127 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Right Column / Sidebar */}
-          <div className="md:col-span-4 space-y-6">
-            {/* Skills Card */}
-            {skills.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                  Verified Skills
-                </h2>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {skills.map((skill: any, idx: number) => (
-                    <Badge key={skill.id || idx} variant="subtle" className="font-medium text-xs">
-                      {skill.name}
-                    </Badge>
-                  ))}
+          {(activeTab === 'all' || activeTab === 'overview' || activeTab === 'experience') && (
+            <div className="md:col-span-4 space-y-6 min-w-0 max-w-full">
+              {/* Skills Card */}
+              {skills.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                    Verified Skills
+                  </h2>
+                  <div className="flex flex-wrap gap-1.5 pt-1 min-w-0 max-w-full">
+                    {skills.map((skill: any, idx: number) => (
+                      <Badge key={skill.id || idx} variant="subtle" className="font-medium text-xs break-words [overflow-wrap:anywhere] max-w-full">
+                        {skill.name}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Social Links */}
-            {profile.socialLinks && profile.socialLinks.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                  Connect & Social
-                </h2>
-                <div className="space-y-2 pt-1">
-                  {profile.socialLinks.map((link: any, idx: number) => (
-                    <a
-                      key={link.id || idx}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleLinkClick(link.url, link.platform)}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 hover:bg-primary-soft hover:text-primary transition-colors text-xs font-semibold"
-                    >
-                      <span>{link.label || link.platform}</span>
-                      <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                    </a>
-                  ))}
+              {/* Social Links */}
+              {profile.socialLinks && profile.socialLinks.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                    Connect & Social
+                  </h2>
+                  <div className="space-y-2 pt-1 min-w-0 max-w-full">
+                    {profile.socialLinks.map((link: any, idx: number) => (
+                      <a
+                        key={link.id || idx}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleLinkClick(link.url, link.platform)}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 hover:bg-primary-soft hover:text-primary transition-colors text-xs font-semibold min-w-0 max-w-full"
+                      >
+                        <span className="break-words [overflow-wrap:anywhere] min-w-0">{link.label || link.platform}</span>
+                        <ExternalLink className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Education Card */}
-            {education.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-border">
-                  <GraduationCap className="h-4 w-4 text-primary" />
-                  <h2 className="text-sm font-bold text-foreground">Education</h2>
-                </div>
-                <div className="space-y-4 pt-1">
-                  {education.map((edu: any, idx: number) => {
-                    const dateStr = formatDateRange(
-                      edu.startMonth,
-                      edu.startYear,
-                      edu.endMonth,
-                      edu.endYear,
-                      edu.current,
-                      edu.startDate,
-                      edu.endDate
-                    )
-                    return (
-                      <div key={edu.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2.5 last:pb-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <div className="font-bold text-foreground">{edu.institution}</div>
-                          {dateStr && (
-                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                              {dateStr}
-                            </span>
-                          )}
+              {/* Education Card */}
+              {education.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <GraduationCap className="h-4 w-4 text-primary shrink-0" />
+                    <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education</h2>
+                  </div>
+                  <div className="space-y-4 pt-1 min-w-0">
+                    {education.map((edu: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        edu.startMonth,
+                        edu.startYear,
+                        edu.endMonth,
+                        edu.endYear,
+                        edu.current,
+                        edu.startDate,
+                        edu.endDate
+                      )
+                      return (
+                        <div key={edu.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2.5 last:pb-0 min-w-0 max-w-full">
+                          <div className="flex items-start justify-between gap-1 min-w-0">
+                            <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
+                            {dateStr && (
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                                {dateStr}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-primary font-medium break-words [overflow-wrap:anywhere] min-w-0">
+                            {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ')}
+                          </div>
                         </div>
-                        <div className="text-primary font-medium">
-                          {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ')}
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Awards & Certifications */}
             {(awards.length > 0 || certifications.length > 0) && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-border">
-                  <Award className="h-4 w-4 text-primary" />
-                  <h2 className="text-sm font-bold text-foreground">Honors & Certifications</h2>
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                  <Award className="h-4 w-4 text-primary shrink-0" />
+                  <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Honors & Certifications</h2>
                 </div>
-                <div className="space-y-3 pt-1">
+                <div className="space-y-3 pt-1 min-w-0">
                   {awards.map((award: any, idx: number) => (
-                    <div key={award.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0">
-                      <div className="flex items-start justify-between gap-1">
-                        <div className="font-bold text-foreground">{award.title}</div>
+                    <div key={award.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
+                      <div className="flex items-start justify-between gap-1 min-w-0">
+                        <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.title}</div>
                         {(award.year || award.date) && (
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
                             {formatMonthYear(award.month, award.year, award.date)}
                           </span>
                         )}
                       </div>
-                      <div className="text-muted-foreground">{award.issuer}</div>
+                      <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.issuer}</div>
                     </div>
                   ))}
                   {certifications.map((cert: any, idx: number) => (
-                    <div key={cert.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0">
-                      <div className="flex items-start justify-between gap-1">
-                        <div className="font-bold text-foreground">{cert.name}</div>
+                    <div key={cert.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
+                      <div className="flex items-start justify-between gap-1 min-w-0">
+                        <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.name}</div>
                         {(cert.issueYear || cert.issueDate) && (
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
                             {cert.doesNotExpire
                               ? 'No Expiration'
                               : formatMonthYear(cert.issueMonth, cert.issueYear, cert.issueDate)}
                           </span>
                         )}
                       </div>
-                      <div className="text-muted-foreground">{cert.issuer}</div>
+                      <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.issuer}</div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
+          )}
         </div>
       </main>
 

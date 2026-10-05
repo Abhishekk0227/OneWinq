@@ -502,7 +502,7 @@ export default function ProfilePage() {
             </div>
 
             {profile.headline ? (
-              <p className="text-base font-semibold text-primary">
+              <p className="text-base font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">
                 {profile.headline}
               </p>
             ) : (
@@ -513,26 +513,22 @@ export default function ProfilePage() {
 
             {/* Professional Identities */}
             {identities && identities.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
                 {identities
                   .filter((id: any) => !profile?.headline || id.customTitle?.trim().toLowerCase() !== profile.headline.trim().toLowerCase())
                   .map((id: any, idx: number) => (
                   <span
                     key={id._id || id.id || idx}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold ${
-                      id.isPrimary
-                        ? 'bg-primary text-white shadow-sm ring-1 ring-primary/30'
-                        : 'bg-muted text-foreground/80 border border-border/60'
-                    }`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-muted text-foreground/80 border border-border/60 max-w-full break-words [overflow-wrap:anywhere]"
                   >
                     {id.isPrimary ? (
-                      <Crown className="h-3 w-3 text-amber-300" />
+                      <Crown className="h-3 w-3 text-amber-300 shrink-0" />
                     ) : (
-                      <Briefcase className="h-3 w-3 text-muted-foreground" />
+                      <Briefcase className="h-3 w-3 text-muted-foreground shrink-0" />
                     )}
-                    <span>{id.customTitle}</span>
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{id.customTitle}</span>
                     {id.isPrimary && (
-                      <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider">
+                      <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
                         Primary
                       </span>
                     )}
@@ -540,7 +536,7 @@ export default function ProfilePage() {
                 ))}
                 <Link
                   to="/app/profile/edit"
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium ml-1"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium ml-1 shrink-0"
                 >
                   Edit
                 </Link>
@@ -570,21 +566,21 @@ export default function ProfilePage() {
             )}
 
             {/* Profile Template Presentation Section */}
-            <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+            <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 max-w-full">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <LayoutTemplate className="h-4.5 w-4.5" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-foreground">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                       Profile Template: {currentTemplate?.name || 'Basic Universal Template'}
                     </span>
-                    <Badge variant="subtle" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/20 font-bold">
+                    <Badge variant="subtle" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/20 font-bold shrink-0">
                       Active
                     </Badge>
                   </div>
-                  <span className="text-[11px] text-muted-foreground block line-clamp-1">
+                  <span className="text-[11px] text-muted-foreground block line-clamp-1 min-w-0">
                     {currentMode === VISIBILITY_MODE.PRIVATE
                       ? 'Private Presentation: Sensitive personal & credential fields are shielded.'
                       : currentMode === VISIBILITY_MODE.PROFESSIONAL
@@ -603,7 +599,7 @@ export default function ProfilePage() {
             </div>
 
             {profile.bio && (
-              <p className="text-sm text-foreground/80 leading-relaxed pt-2">
+              <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
                 {profile.bio}
               </p>
             )}
@@ -611,11 +607,11 @@ export default function ProfilePage() {
             {/* Location & Contact Details */}
             {((profile.location && (profile.location.city || profile.location.country)) ||
               (profile.contact && (profile.contact.website || profile.contact.email || profile.contact.phone || profile.contact.address))) && (
-              <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
                 {profile.location && (profile.location.city || profile.location.country) && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium">
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
-                    <span>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">
                       {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
                       {profile.location.isRemote && ' (Remote)'}
                     </span>
@@ -626,35 +622,35 @@ export default function ProfilePage() {
                     href={profile.contact.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-medium transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-medium transition-colors min-w-0 max-w-full"
                   >
-                    <Globe className="h-3.5 w-3.5" />
-                    <span>{profile.contact.website.replace(/^https?:\/\//, '')}</span>
-                    <ExternalLink className="h-2.5 w-2.5" />
+                    <Globe className="h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.website.replace(/^https?:\/\//, '')}</span>
+                    <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                   </a>
                 )}
                 {profile.contact?.email && (
                   <a
                     href={`mailto:${profile.contact.email}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
                   >
-                    <Mail className="h-3.5 w-3.5 text-primary" />
-                    <span>{profile.contact.email}</span>
+                    <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
                   </a>
                 )}
                 {profile.contact?.phone && (
                   <a
                     href={`tel:${profile.contact.phone}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
                   >
-                    <Phone className="h-3.5 w-3.5 text-primary" />
-                    <span>{profile.contact.phone}</span>
+                    <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
                   </a>
                 )}
                 {profile.contact?.address && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium">
-                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>{profile.contact.address}</span>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
                   </div>
                 )}
               </div>
