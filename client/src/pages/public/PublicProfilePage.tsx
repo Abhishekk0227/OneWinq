@@ -705,24 +705,15 @@ export default function PublicProfilePage() {
                         className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
                       />
                       <div className="flex items-center gap-2">
-                        <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
-                          {activeMode} MODE
-                        </Badge>
                         <span className="text-xs font-mono text-muted-foreground">
                           @{profileUser.username}
                         </span>
                       </div>
                     </div>
                   ) : (
-                    /* Active Mode Tag */
                     <div className="flex items-center justify-between pb-4 border-b border-border">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                          Identity Presentation
-                        </span>
-                        <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
-                          {activeMode} MODE
-                        </Badge>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Identity Presentation
                       </div>
                       <div className="text-xs font-mono text-muted-foreground">
                         @{profileUser.username}

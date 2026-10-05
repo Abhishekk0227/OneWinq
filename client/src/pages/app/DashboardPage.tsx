@@ -211,12 +211,6 @@ export default function DashboardPage() {
                     {primaryIdentity.customTitle}
                   </Badge>
                 )}
-                <Badge
-                  variant={profile?.activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'}
-                  className="text-[11px] font-bold py-0.5 px-2"
-                >
-                  {profile?.activeMode || 'PUBLIC'} MODE
-                </Badge>
               </div>
 
               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 max-w-xl">

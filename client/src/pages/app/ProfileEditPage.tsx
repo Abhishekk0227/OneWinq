@@ -3211,58 +3211,7 @@ export default function ProfileEditPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Sticky Fixed Bottom Navigation Bar for Mobile & Desktop Tab Navigation & Sliding */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border shadow-2xl p-2 sm:p-2.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
-          <button
-            type="button"
-            onClick={() => scrollBottomTabs('left')}
-            className="p-1.5 sm:p-2 rounded-xl border border-border bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0 transition-colors shadow-2xs cursor-pointer"
-            title="Slide tabs left"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
 
-          <div
-            ref={bottomTabsScrollRef}
-            className="flex-1 overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-1.5 py-1 px-1 touch-pan-x"
-          >
-            {visibleTabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab.id)
-                    const el = document.getElementById(`bottom-tab-${tab.id}`)
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-                  }}
-                  id={`bottom-tab-${tab.id}`}
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl shrink-0 transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground shadow-md scale-105 ring-2 ring-primary/30 font-bold'
-                      : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span className="whitespace-nowrap">{tab.label}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => scrollBottomTabs('right')}
-            className="p-1.5 sm:p-2 rounded-xl border border-border bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0 transition-colors shadow-2xs cursor-pointer"
-            title="Slide tabs right"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
 
       {/* Create New Profession Persona Modal */}
       {isCreatePersonaOpen && (
