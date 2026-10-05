@@ -708,7 +708,7 @@ export default function ProfilePage() {
 
           {/* Sections Menu Bar (Sticky on scroll, optimized for mobile responsiveness) */}
           {availableSections.length > 1 && (
-            <div className="sticky top-0 z-20 -mx-3 sm:mx-0 p-2 sm:p-2.5 rounded-none sm:rounded-2xl bg-card/95 backdrop-blur-md border-y sm:border border-border/80 shadow-md my-4">
+            <div className="sticky top-0 z-10 -mx-3 sm:mx-0 p-2 sm:p-2.5 rounded-none sm:rounded-2xl bg-card/95 backdrop-blur-md border-y sm:border border-border/80 shadow-md my-4">
               <div className="flex items-center justify-between gap-2 min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-lg bg-muted/70 text-foreground font-bold text-xs border border-border/40">
                   <Layers className="h-3.5 w-3.5 text-primary" />
