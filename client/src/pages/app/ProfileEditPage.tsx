@@ -1239,45 +1239,7 @@ export default function ProfileEditPage() {
           </div>
         </div>
 
-        <div className="flex items-center flex-wrap gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-border/50">
-          {activeUserCard && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold whitespace-nowrap">
-              <Wifi className="h-3 w-3 animate-pulse" />
-              <span>NFC: {activeUserCard.cardCode || activeUserCard.cardUid}</span>
-            </span>
-          )}
-
-          {profileData?.data?.profile && !profileData.data.profile.isActive && selectedPersonaId && (
-            <Button
-              type="button"
-              size="sm"
-              isLoading={switchActiveMutation.isPending}
-              onClick={() => switchActiveMutation.mutate(selectedPersonaId)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 text-xs h-7 px-2.5 shadow-xs"
-            >
-              <Check className="h-3.5 w-3.5" />
-              <span>Make Live</span>
-            </Button>
-          )}
-
-          {profileData?.data?.profile?.isActive && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Live Profile
-            </span>
-          )}
-
-          <Badge
-            variant="outline"
-            className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] sm:text-[11px] font-semibold flex items-center gap-1 py-1 px-2.5"
-            title="Multi-profession profiles are locked and coming soon"
-          >
-            <Lock className="h-3 w-3" />
-            <span className="hidden sm:inline">Multiple Personas (Coming Soon)</span>
-            <span className="sm:hidden">Multi-Personas (Soon)</span>
-          </Badge>
-
-          {personas.length > 1 && selectedPersonaId && (
+        {personas.length > 1 && selectedPersonaId && (
             <Button
               type="button"
               variant="ghost"
@@ -1295,7 +1257,6 @@ export default function ProfileEditPage() {
             </Button>
           )}
         </div>
-      </div>
 
       {/* Editor Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
@@ -1362,14 +1323,6 @@ export default function ProfileEditPage() {
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
-          </div>
-
-          {/* Restricted Extra Sections Indicator */}
-          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
-            <span className="text-[11px] text-muted-foreground flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/40 border border-border/60">
-              <Lock className="h-3 w-3 text-amber-500" />
-              <span>More Sections: <strong>Coming Soon... for now</strong></span>
-            </span>
           </div>
         </div>
 
