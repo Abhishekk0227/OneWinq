@@ -31,6 +31,9 @@ export class SmtpAdapter extends EmailProviderAdapter {
         user,
         pass,
       },
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
     });
 
     logger.info('[Email/SMTP] Initialized SMTP email transport', {

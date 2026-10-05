@@ -314,14 +314,18 @@ export async function login({ email, password }, req) {
     sessionId: session._id.toString(),
   });
 
-  // Send new-login notification (non-critical — login succeeds even if email fails)
-  emailService.sendNewLoginNotification({
-    to: email,
-    deviceName: deviceInfo.deviceName,
-    ipAddress: deviceInfo.ipAddress,
-    loginAt: new Date(),
-  }).catch((err) => {
-    logger.warn('Failed to send login notification', { userId: user._id, error: err.message });
+  // Send new-login notification asynchronously without blocking HTTP response
+  setImmediate(() => {
+    emailService
+      .sendNewLoginNotification({
+        to: email,
+        deviceName: deviceInfo.deviceName,
+        ipAddress: deviceInfo.ipAddress,
+        loginAt: new Date(),
+      })
+      .catch((err) => {
+        logger.warn('Failed to send login notification', { userId: user._id, error: err.message });
+      });
   });
 
   logger.info('User logged in', { userId: user._id, sessionId: session._id });

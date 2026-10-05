@@ -44,7 +44,7 @@ export function AuthLayout() {
         </div>
 
         <div className="relative z-10 text-xs text-white/50 flex justify-between items-center">
-          <span>© {new Date().getFullYear()} OneWinq Inc. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} OneWinq </span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>

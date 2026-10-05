@@ -98,7 +98,9 @@ export async function connectDatabase() {
   while (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
     try {
       await mongoose.connect(config.db.uri, options);
-      await dropLegacyUniqueIndexes();
+      dropLegacyUniqueIndexes().catch((err) => {
+        logger.debug('Non-blocking legacy index cleanup skipped or deferred', { message: err.message });
+      });
       return; // success
     } catch (err) {
       reconnectAttempts += 1;
