@@ -24,7 +24,9 @@ export const helmetMiddleware = helmet({
 
 const ALLOWED_ORIGIN_PATTERNS = [
   /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
   /^https:\/\/.*\.vercel\.app$/,
+  /^https:\/\/vercel\.app$/,
   /^https:\/\/onewinq\.com$/,
   /^https:\/\/.*\.onewinq\.com$/,
 ];
@@ -38,18 +40,14 @@ const corsOptions = {
     // Allow requests with no origin (e.g. curl, Postman, server-to-server)
     if (!origin) { return callback(null, true); }
 
-    if (
-      config.cors.origins.includes(origin) ||
-      (config.isDevelopment && (origin.includes('localhost') || origin.includes('127.0.0.1')))
-    ) {
+    const isAllowedConfig = config.cors.origins.some((o) => o && o.trim() === origin.trim());
+    const isAllowedPattern = ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin));
+
+    if (isAllowedConfig || isAllowedPattern || origin.includes('localhost') || origin.includes('127.0.0.1')) {
       return callback(null, true);
     }
 
-    if (ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))) {
-      return callback(null, true);
-    }
-
-    return callback(new Error(`CORS: origin '${origin}' is not allowed`));
+    return callback(null, false);
   },
   credentials: true, // Required for HTTP-only cookie to be sent cross-origin
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
