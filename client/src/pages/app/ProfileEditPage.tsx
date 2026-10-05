@@ -1740,14 +1740,6 @@ export default function ProfileEditPage() {
                     <span>View Templates</span>
                   </Button>
                 </div>
-
-                {/* Universal Template Notice */}
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-3 text-xs text-muted-foreground">
-                  <Lock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-foreground">Basic Universal Template Active:</strong> Your profile uses this clean universal layout with fixed essential fields (Identity, Bio, Contact Information, and Social Links). All specialty templates and multi-personas are locked and <strong>Coming Soon... for now</strong>!
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-1">
