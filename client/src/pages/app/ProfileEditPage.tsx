@@ -684,59 +684,13 @@ export default function ProfileEditPage() {
     return ['identity', 'privacy']
   }, [])
 
-  // Dynamic Tabs Engine for Basic Universal Template + Populated Data
+  // Clean 2-Tab Structure: Universal Profile (All-in-One) + Visibility Rules
   const visibleTabs = React.useMemo(() => {
-    const tabs: { id: string; label: string; icon: any }[] = [
+    return [
       { id: 'identity', label: 'Universal Profile', icon: Sparkles },
+      { id: 'privacy', label: 'Visibility Rules', icon: Shield },
     ]
-
-    const added = new Set<string>(['identity'])
-
-    const addTabIfDefined = (tabId: string) => {
-      if (added.has(tabId) || tabId === 'privacy') return
-      const def = SECTION_TO_TAB[tabId] || Object.values(SECTION_TO_TAB).find((t) => t.id === tabId)
-      if (def) {
-        tabs.push(def)
-        added.add(tabId)
-      } else if (tabId === 'skills-projects') {
-        tabs.push({ id: 'skills-projects', label: 'Skills & Projects', icon: Layers })
-        added.add('skills-projects')
-      } else if (tabId === 'credentials') {
-        tabs.push({ id: 'credentials', label: 'Credentials & Services', icon: Award })
-        added.add('credentials')
-      }
-    }
-
-    // Always include standard profile sections so all sections in Visibility Rules are directly editable
-    addTabIfDefined('career')
-    addTabIfDefined('education')
-    addTabIfDefined('skills')
-    addTabIfDefined('projects')
-    addTabIfDefined('services')
-    addTabIfDefined('certifications')
-    addTabIfDefined('media')
-    addTabIfDefined('ventures')
-    if (publications.length > 0) addTabIfDefined('publications')
-    if (awards.length > 0) addTabIfDefined('awards')
-    if (customSections.length > 0) addTabIfDefined('custom-blocks')
-
-    // Always append privacy / visibility rules
-    tabs.push({ id: 'privacy', label: 'Visibility Rules', icon: Shield })
-    return tabs
-  }, [
-    mediaGallery.length,
-    organizations.length,
-    experience.length,
-    education.length,
-    skills.length,
-    projects.length,
-    services.length,
-    certifications.length,
-    publications.length,
-    awards.length,
-    customSections.length,
-    SECTION_TO_TAB,
-  ])
+  }, [])
 
   // Handler to remove / delete an extra added section
   const handleRemoveSection = (sectionId: string, sectionTitle?: string) => {
@@ -1848,14 +1802,8 @@ export default function ProfileEditPage() {
                 </div>
               </div>
             </div>
-          </div>
-        </TabsContent>
-
-        {/* ================= TAB: MEDIA & CHANNELS (CREATOR) ================= */}
-        {visibleTabs.some((t) => t.id === 'media') && (
-          <TabsContent value="media" className="space-y-6">
-            {renderExtraSectionBanner('media', 'Media & Channels')}
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+          {/* ================= SECTION: MEDIA & CHANNELS ================= */}
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
                   <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -1976,15 +1924,11 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
+          </div>
 
-        {/* ================= TAB: VENTURES & ORGANIZATIONS (FOUNDER / EXEC) ================= */}
-        {visibleTabs.some((t) => t.id === 'ventures') && (
-          <TabsContent value="ventures" className="space-y-6">
-            {renderExtraSectionBanner('ventures', 'Ventures & Organizations')}
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
+          {/* ================= SECTION: VENTURES & ORGANIZATIONS ================= */}
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
                   <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-amber-500" />
@@ -2111,13 +2055,7 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: CAREER & WORK EXPERIENCE ================= */}
-        {visibleTabs.some((t) => t.id === 'career') && (
-          <TabsContent value="career" className="space-y-6">
-            {renderExtraSectionBanner('career', 'Work Experience')}
             {/* Experience list */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
@@ -2242,13 +2180,8 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: EDUCATION & ACADEMICS (STUDENT / ACADEMIC) ================= */}
-        {visibleTabs.some((t) => t.id === 'education') && (
-          <TabsContent value="education" className="space-y-6">
-            {renderExtraSectionBanner('education', 'Education & Academics')}
+            {/* ================= SECTION: EDUCATION & ACADEMICS ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2397,13 +2330,8 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: SKILLS & COMPETENCIES ================= */}
-        {visibleTabs.some((t) => t.id === 'skills') && (
-          <TabsContent value="skills" className="space-y-6">
-            {renderExtraSectionBanner('skills', 'Skills & Technical Stack')}
+            {/* ================= SECTION: SKILLS & TECHNICAL STACK ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2492,13 +2420,8 @@ export default function ProfileEditPage() {
                 </div>
               )}
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: PROJECTS & WORKS ================= */}
-        {visibleTabs.some((t) => t.id === 'projects') && (
-          <TabsContent value="projects" className="space-y-6">
-            {renderExtraSectionBanner('projects', 'Projects & Portfolio')}
+            {/* ================= SECTION: PROJECTS & PORTFOLIO ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2580,103 +2503,8 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: COMBINED SKILLS & PROJECTS (GENERAL) ================= */}
-        {visibleTabs.some((t) => t.id === 'skills-projects') && (
-          <TabsContent value="skills-projects" className="space-y-6">
-            {renderExtraSectionBanner('skills-projects', 'Skills & Projects')}
-            {/* Skills */}
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <h3 className="text-base font-bold text-foreground">Skills & Expertise</h3>
-                <Button variant="subtle" size="sm" onClick={handleAddSkill} leftIcon={<Plus className="h-3.5 w-3.5" />}>
-                  Add Skill
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {skills.map((skill, idx) => (
-                  <div key={skill.id || idx} className="p-3 rounded-2xl border border-border bg-muted/20 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-primary">Skill #{idx + 1}</span>
-                      <button type="button" onClick={() => setSkills((prev) => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <Input
-                      value={skill.name}
-                      onChange={(e) => {
-                        const updated = [...skills]
-                        updated[idx].name = e.target.value
-                        setSkills(updated)
-                      }}
-                      placeholder="Skill Name"
-                      className="text-xs"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Projects */}
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <h3 className="text-base font-bold text-foreground">Projects & Portfolio</h3>
-                <Button variant="subtle" size="sm" onClick={handleAddProject} leftIcon={<Plus className="h-3.5 w-3.5" />}>
-                  Add Project
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {projects.map((proj, idx) => (
-                  <div key={proj.id || idx} className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-primary uppercase">Project #{idx + 1}</span>
-                      <button type="button" onClick={() => setProjects((prev) => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        value={proj.title}
-                        onChange={(e) => {
-                          const updated = [...projects]
-                          updated[idx].title = e.target.value
-                          setProjects(updated)
-                        }}
-                        placeholder="Project Title"
-                      />
-                      <Input
-                        value={proj.url || ''}
-                        onChange={(e) => {
-                          const updated = [...projects]
-                          updated[idx].url = e.target.value
-                          setProjects(updated)
-                        }}
-                        placeholder="URL (https://...)"
-                      />
-                    </div>
-                    <Textarea
-                      value={proj.description || ''}
-                      onChange={(e) => {
-                        const updated = [...projects]
-                        updated[idx].description = e.target.value
-                        setProjects(updated)
-                      }}
-                      placeholder="Description & outcomes..."
-                      rows={2}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        )}
-
-        {/* ================= TAB: SERVICES & PACKAGES ================= */}
-        {visibleTabs.some((t) => t.id === 'services') && (
-          <TabsContent value="services" className="space-y-6">
-            {renderExtraSectionBanner('services', 'Services & Packages')}
+            {/* ================= SECTION: SERVICES & PACKAGES ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2758,13 +2586,8 @@ export default function ProfileEditPage() {
                 )}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: CERTIFICATIONS & CREDENTIALS ================= */}
-        {visibleTabs.some((t) => t.id === 'certifications') && (
-          <TabsContent value="certifications" className="space-y-6">
-            {renderExtraSectionBanner('certifications', 'Certifications')}
+            {/* ================= SECTION: CERTIFICATIONS & CREDENTIALS ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -2847,101 +2670,8 @@ export default function ProfileEditPage() {
                 ))}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: COMBINED CREDENTIALS & SERVICES (GENERAL) ================= */}
-        {visibleTabs.some((t) => t.id === 'credentials') && (
-          <TabsContent value="credentials" className="space-y-6">
-            {renderExtraSectionBanner('credentials', 'Credentials & Services')}
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <h3 className="text-base font-bold text-foreground">Certifications & Licenses</h3>
-                <Button variant="subtle" size="sm" onClick={handleAddCertification} leftIcon={<Plus className="h-3.5 w-3.5" />}>
-                  Add Certification
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {certifications.map((cert, idx) => (
-                  <div key={cert.id || idx} className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-primary uppercase">Cert #{idx + 1}</span>
-                      <button type="button" onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        value={cert.name}
-                        onChange={(e) => {
-                          const updated = [...certifications]
-                          updated[idx].name = e.target.value
-                          setCertifications(updated)
-                        }}
-                        placeholder="Certificate Name"
-                      />
-                      <Input
-                        value={cert.issuer}
-                        onChange={(e) => {
-                          const updated = [...certifications]
-                          updated[idx].issuer = e.target.value
-                          setCertifications(updated)
-                        }}
-                        placeholder="Issuer"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <h3 className="text-base font-bold text-foreground">Professional Services</h3>
-                <Button variant="subtle" size="sm" onClick={handleAddService} leftIcon={<Plus className="h-3.5 w-3.5" />}>
-                  Add Service
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {services.map((srv, idx) => (
-                  <div key={srv.id || idx} className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-primary uppercase">Service #{idx + 1}</span>
-                      <button type="button" onClick={() => setServices((prev) => prev.filter((_, i) => i !== idx))} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        value={srv.title}
-                        onChange={(e) => {
-                          const updated = [...services]
-                          updated[idx].title = e.target.value
-                          setServices(updated)
-                        }}
-                        placeholder="Service Title"
-                      />
-                      <Input
-                        value={srv.priceRange || ''}
-                        onChange={(e) => {
-                          const updated = [...services]
-                          updated[idx].priceRange = e.target.value
-                          setServices(updated)
-                        }}
-                        placeholder="Price / Rate"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        )}
-
-        {/* ================= TAB: AWARDS & HONORS ================= */}
-        {visibleTabs.some((t) => t.id === 'awards') && (
-          <TabsContent value="awards" className="space-y-6">
-            {renderExtraSectionBanner('awards', 'Awards & Honors')}
+            {/* ================= SECTION: AWARDS & HONORS ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -3006,13 +2736,8 @@ export default function ProfileEditPage() {
                 ))}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: PUBLICATIONS & RESEARCH ================= */}
-        {visibleTabs.some((t) => t.id === 'publications') && (
-          <TabsContent value="publications" className="space-y-6">
-            {renderExtraSectionBanner('publications', 'Publications & Research')}
+            {/* ================= SECTION: PUBLICATIONS & RESEARCH ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
@@ -3076,133 +2801,127 @@ export default function ProfileEditPage() {
                 ))}
               </div>
             </div>
-          </TabsContent>
-        )}
 
-        {/* ================= TAB: CUSTOM SECTIONS ================= */}
-        {visibleTabs.some((t) => t.id === 'custom-blocks') && (
-          <TabsContent value="custom-blocks" className="space-y-6">
-            {renderExtraSectionBanner('custom-blocks', 'Custom Sections')}
+            {/* ================= SECTION: CUSTOM SECTIONS ================= */}
             <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div>
-                <h3 className="text-base font-bold text-foreground">Custom Portfolio Sections</h3>
-                <p className="text-xs text-muted-foreground">
-                  Build custom modular sections with text, media links, and custom markdown.
-                </p>
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div>
+                  <h3 className="text-base font-bold text-foreground">Custom Portfolio Sections</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Build custom modular sections with text, media links, and custom markdown.
+                  </p>
+                </div>
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  onClick={handleAddCustomSection}
+                  leftIcon={<Plus className="h-3.5 w-3.5" />}
+                >
+                  Add Custom Section
+                </Button>
               </div>
-              <Button
-                variant="subtle"
-                size="sm"
-                onClick={handleAddCustomSection}
-                leftIcon={<Plus className="h-3.5 w-3.5" />}
-              >
-                Add Custom Section
-              </Button>
-            </div>
 
-            <div className="space-y-6">
-              {customSections.map((sec, sIdx) => (
-                <div key={sec.id || sIdx} className="p-5 rounded-2xl border border-border bg-muted/20 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-primary uppercase">
-                      Custom Section #{sIdx + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setCustomSections((prev) => prev.filter((_, i) => i !== sIdx))}
-                      className="text-muted-foreground hover:text-destructive p-1 rounded"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+              <div className="space-y-6">
+                {customSections.map((sec, sIdx) => (
+                  <div key={sec.id || sIdx} className="p-5 rounded-2xl border border-border bg-muted/20 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-primary uppercase">
+                        Custom Section #{sIdx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCustomSections((prev) => prev.filter((_, i) => i !== sIdx))}
+                        className="text-muted-foreground hover:text-destructive p-1 rounded"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Input
-                      value={sec.title}
-                      onChange={(e) => {
-                        const updated = [...customSections]
-                        updated[sIdx].title = e.target.value
-                        setCustomSections(updated)
-                      }}
-                      placeholder="Section Title"
-                    />
-                    <Input
-                      value={sec.description || ''}
-                      onChange={(e) => {
-                        const updated = [...customSections]
-                        updated[sIdx].description = e.target.value
-                        setCustomSections(updated)
-                      }}
-                      placeholder="Subtitle / Description"
-                    />
-                  </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        value={sec.title}
+                        onChange={(e) => {
+                          const updated = [...customSections]
+                          updated[sIdx].title = e.target.value
+                          setCustomSections(updated)
+                        }}
+                        placeholder="Section Title"
+                      />
+                      <Input
+                        value={sec.description || ''}
+                        onChange={(e) => {
+                          const updated = [...customSections]
+                          updated[sIdx].description = e.target.value
+                          setCustomSections(updated)
+                        }}
+                        placeholder="Subtitle / Description"
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    {sec.blocks.map((blk, bIdx) => (
-                      <div key={bIdx} className="p-3 bg-card border border-border/80 rounded-xl space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-muted-foreground capitalize">
-                            Block: {blk.type}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
+                    <div className="space-y-2">
+                      {sec.blocks.map((blk, bIdx) => (
+                        <div key={bIdx} className="p-3 bg-card border border-border/80 rounded-xl space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-muted-foreground capitalize">
+                              Block: {blk.type}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...customSections]
+                                updated[sIdx].blocks = updated[sIdx].blocks.filter((_, i) => i !== bIdx)
+                                setCustomSections(updated)
+                              }}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <Textarea
+                            value={blk.content}
+                            onChange={(e) => {
                               const updated = [...customSections]
-                              updated[sIdx].blocks = updated[sIdx].blocks.filter((_, i) => i !== bIdx)
+                              updated[sIdx].blocks[bIdx].content = e.target.value
                               setCustomSections(updated)
                             }}
-                            className="text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                            placeholder="Content details..."
+                            rows={2}
+                          />
                         </div>
-                        <Textarea
-                          value={blk.content}
-                          onChange={(e) => {
-                            const updated = [...customSections]
-                            updated[sIdx].blocks[bIdx].content = e.target.value
-                            setCustomSections(updated)
-                          }}
-                          placeholder="Content details..."
-                          rows={2}
-                        />
-                      </div>
-                    ))}
+                      ))}
 
-                    <div className="flex items-center gap-2 pt-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlockToSection(sIdx, 'text')}
-                        className="text-xs h-7 px-2"
-                      >
-                        + Add Text
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlockToSection(sIdx, 'link')}
-                        className="text-xs h-7 px-2"
-                      >
-                        + Add Link
-                      </Button>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddBlockToSection(sIdx, 'text')}
+                          className="text-xs h-7 px-2"
+                        >
+                          + Add Text
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAddBlockToSection(sIdx, 'link')}
+                          className="text-xs h-7 px-2"
+                        >
+                          + Add Link
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {customSections.length === 0 && (
-                <div className="text-center py-6 text-xs text-muted-foreground border border-dashed border-border rounded-2xl">
-                  No custom blocks configured yet. Click "+ Add Custom Section" above.
-                </div>
-              )}
+                {customSections.length === 0 && (
+                  <div className="text-center py-6 text-xs text-muted-foreground border border-dashed border-border rounded-2xl">
+                    No custom blocks configured yet. Click "+ Add Custom Section" above.
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </TabsContent>
-      )}
+          </TabsContent>
 
         {/* ================= TAB: VISIBILITY RULES ================= */}
         <TabsContent value="privacy" className="space-y-6">
