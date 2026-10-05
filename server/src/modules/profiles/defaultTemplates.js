@@ -133,6 +133,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 5,
     isFeatured: true,
+    previewImage: '/templates/student.png',
   },
   {
     name: 'CEO / Executive',
@@ -243,6 +244,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     displayOrder: 1,
     isFeatured: true,
     isLocked: false,
+    previewImage: '/templates/professional.png',
   },
 ];
 
@@ -272,6 +274,10 @@ export async function seedDefaultTemplatesIfEmpty() {
         }
         if (existing.isLocked !== false) {
           existing.isLocked = false;
+          changed = true;
+        }
+        if (existing.previewImage !== tpl.previewImage) {
+          existing.previewImage = tpl.previewImage;
           changed = true;
         }
       } else if (existing.isLocked === undefined) {
