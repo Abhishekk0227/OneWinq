@@ -71,6 +71,9 @@ const TEMPLATE_PREVIEW_IMAGES: Record<string, string> = {
   doctor: '/templates/doctor.png',
   executive: '/templates/executive.png',
   academic: '/templates/academic.png',
+  'freelancer-consultant': '/templates/freelancer-consultant.png',
+  founder: '/templates/founder.png',
+  creator: '/templates/creator.png',
 }
 
 interface ProfessionPreviewProps {
@@ -87,12 +90,12 @@ function ProfessionVisualPreview({ slug, category, name, previewImage }: Profess
 
   if (imageSrc) {
     return (
-      <div className="relative w-full rounded-xl overflow-hidden border border-border/70 bg-muted/20 aspect-[2.22/1] select-none shadow-xs group-hover:shadow-md transition-all">
+      <div className="relative w-full rounded-xl overflow-hidden border border-border/60 bg-muted/10 select-none shadow-xs group-hover:shadow-md transition-all">
         <img
           src={imageSrc}
           alt={name}
           onError={() => setImageError(true)}
-          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
+          className="w-full h-auto object-cover object-center transition-transform duration-300 group-hover:scale-[1.01] block"
           loading="lazy"
         />
       </div>

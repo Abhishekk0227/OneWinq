@@ -80,6 +80,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 3,
     isFeatured: true,
+    previewImage: '/templates/founder.png',
   },
   {
     name: 'Creator / Designer',
@@ -105,6 +106,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 4,
     isFeatured: true,
+    previewImage: '/templates/creator.png',
   },
   {
     name: 'Student / Academic',
@@ -212,6 +214,7 @@ export const DEFAULT_PROFILE_TEMPLATES = [
     },
     displayOrder: 9,
     isFeatured: false,
+    previewImage: '/templates/freelancer-consultant.png',
   },
   {
     name: 'Basic Universal Template',
