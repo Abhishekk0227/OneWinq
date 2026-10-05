@@ -31,6 +31,18 @@ async function bootstrap() {
   app.set('io', io);
 
   // --- 4. Start listening ---------------------------------------------------
+  httpServer.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      logger.error(`Port ${config.port} is already in use. Please terminate existing process or set a different PORT in environment.`, {
+        port: config.port,
+        code: err.code,
+      });
+      process.exit(1);
+    } else {
+      logger.error('HTTP server error', { message: err.message, code: err.code });
+    }
+  });
+
   httpServer.listen(config.port, () => {
     logger.info(`OneWinq server started`, {
       port: config.port,
