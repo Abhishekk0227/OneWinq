@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "cd client && npm install --include=dev && npm run build",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://one-winq-bs3m.vercel.app/api/$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
