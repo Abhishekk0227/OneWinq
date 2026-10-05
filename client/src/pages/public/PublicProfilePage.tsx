@@ -48,6 +48,9 @@ import {
   LayoutGrid,
   User,
   Layers,
+  Home,
+  ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
 
@@ -60,7 +63,7 @@ export default function PublicProfilePage() {
   const [connectNote, setConnectNote] = React.useState('')
   const [isCopied, setIsCopied] = React.useState(false)
   const [isStartingChat, setIsStartingChat] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState<string>('all')
+  const [activeTab, setActiveTab] = React.useState<string>('home')
 
   // Profile theme state (Light ☀️ / Dark 🌙)
   const [profileTheme, setProfileTheme] = React.useState<'dark' | 'light'>(() => {
@@ -414,13 +417,12 @@ export default function PublicProfilePage() {
   const hasCustom = customSections.length > 0
 
   const profileTabs = [
-    { id: 'all', label: 'All', icon: <LayoutGrid className="h-4 w-4" /> },
-    { id: 'overview', label: 'Overview', icon: <User className="h-4 w-4" /> },
-    ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" /> }] : []),
-    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" /> }] : []),
-    ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" /> }] : []),
-    ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" /> }] : []),
-    ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" /> }] : []),
+    { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
+    ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length + education.length }] : []),
+    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
+    ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + publications.length }] : []),
+    ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
+    ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
 
   return (
@@ -585,174 +587,243 @@ export default function PublicProfilePage() {
       </header>
 
       {/* Main Profile Canvas */}
-      <main className="container mx-auto max-w-4xl px-4 pt-8 sm:px-6 space-y-8 animate-in fade-in duration-300">
-        {/* Profile Identity Card */}
-        <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
-          {profile.coverUrl ? (
-            <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
-              <img
-                src={profile.coverUrl}
-                alt="Cover Banner"
-                className="w-full h-full object-cover object-center"
-              />
-            </div>
-          ) : null}
+      <main className="container mx-auto max-w-6xl px-3 sm:px-6 pt-6 animate-in fade-in duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-left">
+          {/* Left Desktop Navigation Sidebar */}
+          <div className="hidden md:block md:col-span-3 space-y-4">
+            <div className="sticky top-20 rounded-3xl border border-border bg-card p-4 shadow-sm space-y-3">
+              <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
+                Profile Sections
+              </div>
 
-          <div className="p-6 sm:p-10 space-y-6">
-            {profile.coverUrl ? (
-              <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
+              <div className="space-y-1">
+                {profileTabs.map((tab) => {
+                  const isActive = activeTab === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-left cursor-pointer ${
+                        isActive
+                          ? 'bg-primary text-white shadow-md'
+                          : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        {tab.icon}
+                        <span className="truncate">{tab.label}</span>
+                      </div>
+                      {tab.count !== undefined && (
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {tab.count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Sidebar Compact User Pill */}
+              <div className="pt-3 border-t border-border/60 flex items-center gap-2.5">
                 <Avatar
                   src={profile.avatarUrl || profileUser?.avatarUrl}
                   fallback={profileUser.displayName}
                   alt={profileUser.displayName}
-                  size="2xl"
-                  className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                  size="sm"
+                  className="rounded-xl ring-1 ring-border shrink-0"
                 />
-                <div className="flex items-center gap-2">
-                  <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
-                    {activeMode} MODE
-                  </Badge>
-                  <span className="text-xs font-mono text-muted-foreground">
-                    @{profileUser.username}
-                  </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-foreground truncate">{profileUser.displayName}</div>
+                  <div className="text-[10px] font-mono text-muted-foreground truncate">@{profileUser.username}</div>
                 </div>
               </div>
-            ) : (
-              /* Active Mode Tag */
-              <div className="flex items-center justify-between pb-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Identity Presentation
-                  </span>
-                  <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
-                    {activeMode} MODE
-                  </Badge>
+            </div>
+          </div>
+
+          {/* Right Main Content Canvas */}
+          <div className="md:col-span-9 space-y-6 min-w-0 max-w-full">
+            {/* Dedicated Header for Non-Home Tabs */}
+            {activeTab !== 'home' && (
+              <div className="rounded-3xl border border-border bg-card p-5 shadow-sm flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('home')}
+                    className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer"
+                    title="Back to Home / Intro"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                  <div>
+                    <h1 className="text-lg sm:text-xl font-extrabold text-foreground flex items-center gap-2">
+                      {profileTabs.find((t) => t.id === activeTab)?.icon}
+                      <span>{profileTabs.find((t) => t.id === activeTab)?.label}</span>
+                    </h1>
+                    <p className="text-xs text-muted-foreground">
+                      @{profileUser.username}'s dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
+                    </p>
+                  </div>
                 </div>
-                <div className="text-xs font-mono text-muted-foreground">
-                  @{profileUser.username}
-                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('home')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0"
+                >
+                  <span>Profile Home</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
               </div>
             )}
 
-            <div className={profile.coverUrl ? "space-y-3" : "flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"}>
-              {!profile.coverUrl && (
-                <Avatar
-                  src={profile.avatarUrl || profileUser?.avatarUrl}
-                  fallback={profileUser.displayName}
-                  alt={profileUser.displayName}
-                  size="2xl"
-                  className="rounded-3xl ring-4 ring-primary/10 shadow-md"
-                />
-              )}
+            {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
+            {activeTab === 'home' && (
+              <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
+                {profile.coverUrl ? (
+                  <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
+                    <img
+                      src={profile.coverUrl}
+                      alt="Cover Banner"
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                ) : null}
 
-              <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
-                <div className="min-w-0 max-w-full">
-                  <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
-                    {profileUser.displayName}
-                  </h1>
-                  {profile.headline && (
-                    <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
-                      {profile.headline}
-                    </p>
+                <div className="p-6 sm:p-10 space-y-6">
+                  {profile.coverUrl ? (
+                    <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
+                      <Avatar
+                        src={profile.avatarUrl || profileUser?.avatarUrl}
+                        fallback={profileUser.displayName}
+                        alt={profileUser.displayName}
+                        size="2xl"
+                        className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
+                          {activeMode} MODE
+                        </Badge>
+                        <span className="text-xs font-mono text-muted-foreground">
+                          @{profileUser.username}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Active Mode Tag */
+                    <div className="flex items-center justify-between pb-4 border-b border-border">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          Identity Presentation
+                        </span>
+                        <Badge variant={activeMode === 'PROFESSIONAL' ? 'subtle' : 'outline'} className="text-[11px] font-bold">
+                          {activeMode} MODE
+                        </Badge>
+                      </div>
+                      <div className="text-xs font-mono text-muted-foreground">
+                        @{profileUser.username}
+                      </div>
+                    </div>
                   )}
+
+                  <div className={profile.coverUrl ? "space-y-3" : "flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"}>
+                    {!profile.coverUrl && (
+                      <Avatar
+                        src={profile.avatarUrl || profileUser?.avatarUrl}
+                        fallback={profileUser.displayName}
+                        alt={profileUser.displayName}
+                        size="2xl"
+                        className="rounded-3xl ring-4 ring-primary/10 shadow-md"
+                      />
+                    )}
+
+                    <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
+                      <div className="min-w-0 max-w-full">
+                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                          {profileUser.displayName}
+                        </h1>
+                        {profile.headline && (
+                          <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
+                            {profile.headline}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Active Profession Title Badge */}
+                      {profile.professionTitle &&
+                        profile.professionTitle !== 'Basic Universal Template' &&
+                        profile.professionTitle !== 'Universal Profile' &&
+                        profile.professionTitle.trim().toLowerCase() !== profile.headline?.trim().toLowerCase() && (
+                        <div className="flex flex-wrap gap-2 pt-1 max-w-full">
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs max-w-full break-words [overflow-wrap:anywhere]">
+                            <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.professionTitle}</span>
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Bio */}
+                      {profile.bio && (
+                        <p className="text-sm sm:text-base text-foreground/80 leading-relaxed pt-2 max-w-2xl whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+                          {profile.bio}
+                        </p>
+                      )}
+
+                      {/* Location and Contact Info Pills */}
+                      <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
+                        {profile.location && (profile.location.city || profile.location.country) && (
+                          <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">
+                              {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
+                              {profile.location.isRemote && ' (Remote)'}
+                            </span>
+                          </div>
+                        )}
+                        {profile.contact?.website && (
+                          <a
+                            href={profile.contact.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleLinkClick(profile.contact!.website!, 'Website')}
+                            className="flex items-center gap-1.5 text-primary hover:underline min-w-0 max-w-full"
+                          >
+                            <Globe className="h-3.5 w-3.5 shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">Portfolio / Site</span>
+                            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                          </a>
+                        )}
+                        {profile.contact?.email && (
+                          <a
+                            href={`mailto:${profile.contact.email}`}
+                            className="flex items-center gap-1.5 hover:text-foreground transition-colors min-w-0 max-w-full"
+                          >
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
+                          </a>
+                        )}
+                        {profile.contact?.phone && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
+                            <Phone className="h-3.5 w-3.5 shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
+                          </div>
+                        )}
+                        {profile.contact?.address && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
-              {/* Active Profession Title Badge */}
-              {profile.professionTitle &&
-                profile.professionTitle !== 'Basic Universal Template' &&
-                profile.professionTitle !== 'Universal Profile' &&
-                profile.professionTitle.trim().toLowerCase() !== profile.headline?.trim().toLowerCase() && (
-                <div className="flex flex-wrap gap-2 pt-1 max-w-full">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs max-w-full break-words [overflow-wrap:anywhere]">
-                    <Briefcase className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.professionTitle}</span>
-                  </span>
-                </div>
-              )}
-
-              {/* Bio */}
-              {profile.bio && (
-                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed pt-2 max-w-2xl whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
-                  {profile.bio}
-                </p>
-              )}
-
-              {/* Location and Contact Info Pills */}
-              <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
-                {profile.location && (profile.location.city || profile.location.country) && (
-                  <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">
-                      {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
-                      {profile.location.isRemote && ' (Remote)'}
-                    </span>
-                  </div>
-                )}
-                {profile.contact?.website && (
-                  <a
-                    href={profile.contact.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => handleLinkClick(profile.contact!.website!, 'Website')}
-                    className="flex items-center gap-1.5 text-primary hover:underline min-w-0 max-w-full"
-                  >
-                    <Globe className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">Portfolio / Site</span>
-                    <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                  </a>
-                )}
-                {profile.contact?.email && (
-                  <a
-                    href={`mailto:${profile.contact.email}`}
-                    className="flex items-center gap-1.5 hover:text-foreground transition-colors min-w-0 max-w-full"
-                  >
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
-                  </a>
-                )}
-                {profile.contact?.phone && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
-                    <Phone className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
-                  </div>
-                )}
-                {profile.contact?.address && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
-                  </div>
-                )}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-        {/* Section Tabs Navigation Bar */}
-        {profileTabs.length > 1 && (
-          <div className="sticky top-14 z-20 p-2 rounded-2xl bg-card/95 backdrop-blur-md border border-border shadow-sm my-4 min-w-0 max-w-full">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5 min-w-0">
-              {profileTabs.map((tab) => {
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-primary text-white shadow-md'
-                        : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
+            )}
 
         {/* Fixed Mobile Bottom Navigation Bar */}
         {profileTabs.length > 1 && (
@@ -780,10 +851,8 @@ export default function PublicProfilePage() {
           </div>
         )}
 
-        {/* Dynamic Sections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
-          {/* Left / Main Column */}
-          <div className="md:col-span-8 space-y-8">
+        {/* Dynamic Sections Content */}
+        <div className="space-y-6">
             {/* Experience Section */}
             {(activeTab === 'all' || activeTab === 'experience') && experiences.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
@@ -1115,132 +1184,133 @@ export default function PublicProfilePage() {
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Right Column / Sidebar */}
-          {(activeTab === 'all' || activeTab === 'overview' || activeTab === 'experience') && (
-            <div className="md:col-span-4 space-y-6 min-w-0 max-w-full">
-              {/* Skills Card */}
-              {skills.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                    Verified Skills
-                  </h2>
-                  <div className="flex flex-wrap gap-1.5 pt-1 min-w-0 max-w-full">
-                    {skills.map((skill: any, idx: number) => (
-                      <Badge key={skill.id || idx} variant="subtle" className="font-medium text-xs break-words [overflow-wrap:anywhere] max-w-full">
-                        {skill.name}
-                      </Badge>
-                    ))}
+            {/* Overview Info Cards (Skills, Social, Education, Honors) - Shown on Home Tab */}
+            {activeTab === 'home' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                {/* Skills Card */}
+                {skills.length > 0 && (
+                  <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-2">
+                      Verified Skills
+                    </h2>
+                    <div className="flex flex-wrap gap-1.5 pt-1 min-w-0 max-w-full">
+                      {skills.map((skill: any, idx: number) => (
+                        <Badge key={skill.id || idx} variant="subtle" className="font-medium text-xs break-words [overflow-wrap:anywhere] max-w-full">
+                          {skill.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Social Links */}
-              {profile.socialLinks && profile.socialLinks.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                    Connect & Social
-                  </h2>
-                  <div className="space-y-2 pt-1 min-w-0 max-w-full">
-                    {profile.socialLinks.map((link: any, idx: number) => (
-                      <a
-                        key={link.id || idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => handleLinkClick(link.url, link.platform)}
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 hover:bg-primary-soft hover:text-primary transition-colors text-xs font-semibold min-w-0 max-w-full"
-                      >
-                        <span className="break-words [overflow-wrap:anywhere] min-w-0">{link.label || link.platform}</span>
-                        <ExternalLink className="h-3.5 w-3.5 opacity-60 shrink-0" />
-                      </a>
-                    ))}
+                {/* Social Links */}
+                {profile.socialLinks && profile.socialLinks.length > 0 && (
+                  <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-2">
+                      Connect & Social
+                    </h2>
+                    <div className="space-y-2 pt-1 min-w-0 max-w-full">
+                      {profile.socialLinks.map((link: any, idx: number) => (
+                        <a
+                          key={link.id || idx}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => handleLinkClick(link.url, link.platform)}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 hover:bg-primary-soft hover:text-primary transition-colors text-xs font-semibold min-w-0 max-w-full"
+                        >
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{link.label || link.platform}</span>
+                          <ExternalLink className="h-3.5 w-3.5 opacity-60 shrink-0" />
+                        </a>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Education Card */}
-              {education.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <GraduationCap className="h-4 w-4 text-primary shrink-0" />
-                    <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education</h2>
+                {/* Education Card */}
+                {education.length > 0 && (
+                  <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                      <GraduationCap className="h-4 w-4 text-primary shrink-0" />
+                      <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education</h2>
+                    </div>
+                    <div className="space-y-3 pt-1 min-w-0">
+                      {education.map((edu: any, idx: number) => {
+                        const dateStr = formatDateRange(
+                          edu.startMonth,
+                          edu.startYear,
+                          edu.endMonth,
+                          edu.endYear,
+                          edu.current,
+                          edu.startDate,
+                          edu.endDate
+                        )
+                        return (
+                          <div key={edu.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2.5 last:pb-0 min-w-0 max-w-full">
+                            <div className="flex items-start justify-between gap-1 min-w-0">
+                              <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
+                              {dateStr && (
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                                  {dateStr}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-primary font-medium break-words [overflow-wrap:anywhere] min-w-0">
+                              {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ')}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-4 pt-1 min-w-0">
-                    {education.map((edu: any, idx: number) => {
-                      const dateStr = formatDateRange(
-                        edu.startMonth,
-                        edu.startYear,
-                        edu.endMonth,
-                        edu.endYear,
-                        edu.current,
-                        edu.startDate,
-                        edu.endDate
-                      )
-                      return (
-                        <div key={edu.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2.5 last:pb-0 min-w-0 max-w-full">
+                )}
+
+                {/* Awards & Certifications */}
+                {(awards.length > 0 || certifications.length > 0) && (
+                  <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                      <Award className="h-4 w-4 text-primary shrink-0" />
+                      <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Honors & Certifications</h2>
+                    </div>
+                    <div className="space-y-3 pt-1 min-w-0">
+                      {awards.map((award: any, idx: number) => (
+                        <div key={award.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
                           <div className="flex items-start justify-between gap-1 min-w-0">
-                            <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
-                            {dateStr && (
+                            <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.title}</div>
+                            {(award.year || award.date) && (
                               <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                                {dateStr}
+                                {formatMonthYear(award.month, award.year, award.date)}
                               </span>
                             )}
                           </div>
-                          <div className="text-primary font-medium break-words [overflow-wrap:anywhere] min-w-0">
-                            {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' in ')}
-                          </div>
+                          <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.issuer}</div>
                         </div>
-                      )
-                    })}
+                      ))}
+                      {certifications.map((cert: any, idx: number) => (
+                        <div key={cert.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
+                          <div className="flex items-start justify-between gap-1 min-w-0">
+                            <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.name}</div>
+                            {(cert.issueYear || cert.issueDate) && (
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                                {cert.doesNotExpire
+                                  ? 'No Expiration'
+                                  : formatMonthYear(cert.issueMonth, cert.issueYear, cert.issueDate)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.issuer}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-            {/* Awards & Certifications */}
-            {(awards.length > 0 || certifications.length > 0) && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <Award className="h-4 w-4 text-primary shrink-0" />
-                  <h2 className="text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Honors & Certifications</h2>
-                </div>
-                <div className="space-y-3 pt-1 min-w-0">
-                  {awards.map((award: any, idx: number) => (
-                    <div key={award.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
-                      <div className="flex items-start justify-between gap-1 min-w-0">
-                        <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.title}</div>
-                        {(award.year || award.date) && (
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                            {formatMonthYear(award.month, award.year, award.date)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{award.issuer}</div>
-                    </div>
-                  ))}
-                  {certifications.map((cert: any, idx: number) => (
-                    <div key={cert.id || idx} className="text-xs space-y-0.5 border-b border-border/40 last:border-0 pb-2 last:pb-0 min-w-0 max-w-full">
-                      <div className="flex items-start justify-between gap-1 min-w-0">
-                        <div className="font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.name}</div>
-                        {(cert.issueYear || cert.issueDate) && (
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                            {cert.doesNotExpire
-                              ? 'No Expiration'
-                              : formatMonthYear(cert.issueMonth, cert.issueYear, cert.issueDate)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">{cert.issuer}</div>
-                    </div>
-                  ))}
-                </div>
+                )}
               </div>
             )}
           </div>
-          )}
         </div>
-      </main>
+      </div>
+    </main>
 
       {/* Share Modal with QR Code */}
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>

@@ -36,6 +36,9 @@ import {
   Wifi,
   ChevronDown,
   Flame,
+  Home,
+  ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
@@ -46,8 +49,8 @@ export default function ProfilePage() {
   const { user } = useAuthStore()
   const queryClient = useQueryClient()
 
-  // Active Section Tracker for Mobile & Responsive Scroll Navigation
-  const [activeSection, setActiveSection] = React.useState<string>('section-overview')
+  // Active Section Tab Tracker
+  const [activeTab, setActiveTab] = React.useState<string>('home')
   const [isMenuDropdownOpen, setIsMenuDropdownOpen] = React.useState(false)
 
   // State for Temporary Mode Modal
@@ -172,124 +175,33 @@ export default function ProfilePage() {
       ? VISIBILITY_MODE.PROFESSIONAL
       : VISIBILITY_MODE.PUBLIC
 
-  // Dynamic Available Sections for Mobile & Responsive Menu Bar
-  const availableSections = React.useMemo(() => {
+  // Profile Section Tabs configuration
+  const experiences = profile?.experience || profile?.sections?.experience || []
+  const education = profile?.education || profile?.sections?.education || []
+  const projects = profile?.projects || profile?.sections?.projects || []
+  const services = profile?.services || profile?.sections?.services || []
+  const certifications = profile?.certifications || profile?.sections?.certifications || []
+  const skills = profile?.skills || profile?.sections?.skills || []
+  const awards = profile?.awards || profile?.sections?.awards || []
+  const publications = profile?.publications || profile?.sections?.publications || []
+  const customSections = profile?.customSections || []
+
+  const hasExperience = experiences.length > 0 || education.length > 0
+  const hasPortfolio = projects.length > 0 || services.length > 0
+  const hasMedia = certifications.length > 0 || skills.length > 0 || awards.length > 0 || publications.length > 0
+  const hasCustom = customSections.length > 0
+
+  const profileTabs = React.useMemo(() => {
     if (!profile) return []
-    const list: { id: string; label: string; icon: React.ReactNode; count?: number }[] = [
-      { id: 'section-overview', label: 'Overview', icon: <FileText className="h-3.5 w-3.5" /> },
+    return [
+      { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
+      ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length + education.length }] : []),
+      ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length }] : []),
+      ...(hasMedia ? [{ id: 'media', label: 'Credentials', icon: <Award className="h-4 w-4" />, count: certifications.length + skills.length + awards.length + publications.length }] : []),
+      { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
+      ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
-    if (profile.experience && profile.experience.length > 0) {
-      list.push({
-        id: 'section-experience',
-        label: 'Experience',
-        icon: <Briefcase className="h-3.5 w-3.5" />,
-        count: profile.experience.length,
-      })
-    }
-    if (profile.education && profile.education.length > 0) {
-      list.push({
-        id: 'section-education',
-        label: 'Education',
-        icon: <GraduationCap className="h-3.5 w-3.5" />,
-        count: profile.education.length,
-      })
-    }
-    if (profile.projects && profile.projects.length > 0) {
-      list.push({
-        id: 'section-projects',
-        label: 'Projects',
-        icon: <Layers className="h-3.5 w-3.5" />,
-        count: profile.projects.length,
-      })
-    }
-    if (profile.certifications && profile.certifications.length > 0) {
-      list.push({
-        id: 'section-certifications',
-        label: 'Certifications',
-        icon: <Award className="h-3.5 w-3.5" />,
-        count: profile.certifications.length,
-      })
-    }
-    if (profile.services && profile.services.length > 0) {
-      list.push({
-        id: 'section-services',
-        label: 'Services',
-        icon: <Sparkles className="h-3.5 w-3.5" />,
-        count: profile.services.length,
-      })
-    }
-    if (profile.skills && profile.skills.length > 0) {
-      list.push({
-        id: 'section-skills',
-        label: 'Skills',
-        icon: <Sparkles className="h-3.5 w-3.5" />,
-        count: profile.skills.length,
-      })
-    }
-    if (profile.awards && profile.awards.length > 0) {
-      list.push({
-        id: 'section-awards',
-        label: 'Awards',
-        icon: <Award className="h-3.5 w-3.5" />,
-        count: profile.awards.length,
-      })
-    }
-    if (profile.publications && profile.publications.length > 0) {
-      list.push({
-        id: 'section-publications',
-        label: 'Publications',
-        icon: <FileText className="h-3.5 w-3.5" />,
-        count: profile.publications.length,
-      })
-    }
-    if (profile.customSections && profile.customSections.length > 0) {
-      list.push({
-        id: 'section-custom',
-        label: 'Custom',
-        icon: <Layers className="h-3.5 w-3.5" />,
-        count: profile.customSections.length,
-      })
-    }
-    // Activity & Posts section
-    list.push({
-      id: 'section-posts',
-      label: 'Activity & Posts',
-      icon: <Flame className="h-3.5 w-3.5" />,
-    })
-    return list
-  }, [profile])
-
-  const scrollToSection = (id: string) => {
-    setActiveSection(id)
-    setIsMenuDropdownOpen(false)
-    const element = document.getElementById(id)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
-  // IntersectionObserver to auto-update activeSection on scroll
-  React.useEffect(() => {
-    if (!availableSections.length) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
-            break
-          }
-        }
-      },
-      { rootMargin: '-80px 0px -60% 0px' }
-    )
-
-    availableSections.forEach((sec) => {
-      const el = document.getElementById(sec.id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [availableSections])
+  }, [profile, hasExperience, hasPortfolio, hasMedia, hasCustom, experiences.length, education.length, projects.length, services.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
 
   if (isLoading) {
     return <LoadingScreen message="Loading your identity..." />
@@ -306,7 +218,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6 text-left max-w-5xl mx-auto pb-20 transition-colors duration-300">
+    <div className="space-y-6 text-left max-w-6xl mx-auto pb-24 transition-colors duration-300">
       {/* Slim Top Alert: Card Activation Required (Only if card not active) */}
       {!activeUserCard && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-950 dark:text-amber-200 shadow-xs">
@@ -331,617 +243,708 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Main Profile Canvas Overview */}
-      <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
-        {/* Cover Banner */}
-        {profile.coverUrl ? (
-          <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
-            <img
-              src={profile.coverUrl}
-              alt="Cover Banner"
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-28 sm:h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b border-border" />
-        )}
+      {/* Main Profile Canvas with Desktop Sidebar Navigation */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        {/* Left Desktop Navigation Sidebar */}
+        <div className="hidden md:block md:col-span-3 space-y-4">
+          <div className="sticky top-20 rounded-3xl border border-border bg-card p-4 shadow-sm space-y-3">
+            <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
+              Profile Sections
+            </div>
 
-        <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
-          {/* Avatar and Top Actions Bar */}
-          <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4 -mt-10 sm:-mt-16">
-            <Avatar
-              src={profile.avatarUrl}
-              fallback={user?.displayName}
-              alt={user?.displayName}
-              size="2xl"
-              className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
-            />
-
-            {/* Canvas Actions Bar */}
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              {/* Presentation Mode Pills */}
-              <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedMode(VISIBILITY_MODE.PUBLIC)
-                    setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
-                  }}
-                  disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                    currentMode === VISIBILITY_MODE.PUBLIC
-                      ? 'bg-card text-foreground shadow-xs font-bold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  title="Visitors see your Public profile"
-                >
-                  <Eye className="h-3 w-3 text-primary" />
-                  <span>Public</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
-                    setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
-                  }}
-                  disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                    currentMode === VISIBILITY_MODE.PROFESSIONAL
-                      ? 'bg-card text-primary shadow-xs font-bold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  title="Visitors see your Professional profile"
-                >
-                  <Briefcase className="h-3 w-3 text-primary" />
-                  <span>Professional</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedMode(VISIBILITY_MODE.PRIVATE)
-                    setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
-                  }}
-                  disabled={setModeMutation.isPending}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                    currentMode === VISIBILITY_MODE.PRIVATE
-                      ? 'bg-card text-foreground shadow-xs font-bold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  title="Profile is hidden / private"
-                >
-                  <Lock className="h-3 w-3 text-primary" />
-                  <span>Private</span>
-                </button>
-              </div>
-
-              {/* Temporary Mode Trigger */}
-              {profile.temporaryMode && profile.temporaryMode.mode ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
-                  <Clock className="h-3 w-3 shrink-0" />
-                  <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
+            <div className="space-y-1">
+              {profileTabs.map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
                   <button
-                    disabled={cancelTemporaryModeMutation.isPending}
-                    onClick={() => cancelTemporaryModeMutation.mutate()}
-                    className="text-destructive hover:underline ml-1 font-semibold"
-                    title="Cancel temporary mode"
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all text-left cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-white shadow-md'
+                        : 'text-foreground/80 hover:bg-muted hover:text-foreground'
+                    }`}
                   >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsTempModalOpen(true)}
-                  className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
-                  title="Set timed presentation mode"
-                >
-                  <Clock className="h-3.5 w-3.5" />
-                </Button>
-              )}
-
-              {/* Preview Live */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsPreviewOpen(true)
-                  refetchPreview()
-                }}
-                leftIcon={<Eye className="h-3.5 w-3.5" />}
-                className="text-xs h-8"
-              >
-                Preview
-              </Button>
-
-              {/* Edit Profile */}
-              <Link to="/app/profile/edit">
-                <Button
-                  variant="subtle"
-                  size="sm"
-                  leftIcon={<Edit3 className="h-3.5 w-3.5" />}
-                  className="text-xs h-8"
-                >
-                  Edit Profile
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Header Info */}
-          <div id="section-overview" className="scroll-mt-28 space-y-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-                {user?.displayName}
-              </h2>
-              <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
-
-              {activeUserCard ? (
-                <a
-                  href={`/u/${user?.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
-                >
-                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-semibold flex items-center gap-1">
-                    <Wifi className="h-2.5 w-2.5" />
-                    <span>NFC Active</span>
-                  </Badge>
-                  <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground">
-                    /u/{user?.username}
-                  </span>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                </a>
-              ) : (
-                <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-semibold flex items-center gap-1 ml-auto">
-                  <span>Card Activation Pending</span>
-                </Badge>
-              )}
-            </div>
-
-            {profile.headline ? (
-              <p className="text-base font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">
-                {profile.headline}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">
-                No headline set. Add a headline to describe what you do.
-              </p>
-            )}
-
-            {/* Professional Identities */}
-            {identities && identities.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
-                {identities
-                  .filter((id: any) => !profile?.headline || id.customTitle?.trim().toLowerCase() !== profile.headline.trim().toLowerCase())
-                  .map((id: any, idx: number) => (
-                  <span
-                    key={id._id || id.id || idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-muted text-foreground/80 border border-border/60 max-w-full break-words [overflow-wrap:anywhere]"
-                  >
-                    {id.isPrimary ? (
-                      <Crown className="h-3 w-3 text-amber-300 shrink-0" />
-                    ) : (
-                      <Briefcase className="h-3 w-3 text-muted-foreground shrink-0" />
-                    )}
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{id.customTitle}</span>
-                    {id.isPrimary && (
-                      <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
-                        Primary
-                      </span>
-                    )}
-                  </span>
-                ))}
-                <Link
-                  to="/app/profile/edit"
-                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium ml-1 shrink-0"
-                >
-                  Edit
-                </Link>
-              </div>
-            ) : (
-              <div className="pt-1">
-                <Link
-                  to={`/app/profile/edit?mode=${currentMode.toLowerCase()}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shadow-xs cursor-pointer"
-                >
-                  {currentMode === VISIBILITY_MODE.PRIVATE ? (
-                    <Lock className="h-3 w-3 text-primary shrink-0" />
-                  ) : currentMode === VISIBILITY_MODE.PROFESSIONAL ? (
-                    <Briefcase className="h-3 w-3 text-primary shrink-0" />
-                  ) : (
-                    <Eye className="h-3 w-3 text-primary shrink-0" />
-                  )}
-                  <span>
-                    {currentMode === VISIBILITY_MODE.PRIVATE
-                      ? 'Set Up Private Profile'
-                      : currentMode === VISIBILITY_MODE.PROFESSIONAL
-                      ? 'Set Up Professional Profile'
-                      : 'Set Up Public Profile'}
-                  </span>
-                </Link>
-              </div>
-            )}
-
-            {/* Profile Template Presentation Section */}
-            <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 max-w-full">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <LayoutTemplate className="h-4.5 w-4.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
-                      Profile Template: {currentTemplate?.name || 'Basic Universal Template'}
-                    </span>
-                    <Badge variant="subtle" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/20 font-bold shrink-0">
-                      Active
-                    </Badge>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground block line-clamp-1 min-w-0">
-                    {currentMode === VISIBILITY_MODE.PRIVATE
-                      ? 'Private Presentation: Sensitive personal & credential fields are shielded.'
-                      : currentMode === VISIBILITY_MODE.PROFESSIONAL
-                      ? 'Professional Presentation: Tailored for career, client networking, and credentials.'
-                      : 'Public Presentation: Universal identity, bio, and social channels visible to all.'}
-                  </span>
-                </div>
-              </div>
-
-              <Link to="/app/templates">
-                <Button variant="outline" size="sm" className="text-xs shrink-0 gap-1.5 h-8">
-                  <Lock className="h-3 w-3 text-amber-500" />
-                  <span>Templates (Coming Soon)</span>
-                </Button>
-              </Link>
-            </div>
-
-            {profile.bio && (
-              <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
-                {profile.bio}
-              </p>
-            )}
-
-            {/* Location & Contact Details */}
-            {((profile.location && (profile.location.city || profile.location.country)) ||
-              (profile.contact && (profile.contact.website || profile.contact.email || profile.contact.phone || profile.contact.address))) && (
-              <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
-                {profile.location && (profile.location.city || profile.location.country) && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">
-                      {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
-                      {profile.location.isRemote && ' (Remote)'}
-                    </span>
-                  </div>
-                )}
-                {profile.contact?.website && (
-                  <a
-                    href={profile.contact.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-medium transition-colors min-w-0 max-w-full"
-                  >
-                    <Globe className="h-3.5 w-3.5 shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.website.replace(/^https?:\/\//, '')}</span>
-                    <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                  </a>
-                )}
-                {profile.contact?.email && (
-                  <a
-                    href={`mailto:${profile.contact.email}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
-                  >
-                    <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
-                  </a>
-                )}
-                {profile.contact?.phone && (
-                  <a
-                    href={`tel:${profile.contact.phone}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
-                  >
-                    <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
-                  </a>
-                )}
-                {profile.contact?.address && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
-                    <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Social Links */}
-            {profile.socialLinks && profile.socialLinks.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-3">
-                {profile.socialLinks.map((s, idx) => (
-                  <a
-                    key={s.id || idx}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 hover:bg-muted text-xs font-medium text-foreground transition-colors border border-border/60"
-                  >
-                    <Share2 className="h-3 w-3 text-primary" />
-                    <span>{s.label || s.platform}</span>
-                    <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
-            <div className="p-4 rounded-2xl bg-muted/30 text-center">
-              <div className="text-2xl font-extrabold text-foreground">
-                {profile.experience?.length || 0}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Experiences</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-muted/30 text-center">
-              <div className="text-2xl font-extrabold text-foreground">
-                {profile.projects?.length || 0}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Projects</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-muted/30 text-center">
-              <div className="text-2xl font-extrabold text-foreground">
-                {profile.certifications?.length || 0}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Certifications</div>
-            </div>
-            <div className="p-4 rounded-2xl bg-muted/30 text-center">
-              <div className="text-2xl font-extrabold text-foreground">
-                {profile.skills?.length || 0}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Skills</div>
-            </div>
-          </div>
-
-          {/* Sections Menu Bar (Sticky on scroll, optimized for mobile responsiveness) */}
-          {availableSections.length > 1 && (
-            <div className="sticky top-0 z-10 -mx-3 sm:mx-0 p-2 sm:p-2.5 rounded-none sm:rounded-2xl bg-card/95 backdrop-blur-md border-y sm:border border-border/80 shadow-md my-4">
-              <div className="flex items-center justify-between gap-2 min-w-0">
-                <div className="flex items-center gap-1.5 shrink-0 px-2 py-1 rounded-lg bg-muted/70 text-foreground font-bold text-xs border border-border/40">
-                  <Layers className="h-3.5 w-3.5 text-primary" />
-                  <span className="hidden xs:inline">Sections</span>
-                  <Badge variant="subtle" className="text-[10px] px-1.5 py-0 h-4 font-mono font-bold">
-                    {availableSections.length}
-                  </Badge>
-                </div>
-
-                {/* Horizontal Scrollable Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth flex-1 py-0.5 min-w-0">
-                  {availableSections.map((sec) => {
-                    const isActive = activeSection === sec.id
-                    return (
-                      <button
-                        key={sec.id}
-                        type="button"
-                        onClick={() => scrollToSection(sec.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
-                          isActive
-                            ? 'bg-primary text-white shadow-xs'
-                            : 'bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted border border-border/40'
+                    <div className="flex items-center gap-2.5 truncate">
+                      {tab.icon}
+                      <span className="truncate">{tab.label}</span>
+                    </div>
+                    {tab.count !== undefined && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
                         }`}
                       >
-                        {sec.icon}
-                        <span>{sec.label}</span>
-                        {sec.count !== undefined && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                              isActive
-                                ? 'bg-white/20 text-white font-bold'
-                                : 'bg-background text-muted-foreground'
-                            }`}
-                          >
-                            {sec.count}
-                          </span>
-                        )}
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Sidebar Compact User Pill */}
+            <div className="pt-3 border-t border-border/60 flex items-center gap-2.5">
+              <Avatar
+                src={profile.avatarUrl}
+                fallback={user?.displayName}
+                alt={user?.displayName}
+                size="sm"
+                className="rounded-xl ring-1 ring-border shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold text-foreground truncate">{user?.displayName}</div>
+                <div className="text-[10px] font-mono text-muted-foreground truncate">@{user?.username}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Main Content Canvas */}
+        <div className="md:col-span-9 space-y-6 min-w-0 max-w-full">
+          {/* Dedicated Header for Non-Home Tabs */}
+          {activeTab !== 'home' && (
+            <div className="rounded-3xl border border-border bg-card p-5 shadow-sm flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('home')}
+                  className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer"
+                  title="Back to Home / Intro"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <div>
+                  <h1 className="text-lg sm:text-xl font-extrabold text-foreground flex items-center gap-2">
+                    {profileTabs.find((t) => t.id === activeTab)?.icon}
+                    <span>{profileTabs.find((t) => t.id === activeTab)?.label}</span>
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    Your dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('home')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0"
+              >
+                <span>Profile Home</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
+          {activeTab === 'home' && (
+            <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
+              {/* Cover Banner */}
+              {profile.coverUrl ? (
+                <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
+                  <img
+                    src={profile.coverUrl}
+                    alt="Cover Banner"
+                    className="w-full h-full object-cover object-center"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-28 sm:h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b border-border" />
+              )}
+
+              <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
+                {/* Avatar and Top Actions Bar */}
+                <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4 -mt-10 sm:-mt-16">
+                  <Avatar
+                    src={profile.avatarUrl}
+                    fallback={user?.displayName}
+                    alt={user?.displayName}
+                    size="2xl"
+                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                  />
+
+                  {/* Canvas Actions Bar */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2">
+                    {/* Presentation Mode Pills */}
+                    <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PUBLIC)
+                          setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PUBLIC
+                            ? 'bg-card text-foreground shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Visitors see your Public profile"
+                      >
+                        <Eye className="h-3 w-3 text-primary" />
+                        <span>Public</span>
                       </button>
-                    )
-                  })}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
+                          setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PROFESSIONAL
+                            ? 'bg-card text-primary shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Visitors see your Professional profile"
+                      >
+                        <Briefcase className="h-3 w-3 text-primary" />
+                        <span>Professional</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PRIVATE)
+                          setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PRIVATE
+                            ? 'bg-card text-foreground shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Profile is hidden / private"
+                      >
+                        <Lock className="h-3 w-3 text-primary" />
+                        <span>Private</span>
+                      </button>
+                    </div>
+
+                    {/* Temporary Mode Trigger */}
+                    {profile.temporaryMode && profile.temporaryMode.mode ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
+                        <button
+                          disabled={cancelTemporaryModeMutation.isPending}
+                          onClick={() => cancelTemporaryModeMutation.mutate()}
+                          className="text-destructive hover:underline ml-1 font-semibold"
+                          title="Cancel temporary mode"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsTempModalOpen(true)}
+                        className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
+                        title="Set timed presentation mode"
+                      >
+                        <Clock className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+
+                    {/* Preview Live */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsPreviewOpen(true)
+                        refetchPreview()
+                      }}
+                      leftIcon={<Eye className="h-3.5 w-3.5" />}
+                      className="text-xs h-8"
+                    >
+                      Preview
+                    </Button>
+
+                    {/* Edit Profile */}
+                    <Link to="/app/profile/edit">
+                      <Button
+                        variant="subtle"
+                        size="sm"
+                        leftIcon={<Edit3 className="h-3.5 w-3.5" />}
+                        className="text-xs h-8"
+                      >
+                        Edit Profile
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
 
-                {/* Quick Dropdown for Mobile Viewports */}
-                <div className="relative shrink-0 sm:hidden">
-                  <button
-                    type="button"
-                    onClick={() => setIsMenuDropdownOpen(!isMenuDropdownOpen)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-border bg-muted/60 text-xs font-semibold text-foreground active:scale-95 transition-all"
-                  >
-                    <span>Jump</span>
-                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isMenuDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
+                {/* Header Info */}
+                <div id="section-overview" className="scroll-mt-28 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                      {user?.displayName}
+                    </h2>
+                    <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
 
-                  {isMenuDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-48 rounded-2xl border border-border bg-card shadow-2xl p-1.5 z-30 space-y-1 animate-in fade-in-50 zoom-in-95">
-                      <div className="px-2.5 py-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/40 mb-1">
-                        Jump to Section
-                      </div>
-                      {availableSections.map((sec) => (
-                        <button
-                          key={sec.id}
-                          type="button"
-                          onClick={() => scrollToSection(sec.id)}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors text-left ${
-                            activeSection === sec.id
-                              ? 'bg-primary text-white font-bold'
-                              : 'text-foreground hover:bg-muted'
-                          }`}
+                    {activeUserCard ? (
+                      <a
+                        href={`/u/${user?.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
+                      >
+                        <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-semibold flex items-center gap-1">
+                          <Wifi className="h-2.5 w-2.5" />
+                          <span>NFC Active</span>
+                        </Badge>
+                        <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground">
+                          /u/{user?.username}
+                        </span>
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+                      </a>
+                    ) : (
+                      <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-semibold flex items-center gap-1 ml-auto">
+                        <span>Card Activation Pending</span>
+                      </Badge>
+                    )}
+                  </div>
+
+                  {profile.headline ? (
+                    <p className="text-base font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">
+                      {profile.headline}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">
+                      No headline set. Add a headline to describe what you do.
+                    </p>
+                  )}
+
+                  {/* Professional Identities */}
+                  {identities && identities.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
+                      {identities
+                        .filter((id: any) => !profile?.headline || id.customTitle?.trim().toLowerCase() !== profile.headline.trim().toLowerCase())
+                        .map((id: any, idx: number) => (
+                        <span
+                          key={id._id || id.id || idx}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-muted text-foreground/80 border border-border/60 max-w-full break-words [overflow-wrap:anywhere]"
                         >
-                          <div className="flex items-center gap-2 truncate">
-                            {sec.icon}
-                            <span className="truncate">{sec.label}</span>
-                          </div>
-                          {sec.count !== undefined && (
-                            <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
-                              activeSection === sec.id ? 'bg-white/20 text-white' : 'text-muted-foreground'
-                            }`}>
-                              {sec.count}
+                          {id.isPrimary ? (
+                            <Crown className="h-3 w-3 text-amber-300 shrink-0" />
+                          ) : (
+                            <Briefcase className="h-3 w-3 text-muted-foreground shrink-0" />
+                          )}
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{id.customTitle}</span>
+                          {id.isPrimary && (
+                            <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
+                              Primary
                             </span>
                           )}
-                        </button>
+                        </span>
+                      ))}
+                      <Link
+                        to="/app/profile/edit"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium ml-1 shrink-0"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="pt-1">
+                      <Link
+                        to={`/app/profile/edit?mode=${currentMode.toLowerCase()}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shadow-xs cursor-pointer"
+                      >
+                        {currentMode === VISIBILITY_MODE.PRIVATE ? (
+                          <Lock className="h-3 w-3 text-primary shrink-0" />
+                        ) : currentMode === VISIBILITY_MODE.PROFESSIONAL ? (
+                          <Briefcase className="h-3 w-3 text-primary shrink-0" />
+                        ) : (
+                          <Eye className="h-3 w-3 text-primary shrink-0" />
+                        )}
+                        <span>
+                          {currentMode === VISIBILITY_MODE.PRIVATE
+                            ? 'Set Up Private Profile'
+                            : currentMode === VISIBILITY_MODE.PROFESSIONAL
+                            ? 'Set Up Professional Profile'
+                            : 'Set Up Public Profile'}
+                        </span>
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Profile Template Presentation Section */}
+                  <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 max-w-full">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <LayoutTemplate className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                            Profile Template: {currentTemplate?.name || 'Basic Universal Template'}
+                          </span>
+                          <Badge variant="subtle" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/20 font-bold shrink-0">
+                            Active
+                          </Badge>
+                        </div>
+                        <span className="text-[11px] text-muted-foreground block line-clamp-1 min-w-0">
+                          {currentMode === VISIBILITY_MODE.PRIVATE
+                            ? 'Private Presentation: Sensitive personal & credential fields are shielded.'
+                            : currentMode === VISIBILITY_MODE.PROFESSIONAL
+                            ? 'Professional Presentation: Tailored for career, client networking, and credentials.'
+                            : 'Public Presentation: Universal identity, bio, and social channels visible to all.'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <Link to="/app/templates">
+                      <Button variant="outline" size="sm" className="text-xs shrink-0 gap-1.5 h-8">
+                        <Lock className="h-3 w-3 text-amber-500" />
+                        <span>Templates (Coming Soon)</span>
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {profile.bio && (
+                    <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
+                      {profile.bio}
+                    </p>
+                  )}
+
+                  {/* Location & Contact Details */}
+                  {((profile.location && (profile.location.city || profile.location.country)) ||
+                    (profile.contact && (profile.contact.website || profile.contact.email || profile.contact.phone || profile.contact.address))) && (
+                    <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
+                      {profile.location && (profile.location.city || profile.location.country) && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
+                          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">
+                            {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
+                            {profile.location.isRemote && ' (Remote)'}
+                          </span>
+                        </div>
+                      )}
+                      {profile.contact?.website && (
+                        <a
+                          href={profile.contact.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-medium transition-colors min-w-0 max-w-full"
+                        >
+                          <Globe className="h-3.5 w-3.5 shrink-0" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.website.replace(/^https?:\/\//, '')}</span>
+                          <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                        </a>
+                      )}
+                      {profile.contact?.email && (
+                        <a
+                          href={`mailto:${profile.contact.email}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
+                        >
+                          <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
+                        </a>
+                      )}
+                      {profile.contact?.phone && (
+                        <a
+                          href={`tel:${profile.contact.phone}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
+                        >
+                          <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
+                        </a>
+                      )}
+                      {profile.contact?.address && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
+                          <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Social Links */}
+                  {profile.socialLinks && profile.socialLinks.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-3">
+                      {profile.socialLinks.map((s, idx) => (
+                        <a
+                          key={s.id || idx}
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 hover:bg-muted text-xs font-medium text-foreground transition-colors border border-border/60"
+                        >
+                          <Share2 className="h-3 w-3 text-primary" />
+                          <span>{s.label || s.platform}</span>
+                          <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
+                        </a>
                       ))}
                     </div>
                   )}
                 </div>
+
+                {/* Quick Metrics Bar */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
+                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
+                    <div className="text-2xl font-extrabold text-foreground">
+                      {experiences.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Experiences</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
+                    <div className="text-2xl font-extrabold text-foreground">
+                      {projects.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Projects</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
+                    <div className="text-2xl font-extrabold text-foreground">
+                      {certifications.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Certifications</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
+                    <div className="text-2xl font-extrabold text-foreground">
+                      {skills.length}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Skills</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Detailed Experience & Education */}
-          {profile.experience && profile.experience.length > 0 && (
-            <div id="section-experience" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span>Experience</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.experience.map((exp: any, idx: number) => {
-                  const dateStr = formatDateRange(
-                    exp.startMonth,
-                    exp.startYear,
-                    exp.endMonth,
-                    exp.endYear,
-                    exp.current,
-                    exp.startDate,
-                    exp.endDate
-                  )
-                  return (
-                    <div key={exp.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
+          {/* Overview Cards when on Home tab */}
+          {activeTab === 'home' && (
+            <div className="space-y-6">
+              {skills.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-3">
+                  <h3 className="text-sm font-bold text-foreground flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span>Top Skills</span>
+                    </span>
+                    {hasMedia && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('media')}
+                        className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+                      >
+                        View all &rarr;
+                      </button>
+                    )}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.slice(0, 8).map((skill: any, idx: number) => (
+                      <Badge key={skill.id || idx} variant="subtle" className="text-xs font-semibold py-1 px-3">
+                        {skill.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {experiences.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-3">
+                  <h3 className="text-sm font-bold text-foreground flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-primary" />
+                      <span>Recent Experience</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('experience')}
+                      className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+                    >
+                      View all ({experiences.length}) &rarr;
+                    </button>
+                  </h3>
+                  <div className="space-y-2">
+                    {experiences.slice(0, 2).map((exp: any, idx: number) => (
+                      <div key={exp.id || idx} className="p-3.5 rounded-2xl bg-muted/40 border border-border/60">
                         <div className="font-bold text-sm text-foreground">{exp.role}</div>
-                        {dateStr && (
-                          <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
-                            {dateStr}
-                          </span>
-                        )}
+                        <div className="text-xs text-primary font-medium">{exp.company}</div>
                       </div>
-                      <div className="text-xs text-primary font-medium">
-                        {exp.company}
-                        {exp.location ? ` • ${exp.location}` : ''}
-                      </div>
-                      {exp.description && (
-                        <p className="text-xs text-muted-foreground pt-1 line-clamp-2">{exp.description}</p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Education */}
-          {profile.education && profile.education.length > 0 && (
-            <div id="section-education" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-primary" />
-                <span>Education & Academics</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.education.map((edu: any, idx: number) => {
-                  const dateStr = formatDateRange(
-                    edu.startMonth,
-                    edu.startYear,
-                    edu.endMonth,
-                    edu.endYear,
-                    edu.current,
-                    edu.startDate,
-                    edu.endDate
-                  )
-                  return (
-                    <div key={edu.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="font-bold text-sm text-foreground">{edu.institution}</div>
-                        {dateStr && (
-                          <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
-                            {dateStr}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-primary font-medium">
-                        {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' • ')}
-                      </div>
-                      {edu.description && (
-                        <p className="text-xs text-muted-foreground pt-1 line-clamp-2">{edu.description}</p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Featured Projects */}
-          {profile.projects && profile.projects.length > 0 && (
-            <div id="section-projects" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Layers className="h-4 w-4 text-primary" />
-                <span>Featured Projects</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.projects.map((proj: any, idx: number) => {
-                  const dateStr = formatDateRange(
-                    proj.startMonth,
-                    proj.startYear,
-                    proj.endMonth,
-                    proj.endYear,
-                    proj.current,
-                    proj.startDate,
-                    proj.endDate
-                  )
-                  return (
-                    <div key={proj.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="font-bold text-sm text-foreground">{proj.title}</div>
-                        <div className="flex items-center gap-2">
-                          {dateStr && (
-                            <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
-                              {dateStr}
-                            </span>
-                          )}
-                          {proj.url && (
-                            <a
-                              href={proj.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline text-xs flex items-center gap-1"
-                            >
-                              <span>Link</span>
-                              <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
+          {/* DEDICATED TAB: Experience & Education */}
+          {activeTab === 'experience' && (
+            <div className="space-y-6">
+              {experiences.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    <span>Work Experience</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {experiences.map((exp: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        exp.startMonth,
+                        exp.startYear,
+                        exp.endMonth,
+                        exp.endYear,
+                        exp.current,
+                        exp.startDate,
+                        exp.endDate
+                      )
+                      return (
+                        <div key={exp.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-bold text-sm text-foreground">{exp.role}</div>
+                            {dateStr && (
+                              <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                                {dateStr}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-primary font-medium">
+                            {exp.company}
+                            {exp.location ? ` • ${exp.location}` : ''}
+                          </div>
+                          {exp.description && (
+                            <p className="text-xs text-muted-foreground pt-1 line-clamp-2">{exp.description}</p>
                           )}
                         </div>
-                      </div>
-                      {proj.description && (
-                        <p className="text-xs text-muted-foreground pt-1">{proj.description}</p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {education.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-primary" />
+                    <span>Education & Academics</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {education.map((edu: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        edu.startMonth,
+                        edu.startYear,
+                        edu.endMonth,
+                        edu.endYear,
+                        edu.current,
+                        edu.startDate,
+                        edu.endDate
+                      )
+                      return (
+                        <div key={edu.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-bold text-sm text-foreground">{edu.institution}</div>
+                            {dateStr && (
+                              <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                                {dateStr}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-primary font-medium">
+                            {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' • ')}
+                          </div>
+                          {edu.description && (
+                            <p className="text-xs text-muted-foreground pt-1 line-clamp-2">{edu.description}</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Certifications & Services */}
-          {(profile.certifications?.length || profile.services?.length) ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-              {profile.certifications && profile.certifications.length > 0 && (
-                <div id="section-certifications" className="scroll-mt-28 space-y-2">
-                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                    <Award className="h-3.5 w-3.5 text-primary" />
+          {/* DEDICATED TAB: Work / Portfolio */}
+          {activeTab === 'portfolio' && (
+            <div className="space-y-6">
+              {projects.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <span>Featured Projects</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {projects.map((proj: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        proj.startMonth,
+                        proj.startYear,
+                        proj.endMonth,
+                        proj.endYear,
+                        proj.current,
+                        proj.startDate,
+                        proj.endDate
+                      )
+                      return (
+                        <div key={proj.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="font-bold text-sm text-foreground">{proj.title}</div>
+                            <div className="flex items-center gap-2">
+                              {dateStr && (
+                                <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                                  {dateStr}
+                                </span>
+                              )}
+                              {proj.url && (
+                                <a
+                                  href={proj.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline text-xs flex items-center gap-1"
+                                >
+                                  <span>Link</span>
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                          {proj.description && (
+                            <p className="text-xs text-muted-foreground pt-1">{proj.description}</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {services.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span>Services Provided</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {services.map((s: any, idx: number) => (
+                      <div key={s.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-foreground">{s.title}</span>
+                          {s.priceRange && <span className="text-[10px] font-bold text-primary">{s.priceRange}</span>}
+                        </div>
+                        {s.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Credentials & Media */}
+          {activeTab === 'media' && (
+            <div className="space-y-6">
+              {certifications.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Award className="h-4 w-4 text-primary" />
                     <span>Certifications</span>
-                  </h4>
-                  <div className="space-y-2">
-                    {profile.certifications.map((c: any, idx: number) => (
-                      <div key={c.id || idx} className="p-3 rounded-xl border border-border bg-muted/10">
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {certifications.map((c: any, idx: number) => (
+                      <div key={c.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10">
                         <div className="flex items-start justify-between gap-2">
                           <div className="text-xs font-bold text-foreground">{c.name}</div>
                           {(c.issueYear || c.issueDate) && (
@@ -959,126 +962,109 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {profile.services && profile.services.length > 0 && (
-                <div id="section-services" className="scroll-mt-28 space-y-2">
-                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <span>Services</span>
-                  </h4>
-                  <div className="space-y-2">
-                    {profile.services.map((s, idx) => (
-                      <div key={s.id || idx} className="p-3 rounded-xl border border-border bg-muted/10">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-foreground">{s.title}</span>
-                          {s.priceRange && <span className="text-[10px] font-bold text-primary">{s.priceRange}</span>}
+              {skills.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span>Verified Skills</span>
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map((skill: any, idx: number) => (
+                      <Badge key={skill.id || idx} variant="subtle" className="text-xs font-semibold py-1 px-3">
+                        {skill.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {awards.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Award className="h-4 w-4 text-primary" />
+                    <span>Awards & Honors</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {awards.map((award: any, idx: number) => (
+                      <div key={award.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-bold text-sm text-foreground">{award.title}</div>
+                          {(award.year || award.date) && (
+                            <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                              {formatMonthYear(award.month, award.year, award.date)}
+                            </span>
+                          )}
                         </div>
-                        {s.description && <p className="text-[11px] text-muted-foreground mt-0.5">{s.description}</p>}
+                        {award.issuer && <div className="text-xs text-primary font-medium">{award.issuer}</div>}
+                        {award.description && (
+                          <p className="text-xs text-muted-foreground pt-1">{award.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {publications.length > 0 && (
+                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span>Publications</span>
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {publications.map((pub: any, idx: number) => (
+                      <div key={pub.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-bold text-sm text-foreground">{pub.title}</div>
+                          {(pub.year || pub.date) && (
+                            <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                              {formatMonthYear(pub.month, pub.year, pub.date)}
+                            </span>
+                          )}
+                        </div>
+                        {pub.publisher && <div className="text-xs text-primary font-medium">{pub.publisher}</div>}
+                        {pub.url && (
+                          <a
+                            href={pub.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline pt-1"
+                          >
+                            <span>View Publication</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
             </div>
-          ) : null}
-
-          {/* Verified Skills */}
-          {profile.skills && profile.skills.length > 0 && (
-            <div id="section-skills" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span>Verified Skills</span>
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.skills.map((skill: any, idx: number) => (
-                  <Badge key={skill.id || idx} variant="subtle" className="text-xs font-semibold py-1 px-3">
-                    {skill.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
           )}
 
-          {/* Awards & Honors */}
-          {profile.awards && profile.awards.length > 0 && (
-            <div id="section-awards" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Award className="h-4 w-4 text-primary" />
-                <span>Awards & Honors</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.awards.map((award: any, idx: number) => (
-                  <div key={award.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="font-bold text-sm text-foreground">{award.title}</div>
-                      {(award.year || award.date) && (
-                        <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
-                          {formatMonthYear(award.month, award.year, award.date)}
-                        </span>
-                      )}
-                    </div>
-                    {award.issuer && <div className="text-xs text-primary font-medium">{award.issuer}</div>}
-                    {award.description && (
-                      <p className="text-xs text-muted-foreground pt-1">{award.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* DEDICATED TAB: Posts & Activity */}
+          {activeTab === 'posts' && (
+            <ProfilePostsSection />
           )}
 
-          {/* Publications */}
-          {profile.publications && profile.publications.length > 0 && (
-            <div id="section-publications" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary" />
-                <span>Publications</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.publications.map((pub: any, idx: number) => (
-                  <div key={pub.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="font-bold text-sm text-foreground">{pub.title}</div>
-                      {(pub.year || pub.date) && (
-                        <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
-                          {formatMonthYear(pub.month, pub.year, pub.date)}
-                        </span>
-                      )}
-                    </div>
-                    {pub.publisher && <div className="text-xs text-primary font-medium">{pub.publisher}</div>}
-                    {pub.url && (
-                      <a
-                        href={pub.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline pt-1"
-                      >
-                        <span>View Publication</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
+          {/* DEDICATED TAB: Custom Sections */}
+          {activeTab === 'custom' && (
+            <div className="space-y-6">
+              {customSections.map((sec: any, idx: number) => (
+                <div key={sec.id || idx} className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-3">
+                  <h3 className="text-sm font-bold text-foreground">{sec.title}</h3>
+                  {sec.description && <p className="text-xs text-muted-foreground">{sec.description}</p>}
+                  <div className="p-4 rounded-2xl border border-border bg-muted/10 space-y-2">
+                    {sec.blocks?.map((block: any, bIdx: number) => (
+                      <div key={bIdx} className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">
+                        {block.content}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           )}
-
-          {/* Custom Sections */}
-          {profile.customSections && profile.customSections.map((sec: any, idx: number) => (
-            <div key={sec.id || idx} id="section-custom" className="scroll-mt-28 space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-foreground">{sec.title}</h3>
-              {sec.description && <p className="text-xs text-muted-foreground">{sec.description}</p>}
-              <div className="p-4 rounded-2xl border border-border bg-muted/10 space-y-2">
-                {sec.blocks?.map((block: any, bIdx: number) => (
-                  <div key={bIdx} className="text-xs text-foreground/80 leading-relaxed whitespace-pre-line">
-                    {block.content}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Activity & Posts (My Posts, Saved, Archived) */}
-          <ProfilePostsSection />
         </div>
       </div>
 
