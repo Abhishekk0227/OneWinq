@@ -243,6 +243,37 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Mobile Horizontal Section Navigation Bar */}
+      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth pb-1 px-0.5">
+        {profileTabs.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all active:scale-95 shrink-0 cursor-pointer ${
+                isActive
+                  ? 'bg-primary text-white shadow-xs font-bold'
+                  : 'bg-card text-foreground/80 hover:bg-muted border border-border/60'
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+              {tab.count !== undefined && (
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-md font-mono ${
+                    isActive ? 'bg-white/20 text-white font-bold' : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Main Profile Canvas with Desktop Sidebar Navigation */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Left Desktop Navigation Sidebar */}
@@ -305,23 +336,23 @@ export default function ProfilePage() {
         <div className="md:col-span-9 space-y-6 min-w-0 max-w-full">
           {/* Dedicated Header for Non-Home Tabs */}
           {activeTab !== 'home' && (
-            <div className="rounded-3xl border border-border bg-card p-5 shadow-sm flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+            <div className="rounded-2xl sm:rounded-3xl border border-border bg-card p-3.5 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <button
                   type="button"
                   onClick={() => setActiveTab('home')}
-                  className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer"
+                  className="p-1.5 sm:p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
                   title="Back to Home / Intro"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
                 </button>
-                <div>
-                  <h1 className="text-lg sm:text-xl font-extrabold text-foreground flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 truncate">
                     {profileTabs.find((t) => t.id === activeTab)?.icon}
-                    <span>{profileTabs.find((t) => t.id === activeTab)?.label}</span>
+                    <span className="truncate">{profileTabs.find((t) => t.id === activeTab)?.label}</span>
                   </h1>
-                  <p className="text-xs text-muted-foreground">
-                    Your dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
+                  <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                    Your {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
                   </p>
                 </div>
               </div>
@@ -329,7 +360,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('home')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 ml-auto"
               >
                 <span>Profile Home</span>
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -480,7 +511,7 @@ export default function ProfilePage() {
                 {/* Header Info */}
                 <div id="section-overview" className="scroll-mt-28 space-y-3">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                       {user?.displayName}
                     </h2>
                     <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
