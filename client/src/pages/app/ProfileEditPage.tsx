@@ -1178,59 +1178,7 @@ export default function ProfileEditPage() {
         </div>
       </div>
 
-      {/* Profession Persona Switcher Bar (Responsive) */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 shadow-xs">
-        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-            <Briefcase className="h-4.5 w-4.5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 min-w-0">
-              <span className="text-xs text-muted-foreground font-semibold shrink-0">Active Persona:</span>
-              <select
-                value={selectedPersonaId || ''}
-                onChange={(e) => setSelectedPersonaId(e.target.value)}
-                className="w-full sm:w-auto max-w-xs sm:max-w-sm bg-muted/80 text-foreground font-bold text-xs sm:text-sm px-2.5 py-1.5 rounded-xl border border-border focus:ring-2 focus:ring-primary outline-none truncate"
-              >
-                {personas.map((per: any) => {
-                  const title =
-                    per.professionTitle && per.personaName === 'Basic Universal Template'
-                      ? per.professionTitle
-                      : per.personaName && per.personaName !== 'Basic Universal Template'
-                      ? per.personaName
-                      : per.professionTitle || 'Universal Profile'
-                  return (
-                    <option key={per.id || per._id} value={per.id || per._id}>
-                      {title} {per.isActive ? '★ (LIVE)' : ''}
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1 break-words leading-tight">
-              Only the LIVE profile is shown on <span className="font-mono text-primary font-medium">/u/{user?.username}</span> and NFC cards.
-            </p>
-          </div>
-        </div>
 
-        {personas.length > 1 && selectedPersonaId && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              title="Delete this profile persona"
-              disabled={deletePersonaMutation.isPending}
-              onClick={() => {
-                if (window.confirm(`Delete the "${personaName || 'current'}" profile persona?`)) {
-                  deletePersonaMutation.mutate(selectedPersonaId)
-                }
-              }}
-              className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
 
       {/* Editor Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
