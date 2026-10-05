@@ -1,5 +1,5 @@
-import app from '../server/app.js';
-import { connectDatabase } from '../server/src/infrastructure/database/connection.js';
+import app from '../app.js';
+import { connectDatabase } from '../src/infrastructure/database/connection.js';
 
 export default async function handler(req, res) {
   try {
