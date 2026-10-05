@@ -40,11 +40,24 @@ import {
   ArrowLeft,
   ChevronRight,
   Menu,
+  Code,
+  Video,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
+
+function getSocialIcon(platform?: string, url?: string) {
+  const name = (platform || url || '').toLowerCase()
+  if (name.includes('github')) return <Code className="h-4 w-4 text-purple-500 shrink-0" />
+  if (name.includes('linkedin')) return <Briefcase className="h-4 w-4 text-blue-600 shrink-0" />
+  if (name.includes('youtube')) return <Video className="h-4 w-4 text-red-500 shrink-0" />
+  if (name.includes('mail') || name.includes('@')) return <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
+  if (name.includes('phone') || name.includes('whatsapp')) return <Phone className="h-4 w-4 text-emerald-500 shrink-0" />
+  if (name.includes('site') || name.includes('web') || name.includes('http')) return <Globe className="h-4 w-4 text-sky-500 shrink-0" />
+  return <Share2 className="h-4 w-4 text-primary shrink-0" />
+}
 
 export default function ProfilePage() {
   const { user } = useAuthStore()
@@ -617,75 +630,63 @@ export default function ProfilePage() {
                   )}
 
                   {/* Location & Contact Details */}
-                  {((profile.location && (profile.location.city || profile.location.country)) ||
-                    (profile.contact && (profile.contact.website || profile.contact.email || profile.contact.phone || profile.contact.address))) && (
-                    <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
-                      {profile.location && (profile.location.city || profile.location.country) && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
-                          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">
-                            {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
-                            {profile.location.isRemote && ' (Remote)'}
-                          </span>
-                        </div>
-                      )}
-                      {profile.contact?.website && (
-                        <a
-                          href={profile.contact.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-medium transition-colors min-w-0 max-w-full"
-                        >
-                          <Globe className="h-3.5 w-3.5 shrink-0" />
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.website.replace(/^https?:\/\//, '')}</span>
-                          <ExternalLink className="h-2.5 w-2.5 shrink-0" />
-                        </a>
-                      )}
-                      {profile.contact?.email && (
-                        <a
-                          href={`mailto:${profile.contact.email}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
-                        >
-                          <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
-                        </a>
-                      )}
-                      {profile.contact?.phone && (
-                        <a
-                          href={`tel:${profile.contact.phone}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border/60 text-foreground font-medium transition-colors min-w-0 max-w-full"
-                        >
-                          <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
-                        </a>
-                      )}
-                      {profile.contact?.address && (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/60 text-foreground font-medium min-w-0 max-w-full">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* Sleek Contact & Social Icon Buttons */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
+                    {profile.contact?.website && (
+                      <a
+                        href={profile.contact.website.startsWith('http') ? profile.contact.website : `https://${profile.contact.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Website: ${profile.contact.website}`}
+                        className="p-2 sm:p-2.5 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                      >
+                        <Globe className="h-4 w-4" />
+                      </a>
+                    )}
 
-                  {/* Social Links */}
-                  {profile.socialLinks && profile.socialLinks.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-3">
-                      {profile.socialLinks.map((s, idx) => (
-                        <a
-                          key={s.id || idx}
-                          href={s.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 hover:bg-muted text-xs font-medium text-foreground transition-colors border border-border/60"
-                        >
-                          <Share2 className="h-3 w-3 text-primary" />
-                          <span>{s.label || s.platform}</span>
-                          <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                    {profile.contact?.email && (
+                      <a
+                        href={`mailto:${profile.contact.email}`}
+                        title={`Email: ${profile.contact.email}`}
+                        className="p-2 sm:p-2.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                      >
+                        <Mail className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {profile.contact?.phone && (
+                      <a
+                        href={`tel:${profile.contact.phone}`}
+                        title={`Phone: ${profile.contact.phone}`}
+                        className="p-2 sm:p-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </a>
+                    )}
+
+                    {profile.location && (profile.location.city || profile.location.country) && (
+                      <div
+                        title={`Location: ${[profile.location.city, profile.location.country].filter(Boolean).join(', ')}`}
+                        className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate max-w-[130px]">{[profile.location.city, profile.location.country].filter(Boolean).join(', ')}</span>
+                      </div>
+                    )}
+
+                    {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
+                      <a
+                        key={s.id || idx}
+                        href={s.url.startsWith('http') ? s.url : `https://${s.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={s.label || s.platform || 'Social Link'}
+                        className="p-2 sm:p-2.5 rounded-2xl bg-card hover:bg-muted text-foreground border border-border/80 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                      >
+                        {getSocialIcon(s.platform, s.url)}
+                      </a>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Quick Metrics Bar */}
@@ -831,11 +832,11 @@ export default function ProfilePage() {
 
           {/* DEDICATED TAB: Education & Academics */}
           {activeTab === 'education' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {education.length > 0 ? (
-                <div className="p-5 rounded-3xl border border-border bg-card shadow-sm space-y-4">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <GraduationCap className="h-4 w-4 text-primary" />
+                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
+                    <GraduationCap className="h-3.5 w-3.5 text-primary" />
                     <span>Education & Academics</span>
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -850,20 +851,20 @@ export default function ProfilePage() {
                         edu.endDate
                       )
                       return (
-                        <div key={edu.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-1">
+                        <div key={edu.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
                           <div className="flex items-start justify-between gap-2">
-                            <div className="font-bold text-sm text-foreground">{edu.institution}</div>
+                            <div className="font-semibold text-xs text-foreground">{edu.institution}</div>
                             {dateStr && (
-                              <span className="text-[11px] font-semibold text-muted-foreground bg-muted/70 px-2 py-0.5 rounded-md whitespace-nowrap">
+                              <span className="text-[10px] font-mono text-muted-foreground bg-muted/70 px-1.5 py-0.2 rounded whitespace-nowrap">
                                 {dateStr}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-primary font-medium">
+                          <div className="text-[11px] text-primary font-medium">
                             {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(' • ')}
                           </div>
                           {edu.description && (
-                            <p className="text-xs text-muted-foreground pt-1 line-clamp-2">{edu.description}</p>
+                            <p className="text-[11px] text-muted-foreground pt-0.5 line-clamp-2">{edu.description}</p>
                           )}
                         </div>
                       )
@@ -871,10 +872,10 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-8 rounded-3xl border border-dashed border-border bg-card text-center space-y-2">
-                  <GraduationCap className="h-8 w-8 text-muted-foreground mx-auto" />
-                  <div className="text-sm font-semibold text-foreground">No Education Added</div>
-                  <p className="text-xs text-muted-foreground">Academic qualifications will appear here once added to your profile.</p>
+                <div className="p-6 rounded-2xl border border-dashed border-border bg-card text-center space-y-2">
+                  <GraduationCap className="h-6 w-6 text-muted-foreground mx-auto" />
+                  <div className="text-xs font-semibold text-foreground">No Education Added</div>
+                  <p className="text-[11px] text-muted-foreground">Academic qualifications will appear here once added to your profile.</p>
                 </div>
               )}
             </div>

@@ -52,8 +52,20 @@ import {
   ArrowLeft,
   ChevronRight,
   Menu,
+  Code,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
+
+function getSocialIcon(platform?: string, url?: string) {
+  const name = (platform || url || '').toLowerCase()
+  if (name.includes('github')) return <Code className="h-4 w-4 text-purple-500 shrink-0" />
+  if (name.includes('linkedin')) return <Briefcase className="h-4 w-4 text-blue-600 shrink-0" />
+  if (name.includes('youtube')) return <Video className="h-4 w-4 text-red-500 shrink-0" />
+  if (name.includes('mail') || name.includes('@')) return <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
+  if (name.includes('phone') || name.includes('whatsapp')) return <Phone className="h-4 w-4 text-emerald-500 shrink-0" />
+  if (name.includes('site') || name.includes('web') || name.includes('http')) return <Globe className="h-4 w-4 text-sky-500 shrink-0" />
+  return <Share2 className="h-4 w-4 text-primary shrink-0" />
+}
 
 export default function PublicProfilePage() {
   const navigate = useNavigate()
@@ -768,51 +780,62 @@ export default function PublicProfilePage() {
                         </p>
                       )}
 
-                      {/* Location and Contact Info Pills */}
-                      <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground min-w-0 max-w-full">
-                        {profile.location && (profile.location.city || profile.location.country) && (
-                          <div className="flex items-center gap-1.5 min-w-0 max-w-full">
-                            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">
-                              {[profile.location.city, profile.location.country].filter(Boolean).join(', ')}
-                              {profile.location.isRemote && ' (Remote)'}
-                            </span>
-                          </div>
-                        )}
+                      {/* Sleek Contact & Social Icon Buttons */}
+                      <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
                         {profile.contact?.website && (
                           <a
-                            href={profile.contact.website}
+                            href={profile.contact.website.startsWith('http') ? profile.contact.website : `https://${profile.contact.website}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={() => handleLinkClick(profile.contact!.website!, 'Website')}
-                            className="flex items-center gap-1.5 text-primary hover:underline min-w-0 max-w-full"
+                            title={`Website: ${profile.contact.website}`}
+                            className="p-2 sm:p-2.5 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
                           >
-                            <Globe className="h-3.5 w-3.5 shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">Portfolio / Site</span>
-                            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+                            <Globe className="h-4 w-4" />
                           </a>
                         )}
+
                         {profile.contact?.email && (
                           <a
                             href={`mailto:${profile.contact.email}`}
-                            className="flex items-center gap-1.5 hover:text-foreground transition-colors min-w-0 max-w-full"
+                            title={`Email: ${profile.contact.email}`}
+                            className="p-2 sm:p-2.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
                           >
-                            <Mail className="h-3.5 w-3.5 shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.email}</span>
+                            <Mail className="h-4 w-4" />
                           </a>
                         )}
+
                         {profile.contact?.phone && (
-                          <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
-                            <Phone className="h-3.5 w-3.5 shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.phone}</span>
-                          </div>
+                          <a
+                            href={`tel:${profile.contact.phone}`}
+                            title={`Phone: ${profile.contact.phone}`}
+                            className="p-2 sm:p-2.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                          >
+                            <Phone className="h-4 w-4" />
+                          </a>
                         )}
-                        {profile.contact?.address && (
-                          <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-full">
+
+                        {profile.location && (profile.location.city || profile.location.country) && (
+                          <div
+                            title={`Location: ${[profile.location.city, profile.location.country].filter(Boolean).join(', ')}`}
+                            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
+                          >
                             <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.contact.address}</span>
+                            <span className="truncate max-w-[130px]">{[profile.location.city, profile.location.country].filter(Boolean).join(', ')}</span>
                           </div>
                         )}
+
+                        {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
+                          <a
+                            key={s.id || idx}
+                            href={s.url.startsWith('http') ? s.url : `https://${s.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={s.label || s.platform || 'Social Link'}
+                            className="p-2 sm:p-2.5 rounded-2xl bg-card hover:bg-muted text-foreground border border-border/80 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer"
+                          >
+                            {getSocialIcon(s.platform, s.url)}
+                          </a>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -907,14 +930,14 @@ export default function PublicProfilePage() {
 
             {/* Education Section */}
             {(activeTab === 'all' || activeTab === 'education') && education.length > 0 && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 min-w-0 max-w-full">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border min-w-0">
-                  <div className="p-2 rounded-xl bg-primary-soft text-primary shrink-0">
-                    <GraduationCap className="h-4 w-4" />
+              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
+                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <GraduationCap className="h-3.5 w-3.5" />
                   </div>
-                  <h2 className="text-lg font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education & Credentials</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education & Credentials</h2>
                 </div>
-                <div className="space-y-6 pt-2 min-w-0">
+                <div className="space-y-4 pt-1 min-w-0">
                   {education.map((edu: any, idx: number) => {
                     const dateStr = formatDateRange(
                       edu.startMonth,
@@ -926,20 +949,20 @@ export default function PublicProfilePage() {
                       edu.endDate
                     )
                     return (
-                      <div key={edu.id || idx} className="space-y-1 relative pl-4 border-l-2 border-primary/30 min-w-0 max-w-full">
+                      <div key={edu.id || idx} className="space-y-0.5 relative pl-3 border-l-2 border-primary/30 min-w-0 max-w-full">
                         <div className="flex items-start justify-between gap-2 min-w-0">
-                          <h3 className="font-bold text-foreground text-sm break-words [overflow-wrap:anywhere] min-w-0">
+                          <h3 className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">
                             {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
                           </h3>
                           {dateStr && (
-                            <span className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap bg-muted/60 px-2 py-0.5 rounded-md shrink-0">
+                            <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap bg-muted/60 px-1.5 py-0.2 rounded shrink-0">
                               {dateStr}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
+                        <div className="text-[11px] font-medium text-primary break-words [overflow-wrap:anywhere] min-w-0">{edu.institution}</div>
                         {edu.description && (
-                          <p className="text-xs text-muted-foreground leading-relaxed pt-1 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+                          <p className="text-[11px] text-muted-foreground leading-relaxed pt-0.5 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
                             {edu.description}
                           </p>
                         )}
