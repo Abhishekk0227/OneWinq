@@ -28,6 +28,7 @@ import type {
   CustomSectionItem,
   MediaGalleryItem,
   OrganizationItem,
+  PrivateDocumentItem,
   MultiModeVisibility,
   ModeOverrideData,
 } from '@/types/profile.types'
@@ -61,6 +62,9 @@ import {
   Lock,
   User,
   ShieldCheck,
+  ExternalLink,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog'
@@ -126,12 +130,16 @@ export default function ProfileEditPage() {
   const [customSections, setCustomSections] = React.useState<CustomSectionItem[]>([])
   const [mediaGallery, setMediaGallery] = React.useState<MediaGalleryItem[]>([])
   const [organizations, setOrganizations] = React.useState<OrganizationItem[]>([])
+  const [privateDocuments, setPrivateDocuments] = React.useState<PrivateDocumentItem[]>([])
+  const [uploadingDocId, setUploadingDocId] = React.useState<string | null>(null)
 
   // Dynamic Tabs State
   const [searchParams] = useSearchParams()
   const modeParam = searchParams.get('mode')
+  const tabParam = searchParams.get('tab')
   const [activeTab, setActiveTab] = React.useState(() => {
-    if (modeParam === 'private') return 'privacy'
+    if (tabParam) return tabParam
+    if (modeParam === 'private') return 'private-docs'
     return 'identity'
   })
 
@@ -524,6 +532,7 @@ export default function ProfileEditPage() {
         )
         setMediaGallery(p.mediaGallery || [])
         setOrganizations(p.organizations || [])
+        setPrivateDocuments(p.privateDocuments || [])
         setCustomSections(p.customSections || [])
 
         if (p.visibility) {
@@ -708,6 +717,7 @@ export default function ProfileEditPage() {
       { id: 'certifications', label: 'Certifications', icon: ShieldCheck },
       { id: 'awards', label: 'Awards & Papers', icon: Star },
       { id: 'custom-blocks', label: 'Custom Sections', icon: FileText },
+      { id: 'private-docs', label: 'Private Docs', icon: Lock },
       { id: 'privacy', label: 'Visibility Rules', icon: Shield },
     ]
   }, [])
@@ -743,6 +753,9 @@ export default function ProfileEditPage() {
         break
       case 'certifications':
         setCertifications([])
+        break
+      case 'private-docs':
+        setPrivateDocuments([])
         break
       case 'credentials':
         setCertifications([])
@@ -830,6 +843,7 @@ export default function ProfileEditPage() {
       publications,
       mediaGallery,
       organizations,
+      privateDocuments,
       customSections,
     })
   }
@@ -993,6 +1007,59 @@ export default function ProfileEditPage() {
         metadata: { role: 'Founder', stage: 'Early Stage', status: 'Active' },
       },
     ])
+  }
+
+  const handleAddPrivateDocument = () => {
+    setPrivateDocuments((prev) => [
+      ...prev,
+      {
+        id: Math.random().toString(36).substring(2, 9),
+        title: 'Aadhaar Card',
+        subtitle: 'Aadhaar Card',
+        description: '',
+        url: '',
+        showOnProfile: false,
+        metadata: {
+          docType: 'Aadhaar Card',
+          docNumber: '',
+          showOnProfile: false,
+        },
+      },
+    ])
+  }
+
+  const handleDocumentFileUpload = async (index: number, file: File) => {
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error('File size cannot exceed 25MB')
+      return
+    }
+    const docId = privateDocuments[index]?.id || String(index)
+    try {
+      setUploadingDocId(docId)
+      const res = await mediaApi.uploadFile(file, 'PRIVATE_DOCUMENT')
+      setPrivateDocuments((prev) => {
+        const updated = [...prev]
+        if (updated[index]) {
+          updated[index] = {
+            ...updated[index],
+            url: res.publicUrl,
+            metadata: {
+              ...(updated[index].metadata || {}),
+              originalFilename: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+            },
+          }
+        }
+        return updated
+      })
+      toast.success('Document uploaded successfully!')
+    } catch (err: any) {
+      console.error('[DocumentUploadError]', err)
+      toast.error(err?.message || 'Failed to upload document')
+    } finally {
+      setUploadingDocId(null)
+    }
   }
 
   const handleAddCertification = () => {
@@ -1598,16 +1665,22 @@ export default function ProfileEditPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                  <span>
-                    About / Bio {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <span>
+                      About / Bio {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
+                    </span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.bio && (
+                      <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                    )}
+                  </label>
+                  <span className={`text-[11px] font-mono ${currentBio.length > 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                    {currentBio.length} / 500
                   </span>
-                  {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.bio && (
-                    <span className="text-[10px] text-primary font-bold">Custom Override</span>
-                  )}
-                </label>
+                </div>
                 <Textarea
                   value={currentBio}
+                  maxLength={500}
                   onChange={(e) => handleBioChange(e.target.value)}
                   placeholder={
                     activeProfileMode !== 'ALL'
@@ -1615,7 +1688,11 @@ export default function ProfileEditPage() {
                       : "Tell your story, background, and what drives your work..."
                   }
                   rows={4}
+                  className="text-xs sm:text-sm leading-relaxed"
                 />
+                <p className="text-[11px] text-muted-foreground">
+                  Keep it brief and engaging (up to 500 characters). For extensive work history, use the Experience tab or Custom Sections.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2922,6 +2999,355 @@ export default function ProfileEditPage() {
               </div>
             </div>
           </TabsContent>
+
+        {/* ================= TAB: PRIVATE DOCUMENTS (PRIVATE MODE ONLY) ================= */}
+        <TabsContent value="private-docs" className="space-y-6">
+          <div className="rounded-3xl border border-purple-500/25 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent p-5 sm:p-7 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs border border-purple-500/20">
+                  <Lock className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
+                      Private Documents Vault
+                    </h3>
+                    <Badge variant="outline" className="text-[10px] bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30 font-bold uppercase tracking-wider">
+                      Private Mode Only
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+                    Upload sensitive documents like Aadhaar, PAN card, driving license, passport, or degree marksheets in <strong>Private Mode only</strong>. For each document, choose whether to show it on your profile in Private Mode or keep it in your private vault only.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                onClick={handleAddPrivateDocument}
+                leftIcon={<Plus className="h-4 w-4" />}
+                className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm shrink-0 self-start sm:self-center"
+              >
+                Add Document
+              </Button>
+            </div>
+
+            {/* Private Mode Context Callout */}
+            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-background/80 border border-purple-500/20 text-xs">
+              <div className="flex items-center gap-2 text-foreground/90">
+                <ShieldCheck className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                <span>
+                  Active Profile Mode: <strong>{activeProfileMode}</strong>
+                  {activeProfileMode !== 'PRIVATE' && (
+                    <span className="text-muted-foreground ml-1.5 hidden sm:inline">
+                      (Documents added here will only appear when your profile is set to Private mode)
+                    </span>
+                  )}
+                </span>
+              </div>
+              {activeProfileMode !== 'PRIVATE' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveProfileMode('PRIVATE')}
+                  className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline shrink-0"
+                >
+                  Switch to Private Mode &rarr;
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* List of Documents */}
+          {privateDocuments.length === 0 ? (
+            <div className="p-10 rounded-3xl border border-dashed border-border bg-card text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto">
+                <Lock className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-foreground">No Private Documents Added</h4>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                  Add your Aadhaar card, PAN card, marksheets, driving license, or certificates. You control whether each document is displayed on your profile in Private Mode.
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleAddPrivateDocument}
+                leftIcon={<Plus className="h-3.5 w-3.5" />}
+              >
+                + Add Private Document
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {privateDocuments.map((doc, idx) => {
+                const docId = doc.id || String(idx)
+                const isUploading = uploadingDocId === docId
+                const isDocVisible = Boolean(doc.showOnProfile || doc.metadata?.showOnProfile)
+
+                return (
+                  <div
+                    key={docId}
+                    className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-xs space-y-4 transition-all hover:border-purple-500/30"
+                  >
+                    {/* Header with numbering and remove button */}
+                    <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/70">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-bold flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <h4 className="text-sm font-bold text-foreground">
+                          {doc.title || doc.subtitle || `Document #${idx + 1}`}
+                        </h4>
+                        {isDocVisible ? (
+                          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold flex items-center gap-1">
+                            <Eye className="h-2.5 w-2.5" />
+                            <span>Visible on Profile (Private Mode)</span>
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border font-semibold flex items-center gap-1">
+                            <EyeOff className="h-2.5 w-2.5" />
+                            <span>Vault Only (Hidden)</span>
+                          </Badge>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setPrivateDocuments((prev) => prev.filter((_, i) => i !== idx))
+                          toast.info('Document removed')
+                        }}
+                        className="text-muted-foreground hover:text-destructive text-xs h-7 px-2"
+                        leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+
+                    {/* Inputs Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Document Type Dropdown */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">Document Type</label>
+                        <select
+                          value={doc.subtitle || doc.metadata?.docType || 'Aadhaar Card'}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setPrivateDocuments((prev) => {
+                              const updated = [...prev]
+                              if (updated[idx]) {
+                                const currentTitle = updated[idx].title
+                                const prevType = updated[idx].subtitle || updated[idx].metadata?.docType
+                                const newTitle = (!currentTitle || currentTitle === prevType) ? val : currentTitle
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  subtitle: val,
+                                  title: newTitle,
+                                  metadata: {
+                                    ...(updated[idx].metadata || {}),
+                                    docType: val,
+                                  },
+                                }
+                              }
+                              return updated
+                            })
+                          }}
+                          className="w-full h-9 rounded-xl border border-input bg-background px-3 py-1 text-xs font-medium text-foreground shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <option value="Aadhaar Card">Aadhaar Card</option>
+                          <option value="PAN Card">PAN Card</option>
+                          <option value="Marksheet / Academic Transcript">Marksheet / Academic Transcript</option>
+                          <option value="Driving License">Driving License</option>
+                          <option value="Passport">Passport</option>
+                          <option value="Voter ID Card">Voter ID Card</option>
+                          <option value="Degree / Diploma Certificate">Degree / Diploma Certificate</option>
+                          <option value="Other Private Document">Other Private Document</option>
+                        </select>
+                      </div>
+
+                      {/* Document Title / Label */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">Document Title / Display Label</label>
+                        <Input
+                          value={doc.title}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setPrivateDocuments((prev) => {
+                              const updated = [...prev]
+                              if (updated[idx]) {
+                                updated[idx] = { ...updated[idx], title: val }
+                              }
+                              return updated
+                            })
+                          }}
+                          placeholder="e.g. Aadhaar Card, 10th Marksheet, PAN Card"
+                        />
+                      </div>
+
+                      {/* Document ID Number (Optional) */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">Document Number / ID (Optional)</label>
+                        <Input
+                          value={doc.metadata?.docNumber || ''}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setPrivateDocuments((prev) => {
+                              const updated = [...prev]
+                              if (updated[idx]) {
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  metadata: {
+                                    ...(updated[idx].metadata || {}),
+                                    docNumber: val,
+                                  },
+                                }
+                              }
+                              return updated
+                            })
+                          }}
+                          placeholder="e.g. XXXX-XXXX-4589"
+                        />
+                      </div>
+
+                      {/* File Upload / Attachment */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">File Attachment (PDF / Image)</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="file"
+                            id={`file-upload-${docId}`}
+                            accept=".pdf,image/jpeg,image/png,image/webp,image/heic,image/heif"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleDocumentFileUpload(idx, file)
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            isLoading={isUploading}
+                            onClick={() => document.getElementById(`file-upload-${docId}`)?.click()}
+                            leftIcon={<Upload className="h-3.5 w-3.5" />}
+                            className="text-xs h-9 flex-1"
+                          >
+                            {doc.url ? 'Replace Document' : 'Upload File (Max 25MB)'}
+                          </Button>
+                          {doc.url && (
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 h-9 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-primary flex items-center gap-1.5 shrink-0"
+                            >
+                              <span>View</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                        {doc.url && (
+                          <div className="text-[11px] text-muted-foreground flex items-center justify-between pt-0.5">
+                            <span className="truncate max-w-[200px]">
+                              {doc.metadata?.originalFilename || 'File uploaded'}
+                            </span>
+                            {doc.metadata?.fileSize && (
+                              <span className="font-mono">
+                                {(doc.metadata.fileSize / 1024).toFixed(0)} KB
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Description / Notes (Optional) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-foreground">Description / Notes (Optional)</label>
+                      <Input
+                        value={doc.description || ''}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setPrivateDocuments((prev) => {
+                            const updated = [...prev]
+                            if (updated[idx]) {
+                              updated[idx] = { ...updated[idx], description: val }
+                            }
+                            return updated
+                          })
+                        }}
+                        placeholder="e.g. Government issued identity, verified record"
+                      />
+                    </div>
+
+                    {/* THE OPTION: Show on user profile or not */}
+                    <div className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                      isDocVisible
+                        ? 'bg-purple-500/10 border-purple-500/30'
+                        : 'bg-muted/40 border-border'
+                    }`}>
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          {isDocVisible ? (
+                            <Eye className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                          ) : (
+                            <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                          )}
+                          <span>Show on profile in Private Mode</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">
+                          {isDocVisible
+                            ? 'Selected: This document will be displayed on your profile when viewed in Private Mode.'
+                            : 'Unselected: This document stays confidential in your private vault only.'}
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={isDocVisible}
+                          onChange={(e) => {
+                            const checked = e.target.checked
+                            setPrivateDocuments((prev) => {
+                              const updated = [...prev]
+                              if (updated[idx]) {
+                                updated[idx] = {
+                                  ...updated[idx],
+                                  showOnProfile: checked,
+                                  metadata: {
+                                    ...(updated[idx].metadata || {}),
+                                    showOnProfile: checked,
+                                  },
+                                }
+                              }
+                              return updated
+                            })
+                          }}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                      </label>
+                    </div>
+                  </div>
+                )
+              })}
+
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddPrivateDocument}
+                  leftIcon={<Plus className="h-4 w-4" />}
+                  className="w-full py-3 rounded-2xl border-dashed text-xs font-semibold"
+                >
+                  + Add Another Private Document
+                </Button>
+              </div>
+            </div>
+          )}
+        </TabsContent>
 
         {/* ================= TAB: VISIBILITY RULES ================= */}
         <TabsContent value="privacy" className="space-y-6">

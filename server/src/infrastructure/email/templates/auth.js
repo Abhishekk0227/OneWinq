@@ -5,7 +5,8 @@
 
 const BRAND = 'OneWinq';
 const SUPPORT_EMAIL = 'support@onewinq.com';
-const WEBSITE_URL = 'https://onewinq.com';
+const WEBSITE_URL = process.env.APP_URL || 'https://one-winq.vercel.app';
+const LOGO_URL = process.env.EMAIL_LOGO_URL || `${WEBSITE_URL}/logo-white.png`;
 
 function baseHtml(title, bodyHtml, subtitle = 'Secure Account Notification') {
   return `<!DOCTYPE html>
@@ -40,21 +41,14 @@ function baseHtml(title, bodyHtml, subtitle = 'Secure Account Notification') {
           
           <!-- Header Banner -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 36px 36px 32px 36px; text-align: left;">
+            <td style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 32px 36px 28px 36px; text-align: left;">
               <table border="0" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td>
-                    <!-- Brand Pill Logo -->
-                    <table border="0" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 12px; padding: 8px 14px; color: #ffffff; font-weight: 800; font-size: 18px; letter-spacing: 0.5px; display: inline-block;">
-                          1Q
-                        </td>
-                        <td style="padding-left: 12px; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-                          ${BRAND}
-                        </td>
-                      </tr>
-                    </table>
+                    <!-- OneWinq Brand Logo -->
+                    <a href="${WEBSITE_URL}" target="_blank" style="text-decoration: none; display: inline-block;">
+                      <img src="${LOGO_URL}" alt="${BRAND}" height="32" style="height: 32px; max-width: 140px; width: auto; border: 0; display: block; color: #ffffff; font-size: 22px; font-weight: 800; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.5px; -ms-interpolation-mode: bicubic;" />
+                    </a>
                   </td>
                 </tr>
                 <tr>

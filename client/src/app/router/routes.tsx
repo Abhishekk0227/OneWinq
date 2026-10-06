@@ -224,6 +224,10 @@ export const router = createBrowserRouter([
                 ),
               },
               {
+                path: 'discovery',
+                element: <Navigate to="/app/network" replace />,
+              },
+              {
                 path: 'connections',
                 element: (
                   <Suspended>

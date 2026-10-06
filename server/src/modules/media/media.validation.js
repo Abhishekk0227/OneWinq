@@ -55,6 +55,17 @@ export const PURPOSE_RULES = Object.freeze({
       'video/ogg',
     ],
   },
+  [MEDIA_PURPOSE.PRIVATE_DOCUMENT]: {
+    maxBytes: 25 * 1024 * 1024, // 25MB
+    allowedMimes: [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+    ],
+  },
 });
 
 export const requestUploadUrlSchema = z

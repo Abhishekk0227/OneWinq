@@ -315,6 +315,7 @@ export const MEDIA_PURPOSE = Object.freeze({
   SUPPORT_EVIDENCE: 'SUPPORT_EVIDENCE',
   REPORT_EVIDENCE: 'REPORT_EVIDENCE',
   POST_MEDIA: 'POST_MEDIA',
+  PRIVATE_DOCUMENT: 'PRIVATE_DOCUMENT',
 });
 
 // ---- Posts & Comments lifecycle --------------------------------------------

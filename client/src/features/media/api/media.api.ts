@@ -20,6 +20,7 @@ export type MediaPurpose =
   | 'CARD_MEDIA'
   | 'SUPPORT_EVIDENCE'
   | 'REPORT_EVIDENCE'
+  | 'PRIVATE_DOCUMENT'
 
 function resolveMimeType(file: File): string {
   if (file.type && file.type !== 'application/octet-stream') {

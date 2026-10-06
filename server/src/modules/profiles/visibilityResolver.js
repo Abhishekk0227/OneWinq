@@ -242,5 +242,20 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
     });
   }
 
+  // Private Documents: strictly visible ONLY in PRIVATE mode, and only if showOnProfile is true
+  if (effectiveMode === VISIBILITY_MODE.PRIVATE && Array.isArray(profileSnapshot.privateDocuments)) {
+    const visibleDocs = profileSnapshot.privateDocuments.filter(
+      (item) => item && (item.showOnProfile === true || item.metadata?.showOnProfile === true)
+    );
+    result.privateDocuments = visibleDocs;
+    if (!result.sections) result.sections = {};
+    result.sections.privateDocuments = visibleDocs;
+  } else {
+    delete result.privateDocuments;
+    if (result.sections) {
+      delete result.sections.privateDocuments;
+    }
+  }
+
   return result;
 }

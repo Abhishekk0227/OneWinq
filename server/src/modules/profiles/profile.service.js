@@ -323,6 +323,9 @@ export async function updateProfileDraft(userId, data, personaId = null) {
   if (data.teaching !== undefined) {
     updates.teaching = ensureEntryIds(data.teaching);
   }
+  if (data.privateDocuments !== undefined) {
+    updates.privateDocuments = ensureEntryIds(data.privateDocuments);
+  }
   if (data.customSections !== undefined) {
     updates.customSections = ensureEntryIds(data.customSections);
   }
@@ -403,6 +406,7 @@ export function buildSnapshotFromProfile(profile) {
     speaking: toArrayOfObj(profile.speaking),
     organizations: toArrayOfObj(profile.organizations),
     teaching: toArrayOfObj(profile.teaching),
+    privateDocuments: toArrayOfObj(profile.privateDocuments),
     customSections: toArrayOfObj(profile.customSections),
     sectionVisibility: secVis,
     fieldVisibility: fieldVis,
