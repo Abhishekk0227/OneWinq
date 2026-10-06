@@ -121,13 +121,32 @@ export async function searchDiscovery(
   }
 
   const [profiles, identities] = await Promise.all([
-    Profile.find(profileFilter).lean(),
+    Profile.find(profileFilter)
+      .sort({ isActive: -1, updatedAt: -1 })
+      .lean(),
     ProfessionalIdentity.find({ userId: { $in: candidateUserIds } })
       .sort({ isPrimary: -1, displayOrder: 1 })
       .lean(),
   ]);
 
-  const profileMap = new Map(profiles.map((p) => [p.userId.toString(), p]));
+  const profileMap = new Map();
+  for (const p of profiles) {
+    const uStr = p.userId.toString();
+    if (!profileMap.has(uStr)) {
+      profileMap.set(uStr, p);
+    } else {
+      const existing = profileMap.get(uStr);
+      if (!existing.isActive && p.isActive) {
+        profileMap.set(uStr, p);
+      } else if (existing.isActive === p.isActive) {
+        const existingHasData = Boolean(existing.headline || existing.publishedData?.headline);
+        const pHasData = Boolean(p.headline || p.publishedData?.headline);
+        if (!existingHasData && pHasData) {
+          profileMap.set(uStr, p);
+        }
+      }
+    }
+  }
 
   // Group identities by userId
   const identityMap = new Map();

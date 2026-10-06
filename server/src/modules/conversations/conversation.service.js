@@ -92,12 +92,21 @@ export async function getUserConversations(userId, { cursor, limit = 20 }) {
 
   const [users, profiles, identities] = await Promise.all([
     User.find({ _id: { $in: otherUserIds } }).select('displayName username accountState').lean(),
-    Profile.find({ userId: { $in: otherUserIds } }).select('userId avatarUrl headline').lean(),
+    Profile.find({ userId: { $in: otherUserIds } })
+      .sort({ isActive: -1, updatedAt: -1 })
+      .select('userId avatarUrl headline professionTitle location publishedData isActive')
+      .lean(),
     ProfessionalIdentity.find({ userId: { $in: otherUserIds }, isPrimary: true }).lean(),
   ]);
 
   const userMap = new Map(users.map((u) => [u._id.toString(), u]));
-  const profileMap = new Map(profiles.map((p) => [p.userId.toString(), p]));
+  const profileMap = new Map();
+  for (const p of profiles) {
+    const uStr = p.userId.toString();
+    if (!profileMap.has(uStr) || (!profileMap.get(uStr).isActive && p.isActive)) {
+      profileMap.set(uStr, p);
+    }
+  }
   const identityMap = new Map(identities.map((i) => [i.userId.toString(), i]));
 
   const results = items.map((c) => {
