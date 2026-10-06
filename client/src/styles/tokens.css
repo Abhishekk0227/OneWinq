@@ -69,31 +69,34 @@
   --radius-2xl: 1.5rem;  /* 24px */
 }
 
-/* Dark mode token overrides: WhatsApp Canvas & Card Surfaces with OneWinq Purple Brand */
+/* Dark mode token overrides: Authentic WhatsApp Android Dark Mode */
 .dark {
-  /* WhatsApp Surfaces & Charcoal-Teal Obsidian Canvas */
-  --background: 202 32% 10%;      /* WhatsApp Main Canvas #111B21 */
-  --foreground: 200 15% 93%;      /* WhatsApp Primary Text #E9EDEF */
+  /* WhatsApp Deep Pitch Charcoal Canvas (#0B1014) */
+  --background: 207 24% 6%;
+  --foreground: 0 0% 98%;
 
-  --card: 202 23% 16%;          /* WhatsApp Surface / Card / Bubble #202C33 */
-  --card-foreground: 200 15% 93%;
-  --card-hover: 202 22% 19%;     /* WhatsApp Hover #222E35 */
+  /* WhatsApp Subtle Dark Elevated Card Surface (#13191F) */
+  --card: 208 22% 10%;
+  --card-foreground: 0 0% 98%;
+  --card-hover: 208 20% 13%;
 
-  --popover: 200 23% 18%;       /* WhatsApp Context Popover #233138 */
-  --popover-foreground: 200 15% 93%;
+  /* Popovers & Floating Menus (#182026) */
+  --popover: 208 20% 12%;
+  --popover-foreground: 0 0% 98%;
 
   /* OneWinq Brand Royal Purple */
-  --primary: 270 72% 64%;        /* OneWinq Brand Purple #9353ED */
+  --primary: 270 72% 64%;
   --primary-foreground: 0 0% 100%;
   --primary-hover: 270 76% 56%;
   --primary-soft: 270 50% 18%;
   --primary-muted: 270 45% 24%;
 
-  --secondary: 202 23% 16%;      /* #202C33 */
-  --secondary-foreground: 200 15% 93%;
+  --secondary: 208 22% 10%;
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 202 23% 16%;          /* #202C33 */
-  --muted-foreground: 203 11% 58%; /* WhatsApp Muted Gray #8696A0 */
+  /* WhatsApp Search Pill & Chip Surface (#1A2228) */
+  --muted: 208 19% 13%;
+  --muted-foreground: 204 11% 58%; /* WhatsApp #8696A0 */
 
   --accent: 270 50% 18%;
   --accent-foreground: 270 72% 64%;
@@ -101,35 +104,36 @@
   --destructive: 0 75% 58%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 203 21% 17%;         /* WhatsApp Divider Border #222D34 */
-  --input: 202 23% 16%;          /* #202C33 */
+  /* Subtle Hairline Dividers (#1B2329) */
+  --border: 207 18% 13%;
+  --input: 208 19% 13%;
   --ring: 270 72% 64%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background: 202 32% 10%;
-    --foreground: 200 15% 93%;
-    --card: 202 23% 16%;
-    --card-foreground: 200 15% 93%;
-    --card-hover: 202 22% 19%;
-    --popover: 200 23% 18%;
-    --popover-foreground: 200 15% 93%;
+    --background: 207 24% 6%;
+    --foreground: 0 0% 98%;
+    --card: 208 22% 10%;
+    --card-foreground: 0 0% 98%;
+    --card-hover: 208 20% 13%;
+    --popover: 208 20% 12%;
+    --popover-foreground: 0 0% 98%;
     --primary: 270 72% 64%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 270 76% 56%;
     --primary-soft: 270 50% 18%;
     --primary-muted: 270 45% 24%;
-    --secondary: 202 23% 16%;
-    --secondary-foreground: 200 15% 93%;
-    --muted: 202 23% 16%;
-    --muted-foreground: 203 11% 58%;
+    --secondary: 208 22% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 208 19% 13%;
+    --muted-foreground: 204 11% 58%;
     --accent: 270 50% 18%;
     --accent-foreground: 270 72% 64%;
     --destructive: 0 75% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 203 21% 17%;
-    --input: 202 23% 16%;
+    --border: 207 18% 13%;
+    --input: 208 19% 13%;
     --ring: 270 72% 64%;
   }
 }

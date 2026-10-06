@@ -7,7 +7,7 @@ export function MobileNav() {
   const { openModal } = useUIStore()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-border bg-card/95 px-3 backdrop-blur-md lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-border/60 bg-background/95 px-3 backdrop-blur-md lg:hidden">
       {/* Home / Feed (Instagram-style default) */}
       <NavLink
         to="/app"
