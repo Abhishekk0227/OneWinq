@@ -185,18 +185,53 @@ export async function searchDiscovery(
     const skillList = rawSkills.slice(0, 5).map((s) => (typeof s === 'string' ? { name: s } : { name: s.name || '' }));
     const topSkillNames = skillList.map((s) => s.name).filter(Boolean);
 
+    // Robust headline / profession resolution
+    const resolvedHeadline =
+      (filteredProfile.headline && filteredProfile.headline.trim()) ||
+      (filteredProfile.professionTitle && filteredProfile.professionTitle.trim()) ||
+      (primaryIdn && primaryIdn.customTitle && primaryIdn.customTitle.trim()) ||
+      (profile?.headline && profile.headline.trim()) ||
+      (profile?.professionTitle && profile.professionTitle.trim()) ||
+      (profile?.publishedData?.headline && profile.publishedData.headline.trim()) ||
+      (profile?.publishedData?.professionTitle && profile.publishedData.professionTitle.trim()) ||
+      (profile?.modeData?.PUBLIC?.headline && profile.modeData.PUBLIC.headline.trim()) ||
+      (profile?.modeData?.PROFESSIONAL?.headline && profile.modeData.PROFESSIONAL.headline.trim()) ||
+      (userIdentities[0] && userIdentities[0].customTitle && userIdentities[0].customTitle.trim()) ||
+      '';
+
+    // Robust location resolution
+    const candidateLocs = [
+      filteredProfile.location,
+      profile?.location,
+      profile?.publishedData?.location,
+      profile?.modeData?.PUBLIC?.location,
+      profile?.modeData?.PROFESSIONAL?.location,
+    ];
+    let resolvedLocation = null;
+    for (const cand of candidateLocs) {
+      if (cand && (cand.city || cand.state || cand.country)) {
+        resolvedLocation = {
+          city: cand.city || '',
+          state: cand.state || '',
+          country: cand.country || '',
+          isRemote: Boolean(cand.isRemote),
+        };
+        break;
+      }
+    }
+
     validCards.push({
       id: uStr,
       username: user.username,
       displayName: user.displayName,
-      avatarUrl: filteredProfile.avatarUrl || user.avatarUrl || null,
-      headline: filteredProfile.headline || '',
-      primaryProfession: primaryIdn ? primaryIdn.customTitle : null,
+      avatarUrl: filteredProfile.avatarUrl || user.avatarUrl || profile?.avatarUrl || null,
+      headline: resolvedHeadline,
+      primaryProfession: primaryIdn ? primaryIdn.customTitle : (resolvedHeadline || null),
       otherProfessions: otherIdns.map((i) => i.customTitle),
       identities: userIdentities,
       skills: skillList,
       topSkills: topSkillNames,
-      location: filteredProfile.location || null,
+      location: resolvedLocation,
       connectionStatus,
       connectionState: connectionStatus,
       connectionId,

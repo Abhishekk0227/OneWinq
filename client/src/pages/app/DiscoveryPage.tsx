@@ -219,36 +219,54 @@ export default function DiscoveryPage() {
                       <div className="text-xs font-medium text-muted-foreground truncate">
                         @{person.username}
                       </div>
-                      {person.headline && (
-                        <p className="text-xs text-primary font-medium line-clamp-1 mt-1">
-                          {person.headline}
-                        </p>
-                      )}
+                      {(() => {
+                        const displayHeadline =
+                          person.headline?.trim() ||
+                          person.primaryProfession?.trim() ||
+                          (person as any).professionTitle?.trim() ||
+                          person.identities?.[0]?.customTitle?.trim() ||
+                          ''
+                        return displayHeadline ? (
+                          <p className="text-xs text-primary font-medium line-clamp-1 mt-1">
+                            {displayHeadline}
+                          </p>
+                        ) : null
+                      })()}
                     </div>
                   </div>
 
                   {/* Primary & Secondary Identities */}
-                  {person.identities && person.identities.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {person.identities
-                        .filter((id: { customTitle: string }, idx: number, arr: any[]) => {
-                          if (!id.customTitle?.trim()) return false
-                          const norm = id.customTitle.trim().toLowerCase()
-                          if (person.headline && norm === person.headline.trim().toLowerCase()) return false
-                          return arr.findIndex((other: any) => other.customTitle?.trim().toLowerCase() === norm) === idx
-                        })
-                        .slice(0, 2)
-                        .map((id: { customTitle: string }, i: number) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-muted text-foreground/80 flex items-center gap-1"
-                        >
-                          <Briefcase className="h-3 w-3 text-primary" />
-                          <span>{id.customTitle}</span>
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {person.identities && person.identities.length > 0 && (() => {
+                    const headlineLower = (
+                      person.headline?.trim() ||
+                      person.primaryProfession?.trim() ||
+                      (person as any).professionTitle?.trim() ||
+                      person.identities?.[0]?.customTitle?.trim() ||
+                      ''
+                    ).toLowerCase()
+                    const filteredIdentities = person.identities
+                      .filter((id: { customTitle: string }, idx: number, arr: any[]) => {
+                        if (!id.customTitle?.trim()) return false
+                        const norm = id.customTitle.trim().toLowerCase()
+                        if (headlineLower && norm === headlineLower) return false
+                        return arr.findIndex((other: any) => other.customTitle?.trim().toLowerCase() === norm) === idx
+                      })
+                      .slice(0, 2)
+                    if (filteredIdentities.length === 0) return null
+                    return (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {filteredIdentities.map((id: { customTitle: string }, i: number) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-muted text-foreground/80 flex items-center gap-1"
+                          >
+                            <Briefcase className="h-3 w-3 text-primary" />
+                            <span>{id.customTitle}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )
+                  })()}
 
                   {/* Skills Preview */}
                   {person.skills && person.skills.length > 0 && (
@@ -270,11 +288,11 @@ export default function DiscoveryPage() {
                   )}
 
                   {/* Location */}
-                  {person.location && (person.location.city || person.location.country) && (
+                  {person.location && (person.location.city || person.location.state || person.location.country) && (
                     <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>
-                        {[person.location.city, person.location.country].filter(Boolean).join(', ')}
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">
+                        {[person.location.city, person.location.state, person.location.country].filter(Boolean).join(', ')}
                         {person.location.isRemote && ' (Remote)'}
                       </span>
                     </div>

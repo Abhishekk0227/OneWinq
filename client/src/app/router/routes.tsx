@@ -159,6 +159,28 @@ export const router = createBrowserRouter([
         element: <Navigate to="/app" replace />,
       },
 
+      // Root Discovery & Network Aliases (prevent falling back to home feed)
+      {
+        path: 'discover',
+        element: <Navigate to="/app/network" replace />,
+      },
+      {
+        path: 'discovery',
+        element: <Navigate to="/app/network" replace />,
+      },
+      {
+        path: 'network',
+        element: <Navigate to="/app/network" replace />,
+      },
+      {
+        path: 'people',
+        element: <Navigate to="/app/network" replace />,
+      },
+      {
+        path: 'discover-people',
+        element: <Navigate to="/app/network" replace />,
+      },
+
       // Protected User Application Routes
       {
         path: 'app',
@@ -224,7 +246,19 @@ export const router = createBrowserRouter([
                 ),
               },
               {
+                path: 'discover',
+                element: <Navigate to="/app/network" replace />,
+              },
+              {
                 path: 'discovery',
+                element: <Navigate to="/app/network" replace />,
+              },
+              {
+                path: 'people',
+                element: <Navigate to="/app/network" replace />,
+              },
+              {
+                path: 'discover-people',
                 element: <Navigate to="/app/network" replace />,
               },
               {
