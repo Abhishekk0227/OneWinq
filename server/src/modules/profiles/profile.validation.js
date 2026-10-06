@@ -359,30 +359,65 @@ export const updateProfileSchema = z.object({
     .optional(),
   organizations: z
     .array(
-      z.object({
-        id: z.string().optional(),
-        title: z.string().min(1).max(150),
-        subtitle: z.string().max(100).optional().default(''),
-        description: z.string().max(1000).optional().default(''),
-        url: z.string().url().optional().or(z.literal('')),
-        month: monthSchema,
-        year: yearSchema,
-        date: z.coerce.date().nullable().optional(),
-      }),
+      z
+        .object({
+          id: z.string().optional(),
+          title: z.string().max(200).optional(),
+          name: z.string().max(200).optional(),
+          subtitle: z.string().max(200).optional().default(''),
+          role: z.string().max(200).optional(),
+          description: z.string().max(2000).optional().default(''),
+          tagline: z.string().max(500).optional(),
+          url: z.string().optional().default(''),
+          website: z.string().optional(),
+          month: monthSchema,
+          year: yearSchema,
+          date: z.coerce.date().nullable().optional(),
+          metadata: z.record(z.any()).optional().default({}),
+        })
+        .passthrough()
+        .transform((item) => ({
+          ...item,
+          title: item.title || item.name || 'Venture',
+          subtitle: item.subtitle || item.role || '',
+          description: item.description || item.tagline || '',
+          url: item.url || item.website || '',
+        })),
     )
     .optional(),
   teaching: z
     .array(
-      z.object({
-        id: z.string().optional(),
-        title: z.string().min(1).max(150),
-        subtitle: z.string().max(100).optional().default(''),
-        description: z.string().max(1000).optional().default(''),
-        url: z.string().url().optional().or(z.literal('')),
-        month: monthSchema,
-        year: yearSchema,
-        date: z.coerce.date().nullable().optional(),
-      }),
+      z
+        .object({
+          id: z.string().optional(),
+          title: z.string().min(1).max(200),
+          subtitle: z.string().max(200).optional().default(''),
+          description: z.string().max(2000).optional().default(''),
+          url: z.string().optional().default(''),
+          month: monthSchema,
+          year: yearSchema,
+          date: z.coerce.date().nullable().optional(),
+          metadata: z.record(z.any()).optional().default({}),
+        })
+        .passthrough(),
+    )
+    .optional(),
+  privateDocuments: z
+    .array(
+      z
+        .object({
+          id: z.string().optional(),
+          title: z.string().min(1).max(200),
+          subtitle: z.string().max(200).optional().default(''),
+          description: z.string().max(2000).optional().default(''),
+          url: z.string().optional().default(''),
+          month: monthSchema,
+          year: yearSchema,
+          date: z.coerce.date().nullable().optional(),
+          showOnProfile: z.boolean().optional().default(false),
+          metadata: z.record(z.any()).optional().default({}),
+        })
+        .passthrough(),
     )
     .optional(),
   sectionOrder: z.array(z.string()).optional(),

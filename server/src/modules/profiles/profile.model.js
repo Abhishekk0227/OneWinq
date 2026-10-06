@@ -329,6 +329,9 @@ const profileSchema = new Schema(
     organizations: { type: [genericEntrySchema], default: [] },
     teaching: { type: [genericEntrySchema], default: [] },
 
+    // Private vault — never exposed in public profile snapshots
+    privateDocuments: { type: [genericEntrySchema], default: [] },
+
     // Custom block-based sections
     customSections: { type: [customSectionSchema], default: [] },
 

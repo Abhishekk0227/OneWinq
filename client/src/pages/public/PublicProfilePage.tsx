@@ -34,6 +34,8 @@ import {
   Sparkles,
   Copy,
   FileText,
+  Lock,
+  ShieldCheck,
   Flame,
   Heart,
   MessageSquare,
@@ -56,6 +58,30 @@ import {
   Code,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
+
+const BIO_LIMIT = 300
+
+function BioText({ text }: { text: string }) {
+  const [expanded, setExpanded] = React.useState(false)
+  const isLong = text.length > BIO_LIMIT
+  const display = isLong && !expanded ? text.slice(0, BIO_LIMIT).trimEnd() + '…' : text
+  return (
+    <div className="pt-2 max-w-2xl min-w-0">
+      <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+        {display}
+      </p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-1 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </div>
+  )
+}
 
 function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
@@ -479,12 +505,14 @@ export default function PublicProfilePage() {
   const publications = profile.publications || profile.sections?.publications || []
   const organizations = profile.organizations || profile.sections?.organizations || []
   const mediaGallery = profile.mediaGallery || profile.sections?.mediaGallery || []
+  const privateDocuments = profile.privateDocuments || profile.sections?.privateDocuments || []
   const customSections = profile.customSections || []
 
   const hasExperience = experiences.length > 0
   const hasEducation = education.length > 0
   const hasPortfolio = projects.length > 0 || services.length > 0 || organizations.length > 0
   const hasMedia = mediaGallery.length > 0 || publications.length > 0
+  const hasPrivateDocs = privateDocuments.length > 0
   const hasPosts = userPosts.length > 0
   const hasCustom = customSections.length > 0
 
@@ -494,6 +522,7 @@ export default function PublicProfilePage() {
     ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
     ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
     ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + publications.length }] : []),
+    ...(hasPrivateDocs ? [{ id: 'documents', label: 'Documents', icon: <FileText className="h-4 w-4" />, count: privateDocuments.length }] : []),
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
     ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
@@ -824,11 +853,9 @@ export default function PublicProfilePage() {
                         </div>
                       )}
 
-                      {/* Bio */}
+                      {/* Bio — compact with expand toggle */}
                       {profile.bio && (
-                        <p className="text-sm sm:text-base text-foreground/80 leading-relaxed pt-2 max-w-2xl whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
-                          {profile.bio}
-                        </p>
+                        <BioText text={profile.bio} />
                       )}
 
                       {/* Sleek Contact & Social Icon Buttons */}
@@ -933,7 +960,7 @@ export default function PublicProfilePage() {
 
         {/* Dynamic Sections Content */}
         <div className="space-y-4">
-            {/* Experience Section */}
+            {/* Experience Section — LinkedIn-style Timeline */}
             {(activeTab === 'all' || activeTab === 'experience') && experiences.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
@@ -942,39 +969,67 @@ export default function PublicProfilePage() {
                   </div>
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Experience & Career</h2>
                 </div>
-                <div className="space-y-4 pt-1 min-w-0">
-                  {experiences.map((exp: any, idx: number) => {
-                    const dateStr = formatDateRange(
-                      exp.startMonth,
-                      exp.startYear,
-                      exp.endMonth,
-                      exp.endYear,
-                      exp.current,
-                      exp.startDate,
-                      exp.endDate
-                    )
-                    return (
-                      <div key={exp.id || idx} className="space-y-0.5 relative pl-3 border-l-2 border-primary/30 min-w-0 max-w-full">
-                        <div className="flex items-start justify-between gap-2 min-w-0">
-                          <h3 className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">{exp.role}</h3>
-                          {dateStr && (
-                            <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap bg-muted/60 px-1.5 py-0.2 rounded shrink-0">
-                              {dateStr}
-                            </span>
-                          )}
+                <div className="relative pt-1 min-w-0">
+                  {/* Vertical timeline line */}
+                  <div className="absolute left-[15px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+                  <div className="space-y-0 min-w-0">
+                    {experiences.map((exp: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        exp.startMonth,
+                        exp.startYear,
+                        exp.endMonth,
+                        exp.endYear,
+                        exp.current,
+                        exp.startDate,
+                        exp.endDate
+                      )
+                      return (
+                        <div key={exp.id || idx} className="relative flex gap-3 pb-5 last:pb-0 min-w-0 max-w-full">
+                          {/* Timeline dot */}
+                          <div className="relative z-10 shrink-0">
+                            <div className={`h-[30px] w-[30px] rounded-xl flex items-center justify-center shadow-sm border-2 ${
+                              exp.current
+                                ? 'bg-primary border-primary text-white'
+                                : 'bg-card border-primary/40 text-primary'
+                            }`}>
+                              <Briefcase className="h-3.5 w-3.5" />
+                            </div>
+                          </div>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0 pt-0.5">
+                            <div className="flex items-start justify-between gap-2 min-w-0 flex-wrap">
+                              <div className="min-w-0">
+                                <h3 className="font-bold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0 leading-tight">{exp.role}</h3>
+                                <div className="text-[11px] font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0 mt-0.5">
+                                  {exp.company}
+                                  {exp.location ? (
+                                    <span className="text-muted-foreground font-normal"> · {exp.location}</span>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 shrink-0">
+                                {dateStr && (
+                                  <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap bg-muted/60 px-1.5 py-0.5 rounded-md">
+                                    {dateStr}
+                                  </span>
+                                )}
+                                {exp.current && (
+                                  <span className="text-[9px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-1.5 py-0.5 rounded-md">
+                                    Current
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {exp.description && (
+                              <p className="text-[11px] text-muted-foreground leading-relaxed pt-1.5 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+                                {exp.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-[11px] font-medium text-primary break-words [overflow-wrap:anywhere] min-w-0">
-                          {exp.company}
-                          {exp.location ? ` • ${exp.location}` : ''}
-                        </div>
-                        {exp.description && (
-                          <p className="text-[11px] text-muted-foreground leading-relaxed pt-0.5 whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
-                            {exp.description}
-                          </p>
-                        )}
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )}
@@ -1161,35 +1216,43 @@ export default function PublicProfilePage() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 min-w-0">
-                  {organizations.map((org: any, idx: number) => (
-                    <div key={idx} className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-1 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
-                      <div className="flex items-start justify-between gap-2 min-w-0">
-                        <span className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">{org.name}</span>
-                        {org.stage && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary uppercase shrink-0">
-                            {org.stage}
-                          </span>
+                  {organizations.map((org: any, idx: number) => {
+                    // genericEntrySchema: title, subtitle, description, url, metadata.{role, stage, status}
+                    const orgName = org.name || org.title || ''
+                    const orgRole = org.role || org.subtitle || org.metadata?.role || ''
+                    const orgTagline = org.tagline || org.description || ''
+                    const orgWebsite = org.website || org.url || ''
+                    const orgStage = org.stage || org.metadata?.stage || ''
+                    return (
+                      <div key={org.id || idx} className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-1 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
+                        <div className="flex items-start justify-between gap-2 min-w-0">
+                          <span className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">{orgName}</span>
+                          {orgStage && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary uppercase shrink-0">
+                              {orgStage}
+                            </span>
+                          )}
+                        </div>
+                        {orgRole && (
+                          <p className="text-[11px] font-medium text-foreground/80 break-words [overflow-wrap:anywhere] min-w-0">{orgRole}</p>
+                        )}
+                        {orgTagline && (
+                          <p className="text-[11px] text-muted-foreground line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0">{orgTagline}</p>
+                        )}
+                        {orgWebsite && (
+                          <a
+                            href={orgWebsite.startsWith('http') ? orgWebsite : `https://${orgWebsite}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-0.5 min-w-0 max-w-full"
+                          >
+                            <span className="break-words [overflow-wrap:anywhere] min-w-0">Visit website</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" />
+                          </a>
                         )}
                       </div>
-                      {org.role && (
-                        <p className="text-[11px] font-medium text-foreground/80 break-words [overflow-wrap:anywhere] min-w-0">{org.role}</p>
-                      )}
-                      {org.tagline && (
-                        <p className="text-[11px] text-muted-foreground line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0">{org.tagline}</p>
-                      )}
-                      {org.website && (
-                        <a
-                          href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-0.5 min-w-0 max-w-full"
-                        >
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">Visit website</span>
-                          <ExternalLink className="h-3 w-3 shrink-0" />
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -1310,7 +1373,65 @@ export default function PublicProfilePage() {
               </div>
             )}
 
-            {/* Overview Info Cards (Skills, Social, Honors) - Shown on Home Tab */}
+            {/* Private Documents Section (Visible only when in Private Mode and owner selected to show) */}
+            {(activeTab === 'all' || activeTab === 'documents') && hasPrivateDocs && (
+              <div className="rounded-2xl border border-purple-500/25 bg-card p-4 sm:p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-border min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 shrink-0">
+                      <Lock className="h-4 w-4" />
+                    </div>
+                    <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                      Private Documents ({privateDocuments.length})
+                    </h2>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold">
+                    Private Mode
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+                  {privateDocuments.map((doc: any, idx: number) => (
+                    <div key={doc.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-2 shadow-2xs hover:border-purple-500/40 transition-colors">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-xs sm:text-sm text-foreground truncate">{doc.title}</h3>
+                          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
+                            {doc.subtitle || 'Document'}
+                          </span>
+                        </div>
+                        {doc.metadata?.docNumber && (
+                          <span className="text-[10px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
+                            {doc.metadata.docNumber}
+                          </span>
+                        )}
+                      </div>
+                      {doc.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{doc.description}</p>
+                      )}
+                      {doc.url && (
+                        <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                          >
+                            <span>Open Document</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
+                            <ShieldCheck className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                            <span>Verified</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Overview Info Cards (Skills, Social, Honors, Documents) - Shown on Home Tab */}
             {activeTab === 'home' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 {/* Skills Card */}
@@ -1387,6 +1508,50 @@ export default function PublicProfilePage() {
                             )}
                           </div>
                           <div className="text-muted-foreground text-[11px] break-words [overflow-wrap:anywhere] min-w-0">{cert.issuer}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verified Documents Overview Card */}
+                {hasPrivateDocs && (
+                  <div className="rounded-2xl border border-purple-500/25 bg-purple-500/5 p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <div className="flex items-center justify-between gap-2 border-b border-purple-500/20 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                        <h2 className="text-xs sm:text-sm font-bold text-foreground">
+                          Verified Documents ({privateDocuments.length})
+                        </h2>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('documents')}
+                        className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+                      >
+                        View all &rarr;
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {privateDocuments.slice(0, 3).map((doc: any, idx: number) => (
+                        <div key={doc.id || idx} className="p-3 rounded-xl border border-border bg-card flex items-center justify-between gap-2 shadow-2xs">
+                          <div className="min-w-0">
+                            <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
+                            <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">
+                              {doc.subtitle || 'Document'}
+                            </div>
+                          </div>
+                          {doc.url && (
+                            <a
+                              href={doc.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
+                            >
+                              <span>View</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
                         </div>
                       ))}
                     </div>

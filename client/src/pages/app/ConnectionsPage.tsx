@@ -164,7 +164,7 @@ export default function ConnectionsPage() {
           </p>
         </div>
 
-        <Link to="/app/discovery">
+        <Link to="/app/network">
           <Button size="sm" rightIcon={<ArrowRight className="h-4 w-4" />}>
             Discover People
           </Button>

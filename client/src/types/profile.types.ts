@@ -159,6 +159,27 @@ export interface OrganizationItem {
   }
 }
 
+export interface PrivateDocumentItem {
+  id?: string
+  title: string
+  subtitle?: string
+  description?: string
+  url?: string
+  month?: number | null
+  year?: number | null
+  date?: string | null
+  showOnProfile?: boolean
+  metadata?: {
+    showOnProfile?: boolean
+    docType?: string
+    docNumber?: string
+    originalFilename?: string
+    fileSize?: number
+    mimeType?: string
+    [key: string]: any
+  }
+}
+
 export interface LocationInfo {
   city?: string
   state?: string
@@ -215,6 +236,7 @@ export interface Profile {
   publications?: PublicationItem[]
   mediaGallery?: MediaGalleryItem[]
   organizations?: OrganizationItem[]
+  privateDocuments?: PrivateDocumentItem[]
   customSections?: CustomSectionItem[]
   sections?: Record<string, any[]>
   sectionOrder?: string[]
