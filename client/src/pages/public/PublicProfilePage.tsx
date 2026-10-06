@@ -837,7 +837,8 @@ export default function PublicProfilePage() {
                       {profile.professionTitle &&
                         profile.professionTitle !== 'Basic Universal Template' &&
                         profile.professionTitle !== 'Universal Profile' &&
-                        profile.professionTitle.trim().toLowerCase() !== profile.headline?.trim().toLowerCase() && (
+                        profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase() &&
+                        (!profile.headline || !profile.headline.trim().toLowerCase().split(/\s*\|\s*|\s*•\s*/).map((s: string) => s.trim()).includes(profile.professionTitle.trim().toLowerCase())) && (
                         <div className="flex flex-wrap gap-2 pt-1 max-w-full">
                           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs max-w-full break-words [overflow-wrap:anywhere]">
                             <Briefcase className="h-3.5 w-3.5 shrink-0" />

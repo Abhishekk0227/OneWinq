@@ -230,7 +230,15 @@ export default function DiscoveryPage() {
                   {/* Primary & Secondary Identities */}
                   {person.identities && person.identities.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {person.identities.slice(0, 2).map((id: { customTitle: string }, i: number) => (
+                      {person.identities
+                        .filter((id: { customTitle: string }, idx: number, arr: any[]) => {
+                          if (!id.customTitle?.trim()) return false
+                          const norm = id.customTitle.trim().toLowerCase()
+                          if (person.headline && norm === person.headline.trim().toLowerCase()) return false
+                          return arr.findIndex((other: any) => other.customTitle?.trim().toLowerCase() === norm) === idx
+                        })
+                        .slice(0, 2)
+                        .map((id: { customTitle: string }, i: number) => (
                         <span
                           key={i}
                           className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-muted text-foreground/80 flex items-center gap-1"

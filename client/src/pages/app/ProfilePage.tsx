@@ -614,7 +614,12 @@ export default function ProfilePage() {
                   {identities && identities.length > 0 ? (
                     <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
                       {identities
-                        .filter((id: any) => !profile?.headline || id.customTitle?.trim().toLowerCase() !== profile.headline.trim().toLowerCase())
+                        .filter((id: any, idx: number, arr: any[]) => {
+                          if (!id.customTitle?.trim()) return false
+                          const norm = id.customTitle.trim().toLowerCase()
+                          if (profile?.headline && norm === profile.headline.trim().toLowerCase()) return false
+                          return arr.findIndex((other: any) => other.customTitle?.trim().toLowerCase() === norm) === idx
+                        })
                         .map((id: any, idx: number) => (
                         <span
                           key={id._id || id.id || idx}
