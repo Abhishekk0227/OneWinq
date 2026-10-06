@@ -351,7 +351,7 @@ export default function SettingsPage() {
                   {theme === 'dark' && <span className="h-2 w-2 rounded-full bg-primary" />}
                 </div>
                 <div className="font-bold text-sm text-foreground">Dark</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Luxurious midnight obsidian theme</div>
+                <div className="text-xs text-muted-foreground mt-0.5">WhatsApp-inspired deep obsidian slate theme</div>
               </button>
 
               <button

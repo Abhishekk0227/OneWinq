@@ -69,65 +69,89 @@
   --radius-2xl: 1.5rem;  /* 24px */
 }
 
-/* Dark mode token overrides: Luxurious Midnight Imperial Purple */
+/* Dark mode token overrides: WhatsApp Official Dark Aesthetic */
 .dark {
-  --background: 270 24% 7%;      /* Deep obsidian plum #120B1C */
-  --foreground: 270 15% 98%;
+  /* WhatsApp Emerald Primary Scale */
+  --primary-50: 167 50% 95%;
+  --primary-100: 167 45% 88%;
+  --primary-200: 167 45% 76%;
+  --primary-300: 167 50% 62%;
+  --primary-400: 167 70% 45%;
+  --primary-500: 167 100% 33%;  /* WhatsApp #00A884 */
+  --primary-600: 167 100% 28%;  /* WhatsApp #008F70 */
+  --primary-700: 167 100% 22%;  /* WhatsApp #007058 */
+  --primary-800: 167 100% 16%;
+  --primary-900: 167 100% 10%;
 
-  --card: 270 20% 11%;          /* Rich amethyst slate #1D142B */
-  --card-foreground: 270 15% 98%;
-  --card-hover: 270 22% 15%;
+  /* WhatsApp Surfaces & Charcoal-Teal Obsidian Canvas */
+  --background: 202 32% 10%;      /* WhatsApp Main Canvas #111B21 */
+  --foreground: 200 15% 93%;      /* WhatsApp Primary Text #E9EDEF */
 
-  --popover: 270 20% 11%;
-  --popover-foreground: 270 15% 98%;
+  --card: 202 23% 16%;          /* WhatsApp Surface / Card / Bubble #202C33 */
+  --card-foreground: 200 15% 93%;
+  --card-hover: 202 22% 19%;     /* WhatsApp Hover #222E35 */
 
-  --primary: 270 72% 64%;        /* Glowing royal amethyst */
+  --popover: 200 23% 18%;       /* WhatsApp Context Popover #233138 */
+  --popover-foreground: 200 15% 93%;
+
+  --primary: 167 100% 33%;        /* WhatsApp Emerald-Teal #00A884 */
   --primary-foreground: 0 0% 100%;
-  --primary-hover: 270 76% 56%;
-  --primary-soft: 273 45% 18%;
-  --primary-muted: 273 40% 24%;
+  --primary-hover: 167 100% 28%;  /* #008F70 */
+  --primary-soft: 167 55% 12%;   /* #0C2E25 */
+  --primary-muted: 167 40% 18%;
 
-  --secondary: 270 15% 16%;
-  --secondary-foreground: 270 15% 98%;
+  --secondary: 202 23% 16%;      /* #202C33 */
+  --secondary-foreground: 200 15% 93%;
 
-  --muted: 270 15% 15%;
-  --muted-foreground: 270 12% 72%;
+  --muted: 202 23% 16%;          /* #202C33 */
+  --muted-foreground: 203 11% 58%; /* WhatsApp Muted Gray #8696A0 */
 
-  --accent: 273 45% 18%;
-  --accent-foreground: 270 72% 64%;
+  --accent: 167 55% 12%;
+  --accent-foreground: 167 100% 38%;
 
-  --destructive: 0 75% 55%;
+  --destructive: 0 75% 58%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 270 15% 22%;
-  --input: 270 15% 22%;
-  --ring: 270 72% 64%;
+  --border: 203 21% 17%;         /* WhatsApp Divider Border #222D34 */
+  --input: 202 23% 16%;          /* #202C33 */
+  --ring: 167 100% 33%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background: 270 24% 7%;
-    --foreground: 270 15% 98%;
-    --card: 270 20% 11%;
-    --card-foreground: 270 15% 98%;
-    --card-hover: 270 22% 15%;
-    --popover: 270 20% 11%;
-    --popover-foreground: 270 15% 98%;
-    --primary: 270 72% 64%;
+    --primary-50: 167 50% 95%;
+    --primary-100: 167 45% 88%;
+    --primary-200: 167 45% 76%;
+    --primary-300: 167 50% 62%;
+    --primary-400: 167 70% 45%;
+    --primary-500: 167 100% 33%;
+    --primary-600: 167 100% 28%;
+    --primary-700: 167 100% 22%;
+    --primary-800: 167 100% 16%;
+    --primary-900: 167 100% 10%;
+
+    --background: 202 32% 10%;
+    --foreground: 200 15% 93%;
+    --card: 202 23% 16%;
+    --card-foreground: 200 15% 93%;
+    --card-hover: 202 22% 19%;
+    --popover: 200 23% 18%;
+    --popover-foreground: 200 15% 93%;
+    --primary: 167 100% 33%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 270 76% 56%;
-    --primary-soft: 273 45% 18%;
-    --primary-muted: 273 40% 24%;
-    --secondary: 270 15% 16%;
-    --secondary-foreground: 270 15% 98%;
-    --muted: 270 15% 15%;
-    --muted-foreground: 270 12% 72%;
-    --accent: 273 45% 18%;
-    --accent-foreground: 270 72% 64%;
-    --destructive: 0 75% 55%;
+    --primary-hover: 167 100% 28%;
+    --primary-soft: 167 55% 12%;
+    --primary-muted: 167 40% 18%;
+    --secondary: 202 23% 16%;
+    --secondary-foreground: 200 15% 93%;
+    --muted: 202 23% 16%;
+    --muted-foreground: 203 11% 58%;
+    --accent: 167 55% 12%;
+    --accent-foreground: 167 100% 38%;
+    --destructive: 0 75% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 270 15% 22%;
-    --input: 270 15% 22%;
-    --ring: 270 72% 64%;
+    --border: 203 21% 17%;
+    --input: 202 23% 16%;
+    --ring: 167 100% 33%;
   }
 }

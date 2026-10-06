@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   X,
   LayoutDashboard,
-  Flame,
+  Home,
   Compass,
   UserCircle,
   LayoutTemplate,
@@ -115,7 +115,7 @@ export function MobileMenuDrawer() {
     {
       title: 'Workspace',
       items: [
-        { label: 'Home Feed', to: '/app', icon: Flame, end: true },
+        { label: 'Home Feed', to: '/app', icon: Home, end: true },
         { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
         { label: 'Discover People', to: '/app/network', icon: Compass },
         { label: 'My Profile', to: '/app/profile', icon: UserCircle },

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, UserCircle, Flame, Compass, Plus } from 'lucide-react'
+import { LayoutDashboard, UserCircle, Home, Compass, Plus } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils/cn'
 
@@ -21,7 +21,7 @@ export function MobileNav() {
           )
         }
       >
-        <Flame className="h-5 w-5 mb-0.5" />
+        <Home className="h-5 w-5 mb-0.5" />
         <span>Home</span>
       </NavLink>
 
