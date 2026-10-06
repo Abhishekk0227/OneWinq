@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils/cn'
+import { useTheme } from '@/app/providers/ThemeProvider'
 
 export interface BrandLogoProps {
   className?: string
@@ -25,6 +26,19 @@ export function BrandLogo({
   variant = 'auto',
 }: BrandLogoProps) {
   const [imageError, setImageError] = useState(false)
+  
+  let resolvedTheme: 'light' | 'dark' = 'light'
+  try {
+    const themeContext = useTheme()
+    resolvedTheme = themeContext.resolvedTheme
+  } catch {
+    // If rendered outside ThemeProvider (e.g. standalone test or error boundary)
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      resolvedTheme = 'dark'
+    }
+  }
+
+  const effectiveVariant = variant === 'auto' ? (resolvedTheme === 'dark' ? 'white' : 'dark') : variant
 
   if (collapsed) {
     return (
@@ -55,46 +69,21 @@ export function BrandLogo({
     >
       <div className="flex items-center">
         {!imageError ? (
-          <>
-            {variant === 'white' ? (
-              <img
-                src="/logo-white.png"
-                alt="OneWinq"
-                onError={() => setImageError(true)}
-                className={cn('h-7 sm:h-8 w-auto object-contain select-none', imgClassName)}
-              />
-            ) : variant === 'dark' ? (
-              <img
-                src="/logo.png"
-                alt="OneWinq"
-                onError={() => setImageError(true)}
-                className={cn('h-7 sm:h-8 w-auto object-contain select-none', imgClassName)}
-              />
-            ) : (
-              <>
-                {/* Light mode: crisp dark lettering + purple dot */}
-                <img
-                  src="/logo.png"
-                  alt="OneWinq"
-                  onError={() => setImageError(true)}
-                  className={cn(
-                    'h-7 sm:h-8 w-auto object-contain select-none block dark:hidden',
-                    imgClassName
-                  )}
-                />
-                {/* Dark mode: crisp white lettering + purple dot */}
-                <img
-                  src="/logo-white.png"
-                  alt="OneWinq"
-                  onError={() => setImageError(true)}
-                  className={cn(
-                    'h-7 sm:h-8 w-auto object-contain select-none hidden dark:block',
-                    imgClassName
-                  )}
-                />
-              </>
-            )}
-          </>
+          effectiveVariant === 'white' ? (
+            <img
+              src="/logo-white.png"
+              alt="OneWinq"
+              onError={() => setImageError(true)}
+              className={cn('h-7 sm:h-8 w-auto object-contain select-none', imgClassName)}
+            />
+          ) : (
+            <img
+              src="/logo.png"
+              alt="OneWinq"
+              onError={() => setImageError(true)}
+              className={cn('h-7 sm:h-8 w-auto object-contain select-none', imgClassName)}
+            />
+          )
         ) : (
           <span className="text-2xl font-black tracking-tight text-foreground lowercase flex items-center leading-none">
             one<span className="text-primary">winq</span>

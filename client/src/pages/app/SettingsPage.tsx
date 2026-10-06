@@ -23,11 +23,16 @@ import {
   Eye,
   Shield,
   PauseCircle,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react'
+import { useTheme } from '@/app/providers/ThemeProvider'
 
 export default function SettingsPage() {
   const queryClient = useQueryClient()
   const { user, setUser, logout } = useAuthStore()
+  const { theme, setTheme } = useTheme()
 
   // Username change state
   const [newUsername, setNewUsername] = React.useState(user?.username || '')
@@ -304,6 +309,67 @@ export default function SettingsPage() {
                 <span className="text-muted-foreground">Account Login Email</span>
                 <div className="text-sm font-bold text-foreground mt-0.5">{user?.email}</div>
               </div>
+            </div>
+          </div>
+
+          {/* Appearance & Theme Setting */}
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="pb-3 border-b border-border">
+              <h2 className="text-lg font-bold text-foreground">Appearance & Interface Theme</h2>
+              <p className="text-xs text-muted-foreground">Choose how OneWinq looks on this device</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  theme === 'light'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border bg-card hover:bg-muted/30'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Sun className={`h-5 w-5 ${theme === 'light' ? 'text-primary' : 'text-amber-500'}`} />
+                  {theme === 'light' && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <div className="font-bold text-sm text-foreground">Light</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Clean, crisp white interface</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  theme === 'dark'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border bg-card hover:bg-muted/30'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Moon className={`h-5 w-5 ${theme === 'dark' ? 'text-primary' : 'text-primary'}`} />
+                  {theme === 'dark' && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <div className="font-bold text-sm text-foreground">Dark</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Luxurious midnight obsidian theme</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  theme === 'system'
+                    ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                    : 'border-border bg-card hover:bg-muted/30'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Monitor className={`h-5 w-5 ${theme === 'system' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  {theme === 'system' && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </div>
+                <div className="font-bold text-sm text-foreground">System</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Sync with your device settings</div>
+              </button>
             </div>
           </div>
         </TabsContent>

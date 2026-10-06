@@ -11,9 +11,12 @@ import {
   Shield,
   HelpCircle,
   Plus,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { useTheme } from '@/app/providers/ThemeProvider'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
@@ -28,6 +31,7 @@ export function AppHeader() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { toggleSidebar, setMobileMenuOpen, openModal } = useUIStore()
+  const { theme, resolvedTheme, toggleTheme } = useTheme()
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
   const { data: unreadData } = useQuery({
@@ -155,6 +159,21 @@ export function AppHeader() {
           <span className="hidden sm:inline">Post</span>
         </button>
 
+        {/* Theme Toggle (Sun/Moon) */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all cursor-pointer"
+          aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        >
+          {resolvedTheme === 'dark' ? (
+            <Sun className="h-5 w-5 text-amber-400 hover:rotate-45 transition-transform" />
+          ) : (
+            <Moon className="h-5 w-5 hover:-rotate-12 transition-transform" />
+          )}
+        </button>
+
         {/* Notifications Icon with Unread Badge */}
         <Link
           to="/app/notifications"
@@ -256,6 +275,26 @@ export function AppHeader() {
                     <span>Admin Panel</span>
                   </Link>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleTheme()
+                  }}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    {resolvedTheme === 'dark' ? (
+                      <Sun className="h-4 w-4 text-amber-400" />
+                    ) : (
+                      <Moon className="h-4 w-4 text-primary" />
+                    )}
+                    <span>Appearance</span>
+                  </div>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-foreground/80 capitalize">
+                    {resolvedTheme === 'dark' ? 'Dark' : 'Light'}
+                  </span>
+                </button>
 
                 <div className="pt-1 mt-1 border-t border-border">
                   <button
