@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground break-words leading-tight">
                   Welcome back, {user?.displayName}
                 </h1>
-                {primaryIdentity && (
+                {primaryIdentity?.customTitle && (
                   <Badge variant="subtle" className="text-xs font-semibold py-0.5 px-2.5">
                     {primaryIdentity.customTitle}
                   </Badge>
@@ -214,7 +214,11 @@ export default function DashboardPage() {
               </div>
 
               <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 max-w-xl">
-                {profile?.headline || 'Manage your digital profile, network connections, and NFC smart cards.'}
+                {profile?.headline &&
+                (!primaryIdentity?.customTitle ||
+                  profile.headline.trim().toLowerCase() !== primaryIdentity.customTitle.trim().toLowerCase())
+                  ? profile.headline
+                  : 'Manage your digital profile, network connections, and NFC smart cards.'}
               </p>
 
               {/* Profile Link preview bar */}
