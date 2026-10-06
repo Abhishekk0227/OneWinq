@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useTheme } from '@/app/providers/ThemeProvider'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { profileApi } from '@/features/profile/api/profile.api'
@@ -153,20 +154,8 @@ export default function PublicProfilePage() {
   const [activeTab, setActiveTab] = React.useState<string>('home')
   const [isSectionsDrawerOpen, setIsSectionsDrawerOpen] = React.useState(false)
 
-  // Profile theme state (Light ☀️ / Dark 🌙)
-  const [profileTheme, setProfileTheme] = React.useState<'dark' | 'light'>(() => {
-    const saved = localStorage.getItem('onewinq-profile-theme')
-    if (saved === 'dark' || saved === 'light') return saved
-    return 'light'
-  })
-
-  const toggleTheme = () => {
-    setProfileTheme((prev) => {
-      const next = prev === 'light' ? 'dark' : 'light'
-      localStorage.setItem('onewinq-profile-theme', next)
-      return next
-    })
-  }
+  // Global Theme integration (Light / Dark)
+  const { resolvedTheme, toggleTheme } = useTheme()
 
   const {
     data,
@@ -289,15 +278,9 @@ export default function PublicProfilePage() {
   // If the owner has not activated a physical OneWinq NFC Card, show the reserved splash page
   if (isCardGated || hasActiveCard === false || !profile) {
     return (
-      <div
-        className={`min-h-screen transition-colors duration-300 pb-20 ${
-          profileTheme === 'dark'
-            ? 'dark bg-[#0a0512] text-zinc-100'
-            : 'bg-[#faf8fd] text-zinc-900'
-        }`}
-      >
+      <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-20">
         {/* Floating Top Banner */}
-        <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
+        <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
           <div className="container mx-auto flex max-w-4xl items-center justify-between gap-2">
             <BrandLogo to="/" imgClassName="h-6 sm:h-7" />
 
@@ -307,9 +290,9 @@ export default function PublicProfilePage() {
                 type="button"
                 onClick={toggleTheme}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer"
-                title={`Switch to ${profileTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
+                title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
               >
-                {profileTheme === 'dark' ? (
+                {resolvedTheme === 'dark' ? (
                   <>
                     <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                     <span className="hidden sm:inline">Light</span>
@@ -516,15 +499,9 @@ export default function PublicProfilePage() {
   ]
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 pb-24 ${
-        profileTheme === 'dark'
-          ? 'dark bg-[#0f091a] text-zinc-100'
-          : 'bg-[#faf8fd] text-zinc-900'
-      }`}
-    >
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-24">
       {/* Floating Top Banner / Navigation (Responsive & Tight Layout) */}
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-card/85 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
         <div className="container mx-auto flex max-w-4xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           <BrandLogo to="/" imgClassName="h-5 sm:h-6 shrink-0" />
 
@@ -534,10 +511,10 @@ export default function PublicProfilePage() {
               type="button"
               onClick={toggleTheme}
               className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer shrink-0"
-              title={`Switch to ${profileTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
+              title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
               aria-label="Toggle profile theme"
             >
-              {profileTheme === 'dark' ? (
+              {resolvedTheme === 'dark' ? (
                 <>
                   <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                   <span className="hidden sm:inline">Light</span>
@@ -919,7 +896,7 @@ export default function PublicProfilePage() {
 
         {/* Fixed Bottom Navigation Bar for Profile Sections */}
         {profileTabs.length > 1 && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0">
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
             {profileTabs.slice(0, 3).map((tab) => {
               const isActive = activeTab === tab.id
               return (

@@ -1407,7 +1407,7 @@ export default function ProfilePage() {
 
       {/* Fixed Bottom Navigation Bar for Profile Sections */}
       {profileTabs.length > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
           {profileTabs.slice(0, 3).map((tab) => {
             const isActive = activeTab === tab.id
             return (
