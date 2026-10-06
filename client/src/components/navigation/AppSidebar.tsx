@@ -13,7 +13,7 @@ import {
   Settings,
   ShieldAlert,
   ExternalLink,
-  Flame,
+  Home,
   LayoutTemplate,
   Plus,
   Wifi,
@@ -49,7 +49,7 @@ export function AppSidebar() {
   const activeCardCode = activeCard?.cardCode?.toLowerCase() || activeCard?.cardUid?.toLowerCase()
 
   const navItems = [
-    { label: 'Home Feed', to: '/app', icon: Flame, end: true },
+    { label: 'Home Feed', to: '/app', icon: Home, end: true },
     { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
     { label: 'Discover People', to: '/app/network', icon: Compass },
     { label: 'My Profile', to: '/app/profile', icon: UserCircle },
