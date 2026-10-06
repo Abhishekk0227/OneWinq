@@ -8,6 +8,7 @@ import { connectionsApi } from '@/features/connections/api/connections.api'
 import { analyticsApi } from '@/features/analytics/api/analytics.api'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
+import { discoveryApi } from '@/features/discovery/api/discovery.api'
 import { queryKeys } from '@/lib/query/queryKeys'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
@@ -36,6 +37,7 @@ import {
   Wifi,
   Edit3,
   LayoutTemplate,
+  MapPin,
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -93,6 +95,26 @@ export default function DashboardPage() {
     queryFn: () => profileApi.getRecommendations(),
   })
   const currentTemplate = recData?.data?.activeTemplate || (profileData?.data?.profile as any)?.templateId
+
+  // 8. Fetch Suggested People for Quick Discovery Widget
+  const { data: discoveryData } = useQuery({
+    queryKey: ['dashboard-discovery-suggestions'],
+    queryFn: () => discoveryApi.search({ limit: 6 }),
+    staleTime: 60_000,
+  })
+
+  // Mutation: Send Connection Request from Dashboard
+  const connectMutation = useMutation({
+    mutationFn: (targetUserId: string) => connectionsApi.sendRequest(targetUserId),
+    onSuccess: () => {
+      toast.success('Connection request sent!')
+      queryClient.invalidateQueries({ queryKey: ['dashboard-discovery-suggestions'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.connections.list() })
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || 'Failed to send connection request')
+    },
+  })
 
   // Mutation: Publish profile changes
   const publishMutation = useMutation({
@@ -184,6 +206,14 @@ export default function DashboardPage() {
     (weeklyAnalytics?.data as any)?.timeSeries ||
     (weeklyAnalytics?.data as any)?.timeline ||
     []
+
+  const suggestedPeople = ((discoveryData?.data?.users || discoveryData?.data?.results || []) as any[])
+    .filter((p: any) => {
+      const pid = p.id || p._id
+      const uid = (user as any)?._id || (user as any)?.id
+      return pid && uid && pid.toString() !== uid.toString()
+    })
+    .slice(0, 3)
 
 
   return (
@@ -497,6 +527,121 @@ export default function DashboardPage() {
             )}
           </div>
 
+          {/* Discover People Widget */}
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500">
+                  <Compass className="h-4 w-4" />
+                </div>
+                <h2 className="text-base font-bold text-foreground">
+                  Discover People
+                </h2>
+              </div>
+              <Link to="/app/network" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                <span>Explore All</span>
+                <Compass className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {suggestedPeople.length === 0 ? (
+              <div className="text-center py-6 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Explore professionals and builders across the OneWinq network.
+                </p>
+                <Link to="/app/network">
+                  <Button variant="subtle" size="sm" className="mt-1" leftIcon={<Compass className="h-3.5 w-3.5" />}>
+                    Open Discovery
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {suggestedPeople.map((person: any) => {
+                  const headline =
+                    person.headline?.trim() ||
+                    person.primaryProfession?.trim() ||
+                    person.professionTitle?.trim() ||
+                    person.identities?.[0]?.customTitle?.trim() ||
+                    ''
+                  const isConnected = person.connectionStatus === 'ACCEPTED'
+                  const isPending = person.connectionStatus === 'PENDING_SENT'
+                  const pId = person.id || person._id
+                  return (
+                    <div
+                      key={pId}
+                      className="p-4 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-3 hover:border-primary/40 transition-colors text-left"
+                    >
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar
+                            src={person.avatarUrl}
+                            fallback={person.displayName}
+                            alt={person.displayName}
+                            size="md"
+                            className="rounded-xl shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              to={`/u/${person.username}`}
+                              className="text-xs font-bold text-foreground hover:text-primary transition-colors truncate block"
+                            >
+                              {person.displayName}
+                            </Link>
+                            <span className="text-[11px] font-mono text-muted-foreground truncate block">
+                              @{person.username}
+                            </span>
+                          </div>
+                        </div>
+
+                        {headline && (
+                          <p className="text-[11px] text-primary font-medium line-clamp-1">
+                            {headline}
+                          </p>
+                        )}
+
+                        {person.location && (person.location.city || person.location.country) && (
+                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            <span className="truncate">
+                              {[person.location.city, person.location.country].filter(Boolean).join(', ')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-2 border-t border-border/50 flex items-center gap-1.5">
+                        <Link to={`/u/${person.username}`} className="flex-1">
+                          <Button size="sm" variant="ghost" className="w-full text-[11px] h-8 px-2">
+                            View
+                          </Button>
+                        </Link>
+                        {isConnected ? (
+                          <Badge variant="subtle" className="text-[10px] px-2 py-1">
+                            Connected
+                          </Badge>
+                        ) : isPending ? (
+                          <Badge variant="warning" className="text-[10px] px-2 py-1">
+                            Sent
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="flex-1 text-[11px] h-8 px-2 font-semibold"
+                            onClick={() => connectMutation.mutate(pId)}
+                            isLoading={connectMutation.isPending && connectMutation.variables === pId}
+                          >
+                            Connect
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {/* User's Recent Community Posts & Discussions */}
           <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-border flex-wrap">
@@ -570,10 +715,118 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* 7-Day Traffic Sparkline Card */}
+          {timeSeries.length > 0 && (
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                    7-Day Impressions
+                  </h2>
+                </div>
+                <Link to="/app/analytics" className="text-xs font-semibold text-primary hover:underline">
+                  Full Analytics →
+                </Link>
+              </div>
+              <div className="flex items-end justify-between gap-1.5 h-16 pt-2">
+                {timeSeries.slice(-7).map((d: any, idx: number) => {
+                  const maxViews = Math.max(...timeSeries.map((item: any) => item.views || 1), 1)
+                  const heightPercent = Math.max(15, Math.round(((d.views || 0) / maxViews) * 100))
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
+                      <div
+                        className="w-full rounded-md bg-primary/20 group-hover:bg-primary transition-all duration-300"
+                        style={{ height: `${heightPercent}%` }}
+                        title={`${d.views || 0} views on ${d.date}`}
+                      />
+                      <span className="text-[9px] text-muted-foreground">
+                        {new Date(d.date).toLocaleDateString([], { weekday: 'narrow' })}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Column (4 cols): Identity Health & NFC Card Widget */}
-        <div className="lg:col-span-4 space-y-6">
+        {/* Right Column (4 cols): Identity Health & NFC Card Widget — Sticky on Desktop */}
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start">
+          {/* Linked NFC Smart Card Widget */}
+          <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-border">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <CreditCard className="h-3.5 w-3.5 text-primary" />
+                <span>Smart Card Pass</span>
+              </h2>
+              <Link to="/app/cards" className="text-xs font-semibold text-primary hover:underline">
+                Manage
+              </Link>
+            </div>
+
+            {primaryCard ? (
+              <Link to="/app/cards" className="block group">
+                <div className="relative rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-5 border border-zinc-800 shadow-md flex flex-col justify-between min-h-[175px] overflow-hidden transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-lg">
+                  {/* Subtle Ambient Glow & Radial Grid */}
+                  <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                  <div
+                    className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                      backgroundSize: '16px 16px',
+                    }}
+                  />
+
+                  {/* Top Header */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
+                      OneWinq Pass
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <Wifi className="h-4 w-4 text-emerald-400" />
+                    </div>
+                  </div>
+
+                  {/* Middle Identity */}
+                  <div className="my-auto py-2 relative z-10 space-y-0.5">
+                    <div className="font-extrabold text-base sm:text-lg tracking-tight text-white truncate">
+                      {user?.displayName}
+                    </div>
+                    <div className="text-xs text-zinc-400 font-mono truncate">
+                      @{user?.username}
+                    </div>
+                  </div>
+
+                  {/* Bottom Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400 relative z-10">
+                    <span className="truncate max-w-[150px]">
+                      Card: {primaryCard.label || 'Primary Card'}
+                    </span>
+                    <span className="font-bold text-emerald-400 shrink-0">
+                      {primaryCard.tapCount || 0} Taps
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5 text-center space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  No NFC Smart Card linked yet. Tap phones in the real world to instantly share your OneWinq credentials.
+                </p>
+                <Link to="/app/orders">
+                  <Button size="sm" variant="subtle" className="w-full text-xs font-bold" leftIcon={<Plus className="h-3.5 w-3.5" />}>
+                    Order Smart Card (from ₹500)
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+
           {/* Identity Completeness Widget */}
           <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border">
@@ -652,109 +905,6 @@ export default function DashboardPage() {
               </Button>
             </Link>
           </div>
-
-          {/* Linked NFC Smart Card Widget */}
-          <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-border">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <CreditCard className="h-3.5 w-3.5 text-primary" />
-                <span>Smart Card Pass</span>
-              </h2>
-              <Link to="/app/cards" className="text-xs font-semibold text-primary hover:underline">
-                Manage
-              </Link>
-            </div>
-
-            {primaryCard ? (
-              <Link to="/app/cards" className="block group">
-                <div className="relative rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-5 border border-zinc-800 shadow-md flex flex-col justify-between min-h-[175px] overflow-hidden transition-all duration-300 group-hover:border-primary/40 group-hover:shadow-lg">
-                  {/* Subtle Ambient Glow & Radial Grid */}
-                  <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-                  <div
-                    className="absolute inset-0 opacity-10 pointer-events-none"
-                    style={{
-                      backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                      backgroundSize: '16px 16px',
-                    }}
-                  />
-
-                  {/* Top Header */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <span className="text-[11px] font-bold tracking-widest uppercase text-zinc-400">
-                      OneWinq Pass
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <Wifi className="h-4 w-4 text-emerald-400" />
-                    </div>
-                  </div>
-
-                  {/* Middle Identity */}
-                  <div className="my-auto py-2 relative z-10 space-y-0.5">
-                    <div className="font-extrabold text-base sm:text-lg tracking-tight text-white truncate">
-                      {user?.displayName}
-                    </div>
-                    <div className="text-xs text-zinc-400 font-mono truncate">
-                      @{user?.username}
-                    </div>
-                  </div>
-
-                  {/* Bottom Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-400 relative z-10">
-                    <span className="truncate max-w-[150px]">
-                      Card: {primaryCard.label || 'Primary Card'}
-                    </span>
-                    <span className="font-bold text-emerald-400 shrink-0">
-                      {primaryCard.tapCount || 0} Taps
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5 text-center space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  No NFC Smart Card linked yet. Tap phones in the real world to instantly share your OneWinq credentials.
-                </p>
-                <Link to="/app/orders">
-                  <Button size="sm" variant="subtle" className="w-full text-xs font-bold" leftIcon={<Plus className="h-3.5 w-3.5" />}>
-                    Order Smart Card (from ₹500)
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* 7-Day Traffic Sparkline Card */}
-          {timeSeries.length > 0 && (
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                  7-Day Impressions
-                </h2>
-                <Link to="/app/analytics" className="text-xs font-semibold text-primary hover:underline">
-                  Full Analytics →
-                </Link>
-              </div>
-              <div className="flex items-end justify-between gap-1.5 h-16 pt-2">
-                {timeSeries.slice(-7).map((d: any, idx: number) => {
-                  const maxViews = Math.max(...timeSeries.map((item: any) => item.views || 1), 1)
-                  const heightPercent = Math.max(15, Math.round(((d.views || 0) / maxViews) * 100))
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
-                      <div
-                        className="w-full rounded-md bg-primary/20 group-hover:bg-primary transition-all duration-300"
-                        style={{ height: `${heightPercent}%` }}
-                        title={`${d.views || 0} views on ${d.date}`}
-                      />
-                      <span className="text-[9px] text-muted-foreground">
-                        {new Date(d.date).toLocaleDateString([], { weekday: 'narrow' })}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

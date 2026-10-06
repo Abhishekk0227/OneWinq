@@ -391,12 +391,21 @@ export async function getConnections(userId, { cursor, limit = 20 }) {
 
   const [users, profiles, identities] = await Promise.all([
     User.find({ _id: { $in: otherUserIds } }).select('displayName username accountState').lean(),
-    Profile.find({ userId: { $in: otherUserIds } }).select('userId avatarUrl headline location').lean(),
+    Profile.find({ userId: { $in: otherUserIds } })
+      .sort({ isActive: -1, updatedAt: -1 })
+      .select('userId avatarUrl headline professionTitle location publishedData isActive')
+      .lean(),
     ProfessionalIdentity.find({ userId: { $in: otherUserIds }, isPrimary: true }).lean(),
   ]);
 
   const userMap = new Map(users.map((u) => [u._id.toString(), u]));
-  const profileMap = new Map(profiles.map((p) => [p.userId.toString(), p]));
+  const profileMap = new Map();
+  for (const p of profiles) {
+    const uStr = p.userId.toString();
+    if (!profileMap.has(uStr) || (!profileMap.get(uStr).isActive && p.isActive)) {
+      profileMap.set(uStr, p);
+    }
+  }
   const identityMap = new Map(identities.map((i) => [i.userId.toString(), i]));
 
   const connections = items.map((r) => {
@@ -404,6 +413,14 @@ export async function getConnections(userId, { cursor, limit = 20 }) {
     const u = userMap.get(otherId) || {};
     const p = profileMap.get(otherId) || {};
     const idn = identityMap.get(otherId) || {};
+
+    const resolvedHeadline =
+      p.headline ||
+      p.professionTitle ||
+      p.publishedData?.headline ||
+      p.publishedData?.professionTitle ||
+      idn.customTitle ||
+      '';
 
     return {
       id: r._id.toString(),
@@ -415,9 +432,10 @@ export async function getConnections(userId, { cursor, limit = 20 }) {
         _id: otherId,
         username: u.username || 'User',
         displayName: u.displayName || u.username || 'User',
-        avatarUrl: p.avatarUrl || null,
-        headline: p.headline || '',
-        primaryProfession: idn.customTitle || null,
+        avatarUrl: p.avatarUrl || p.publishedData?.avatarUrl || null,
+        headline: resolvedHeadline,
+        primaryProfession: idn.customTitle || (resolvedHeadline || null),
+        location: p.location || p.publishedData?.location || null,
       },
     };
   });
@@ -466,12 +484,21 @@ export async function getPendingRequests(userId, { direction = 'incoming', curso
 
   const [users, profiles, identities] = await Promise.all([
     User.find({ _id: { $in: otherUserIds } }).select('displayName username').lean(),
-    Profile.find({ userId: { $in: otherUserIds } }).select('userId avatarUrl headline').lean(),
+    Profile.find({ userId: { $in: otherUserIds } })
+      .sort({ isActive: -1, updatedAt: -1 })
+      .select('userId avatarUrl headline professionTitle location publishedData isActive')
+      .lean(),
     ProfessionalIdentity.find({ userId: { $in: otherUserIds }, isPrimary: true }).lean(),
   ]);
 
   const userMap = new Map(users.map((u) => [u._id.toString(), u]));
-  const profileMap = new Map(profiles.map((p) => [p.userId.toString(), p]));
+  const profileMap = new Map();
+  for (const p of profiles) {
+    const uStr = p.userId.toString();
+    if (!profileMap.has(uStr) || (!profileMap.get(uStr).isActive && p.isActive)) {
+      profileMap.set(uStr, p);
+    }
+  }
   const identityMap = new Map(identities.map((i) => [i.userId.toString(), i]));
 
   const requests = docs.map((r) => {
@@ -480,14 +507,23 @@ export async function getPendingRequests(userId, { direction = 'incoming', curso
     const p = profileMap.get(otherId) || {};
     const idn = identityMap.get(otherId) || {};
 
+    const resolvedHeadline =
+      p.headline ||
+      p.professionTitle ||
+      p.publishedData?.headline ||
+      p.publishedData?.professionTitle ||
+      idn.customTitle ||
+      '';
+
     const userSummary = {
       id: otherId,
       _id: otherId,
       username: u.username || 'User',
       displayName: u.displayName || u.username || 'User',
-      avatarUrl: p.avatarUrl || null,
-      headline: p.headline || '',
-      primaryProfession: idn.customTitle || null,
+      avatarUrl: p.avatarUrl || p.publishedData?.avatarUrl || null,
+      headline: resolvedHeadline,
+      primaryProfession: idn.customTitle || (resolvedHeadline || null),
+      location: p.location || p.publishedData?.location || null,
     };
 
     return {
