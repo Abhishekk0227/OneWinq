@@ -7,7 +7,7 @@ import { CreatePostModal } from '@/components/posts/CreatePostModal'
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen flex bg-muted/30 w-full overflow-x-clip">
+    <div className="min-h-screen flex bg-background text-foreground w-full overflow-x-clip">
       {/* Sidebar for Desktop */}
       <AppSidebar />
 
