@@ -69,20 +69,8 @@
   --radius-2xl: 1.5rem;  /* 24px */
 }
 
-/* Dark mode token overrides: WhatsApp Official Dark Aesthetic */
+/* Dark mode token overrides: WhatsApp Canvas & Card Surfaces with OneWinq Purple Brand */
 .dark {
-  /* WhatsApp Emerald Primary Scale */
-  --primary-50: 167 50% 95%;
-  --primary-100: 167 45% 88%;
-  --primary-200: 167 45% 76%;
-  --primary-300: 167 50% 62%;
-  --primary-400: 167 70% 45%;
-  --primary-500: 167 100% 33%;  /* WhatsApp #00A884 */
-  --primary-600: 167 100% 28%;  /* WhatsApp #008F70 */
-  --primary-700: 167 100% 22%;  /* WhatsApp #007058 */
-  --primary-800: 167 100% 16%;
-  --primary-900: 167 100% 10%;
-
   /* WhatsApp Surfaces & Charcoal-Teal Obsidian Canvas */
   --background: 202 32% 10%;      /* WhatsApp Main Canvas #111B21 */
   --foreground: 200 15% 93%;      /* WhatsApp Primary Text #E9EDEF */
@@ -94,11 +82,12 @@
   --popover: 200 23% 18%;       /* WhatsApp Context Popover #233138 */
   --popover-foreground: 200 15% 93%;
 
-  --primary: 167 100% 33%;        /* WhatsApp Emerald-Teal #00A884 */
+  /* OneWinq Brand Royal Purple */
+  --primary: 270 72% 64%;        /* OneWinq Brand Purple #9353ED */
   --primary-foreground: 0 0% 100%;
-  --primary-hover: 167 100% 28%;  /* #008F70 */
-  --primary-soft: 167 55% 12%;   /* #0C2E25 */
-  --primary-muted: 167 40% 18%;
+  --primary-hover: 270 76% 56%;
+  --primary-soft: 270 50% 18%;
+  --primary-muted: 270 45% 24%;
 
   --secondary: 202 23% 16%;      /* #202C33 */
   --secondary-foreground: 200 15% 93%;
@@ -106,30 +95,19 @@
   --muted: 202 23% 16%;          /* #202C33 */
   --muted-foreground: 203 11% 58%; /* WhatsApp Muted Gray #8696A0 */
 
-  --accent: 167 55% 12%;
-  --accent-foreground: 167 100% 38%;
+  --accent: 270 50% 18%;
+  --accent-foreground: 270 72% 64%;
 
   --destructive: 0 75% 58%;
   --destructive-foreground: 0 0% 100%;
 
   --border: 203 21% 17%;         /* WhatsApp Divider Border #222D34 */
   --input: 202 23% 16%;          /* #202C33 */
-  --ring: 167 100% 33%;
+  --ring: 270 72% 64%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --primary-50: 167 50% 95%;
-    --primary-100: 167 45% 88%;
-    --primary-200: 167 45% 76%;
-    --primary-300: 167 50% 62%;
-    --primary-400: 167 70% 45%;
-    --primary-500: 167 100% 33%;
-    --primary-600: 167 100% 28%;
-    --primary-700: 167 100% 22%;
-    --primary-800: 167 100% 16%;
-    --primary-900: 167 100% 10%;
-
     --background: 202 32% 10%;
     --foreground: 200 15% 93%;
     --card: 202 23% 16%;
@@ -137,21 +115,21 @@
     --card-hover: 202 22% 19%;
     --popover: 200 23% 18%;
     --popover-foreground: 200 15% 93%;
-    --primary: 167 100% 33%;
+    --primary: 270 72% 64%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 167 100% 28%;
-    --primary-soft: 167 55% 12%;
-    --primary-muted: 167 40% 18%;
+    --primary-hover: 270 76% 56%;
+    --primary-soft: 270 50% 18%;
+    --primary-muted: 270 45% 24%;
     --secondary: 202 23% 16%;
     --secondary-foreground: 200 15% 93%;
     --muted: 202 23% 16%;
     --muted-foreground: 203 11% 58%;
-    --accent: 167 55% 12%;
-    --accent-foreground: 167 100% 38%;
+    --accent: 270 50% 18%;
+    --accent-foreground: 270 72% 64%;
     --destructive: 0 75% 58%;
     --destructive-foreground: 0 0% 100%;
     --border: 203 21% 17%;
     --input: 202 23% 16%;
-    --ring: 167 100% 33%;
+    --ring: 270 72% 64%;
   }
 }
