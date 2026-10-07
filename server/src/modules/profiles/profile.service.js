@@ -113,7 +113,9 @@ export async function getOrCreateProfile(userId, personaId = null) {
     profile.publishedData = buildSnapshotFromProfile(profile);
     profile.publishedAt = profile.publishedAt || new Date();
     profile.state = PROFILE_STATE.PUBLISHED;
-    await profile.save();
+    if (typeof profile.save === 'function') {
+      await profile.save();
+    }
   }
   return profile;
 }

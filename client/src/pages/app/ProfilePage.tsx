@@ -48,6 +48,7 @@ import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
+import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 
 function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
@@ -278,12 +279,13 @@ export default function ProfilePage() {
   const skills = profile?.skills || profile?.sections?.skills || []
   const awards = profile?.awards || profile?.sections?.awards || []
   const publications = profile?.publications || profile?.sections?.publications || []
+  const mediaGallery = profile?.mediaGallery || profile?.sections?.mediaGallery || []
   const customSections = profile?.customSections || []
 
   const hasExperience = experiences.length > 0
   const hasEducation = education.length > 0
   const hasPortfolio = projects.length > 0 || services.length > 0 || organizations.length > 0
-  const hasMedia = certifications.length > 0 || skills.length > 0 || awards.length > 0 || publications.length > 0
+  const hasMedia = mediaGallery.length > 0 || certifications.length > 0 || skills.length > 0 || awards.length > 0 || publications.length > 0
   const hasCustom = customSections.length > 0
   const isPrivateMode = currentMode === VISIBILITY_MODE.PRIVATE
 
@@ -296,12 +298,12 @@ export default function ProfilePage() {
       ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
       ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
       ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Briefcase className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
-      ...(hasMedia ? [{ id: 'media', label: 'Credentials', icon: <Award className="h-4 w-4" />, count: certifications.length + skills.length + awards.length + publications.length }] : []),
+      ...(hasMedia ? [{ id: 'media', label: 'Media & Credentials', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + certifications.length + skills.length + awards.length + publications.length }] : []),
       { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
       ...(isPrivateMode ? [{ id: 'vault', label: 'Private Vault', icon: <Lock className="h-4 w-4" />, count: privateDocuments.length }] : []),
       ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
-  }, [profile, hasExperience, hasEducation, hasPortfolio, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
+  }, [profile, hasExperience, hasEducation, hasPortfolio, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
 
   if (isLoading) {
     return <LoadingScreen message="Loading your identity..." />
@@ -1101,31 +1103,55 @@ export default function ProfilePage() {
                         proj.startDate,
                         proj.endDate
                       )
+                      const projectImg = proj.imageUrl || (proj.mediaUrls && proj.mediaUrls[0])
                       return (
-                        <div key={proj.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="font-semibold text-xs text-foreground">{proj.title}</div>
-                            <div className="flex items-center gap-2">
-                              {dateStr && (
-                                <span className="text-[10px] font-mono text-muted-foreground bg-muted/70 px-1.5 py-0.2 rounded whitespace-nowrap">
-                                  {dateStr}
-                                </span>
-                              )}
+                        <div key={proj.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2 flex flex-col justify-between">
+                          <div>
+                            {projectImg && (
+                              <div className="w-full aspect-[16/9] max-h-40 rounded-lg overflow-hidden bg-muted/40 mb-2 border border-border/60">
+                                <img
+                                  src={projectImg}
+                                  alt={proj.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="font-semibold text-xs sm:text-sm text-foreground">{proj.title}</div>
                               {proj.url && (
                                 <a
                                   href={proj.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-primary hover:underline text-[11px] flex items-center gap-1"
+                                  className="text-primary hover:underline text-[11px] flex items-center gap-1 shrink-0"
                                 >
                                   <span>Link</span>
                                   <ExternalLink className="h-2.5 w-2.5" />
                                 </a>
                               )}
                             </div>
+                            {dateStr && (
+                              <span className="text-[10px] font-mono text-muted-foreground block mt-0.5">
+                                {dateStr}
+                              </span>
+                            )}
+                            {proj.description && (
+                              <p className="text-[11px] text-muted-foreground pt-1 line-clamp-3 leading-relaxed">{proj.description}</p>
+                            )}
                           </div>
-                          {proj.description && (
-                            <p className="text-[11px] text-muted-foreground pt-0.5 line-clamp-2">{proj.description}</p>
+                          {proj.url && (
+                            <div className="pt-2 mt-1 border-t border-border/40 flex items-center justify-end">
+                              <a
+                                href={proj.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                              >
+                                <span>View Project</span>
+                                <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            </div>
                           )}
                         </div>
                       )
@@ -1166,6 +1192,20 @@ export default function ProfilePage() {
           {/* DEDICATED TAB: Credentials & Media */}
           {activeTab === 'media' && (
             <div className="space-y-4">
+              {mediaGallery.length > 0 && (
+                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                  <div className="pb-2 border-b border-border min-w-0">
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Media & Channels</h3>
+                    <p className="text-[11px] text-muted-foreground">Featured videos, channels, and broadcasts</p>
+                  </div>
+                  <div className="space-y-4 pt-1 min-w-0">
+                    {mediaGallery.map((media: any, idx: number) => (
+                      <MediaVideoPostCard key={media.id || idx} media={media} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {certifications.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
                   <div className="pb-2 border-b border-border min-w-0">
