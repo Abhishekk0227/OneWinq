@@ -6,7 +6,9 @@ import { getBlockedUserIds, getConnectionStatus } from '../connections/connectio
 import { Connection, getCanonicalUserPair } from '../connections/connection.model.js';
 import { filterProfileByVisibility } from '../profiles/visibilityResolver.js';
 import { filterToCardActive } from '../cards/cardGate.js';
+import { getOrCreateProfile } from '../profiles/profile.service.js';
 import { ACCOUNT_STATE, PROFILE_STATE } from '../../config/constants.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Search & Discovery Service.
@@ -112,6 +114,7 @@ export async function searchDiscovery(
   const [profiles, identities] = await Promise.all([
     Profile.find(profileFilter)
       .sort({ isActive: -1, updatedAt: -1 })
+      .populate('templateId')
       .lean(),
     ProfessionalIdentity.find({ userId: { $in: candidateUserIds } })
       .sort({ isPrimary: -1, displayOrder: 1 })
@@ -133,6 +136,30 @@ export async function searchDiscovery(
         if (!existingHasData && pHasData) {
           profileMap.set(uStr, p);
         }
+      }
+    }
+  }
+
+  // Ensure every candidate user has a profile initialized (auto-provision default profile if missing)
+  for (const user of candidateUsers) {
+    const uStr = user._id.toString();
+    if (!profileMap.has(uStr)) {
+      try {
+        const newProf = await getOrCreateProfile(user._id);
+        if (newProf) {
+          const leanProf = typeof newProf.toObject === 'function' ? newProf.toObject() : newProf;
+          profileMap.set(uStr, leanProf);
+        }
+      } catch (err) {
+        logger.warn('Failed auto-provisioning profile in discovery', { userId: uStr, error: err?.message });
+        profileMap.set(uStr, {
+          userId: user._id,
+          personaName: 'Basic Universal Template',
+          professionTitle: 'Basic Universal Template',
+          templateSlug: 'professional',
+          headline: '',
+          location: {},
+        });
       }
     }
   }
@@ -193,6 +220,18 @@ export async function searchDiscovery(
     const skillList = rawSkills.slice(0, 5).map((s) => (typeof s === 'string' ? { name: s } : { name: s.name || '' }));
     const topSkillNames = skillList.map((s) => s.name).filter(Boolean);
 
+    // Robust template name resolution (e.g. 'Basic Universal Template', 'Founder', 'Engineer')
+    const rawTemplateName =
+      profile?.templateId?.name ||
+      (profile?.templateSlug && profile.templateSlug !== 'professional'
+        ? profile.templateSlug.charAt(0).toUpperCase() + profile.templateSlug.slice(1)
+        : null) ||
+      (profile?.personaName && profile.personaName !== 'Primary Profile' && profile.personaName !== 'Profile'
+        ? profile.personaName
+        : null) ||
+      'Basic Universal Template';
+    const resolvedTemplateName = rawTemplateName.trim();
+
     // Robust headline / profession resolution
     const resolvedHeadline =
       (filteredProfile.headline && filteredProfile.headline.trim()) ||
@@ -202,22 +241,36 @@ export async function searchDiscovery(
       (profile?.professionTitle && profile.professionTitle.trim()) ||
       (profile?.publishedData?.headline && profile.publishedData.headline.trim()) ||
       (profile?.publishedData?.professionTitle && profile.publishedData.professionTitle.trim()) ||
-      (profile?.modeData?.PUBLIC?.headline && profile.modeData.PUBLIC.headline.trim()) ||
-      (profile?.modeData?.PROFESSIONAL?.headline && profile.modeData.PROFESSIONAL.headline.trim()) ||
-      (userIdentities[0] && userIdentities[0].customTitle && userIdentities[0].customTitle.trim()) ||
-      '';
+      (profile?.personaName && profile.personaName !== 'Primary Profile' && profile.personaName !== 'Profile' && profile.personaName.trim()) ||
+      (profile?.templateId?.name && profile.templateId.name.trim()) ||
+      resolvedTemplateName ||
+      'Basic Universal Template';
 
-    // Robust location resolution
+    // Robust location resolution (support object and string representations across all persona stores)
     const candidateLocs = [
       filteredProfile.location,
       profile?.location,
       profile?.publishedData?.location,
       profile?.modeData?.PUBLIC?.location,
       profile?.modeData?.PROFESSIONAL?.location,
+      profile?.sections?.about?.location,
+      profile?.contact?.address,
+      profile?.sections?.contact?.address,
     ];
     let resolvedLocation = null;
     for (const cand of candidateLocs) {
-      if (cand && (cand.city || cand.state || cand.country)) {
+      if (!cand) continue;
+      if (typeof cand === 'string' && cand.trim()) {
+        const parts = cand.split(',').map((p) => p.trim()).filter(Boolean);
+        resolvedLocation = {
+          city: parts[0] || cand.trim(),
+          state: parts.length > 2 ? parts[1] : '',
+          country: parts.length > 1 ? parts[parts.length - 1] : '',
+          isRemote: cand.toLowerCase().includes('remote'),
+        };
+        break;
+      }
+      if (typeof cand === 'object' && (cand.city || cand.state || cand.country)) {
         resolvedLocation = {
           city: cand.city || '',
           state: cand.state || '',
@@ -237,6 +290,8 @@ export async function searchDiscovery(
       primaryProfession: primaryIdn ? primaryIdn.customTitle : (resolvedHeadline || null),
       otherProfessions: otherIdns.map((i) => i.customTitle),
       identities: userIdentities,
+      templateName: resolvedTemplateName,
+      templateSlug: profile?.templateSlug || profile?.templateId?.slug || 'professional',
       skills: skillList,
       topSkills: topSkillNames,
       location: resolvedLocation,

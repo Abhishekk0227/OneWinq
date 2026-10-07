@@ -65,9 +65,11 @@ export interface DiscoveryUserCard {
   primaryProfession?: string | null
   otherProfessions?: string[]
   identities?: Array<{ customTitle: string }>
+  templateName?: string
+  templateSlug?: string
   skills?: Array<{ name: string }>
   topSkills?: string[]
-  location?: { city?: string; country?: string; isRemote?: boolean } | null
+  location?: { city?: string; state?: string; country?: string; isRemote?: boolean } | string | null
   connectionState?: ConnectionState
   connectionStatus?: string
   connectionId?: string | null

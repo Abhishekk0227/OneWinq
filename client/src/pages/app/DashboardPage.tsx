@@ -561,9 +561,10 @@ export default function DashboardPage() {
                   const headline =
                     person.headline?.trim() ||
                     person.primaryProfession?.trim() ||
+                    person.templateName?.trim() ||
                     person.professionTitle?.trim() ||
                     person.identities?.[0]?.customTitle?.trim() ||
-                    ''
+                    'Basic Universal Template'
                   const isConnected = person.connectionStatus === 'ACCEPTED'
                   const isPending = person.connectionStatus === 'PENDING_SENT'
                   const pId = person.id || person._id
@@ -600,14 +601,18 @@ export default function DashboardPage() {
                           </p>
                         )}
 
-                        {person.location && (person.location.city || person.location.country) && (
-                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
-                            <MapPin className="h-3 w-3 shrink-0" />
-                            <span className="truncate">
-                              {[person.location.city, person.location.country].filter(Boolean).join(', ')}
-                            </span>
-                          </div>
-                        )}
+                        {person.location && (() => {
+                          const locText = typeof person.location === 'string'
+                            ? person.location.trim()
+                            : [person.location.city, person.location.state, person.location.country].filter(Boolean).join(', ')
+                          if (!locText) return null
+                          return (
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
+                              <MapPin className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{locText}</span>
+                            </div>
+                          )
+                        })()}
                       </div>
 
                       <div className="pt-2 border-t border-border/50 flex items-center gap-1.5">
