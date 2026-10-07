@@ -37,8 +37,6 @@ import {
   ChevronDown,
   Flame,
   Home,
-  ArrowLeft,
-  ChevronRight,
   Menu,
   Code,
   Video,
@@ -405,35 +403,6 @@ export default function ProfilePage() {
 
         {/* Right Main Content Canvas */}
         <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-          {/* Dedicated Header for Non-Home Tabs (Responsive & Compact) */}
-          {activeTab !== 'home' && (
-            <div className="rounded-3xl border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 min-w-0 max-w-full overflow-hidden">
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('home')}
-                  className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
-                  title="Back to Profile Home"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate">
-                    {profileTabs.find((t) => t.id === activeTab)?.label}
-                  </h1>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('home')}
-                className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 self-start xs:self-auto"
-              >
-                <span>Profile Home</span>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
@@ -942,14 +911,13 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {experiences.length > 0 ? (
                 <div className="p-4 sm:p-6 rounded-2xl border border-border bg-card shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Work Experience</h3>
                   </div>
-                  <div className="relative pl-3 space-y-0 min-w-0">
+                  <div className="relative pl-0.5 space-y-0 min-w-0">
                     {/* Vertical timeline line */}
                     {experiences.length > 1 && (
-                      <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary/60 via-border to-border/30" />
+                      <div className="absolute left-[5px] top-2.5 bottom-2.5 w-0.5 bg-gradient-to-b from-primary/60 via-border to-border/30" />
                     )}
 
                     {experiences.map((exp: any, idx: number) => {
@@ -965,14 +933,12 @@ export default function ProfilePage() {
                       return (
                         <div key={exp.id || idx} className="relative flex gap-3 pb-5 last:pb-0 min-w-0 max-w-full">
                           {/* Timeline dot */}
-                          <div className="relative z-10 shrink-0">
-                            <div className={`h-[30px] w-[30px] rounded-xl flex items-center justify-center shadow-sm border-2 ${
+                          <div className="relative z-10 shrink-0 pt-1">
+                            <div className={`h-2.5 w-2.5 rounded-full ${
                               exp.current
-                                ? 'bg-primary border-primary text-white'
-                                : 'bg-card border-primary/40 text-primary'
-                            }`}>
-                              <Briefcase className="h-3.5 w-3.5" />
-                            </div>
+                                ? 'bg-primary ring-4 ring-primary/20'
+                                : 'bg-card border-2 border-muted-foreground/40'
+                            }`} />
                           </div>
                           {/* Content */}
                           <div className="flex-1 min-w-0 pt-0.5">
@@ -1025,8 +991,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {education.length > 0 ? (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Education & Academics</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1076,8 +1041,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {organizations.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Ventures & Organizations</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1123,8 +1087,7 @@ export default function ProfilePage() {
 
               {projects.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Featured Projects</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1173,8 +1136,7 @@ export default function ProfilePage() {
 
               {services.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Services Provided</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1206,8 +1168,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {certifications.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Certifications</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1232,8 +1193,7 @@ export default function ProfilePage() {
 
               {skills.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Verified Skills</h3>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -1248,8 +1208,7 @@ export default function ProfilePage() {
 
               {awards.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Awards & Honors</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1275,8 +1234,7 @@ export default function ProfilePage() {
 
               {publications.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                  <div className="pb-2 border-b border-border min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground">Publications</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
