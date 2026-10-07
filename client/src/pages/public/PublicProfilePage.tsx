@@ -52,7 +52,6 @@ import {
   User,
   Layers,
   Home,
-  ArrowLeft,
   ChevronRight,
   Menu,
   Code,
@@ -742,35 +741,6 @@ export default function PublicProfilePage() {
 
           {/* Right Main Content Canvas */}
           <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-            {/* Dedicated Header for Non-Home Tabs (Responsive & Compact) */}
-            {activeTab !== 'home' && (
-              <div className="rounded-3xl border border-border bg-card p-4 sm:p-5 shadow-sm flex flex-col xs:flex-row xs:items-center justify-between gap-3 sm:gap-4 min-w-0 max-w-full overflow-hidden">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('home')}
-                    className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-foreground transition-all cursor-pointer shrink-0"
-                    title="Back to Profile Home"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate">
-                      {profileTabs.find((t) => t.id === activeTab)?.label}
-                    </h1>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('home')}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-all cursor-pointer shrink-0 self-start xs:self-auto"
-                >
-                  <span>Profile Home</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
 
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (
@@ -959,14 +929,13 @@ export default function PublicProfilePage() {
             {/* Experience Section — LinkedIn-style Timeline */}
             {(activeTab === 'all' || activeTab === 'experience') && experiences.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Experience & Career</h2>
                 </div>
                 <div className="relative pt-1 min-w-0">
                   {/* Vertical timeline line */}
-                  <div className="absolute left-[15px] top-0 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
-                  <div className="space-y-0 min-w-0">
+                  <div className="absolute left-[5px] top-2.5 bottom-2.5 w-0.5 bg-gradient-to-b from-primary/50 via-border to-border/30" />
+                  <div className="space-y-0 min-w-0 pl-0.5">
                     {experiences.map((exp: any, idx: number) => {
                       const dateStr = formatDateRange(
                         exp.startMonth,
@@ -980,14 +949,12 @@ export default function PublicProfilePage() {
                       return (
                         <div key={exp.id || idx} className="relative flex gap-3 pb-5 last:pb-0 min-w-0 max-w-full">
                           {/* Timeline dot */}
-                          <div className="relative z-10 shrink-0">
-                            <div className={`h-[30px] w-[30px] rounded-xl flex items-center justify-center shadow-sm border-2 ${
+                          <div className="relative z-10 shrink-0 pt-1">
+                            <div className={`h-2.5 w-2.5 rounded-full ${
                               exp.current
-                                ? 'bg-primary border-primary text-white'
-                                : 'bg-card border-primary/40 text-primary'
-                            }`}>
-                              <Briefcase className="h-3.5 w-3.5" />
-                            </div>
+                                ? 'bg-primary ring-4 ring-primary/20'
+                                : 'bg-card border-2 border-muted-foreground/40'
+                            }`} />
                           </div>
                           {/* Content */}
                           <div className="flex-1 min-w-0 pt-0.5">
@@ -1031,8 +998,7 @@ export default function PublicProfilePage() {
             {/* Education Section */}
             {(activeTab === 'all' || activeTab === 'education') && education.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education & Credentials</h2>
                 </div>
                 <div className="space-y-4 pt-1 min-w-0">
@@ -1074,8 +1040,7 @@ export default function PublicProfilePage() {
             {/* Projects Section */}
             {(activeTab === 'all' || activeTab === 'portfolio') && projects.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects & Work</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
@@ -1127,8 +1092,7 @@ export default function PublicProfilePage() {
             {/* Services Section */}
             {(activeTab === 'all' || activeTab === 'portfolio') && services.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services & Offerings</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
@@ -1156,8 +1120,7 @@ export default function PublicProfilePage() {
             {/* Publications Section */}
             {(activeTab === 'all' || activeTab === 'media') && publications.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Publications & Research</h2>
                 </div>
                 <div className="space-y-3 pt-1 min-w-0">
@@ -1192,8 +1155,7 @@ export default function PublicProfilePage() {
             {/* Ventures & Organizations */}
             {(activeTab === 'all' || activeTab === 'portfolio') && organizations.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <div className="min-w-0">
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations</h2>
                     <p className="text-[11px] text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Companies, startups, and initiatives founded or led</p>
@@ -1244,8 +1206,7 @@ export default function PublicProfilePage() {
             {/* Media & Channels */}
             {(activeTab === 'all' || activeTab === 'media') && mediaGallery.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                <div className="pb-2 border-b border-border min-w-0">
                   <div className="min-w-0">
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Media & Channels</h2>
                     <p className="text-[11px] text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured videos, channels, and broadcasts</p>
@@ -1309,10 +1270,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'posts') && userPosts.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
-                    <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Community Posts</h2>
-                  </div>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Community Posts</h2>
                   <Link to="/app/feed" className="text-[11px] font-semibold text-primary hover:underline shrink-0">
                     View in Feed →
                   </Link>
@@ -1435,8 +1393,7 @@ export default function PublicProfilePage() {
                 {/* Awards & Certifications */}
                 {(awards.length > 0 || certifications.length > 0) && (
                   <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-2.5 min-w-0 max-w-full">
-                    <div className="flex items-center gap-2 pb-1.5 border-b border-border min-w-0">
-                      <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <div className="pb-1.5 border-b border-border min-w-0">
                       <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Honors & Certifications</h2>
                     </div>
                     <div className="space-y-2 pt-0.5 min-w-0">
