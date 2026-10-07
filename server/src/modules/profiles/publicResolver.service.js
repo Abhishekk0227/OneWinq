@@ -8,8 +8,7 @@ import { eventBus } from '../../events/eventBus.js';
 import { Connection, getCanonicalUserPair } from '../connections/connection.model.js';
 import { isBlockedMutual } from '../connections/connection.service.js';
 import { NotFoundError } from '../../shared/errors.js';
-import { ACCOUNT_STATE, PROFILE_STATE, CARD_STATE, APP_EVENT } from '../../config/constants.js';
-import { buildSnapshotFromProfile } from './profile.service.js';
+import { buildSnapshotFromProfile, getOrCreateProfile } from './profile.service.js';
 
 /**
  * Public profile resolver service.
@@ -50,8 +49,7 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     throw new NotFoundError('Profile not found');
   }
 
-  // 5c. OPTION C: CARD-GATED PUBLIC PROFILE ENFORCEMENT
-  // A public profile is strictly gated until an active physical NFC card is purchased, assigned, and activated.
+  // 5c. Check for physical NFC smart card (optional accessory for contactless tap sharing)
   const activeCard = await Card.findOne({
     $and: [
       {
@@ -72,20 +70,20 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     .select('cardCode cardUid cardId state edition cardType customSlug')
     .lean();
 
-  if (!activeCard) {
-    // No active card → hard 404. The /u/:username URL does not exist yet.
-    // Username-based public access is only unlocked after physical card activation.
-    // Anti-enumeration: identical response to a non-existent user.
-    throw new NotFoundError('Profile not found');
-  }
-
-  // 6. Check profile (resolve currently ACTIVE persona, or fallback to latest)
+  // 6. Check profile (resolve currently ACTIVE persona, or fallback to latest, or auto-provision default)
   let profile = await Profile.findOne({ userId: user._id, isActive: true }).populate('templateId').lean();
   if (!profile) {
     profile = await Profile.findOne({ userId: user._id })
       .sort({ updatedAt: -1 })
       .populate('templateId')
       .lean();
+  }
+  if (!profile) {
+    try {
+      profile = await getOrCreateProfile(user._id);
+    } catch {
+      profile = null;
+    }
   }
 
   if (!profile) {
@@ -142,15 +140,17 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     connectionState,
     connectionStatus: connectionState,
     connectionId,
-    hasActiveCard: true,
+    hasActiveCard: Boolean(activeCard),
     isCardGated: false,
-    cardStatus: 'ACTIVE',
-    activeCard: {
-      cardCode: activeCard.cardCode || activeCard.cardUid,
-      cardUid: activeCard.cardUid,
-      cardId: activeCard.cardId || activeCard.cardCode || activeCard.cardUid,
-      edition: activeCard.edition || 'STANDARD',
-    },
+    cardStatus: activeCard ? 'ACTIVE' : 'DIGITAL',
+    activeCard: activeCard
+      ? {
+          cardCode: activeCard.cardCode || activeCard.cardUid,
+          cardUid: activeCard.cardUid,
+          cardId: activeCard.cardId || activeCard.cardCode || activeCard.cardUid,
+          edition: activeCard.edition || 'STANDARD',
+        }
+      : null,
   };
 
   // 12. Record profile-view event asynchronously

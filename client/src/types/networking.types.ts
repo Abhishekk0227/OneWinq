@@ -71,6 +71,7 @@ export interface DiscoveryUserCard {
   connectionState?: ConnectionState
   connectionStatus?: string
   connectionId?: string | null
+  hasActiveCard?: boolean
 }
 
 export interface DiscoverySearchParams {

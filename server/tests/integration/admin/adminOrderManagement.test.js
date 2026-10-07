@@ -156,12 +156,11 @@ describe('Admin Order Fulfillment & Hardware Card Pipeline', () => {
       publishedAt: new Date(),
     });
 
-    // Verify public profile is currently CARD-GATED
+    // Verify public profile initially has no active card
     const preCheck = await request(app).get(`/api/v1/public/u/${regularUser.username}`);
     expect(preCheck.status).toBe(200);
-    expect(preCheck.body.data.isCardGated).toBe(true);
     expect(preCheck.body.data.hasActiveCard).toBe(false);
-    expect(preCheck.body.data.profile).toBeNull();
+    expect(preCheck.body.data.cardStatus).toBe('DIGITAL');
 
     // 2. Customer places an order
     const order = await Order.create({

@@ -89,7 +89,7 @@ describe('Public Profile Resolver — GET /api/v1/public/u/:username', () => {
     expect(res.status).toBe(404);
   });
 
-  it('returns card-gated response (isCardGated: true, profile: null) when user has not activated a card', async () => {
+  it('returns digital profile (hasActiveCard: false, cardStatus: DIGITAL) when user has not activated a physical card', async () => {
     if (skipIfNoDb()) {return;}
 
     const user = await User.create({
@@ -104,17 +104,18 @@ describe('Public Profile Resolver — GET /api/v1/public/u/:username', () => {
     await Profile.create({
       userId: user._id,
       state: PROFILE_STATE.PUBLISHED,
-      publishedData: { headline: 'Will not show publicly' },
+      publishedData: { headline: 'Digital Profile Active' },
       publishedAt: new Date(),
     });
 
     const res = await request(app).get(`${BASE}/nocarduser`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.isCardGated).toBe(true);
+    expect(res.body.data.isCardGated).toBe(false);
     expect(res.body.data.hasActiveCard).toBe(false);
-    expect(res.body.data.cardStatus).toBe('CARD_REQUIRED');
-    expect(res.body.data.profile).toBeNull();
+    expect(res.body.data.cardStatus).toBe('DIGITAL');
+    expect(res.body.data.profile).toBeDefined();
+    expect(res.body.data.profile.headline).toBe('Digital Profile Active');
     expect(res.body.data.user.username).toBe('nocarduser');
     expect(res.body.data.user.displayName).toBe('No Card User');
   });
