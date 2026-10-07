@@ -58,6 +58,7 @@ import {
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
+import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 
 const BIO_LIMIT = 300
 
@@ -532,7 +533,20 @@ export default function PublicProfilePage() {
       {/* Floating Top Banner / Navigation (Responsive & Tight Layout) */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
         <div className="container mx-auto flex max-w-4xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
-          <BrandLogo to="/" imgClassName="h-5 sm:h-6 shrink-0" />
+          <div className="flex items-center gap-1.5 min-w-0">
+            {profileTabs.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setIsSectionsDrawerOpen(true)}
+                className="p-1.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors md:hidden shrink-0 cursor-pointer"
+                title="Open Profile Sections Sidebar"
+                aria-label="Open Profile Sections Sidebar"
+              >
+                <Menu className="h-4 w-4 text-primary" />
+              </button>
+            )}
+            <BrandLogo to="/" imgClassName="h-5 sm:h-6 shrink-0" />
+          </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
             {/* Theme Switcher: Light ☀️ / Dark 🌙 */}
@@ -1558,60 +1572,22 @@ export default function PublicProfilePage() {
         </div>
       </Dialog>
 
-      {/* All Profile Sections Menu Drawer */}
-      <Dialog open={isSectionsDrawerOpen} onOpenChange={setIsSectionsDrawerOpen}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base font-bold">
-            <Menu className="h-4 w-4 text-primary" />
-            <span>All Profile Sections</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs">
-            Navigate to any section tab on @{profileUser.username}'s profile.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-2 py-3 max-h-[60vh] overflow-y-auto pr-1">
-          {profileTabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id)
-                  setIsSectionsDrawerOpen(false)
-                }}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                  isActive
-                    ? 'border-primary bg-primary/10 text-primary font-bold shadow-xs'
-                    : 'border-border/80 bg-card hover:bg-muted hover:border-border text-foreground'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`p-2 rounded-xl ${isActive ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
-                    {tab.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold truncate">{tab.label}</div>
-                    <div className="text-[10px] text-muted-foreground truncate">
-                      {tab.id === 'home' ? 'Main identity card, headline & bio' : `View ${tab.label.toLowerCase()}`}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {tab.count !== undefined && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-muted text-muted-foreground">
-                      {tab.count}
-                    </span>
-                  )}
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </Dialog>
+      {/* All Profile Sections Sidebar Drawer */}
+      <ProfileSectionsSidebar
+        isOpen={isSectionsDrawerOpen}
+        onClose={() => setIsSectionsDrawerOpen(false)}
+        tabs={profileTabs}
+        activeTab={activeTab}
+        onSelectTab={(tabId) => setActiveTab(tabId)}
+        user={{
+          displayName: profileUser.displayName,
+          username: profileUser.username,
+          avatarUrl: profile.avatarUrl || profileUser.avatarUrl,
+          headline: profile.headline,
+        }}
+        isSelf={isSelf}
+        onShareClick={() => setIsShareModalOpen(true)}
+      />
     </div>
   )
 }
