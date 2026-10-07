@@ -142,15 +142,23 @@ export function MediaVideoPostCard({ media, onLinkClick }: MediaVideoPostCardPro
       <div className="pt-0.5 min-w-0">
         {videoInfo?.type === 'instagram' && videoInfo.embedUrl ? (
           <div className="w-full rounded-xl overflow-hidden border border-border bg-black/5 dark:bg-black/40 flex justify-center">
-            <iframe
-              src={videoInfo.embedUrl}
-              className="w-full max-w-[420px] h-[520px] sm:h-[560px] border-0 rounded-xl"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-              allowFullScreen
-              scrolling="no"
-              loading="lazy"
-              title={media.title}
-            />
+            <div
+              className="w-full max-w-[420px] relative overflow-hidden rounded-xl"
+              style={{
+                height: 0,
+                paddingBottom: 'calc(56.25% + 58px)',
+              }}
+            >
+              <iframe
+                src={videoInfo.embedUrl}
+                className="absolute inset-x-0 top-0 w-full h-[480px] border-0 rounded-xl"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allowFullScreen
+                scrolling="no"
+                loading="lazy"
+                title={media.title}
+              />
+            </div>
           </div>
         ) : videoInfo?.type === 'youtube' && videoInfo.embedUrl ? (
           <div className="w-full aspect-video rounded-xl overflow-hidden border border-border bg-black shadow-inner">
