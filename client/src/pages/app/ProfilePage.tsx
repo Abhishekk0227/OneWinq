@@ -49,6 +49,7 @@ import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
+import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 
 function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
@@ -1431,73 +1432,28 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* All Profile Sections Drawer Modal */}
-      <Dialog open={isSectionsDrawerOpen} onOpenChange={setIsSectionsDrawerOpen}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Menu className="h-4 w-4 text-primary" />
-            <span>All Profile Sections</span>
-          </DialogTitle>
-          <DialogDescription>
-            Select any section to jump directly to its dedicated content.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-2 py-2 max-h-[60vh] overflow-y-auto pr-1">
-          {profileTabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id)
-                  setIsSectionsDrawerOpen(false)
-                }}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-white border-primary shadow-md'
-                    : 'bg-card border-border hover:bg-muted text-foreground'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`p-2 rounded-xl shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-muted text-primary'}`}>
-                    {tab.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold truncate">{tab.label}</div>
-                    <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-muted-foreground'}`}>
-                      {tab.id === 'home'
-                        ? 'Main identity overview & intro hero card'
-                        : tab.id === 'experience'
-                        ? 'Work history & professional roles'
-                        : tab.id === 'education'
-                        ? 'Academic qualifications & degrees'
-                        : tab.id === 'portfolio'
-                        ? 'Featured projects & services'
-                        : tab.id === 'media'
-                        ? 'Certifications, skills & awards'
-                        : tab.id === 'posts'
-                        ? 'Community posts & activity'
-                        : 'Custom section blocks'}
-                    </div>
-                  </div>
-                </div>
-
-                {tab.count !== undefined && (
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-mono font-bold shrink-0 ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </Dialog>
+      {/* All Profile Sections Sidebar Drawer */}
+      <ProfileSectionsSidebar
+        isOpen={isSectionsDrawerOpen}
+        onClose={() => setIsSectionsDrawerOpen(false)}
+        tabs={profileTabs}
+        activeTab={activeTab}
+        onSelectTab={(tabId) => setActiveTab(tabId)}
+        user={{
+          displayName: user?.displayName,
+          username: user?.username,
+          avatarUrl: profile.avatarUrl || user?.avatarUrl,
+          headline: profile.headline,
+        }}
+        isSelf={true}
+        onShareClick={() => {
+          if (user?.username) {
+            navigator.clipboard.writeText(`${window.location.origin}/u/${user.username}`)
+            toast.success('Public profile link copied to clipboard!')
+          }
+        }}
+        editProfileUrl="/app/profile/edit"
+      />
 
       {/* Temporary Mode Configuration Modal */}
       <Dialog open={isTempModalOpen} onOpenChange={setIsTempModalOpen}>
