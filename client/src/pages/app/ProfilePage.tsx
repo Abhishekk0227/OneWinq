@@ -690,15 +690,21 @@ export default function ProfilePage() {
                       </a>
                     )}
 
-                    {profile.location && (profile.location.city || profile.location.country) && (
-                      <div
-                        title={`Location: ${[profile.location.city, profile.location.country].filter(Boolean).join(', ')}`}
-                        className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
-                      >
-                        <MapPin className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate max-w-[130px]">{[profile.location.city, profile.location.country].filter(Boolean).join(', ')}</span>
-                      </div>
-                    )}
+                    {profile.location && (() => {
+                      const locText = typeof profile.location === 'string'
+                        ? profile.location.trim()
+                        : [profile.location.city, profile.location.state, profile.location.country].filter(Boolean).join(', ')
+                      if (!locText) return null
+                      return (
+                        <div
+                          title={`Location: ${locText}`}
+                          className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
+                        >
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate max-w-[130px]">{locText}</span>
+                        </div>
+                      )
+                    })()}
 
                     {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
                       <a

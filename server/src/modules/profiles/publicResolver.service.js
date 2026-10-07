@@ -71,35 +71,84 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     .lean();
 
   // 6. Check profile (resolve currently ACTIVE persona, or fallback to latest, or auto-provision default)
-  let profile = await Profile.findOne({ userId: user._id, isActive: true }).populate('templateId').lean();
+  let profile = await Profile.findOne({
+    $or: [
+      { userId: user._id },
+      { userId: user._id.toString() },
+    ],
+    isActive: true,
+  }).populate('templateId').lean();
+
   if (!profile) {
-    profile = await Profile.findOne({ userId: user._id })
+    profile = await Profile.findOne({
+      $or: [
+        { userId: user._id },
+        { userId: user._id.toString() },
+      ],
+    })
       .sort({ updatedAt: -1 })
       .populate('templateId')
       .lean();
   }
+
   if (!profile) {
     try {
       profile = await getOrCreateProfile(user._id);
+      if (profile && typeof profile.toObject === 'function') {
+        profile = profile.toObject();
+      }
     } catch {
       profile = null;
     }
   }
 
+  // Safe fallback profile structure if none exists in DB
   if (!profile) {
-    throw new NotFoundError('Profile not found');
+    profile = {
+      _id: user._id,
+      userId: user._id,
+      personaName: 'Basic Universal Template',
+      professionTitle: 'Basic Universal Template',
+      templateSlug: 'professional',
+      templateId: null,
+      headline: '',
+      bio: '',
+      avatarUrl: user.avatarUrl || null,
+      location: {},
+      contact: {},
+      socialLinks: [],
+      skills: [],
+      experience: [],
+      education: [],
+      projects: [],
+      certifications: [],
+      services: [],
+      awards: [],
+      publications: [],
+      achievements: [],
+      isActive: true,
+      state: 'PUBLISHED',
+      activeMode: 'PUBLIC',
+    };
   }
 
   // 7, 8, 9, 10. Resolve active mode & filter sections / fields
   const snapshotData = profile.publishedData || buildSnapshotFromProfile(profile);
-  const filteredData = filterProfileByVisibility(snapshotData);
+  const filteredData = filterProfileByVisibility(snapshotData) || {};
   const activeTemplateSlug = profile.templateSlug || profile.templateId?.slug || filteredData.templateSlug || 'professional';
-  const rawTitle = profile.professionTitle || (profile.personaName !== 'Basic Universal Template' ? profile.personaName : '') || '';
-  const activeTitle = (rawTitle && rawTitle !== 'Basic Universal Template') ? rawTitle : '';
+  const rawTitle =
+    (profile.professionTitle && profile.professionTitle.trim()) ||
+    (profile.headline && profile.headline.trim()) ||
+    (profile.personaName && profile.personaName !== 'Primary Profile' && profile.personaName !== 'Profile' ? profile.personaName : '') ||
+    profile.templateId?.name ||
+    'Basic Universal Template';
+  const activeTitle = rawTitle;
+  const templateName = profile.templateId?.name || (profile.templateSlug ? profile.templateSlug.charAt(0).toUpperCase() + profile.templateSlug.slice(1) : 'Basic Universal Template');
 
   filteredData.templateSlug = activeTemplateSlug;
   filteredData.templateId = profile.templateId || null;
-  filteredData.personaName = profile.personaName && profile.personaName !== 'Basic Universal Template' ? profile.personaName : 'Profile';
+  filteredData.templateName = templateName;
+  filteredData.personaName = profile.personaName || 'Profile';
   filteredData.professionTitle = activeTitle;
 
   // Check relationship relative to viewer
@@ -130,10 +179,11 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
       identities: [{ customTitle: activeTitle || 'Professional', isPrimary: true }],
     },
     activePersona: {
-      id: profile._id.toString(),
+      id: profile._id ? profile._id.toString() : user._id.toString(),
       personaName: profile.personaName,
       professionTitle: activeTitle,
       templateSlug: activeTemplateSlug,
+      templateName,
     },
     identities: [{ customTitle: activeTitle || 'Professional', isPrimary: true }],
     profile: filteredData,

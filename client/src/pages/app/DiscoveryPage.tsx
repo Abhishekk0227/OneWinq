@@ -235,14 +235,15 @@ export default function DiscoveryPage() {
                         const displayHeadline =
                           person.headline?.trim() ||
                           person.primaryProfession?.trim() ||
+                          person.templateName?.trim() ||
                           (person as any).professionTitle?.trim() ||
                           person.identities?.[0]?.customTitle?.trim() ||
-                          ''
-                        return displayHeadline ? (
+                          'Basic Universal Template';
+                        return (
                           <p className="text-xs text-primary font-medium line-clamp-1 mt-1">
                             {displayHeadline}
                           </p>
-                        ) : null
+                        );
                       })()}
                     </div>
                   </div>
@@ -252,6 +253,7 @@ export default function DiscoveryPage() {
                     const headlineLower = (
                       person.headline?.trim() ||
                       person.primaryProfession?.trim() ||
+                      person.templateName?.trim() ||
                       (person as any).professionTitle?.trim() ||
                       person.identities?.[0]?.customTitle?.trim() ||
                       ''
@@ -300,15 +302,22 @@ export default function DiscoveryPage() {
                   )}
 
                   {/* Location */}
-                  {person.location && (person.location.city || person.location.state || person.location.country) && (
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">
-                        {[person.location.city, person.location.state, person.location.country].filter(Boolean).join(', ')}
-                        {person.location.isRemote && ' (Remote)'}
-                      </span>
-                    </div>
-                  )}
+                  {person.location && (() => {
+                    const locText = typeof person.location === 'string'
+                      ? person.location.trim()
+                      : [person.location.city, person.location.state, person.location.country].filter(Boolean).join(', ')
+                    const isRemote = typeof person.location === 'object' && person.location?.isRemote
+                    if (!locText) return null
+                    return (
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          {locText}
+                          {isRemote && ' (Remote)'}
+                        </span>
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 {/* Action Buttons */}

@@ -659,9 +659,9 @@ export default function PublicProfilePage() {
                         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                           {profileUser.displayName}
                         </h1>
-                        {profile.headline && (
+                        {(profile.headline || profile.professionTitle || (profile as any).templateName) && (
                           <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
-                            {profile.headline}
+                            {profile.headline || profile.professionTitle || (profile as any).templateName}
                           </p>
                         )}
                       </div>
@@ -719,15 +719,21 @@ export default function PublicProfilePage() {
                           </a>
                         )}
 
-                        {profile.location && (profile.location.city || profile.location.country) && (
-                          <div
-                            title={`Location: ${[profile.location.city, profile.location.country].filter(Boolean).join(', ')}`}
-                            className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
-                          >
-                            <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            <span className="truncate max-w-[130px]">{[profile.location.city, profile.location.country].filter(Boolean).join(', ')}</span>
-                          </div>
-                        )}
+                        {profile.location && (() => {
+                          const locText = typeof profile.location === 'string'
+                            ? profile.location.trim()
+                            : [profile.location.city, profile.location.state, profile.location.country].filter(Boolean).join(', ')
+                          if (!locText) return null
+                          return (
+                            <div
+                              title={`Location: ${locText}`}
+                              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
+                            >
+                              <MapPin className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate max-w-[130px]">{locText}</span>
+                            </div>
+                          )
+                        })()}
 
                         {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
                           <a
