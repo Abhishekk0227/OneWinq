@@ -8,6 +8,7 @@ import { eventBus } from '../../events/eventBus.js';
 import { Connection, getCanonicalUserPair } from '../connections/connection.model.js';
 import { isBlockedMutual } from '../connections/connection.service.js';
 import { NotFoundError } from '../../shared/errors.js';
+import { ACCOUNT_STATE, PROFILE_STATE, CARD_STATE, APP_EVENT } from '../../config/constants.js';
 import { buildSnapshotFromProfile, getOrCreateProfile } from './profile.service.js';
 
 /**
