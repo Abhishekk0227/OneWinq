@@ -520,7 +520,7 @@ export default function PublicProfilePage() {
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
     ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
     ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
-    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
+    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Briefcase className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
     ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + publications.length }] : []),
     ...(hasPrivateDocs ? [{ id: 'documents', label: 'Documents', icon: <FileText className="h-4 w-4" />, count: privateDocuments.length }] : []),
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
@@ -755,13 +755,9 @@ export default function PublicProfilePage() {
                     <ArrowLeft className="h-4 w-4" />
                   </button>
                   <div className="min-w-0 flex-1">
-                    <h1 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 truncate">
-                      {profileTabs.find((t) => t.id === activeTab)?.icon}
-                      <span className="truncate">{profileTabs.find((t) => t.id === activeTab)?.label}</span>
+                    <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate">
+                      {profileTabs.find((t) => t.id === activeTab)?.label}
                     </h1>
-                    <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                      @{profileUser.username}'s dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} section
-                    </p>
                   </div>
                 </div>
 
@@ -964,9 +960,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'experience') && experiences.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <Briefcase className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Experience & Career</h2>
                 </div>
                 <div className="relative pt-1 min-w-0">
@@ -1038,9 +1032,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'education') && education.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <GraduationCap className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Education & Credentials</h2>
                 </div>
                 <div className="space-y-4 pt-1 min-w-0">
@@ -1083,9 +1075,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'portfolio') && projects.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <Sparkles className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects & Work</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
@@ -1138,9 +1128,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'portfolio') && services.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <Sparkles className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services & Offerings</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
@@ -1169,9 +1157,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'media') && publications.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <FileText className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Publications & Research</h2>
                 </div>
                 <div className="space-y-3 pt-1 min-w-0">
@@ -1207,9 +1193,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'portfolio') && organizations.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <Building2 className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <div className="min-w-0">
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations</h2>
                     <p className="text-[11px] text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Companies, startups, and initiatives founded or led</p>
@@ -1261,9 +1245,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'media') && mediaGallery.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                    <Video className="h-3.5 w-3.5" />
-                  </div>
+                  <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                   <div className="min-w-0">
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Media & Channels</h2>
                     <p className="text-[11px] text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured videos, channels, and broadcasts</p>
@@ -1328,9 +1310,7 @@ export default function PublicProfilePage() {
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                      <Flame className="h-3.5 w-3.5" />
-                    </div>
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Community Posts</h2>
                   </div>
                   <Link to="/app/feed" className="text-[11px] font-semibold text-primary hover:underline shrink-0">
@@ -1455,8 +1435,8 @@ export default function PublicProfilePage() {
                 {/* Awards & Certifications */}
                 {(awards.length > 0 || certifications.length > 0) && (
                   <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-2.5 min-w-0 max-w-full">
-                    <div className="flex items-center gap-1.5 pb-1.5 border-b border-border min-w-0">
-                      <Award className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <div className="flex items-center gap-2 pb-1.5 border-b border-border min-w-0">
+                      <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
                       <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Honors & Certifications</h2>
                     </div>
                     <div className="space-y-2 pt-0.5 min-w-0">
@@ -1651,7 +1631,7 @@ export default function PublicProfilePage() {
                   <div className="min-w-0">
                     <div className="text-xs font-bold truncate">{tab.label}</div>
                     <div className="text-[10px] text-muted-foreground truncate">
-                      {tab.id === 'home' ? 'Main identity card, headline & bio' : `Dedicated ${tab.label.toLowerCase()} section`}
+                      {tab.id === 'home' ? 'Main identity card, headline & bio' : `View ${tab.label.toLowerCase()}`}
                     </div>
                   </div>
                 </div>

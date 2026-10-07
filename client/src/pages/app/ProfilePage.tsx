@@ -297,7 +297,7 @@ export default function ProfilePage() {
       { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
       ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
       ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
-      ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Sparkles className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
+      ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Briefcase className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
       ...(hasMedia ? [{ id: 'media', label: 'Credentials', icon: <Award className="h-4 w-4" />, count: certifications.length + skills.length + awards.length + publications.length }] : []),
       { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
       ...(isPrivateMode ? [{ id: 'vault', label: 'Private Vault', icon: <Lock className="h-4 w-4" />, count: privateDocuments.length }] : []),
@@ -418,13 +418,9 @@ export default function ProfilePage() {
                   <ArrowLeft className="h-4 w-4" />
                 </button>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-1.5 truncate">
-                    {profileTabs.find((t) => t.id === activeTab)?.icon}
-                    <span className="truncate">{profileTabs.find((t) => t.id === activeTab)?.label}</span>
+                  <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate">
+                    {profileTabs.find((t) => t.id === activeTab)?.label}
                   </h1>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                    Dedicated {profileTabs.find((t) => t.id === activeTab)?.label.toLowerCase()} view
-                  </p>
                 </div>
               </div>
 
@@ -946,10 +942,10 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {experiences.length > 0 ? (
                 <div className="p-4 sm:p-6 rounded-2xl border border-border bg-card shadow-sm space-y-4">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Briefcase className="h-3.5 w-3.5 text-primary" />
-                    <span>Work Experience</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Work Experience</h3>
+                  </div>
                   <div className="relative pl-3 space-y-0 min-w-0">
                     {/* Vertical timeline line */}
                     {experiences.length > 1 && (
@@ -1029,10 +1025,10 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {education.length > 0 ? (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                    <span>Education & Academics</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Education & Academics</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {education.map((edu: any, idx: number) => {
                       const dateStr = formatDateRange(
@@ -1080,10 +1076,10 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {organizations.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Building2 className="h-3.5 w-3.5 text-primary" />
-                    <span>Ventures & Organizations</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Ventures & Organizations</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {organizations.map((org: any, idx: number) => {
                       const orgName = org.name || org.title || 'Venture'
@@ -1127,10 +1123,10 @@ export default function ProfilePage() {
 
               {projects.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Layers className="h-3.5 w-3.5 text-primary" />
-                    <span>Featured Projects</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Featured Projects</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {projects.map((proj: any, idx: number) => {
                       const dateStr = formatDateRange(
@@ -1177,10 +1173,10 @@ export default function ProfilePage() {
 
               {services.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <span>Services Provided</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Services Provided</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {services.map((s: any, idx: number) => (
                       <div key={s.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
@@ -1210,10 +1206,10 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {certifications.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Award className="h-3.5 w-3.5 text-primary" />
-                    <span>Certifications</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Certifications</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {certifications.map((c: any, idx: number) => (
                       <div key={c.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-0.5">
@@ -1236,10 +1232,10 @@ export default function ProfilePage() {
 
               {skills.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <span>Verified Skills</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Verified Skills</h3>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {skills.map((skill: any, idx: number) => (
                       <Badge key={skill.id || idx} variant="subtle" className="text-[11px] font-medium py-0.5 px-2.5">
@@ -1252,10 +1248,10 @@ export default function ProfilePage() {
 
               {awards.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Award className="h-3.5 w-3.5 text-primary" />
-                    <span>Awards & Honors</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Awards & Honors</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {awards.map((award: any, idx: number) => (
                       <div key={award.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
@@ -1279,10 +1275,10 @@ export default function ProfilePage() {
 
               {publications.length > 0 && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                    <span>Publications</span>
-                  </h3>
+                  <div className="flex items-center gap-2 pb-2 border-b border-border min-w-0">
+                    <span className="w-1 h-3.5 rounded-full bg-primary shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground">Publications</h3>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {publications.map((pub: any, idx: number) => (
                       <div key={pub.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 space-y-1">
