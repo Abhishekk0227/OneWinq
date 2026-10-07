@@ -301,196 +301,16 @@ export default function PublicProfilePage() {
   )
   const profileUrl = window.location.href
 
-  // OPTION C: CARD-GATED PROFILE ENFORCEMENT
-  // If the owner has not activated a physical OneWinq NFC Card, show the reserved splash page
-  if (isCardGated || hasActiveCard === false || !profile) {
+  if (!profile) {
     return (
-      <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-20">
-        {/* Floating Top Banner */}
-        <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 transition-colors">
-          <div className="container mx-auto flex max-w-4xl items-center justify-between gap-2">
-            <BrandLogo to="/" imgClassName="h-6 sm:h-7" />
-
-
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer"
-                title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
-              >
-                {resolvedTheme === 'dark' ? (
-                  <>
-                    <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                    <span className="hidden sm:inline">Light</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-3.5 w-3.5 text-purple-600 shrink-0" />
-                    <span className="hidden sm:inline">Dark</span>
-                  </>
-                )}
-              </button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyLink}
-                leftIcon={isCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                className="h-8 text-xs px-2.5 sm:px-3"
-              >
-                {isCopied ? 'Copied' : 'Share'}
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        {/* Hero Card Gated Section */}
-        <main className="container mx-auto max-w-2xl px-4 pt-8 sm:pt-12 space-y-8 animate-in fade-in duration-300 text-center">
-          {/* Visual NFC Card Mockup */}
-          <div className="relative mx-auto max-w-sm sm:max-w-md group">
-            {/* Ambient Background Glow */}
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-purple-600 via-primary to-indigo-600 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition duration-500" />
-
-            {/* Smart NFC Card */}
-            <div className="relative rounded-3xl p-6 sm:p-7 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white border border-white/15 shadow-2xl overflow-hidden aspect-[1.586/1] flex flex-col justify-between text-left">
-              {/* Card Holographic / Grid overlay */}
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                  backgroundSize: '20px 20px',
-                }}
-              />
-              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-44 h-44 bg-gradient-to-bl from-primary/30 via-purple-500/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-
-              {/* Top Row: OneWinq Brand + Contactless Wifi Icon */}
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <BrandLogo to="/" variant="white" imgClassName="h-5 sm:h-6" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold tracking-wider uppercase">
-                    Activation Required
-                  </div>
-                  <Wifi className="h-4 w-4 text-white/70 rotate-90" />
-                </div>
-              </div>
-
-              {/* Middle Row: EMV Gold Chip + Reserved User Preview */}
-              <div className="flex items-center justify-between relative z-10 my-auto py-2">
-                <div className="w-11 h-8 rounded-md bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-200 border border-amber-600/40 shadow-inner flex items-center justify-center opacity-90">
-                  <div className="w-7 h-5 border border-amber-700/30 rounded-xs grid grid-cols-2 gap-0.5 opacity-60" />
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 block">Link Status</span>
-                  <span className="text-xs font-semibold text-amber-400">Card-Gated</span>
-                </div>
-              </div>
-
-              {/* Bottom Row: User Name & Handle */}
-              <div className="relative z-10 flex items-end justify-between">
-                <div>
-                  <div className="text-sm sm:text-base font-extrabold tracking-wide text-zinc-100">
-                    {profileUser?.displayName || `@${username}`}
-                  </div>
-                  <div className="text-xs font-mono text-zinc-400">
-                    onewinq.me/u/{username}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase">Universal NFC</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Reserved Identity Description */}
-          <div className="space-y-3 max-w-lg mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 text-xs font-bold tracking-wide">
-              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              Physical NFC Card Activation Required
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              @{username} is Reserved & Claimed
-            </h1>
-
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              This digital identity on OneWinq has been registered by{' '}
-              <strong className="text-foreground">{profileUser?.displayName || username}</strong>.
-              Contactless NFC tap sharing and public profile access will unlock automatically once their physical OneWinq Smart Card is activated.
-            </p>
-          </div>
-
-          {/* Conditional CTAs */}
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-card max-w-lg mx-auto text-left space-y-4">
-            {isSelf ? (
-              <>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span>Welcome back, {currentUser?.displayName || 'User'}!</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    This is your personal link. Activate your physical card to unlock your public profile for everyone.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                  <Link to="/app/cards" className="flex-1">
-                    <Button variant="default" className="w-full text-xs font-bold" leftIcon={<Zap className="h-4 w-4" />}>
-                      Activate My Card
-                    </Button>
-                  </Link>
-                  <Link to="/orders" className="flex-1">
-                    <Button variant="outline" className="w-full text-xs font-bold" leftIcon={<ShoppingBag className="h-4 w-4" />}>
-                      Order NFC Card
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="pt-1 text-center">
-                  <Link to="/app/profile/edit" className="text-xs text-primary hover:underline font-medium">
-                    Customize your profile while you wait &rarr;
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                    <CreditCard className="h-4 w-4 text-primary" />
-                    <span>Want your own OneWinq Smart Card?</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Instantly share your contact info, social profiles, and portfolio with a single tap of a premium contactless NFC card.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                  <Link to="/register" className="flex-1">
-                    <Button variant="default" className="w-full text-xs font-bold" rightIcon={<ArrowRight className="h-4 w-4" />}>
-                      Get Your OneWinq Card
-                    </Button>
-                  </Link>
-                  <Link to="/" className="flex-1">
-                    <Button variant="outline" className="w-full text-xs font-bold">
-                      Explore OneWinq
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="pt-2 text-center text-xs text-muted-foreground">
-                  Are you @{username}?{' '}
-                  <Link to="/login" className="text-primary hover:underline font-semibold">
-                    Sign in to activate your card
-                  </Link>
-                </div>
-              </>
-            )}
-          </div>
-        </main>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+        <div className="text-center space-y-3 max-w-md">
+          <h2 className="text-xl font-bold">Profile Not Found</h2>
+          <p className="text-sm text-muted-foreground">This user's profile is not available or has not been set up yet.</p>
+          <Link to="/">
+            <Button variant="default" size="sm">Go to Home</Button>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -694,6 +514,32 @@ export default function PublicProfilePage() {
           </div>
         </div>
       </header>
+
+      {/* Slim Alert for Profile Owner without an Active Physical Card */}
+      {isSelf && !hasActiveCard && (
+        <div className="container mx-auto max-w-6xl px-3 sm:px-6 pt-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-950 dark:text-amber-200 shadow-xs">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span>
+                <strong>Your Digital Profile is Live</strong> — Physical NFC smart card is optional for contactless tap-sharing.
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link to="/app/cards">
+                <Button size="xs" variant="default" className="text-xs h-7 px-3">
+                  Activate Card
+                </Button>
+              </Link>
+              <Link to="/orders">
+                <Button size="xs" variant="outline" className="text-xs h-7 px-3">
+                  Order Card
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Profile Canvas */}
       <main className="container mx-auto max-w-6xl px-3 sm:px-6 pt-6 animate-in fade-in duration-300">

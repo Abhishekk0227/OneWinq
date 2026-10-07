@@ -20,6 +20,7 @@ import {
   UserCheck,
   Compass,
   MessageSquare,
+  Wifi,
 } from 'lucide-react'
 import type { DiscoveryUserCard } from '@/types/networking.types'
 
@@ -216,8 +217,19 @@ export default function DiscoveryPage() {
                       >
                         {person.displayName}
                       </Link>
-                      <div className="text-xs font-medium text-muted-foreground truncate">
-                        @{person.username}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-medium text-muted-foreground truncate">
+                          @{person.username}
+                        </span>
+                        {person.hasActiveCard && (
+                          <span
+                            className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md shrink-0"
+                            title="Active NFC Smart Card"
+                          >
+                            <Wifi className="h-2.5 w-2.5 rotate-90" />
+                            <span>NFC</span>
+                          </span>
+                        )}
                       </div>
                       {(() => {
                         const displayHeadline =

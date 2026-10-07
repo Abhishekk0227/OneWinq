@@ -99,17 +99,12 @@ export const userService = {
     }
 
     const pageSize = Math.min(Number(limit) || 20, 50);
-    // Over-fetch to compensate for card-gate filtering
     const users = await User.find(filter)
       .sort({ createdAt: -1 })
-      .limit(pageSize * 3);
+      .limit(pageSize + 1);
 
-    // Card-gate: only expose users who have an active physical card
-    const activeSet = await filterToCardActive(users.map((u) => u._id));
-    const gated = users.filter((u) => activeSet.has(u._id.toString()));
-
-    const hasMore = gated.length > pageSize;
-    const results = hasMore ? gated.slice(0, pageSize) : gated;
+    const hasMore = users.length > pageSize;
+    const results = hasMore ? users.slice(0, pageSize) : users;
     const nextCursor = hasMore ? results[results.length - 1].createdAt.toISOString() : null;
 
     return {

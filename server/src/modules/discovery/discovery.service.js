@@ -75,20 +75,9 @@ export async function searchDiscovery(
     };
   }
 
-  // Card-gate: only users with an active physical card are publicly visible
+  // Check physical NFC card status for candidate users (for badges/metadata without excluding digital profiles)
   const cardActiveSet = await filterToCardActive(candidateUsers.map((u) => u._id));
-  const cardGatedUsers = candidateUsers.filter((u) => cardActiveSet.has(u._id.toString()));
-
-  if (cardGatedUsers.length === 0) {
-    return {
-      results: [],
-      users: [],
-      nextCursor: null,
-      hasNextPage: false,
-    };
-  }
-
-  const candidateUserIds = cardGatedUsers.map((u) => u._id);
+  const candidateUserIds = candidateUsers.map((u) => u._id);
 
   // 3. Fetch profiles for candidate users (support published and active profiles)
   const profileFilter = {
@@ -161,7 +150,7 @@ export async function searchDiscovery(
   // 4. Assemble and filter result cards
   const validCards = [];
 
-  for (const user of cardGatedUsers) {
+  for (const user of candidateUsers) {
     const uStr = user._id.toString();
     const profile = profileMap.get(uStr);
     const profileSource = profile?.publishedData || profile || {};
@@ -251,6 +240,7 @@ export async function searchDiscovery(
       skills: skillList,
       topSkills: topSkillNames,
       location: resolvedLocation,
+      hasActiveCard: cardActiveSet.has(uStr),
       connectionStatus,
       connectionState: connectionStatus,
       connectionId,
