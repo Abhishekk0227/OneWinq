@@ -49,7 +49,7 @@ import {
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
-import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
+import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 
 function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
@@ -266,9 +266,9 @@ export default function ProfilePage() {
       ? VISIBILITY_MODE.PROFESSIONAL
       : VISIBILITY_MODE.PUBLIC
 
-  // Profile Section Tabs configuration
-  const experiences = profile?.experience || profile?.sections?.experience || []
-  const education = profile?.education || profile?.sections?.education || []
+  // Profile Section Tabs configuration (sorted chronologically)
+  const experiences = sortExperiencesByDate(profile?.experience || profile?.sections?.experience || [])
+  const education = sortEducationByDate(profile?.education || profile?.sections?.education || [])
   const projects = profile?.projects || profile?.sections?.projects || []
   const services = profile?.services || profile?.sections?.services || []
   const organizations = profile?.organizations || profile?.sections?.organizations || []
@@ -679,38 +679,7 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Profile Template Presentation Section */}
-                  <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 max-w-full">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <LayoutTemplate className="h-4.5 w-4.5" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
-                            Profile Template: {currentTemplate?.name || 'Basic Universal Template'}
-                          </span>
-                          <Badge variant="subtle" className="text-[10px] text-emerald-600 bg-emerald-500/10 border-emerald-500/20 font-bold shrink-0">
-                            Active
-                          </Badge>
-                        </div>
-                        <span className="text-[11px] text-muted-foreground block line-clamp-1 min-w-0">
-                          {currentMode === VISIBILITY_MODE.PRIVATE
-                            ? 'Private Presentation: Sensitive personal & credential fields are shielded.'
-                            : currentMode === VISIBILITY_MODE.PROFESSIONAL
-                            ? 'Professional Presentation: Tailored for career, client networking, and credentials.'
-                            : 'Public Presentation: Universal identity, bio, and social channels visible to all.'}
-                        </span>
-                      </div>
-                    </div>
 
-                    <Link to="/app/templates">
-                      <Button variant="outline" size="sm" className="text-xs shrink-0 gap-1.5 h-8">
-                        <Lock className="h-3 w-3 text-amber-500" />
-                        <span>Templates (Coming Soon)</span>
-                      </Button>
-                    </Link>
-                  </div>
 
                   {profile.bio && (
                     <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">

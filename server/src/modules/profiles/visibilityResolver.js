@@ -213,8 +213,52 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
         }
         return true;
       });
-      result.sections[key] = filtered;
-      result[key] = filtered;
+      let sorted = filtered;
+      if (key === 'experience') {
+        sorted = [...filtered].sort((a, b) => {
+          if (a.current && !b.current) return -1;
+          if (!a.current && b.current) return 1;
+          if (a.current && b.current) {
+            const startA = (a.startYear || 0) * 12 + (a.startMonth || 1);
+            const startB = (b.startYear || 0) * 12 + (b.startMonth || 1);
+            return startB - startA;
+          }
+          const getEndVal = (x) => {
+            if (x.endYear) return x.endYear * 12 + (x.endMonth || 12);
+            if (x.endDate) {
+              const d = new Date(x.endDate).getTime();
+              if (!isNaN(d)) return d;
+            }
+            return 0;
+          };
+          const endA = getEndVal(a);
+          const endB = getEndVal(b);
+          if (endA !== endB) return endB - endA;
+
+          const getStartVal = (x) => {
+            if (x.startYear) return x.startYear * 12 + (x.startMonth || 1);
+            if (x.startDate) {
+              const d = new Date(x.startDate).getTime();
+              if (!isNaN(d)) return d;
+            }
+            return 0;
+          };
+          return getStartVal(b) - getStartVal(a);
+        });
+      } else if (key === 'education') {
+        sorted = [...filtered].sort((a, b) => {
+          if (a.current && !b.current) return -1;
+          if (!a.current && b.current) return 1;
+          const endA = (a.endYear || 0) * 12 + (a.endMonth || 12);
+          const endB = (b.endYear || 0) * 12 + (b.endMonth || 12);
+          if (endA !== endB) return endB - endA;
+          const startA = (a.startYear || 0) * 12 + (a.startMonth || 1);
+          const startB = (b.startYear || 0) * 12 + (b.startMonth || 1);
+          return startB - startA;
+        });
+      }
+      result.sections[key] = sorted;
+      result[key] = sorted;
     }
   }
 

@@ -57,7 +57,7 @@ import {
   Menu,
   Code,
 } from 'lucide-react'
-import { formatDateRange, formatMonthYear } from '@/utils/dateFormatter'
+import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 
 const BIO_LIMIT = 300
 
@@ -494,11 +494,11 @@ export default function PublicProfilePage() {
     )
   }
 
-  // Fallbacks to support both top-level and profile.sections structures
-  const experiences = profile.experience || profile.sections?.experience || []
+  // Fallbacks to support both top-level and profile.sections structures (sorted chronologically)
+  const experiences = sortExperiencesByDate(profile.experience || profile.sections?.experience || [])
   const projects = profile.projects || profile.sections?.projects || []
   const skills = profile.skills || profile.sections?.skills || []
-  const education = profile.education || profile.sections?.education || []
+  const education = sortEducationByDate(profile.education || profile.sections?.education || [])
   const certifications = profile.certifications || profile.sections?.certifications || []
   const services = profile.services || profile.sections?.services || []
   const awards = profile.awards || profile.sections?.awards || []
@@ -1450,29 +1450,7 @@ export default function PublicProfilePage() {
                   </div>
                 )}
 
-                {/* Social Links */}
-                {profile.socialLinks && profile.socialLinks.length > 0 && (
-                  <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-2.5 min-w-0 max-w-full">
-                    <h2 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/40 pb-1.5">
-                      Connect & Social
-                    </h2>
-                    <div className="space-y-1.5 pt-0.5 min-w-0 max-w-full">
-                      {profile.socialLinks.map((link: any, idx: number) => (
-                        <a
-                          key={link.id || idx}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => handleLinkClick(link.url, link.platform)}
-                          className="flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-primary-soft hover:text-primary transition-colors text-[11px] font-semibold min-w-0 max-w-full"
-                        >
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{link.label || link.platform}</span>
-                          <ExternalLink className="h-3 w-3 opacity-60 shrink-0" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
 
                 {/* Awards & Certifications */}
                 {(awards.length > 0 || certifications.length > 0) && (

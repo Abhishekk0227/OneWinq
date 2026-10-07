@@ -70,6 +70,7 @@ import { cardsApi } from '@/features/cards/api/cards.api'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog'
 import { MonthYearPicker } from '@/components/common/MonthYearPicker'
 import { TemplateCard } from '@/components/profile/TemplateCard'
+import { sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
@@ -479,22 +480,26 @@ export default function ProfileEditPage() {
         setIdentities(rawIdentities)
         setSocialLinks(p.socialLinks || [])
         setExperience(
-          (p.experience || []).map((exp: any) => ({
-            ...exp,
-            startYear: exp.startYear ?? (exp.startDate ? new Date(exp.startDate).getFullYear() : null),
-            startMonth: exp.startMonth ?? (exp.startDate ? new Date(exp.startDate).getMonth() + 1 : null),
-            endYear: exp.endYear ?? (exp.endDate ? new Date(exp.endDate).getFullYear() : null),
-            endMonth: exp.endMonth ?? (exp.endDate ? new Date(exp.endDate).getMonth() + 1 : null),
-          }))
+          sortExperiencesByDate(
+            (p.experience || []).map((exp: any) => ({
+              ...exp,
+              startYear: exp.startYear ?? (exp.startDate ? new Date(exp.startDate).getFullYear() : null),
+              startMonth: exp.startMonth ?? (exp.startDate ? new Date(exp.startDate).getMonth() + 1 : null),
+              endYear: exp.endYear ?? (exp.endDate ? new Date(exp.endDate).getFullYear() : null),
+              endMonth: exp.endMonth ?? (exp.endDate ? new Date(exp.endDate).getMonth() + 1 : null),
+            }))
+          )
         )
         setEducation(
-          (p.education || []).map((edu: any) => ({
-            ...edu,
-            startYear: edu.startYear ?? (edu.startDate ? new Date(edu.startDate).getFullYear() : null),
-            startMonth: edu.startMonth ?? (edu.startDate ? new Date(edu.startDate).getMonth() + 1 : null),
-            endYear: edu.endYear ?? (edu.endDate ? new Date(edu.endDate).getFullYear() : null),
-            endMonth: edu.endMonth ?? (edu.endDate ? new Date(edu.endDate).getMonth() + 1 : null),
-          }))
+          sortEducationByDate(
+            (p.education || []).map((edu: any) => ({
+              ...edu,
+              startYear: edu.startYear ?? (edu.startDate ? new Date(edu.startDate).getFullYear() : null),
+              startMonth: edu.startMonth ?? (edu.startDate ? new Date(edu.startDate).getMonth() + 1 : null),
+              endYear: edu.endYear ?? (edu.endDate ? new Date(edu.endDate).getFullYear() : null),
+              endMonth: edu.endMonth ?? (edu.endDate ? new Date(edu.endDate).getMonth() + 1 : null),
+            }))
+          )
         )
         setSkills(p.skills || [])
         setProjects(
