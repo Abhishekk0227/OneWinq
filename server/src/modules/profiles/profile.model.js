@@ -89,6 +89,7 @@ const projectEntrySchema = new Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true, default: '' },
     url: { type: String, trim: true, default: '' },
+    imageUrl: { type: String, trim: true, default: '' },
     mediaUrls: { type: [String], default: [] },
     startMonth: { type: Number, min: 1, max: 12, default: null },
     startYear: { type: Number, min: 1900, max: 2100, default: null },

@@ -57,6 +57,7 @@ import {
   Code,
 } from 'lucide-react'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
+import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 
 const BIO_LIMIT = 300
 
@@ -1054,33 +1055,61 @@ export default function PublicProfilePage() {
                       proj.startDate,
                       proj.endDate
                     )
+                    const projectImg = proj.imageUrl || (proj.mediaUrls && proj.mediaUrls[0])
                     return (
-                      <div key={proj.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-1 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
-                        <div className="flex items-start justify-between gap-2 min-w-0">
-                          <div className="min-w-0">
-                            <h3 className="font-semibold text-xs text-foreground break-words [overflow-wrap:anywhere] min-w-0">{proj.title}</h3>
-                            {dateStr && (
-                              <span className="text-[10px] font-mono text-muted-foreground block">
-                                {dateStr}
-                              </span>
+                      <div key={proj.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-2 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden flex flex-col justify-between">
+                        <div>
+                          {projectImg && (
+                            <div className="w-full aspect-[16/9] max-h-44 rounded-lg overflow-hidden bg-muted/40 mb-2 border border-border/60">
+                              <img
+                                src={projectImg}
+                                alt={proj.title}
+                                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex items-start justify-between gap-2 min-w-0">
+                            <div className="min-w-0">
+                              <h3 className="font-semibold text-xs text-foreground break-words [overflow-wrap:anywhere] min-w-0">{proj.title}</h3>
+                              {dateStr && (
+                                <span className="text-[10px] font-mono text-muted-foreground block mt-0.5">
+                                  {dateStr}
+                                </span>
+                              )}
+                            </div>
+                            {proj.url && (
+                              <a
+                                href={proj.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => handleLinkClick(proj.url!, proj.title)}
+                                className="text-primary hover:text-primary-hover p-1 shrink-0"
+                                title="Open Project"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
                             )}
                           </div>
-                          {proj.url && (
+                          {proj.description && (
+                            <p className="text-[11px] text-muted-foreground line-clamp-3 break-words [overflow-wrap:anywhere] min-w-0 pt-1 leading-relaxed">
+                              {proj.description}
+                            </p>
+                          )}
+                        </div>
+                        {proj.url && (
+                          <div className="pt-2 mt-1 border-t border-border/40 flex items-center justify-end">
                             <a
                               href={proj.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => handleLinkClick(proj.url!, proj.title)}
-                              className="text-primary hover:text-primary-hover p-1 shrink-0"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
                             >
-                              <ExternalLink className="h-3 w-3" />
+                              <span>View Project</span>
+                              <ExternalLink className="h-2.5 w-2.5" />
                             </a>
-                          )}
-                        </div>
-                        {proj.description && (
-                          <p className="text-[11px] text-muted-foreground line-clamp-3 break-words [overflow-wrap:anywhere] min-w-0">
-                            {proj.description}
-                          </p>
+                          </div>
                         )}
                       </div>
                     )
@@ -1212,36 +1241,13 @@ export default function PublicProfilePage() {
                     <p className="text-[11px] text-muted-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured videos, channels, and broadcasts</p>
                   </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 min-w-0">
+                <div className="space-y-4 pt-1 min-w-0">
                   {mediaGallery.map((media: any, idx: number) => (
-                    <div key={idx} className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-1 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
-                      <div className="flex items-start justify-between gap-2 min-w-0">
-                        <span className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">{media.title}</span>
-                        {media.platform && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground uppercase shrink-0">
-                            {media.platform}
-                          </span>
-                        )}
-                      </div>
-                      {media.metrics && (
-                        <span className="inline-block text-[10px] font-medium text-primary bg-primary/5 px-1.5 py-0.2 rounded shrink-0">
-                          {media.metrics}
-                        </span>
-                      )}
-                      {media.url && (
-                        <div>
-                          <a
-                            href={media.url.startsWith('http') ? media.url : `https://${media.url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-0.5 min-w-0 max-w-full"
-                          >
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">Watch / Listen</span>
-                            <ExternalLink className="h-3 w-3 shrink-0" />
-                          </a>
-                        </div>
-                      )}
-                    </div>
+                    <MediaVideoPostCard
+                      key={media.id || idx}
+                      media={media}
+                      onLinkClick={handleLinkClick}
+                    />
                   ))}
                 </div>
               </div>

@@ -58,6 +58,7 @@ export interface ProjectItem {
   title: string
   description?: string
   url?: string
+  imageUrl?: string
   mediaUrls?: string[]
   startMonth?: number | null
   startYear?: number | null
