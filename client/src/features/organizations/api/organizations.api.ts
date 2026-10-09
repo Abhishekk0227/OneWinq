@@ -47,7 +47,11 @@ export const organizationsApi = {
       data
     ),
 
-  updateMember: (organizationId: string, memberId: string, data: Partial<OrganizationMember>) =>
+  updateMember: (
+    organizationId: string,
+    memberId: string,
+    data: { departmentId?: string | null; role?: string; jobTitle?: string; employeeId?: string; status?: string } | Partial<OrganizationMember>
+  ) =>
     apiClient.patch<never, ApiResponse<{ member: OrganizationMember }>>(
       `/organizations/${organizationId}/members/${memberId}`,
       data

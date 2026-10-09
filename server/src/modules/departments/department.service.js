@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Department } from './department.model.js';
 import { OrganizationMember } from '../organizations/organizationMember.model.js';
 import { ConflictError, NotFoundError } from '../../shared/errors.js';
@@ -21,10 +22,29 @@ export async function createDepartment(organizationId, data) {
 }
 
 export async function listDepartments(organizationId) {
-  const departments = await Department.find({ organizationId })
-    .populate('leadMemberId', 'userId jobTitle')
-    .sort({ name: 1 })
-    .lean();
+  const [departments, memberCounts] = await Promise.all([
+    Department.find({ organizationId })
+      .populate('leadMemberId', 'userId jobTitle')
+      .sort({ name: 1 })
+      .lean(),
+    OrganizationMember.aggregate([
+      {
+        $match: {
+          organizationId: new mongoose.Types.ObjectId(organizationId),
+          status: 'ACTIVE',
+          departmentId: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$departmentId',
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  const countMap = new Map(memberCounts.map((c) => [c._id.toString(), c.count]));
 
   return departments.map((d) => ({
     id: d._id.toString(),
@@ -33,7 +53,7 @@ export async function listDepartments(organizationId) {
     description: d.description,
     parentDepartmentId: d.parentDepartmentId?.toString() || null,
     leadMemberId: d.leadMemberId?._id?.toString() || null,
-    membersCount: d.membersCount,
+    membersCount: countMap.get(d._id.toString()) || 0,
     createdAt: d.createdAt,
   }));
 }
