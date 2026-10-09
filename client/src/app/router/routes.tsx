@@ -38,6 +38,20 @@ const OrdersPage = lazyWithRetry(() => import('@/pages/app/OrdersPage'))
 const SettingsPage = lazyWithRetry(() => import('@/pages/app/SettingsPage'))
 const SupportPage = lazyWithRetry(() => import('@/pages/app/SupportPage'))
 
+// Organization & Recruitment pages
+const CreateOrganizationPage = lazyWithRetry(() => import('@/pages/app/CreateOrganizationPage'))
+const OrganizationDashboardPage = lazyWithRetry(() => import('@/pages/app/OrganizationDashboardPage'))
+const OrganizationProfilePage = lazyWithRetry(() => import('@/pages/app/OrganizationProfilePage'))
+const OrganizationMembersPage = lazyWithRetry(() => import('@/pages/app/OrganizationMembersPage'))
+const OrganizationDepartmentsPage = lazyWithRetry(() => import('@/pages/app/OrganizationDepartmentsPage'))
+const OrganizationJobsPage = lazyWithRetry(() => import('@/pages/app/OrganizationJobsPage'))
+const OrganizationApplicationsPage = lazyWithRetry(() => import('@/pages/app/OrganizationApplicationsPage'))
+const OrganizationCardsPage = lazyWithRetry(() => import('@/pages/app/OrganizationCardsPage'))
+const OrganizationAuditPage = lazyWithRetry(() => import('@/pages/app/OrganizationAuditPage'))
+const OrganizationSettingsPage = lazyWithRetry(() => import('@/pages/app/OrganizationSettingsPage'))
+const JobsPage = lazyWithRetry(() => import('@/pages/app/JobsPage'))
+const MyApplicationsPage = lazyWithRetry(() => import('@/pages/app/MyApplicationsPage'))
+
 // Admin pages
 const AdminDashboardPage = lazyWithRetry(() => import('@/pages/admin/AdminDashboardPage'))
 const AdminUsersPage = lazyWithRetry(() => import('@/pages/admin/AdminUsersPage'))
@@ -322,6 +336,106 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspended>
                     <SupportPage />
+                  </Suspended>
+                ),
+              },
+
+              // Candidate & Talent Marketplace
+              {
+                path: 'jobs',
+                element: (
+                  <Suspended>
+                    <JobsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'my-applications',
+                element: (
+                  <Suspended>
+                    <MyApplicationsPage />
+                  </Suspended>
+                ),
+              },
+
+              // Organization Management
+              {
+                path: 'organizations/create',
+                element: (
+                  <Suspended>
+                    <CreateOrganizationPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/dashboard',
+                element: (
+                  <Suspended>
+                    <OrganizationDashboardPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/profile',
+                element: (
+                  <Suspended>
+                    <OrganizationProfilePage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/members',
+                element: (
+                  <Suspended>
+                    <OrganizationMembersPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/departments',
+                element: (
+                  <Suspended>
+                    <OrganizationDepartmentsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/jobs',
+                element: (
+                  <Suspended>
+                    <OrganizationJobsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/applications',
+                element: (
+                  <Suspended>
+                    <OrganizationApplicationsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/cards',
+                element: (
+                  <Suspended>
+                    <OrganizationCardsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/audit',
+                element: (
+                  <Suspended>
+                    <OrganizationAuditPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/settings',
+                element: (
+                  <Suspended>
+                    <OrganizationSettingsPage />
                   </Suspended>
                 ),
               },

@@ -43,6 +43,11 @@ import adminRouter from './src/modules/admin/admin.routes.js';
 import privacyRouter from './src/modules/privacy/privacy.routes.js';
 import { postRoutes } from './src/modules/posts/post.routes.js';
 import { paymentRoutes } from './src/modules/payments/index.js';
+import organizationRouter from './src/modules/organizations/organization.routes.js';
+import { organizationController } from './src/modules/organizations/organization.controller.js';
+import jobRoutes from './src/modules/jobs/job.routes.js';
+import { jobController } from './src/modules/jobs/job.controller.js';
+import { authenticate } from './src/middleware/authenticate.js';
 
 // ---------------------------------------------------------------------------
 // Express application factory.
@@ -171,6 +176,20 @@ apiRouter.use('/privacy', privacyRouter);
 
 // Posts & Social Feed module
 apiRouter.use('/posts', postRoutes);
+
+// Organizations & Multi-tenancy module
+apiRouter.use('/organizations', organizationRouter);
+
+// Jobs & Recruitment module
+apiRouter.use('/jobs', jobRoutes);
+
+// Convenient User Context Aliases
+apiRouter.get('/me/organizations', authenticate, (req, res, next) =>
+  organizationController.getMyOrganizations(req, res, next),
+);
+apiRouter.get('/me/applications', authenticate, (req, res, next) =>
+  jobController.getMyApplications(req, res, next),
+);
 
 // Root vanity NFC tap endpoint (/c/:cardUid)
 app.get('/c/:cardUid', cardController.resolveTap);

@@ -116,6 +116,13 @@ const userSchema = new Schema(
       index: true,
     },
 
+    // ---- Organization context -----------------------------------------------
+    lastActiveOrganizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
+    },
+
     // ---- Soft deletion flags (set by deletion pipeline) --------------------
     deletionRequestedAt: {
       type: Date,
@@ -178,6 +185,7 @@ userSchema.methods.toSafeObject = function () {
     role: this.role || 'USER',
     appearInDiscovery: this.appearInDiscovery,
     connectionRequestVisibility: this.connectionRequestVisibility,
+    lastActiveOrganizationId: this.lastActiveOrganizationId ? this.lastActiveOrganizationId.toString() : null,
     lastLoginAt: this.lastLoginAt,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
