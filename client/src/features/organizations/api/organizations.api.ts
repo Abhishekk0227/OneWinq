@@ -91,4 +91,51 @@ export const organizationsApi = {
       `/organizations/${organizationId}/audit-logs`,
       { params }
     ),
+
+  // Profile Approvals & Moderation
+  listApprovals: (organizationId: string, params?: { status?: string; page?: number; limit?: number }) =>
+    apiClient.get<never, ApiResponse<{ approvals: ProfileApproval[]; pagination: any }>>(
+      `/organizations/${organizationId}/approvals`,
+      { params }
+    ),
+
+  submitProfileApproval: (organizationId: string, data: { memberId: string; draftProfile: any }) =>
+    apiClient.post<never, ApiResponse<{ approval: ProfileApproval }>>(
+      `/organizations/${organizationId}/approvals/submit`,
+      data
+    ),
+
+  reviewProfileApproval: (organizationId: string, approvalId: string, data: { action: 'APPROVE' | 'REJECT' | 'REQUEST_CHANGES'; reviewNote?: string }) =>
+    apiClient.post<never, ApiResponse<{ approval: ProfileApproval; member: OrganizationMember }>>(
+      `/organizations/${organizationId}/approvals/${approvalId}/review`,
+      data
+    ),
+
+  // Enterprise Events & Ticketing
+  listEvents: (organizationId: string, params?: { status?: string; page?: number; limit?: number }) =>
+    apiClient.get<never, ApiResponse<{ events: EnterpriseEvent[]; pagination: any }>>(
+      `/organizations/${organizationId}/events`,
+      { params }
+    ),
+
+  createEvent: (organizationId: string, data: Partial<EnterpriseEvent>) =>
+    apiClient.post<never, ApiResponse<{ event: EnterpriseEvent }>>(
+      `/organizations/${organizationId}/events`,
+      data
+    ),
+
+  rsvpEvent: (organizationId: string, eventId: string) =>
+    apiClient.post<never, ApiResponse<{ registration: EventTicketPass }>>(
+      `/organizations/${organizationId}/events/${eventId}/rsvp`
+    ),
+
+  cancelEventRsvp: (organizationId: string, eventId: string) =>
+    apiClient.post<never, ApiResponse<{ success: boolean }>>(
+      `/organizations/${organizationId}/events/${eventId}/cancel`
+    ),
+
+  getMyEventTickets: (organizationId: string) =>
+    apiClient.get<never, ApiResponse<{ tickets: EventTicketPass[] }>>(
+      `/organizations/${organizationId}/events/my-tickets`
+    ),
 };

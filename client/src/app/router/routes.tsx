@@ -51,6 +51,9 @@ const OrganizationAuditPage = lazyWithRetry(() => import('@/pages/app/Organizati
 const OrganizationSettingsPage = lazyWithRetry(() => import('@/pages/app/OrganizationSettingsPage'))
 const JobsPage = lazyWithRetry(() => import('@/pages/app/JobsPage'))
 const MyApplicationsPage = lazyWithRetry(() => import('@/pages/app/MyApplicationsPage'))
+const OrganizationApprovalsPage = lazyWithRetry(() => import('@/pages/app/OrganizationApprovalsPage'))
+const OrganizationEventsPage = lazyWithRetry(() => import('@/pages/app/OrganizationEventsPage'))
+const CompanyShowcasePage = lazyWithRetry(() => import('@/pages/public/CompanyShowcasePage'))
 
 // Admin pages
 const AdminDashboardPage = lazyWithRetry(() => import('@/pages/admin/AdminDashboardPage'))
@@ -85,6 +88,16 @@ export const router = createBrowserRouter([
         element: (
           <Suspended>
             <PublicProfilePage />
+          </Suspended>
+        ),
+      },
+
+      // Public Company Brand Showcase
+      {
+        path: 'company/:slug',
+        element: (
+          <Suspended>
+            <CompanyShowcasePage />
           </Suspended>
         ),
       },
@@ -388,6 +401,22 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspended>
                     <OrganizationMembersPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/approvals',
+                element: (
+                  <Suspended>
+                    <OrganizationApprovalsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/events',
+                element: (
+                  <Suspended>
+                    <OrganizationEventsPage />
                   </Suspended>
                 ),
               },

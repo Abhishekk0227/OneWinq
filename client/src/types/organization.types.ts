@@ -6,6 +6,10 @@ import type {
   EmploymentType,
   WorkplaceType,
   ApplicationStatus,
+  ProfileApprovalStatus,
+  EventStatus,
+  EventEligibilityType,
+  EventRegistrationStatus,
 } from '@/constants/app.constants';
 
 export interface OrganizationLocation {
@@ -26,6 +30,37 @@ export interface OrganizationSettings {
   requireApprovalForCards?: boolean;
   isPublicDirectory?: boolean;
   defaultTemplateId?: string | null;
+}
+
+export interface OrganizationProduct {
+  name: string;
+  description?: string;
+  imageUrl?: string | null;
+  linkUrl?: string;
+  tag?: string;
+}
+
+export interface OrganizationProject {
+  title: string;
+  description?: string;
+  client?: string;
+  coverUrl?: string | null;
+  linkUrl?: string;
+  metrics?: string;
+}
+
+export interface OrganizationAchievement {
+  title: string;
+  issuer?: string;
+  year?: number | null;
+  description?: string;
+  badgeUrl?: string | null;
+}
+
+export interface OrganizationMediaItem {
+  type: 'IMAGE' | 'VIDEO';
+  url: string;
+  caption?: string;
 }
 
 export interface Organization {
@@ -52,6 +87,10 @@ export interface Organization {
   membersCount: number;
   jobsCount: number;
   settings?: OrganizationSettings;
+  products?: OrganizationProduct[];
+  projects?: OrganizationProject[];
+  achievements?: OrganizationAchievement[];
+  mediaGallery?: OrganizationMediaItem[];
   createdAt: string;
   updatedAt: string;
 }
@@ -101,7 +140,90 @@ export interface OrganizationMember {
   employeeId?: string;
   department?: { id: string; name: string; code: string } | null;
   status: string;
+  profileCompletionScore?: number;
+  approvalStatus?: ProfileApprovalStatus;
+  isLocked?: boolean;
+  draftProfile?: any;
+  publishedProfile?: any;
   joinedAt: string;
+}
+
+export interface ProfileApprovalDiff {
+  field: string;
+  oldValue: any;
+  newValue: any;
+}
+
+export interface ProfileApproval {
+  id: string;
+  memberId: string;
+  user?: {
+    id: string;
+    displayName: string;
+    username: string;
+    email: string;
+    avatarUrl?: string | null;
+  } | null;
+  submittedBy?: {
+    id: string;
+    displayName: string;
+  } | null;
+  status: ProfileApprovalStatus;
+  diffSummary: ProfileApprovalDiff[];
+  draftSnapshot: any;
+  reviewer?: {
+    id: string;
+    displayName: string;
+  } | null;
+  reviewNote?: string;
+  reviewedAt?: string | null;
+  createdAt: string;
+}
+
+export interface EventLocation {
+  type: 'PHYSICAL' | 'VIRTUAL' | 'HYBRID';
+  venue?: string;
+  meetingUrl?: string;
+}
+
+export interface EventEligibility {
+  type: EventEligibilityType;
+  departmentIds?: string[];
+  roleIds?: string[];
+}
+
+export interface EnterpriseEvent {
+  id: string;
+  title: string;
+  slug?: string;
+  category: string;
+  description?: string;
+  bannerUrl?: string | null;
+  location: EventLocation;
+  startDate: string;
+  endDate: string;
+  maxCapacity?: number | null;
+  registeredCount: number;
+  eligibility: EventEligibility;
+  status: EventStatus;
+  isEligible?: boolean;
+  createdAt: string;
+}
+
+export interface EventTicketPass {
+  id: string;
+  ticketCode: string;
+  status: EventRegistrationStatus;
+  registeredAt: string;
+  event?: {
+    id: string;
+    title: string;
+    category: string;
+    bannerUrl?: string | null;
+    location: EventLocation;
+    startDate: string;
+    endDate: string;
+  } | null;
 }
 
 export interface JobSalary {

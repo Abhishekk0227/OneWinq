@@ -157,6 +157,64 @@ const organizationSchema = new Schema(
       type: organizationSettingsSchema,
       default: () => ({}),
     },
+    // ---- 8-Section Company Brand Showcase -----------------------------------
+    products: {
+      type: [
+        {
+          name: { type: String, trim: true, required: true },
+          description: { type: String, trim: true, default: '' },
+          imageUrl: { type: String, default: null },
+          linkUrl: { type: String, default: '' },
+          tag: { type: String, trim: true, default: '' },
+        },
+      ],
+      default: [],
+    },
+    projects: {
+      type: [
+        {
+          title: { type: String, trim: true, required: true },
+          description: { type: String, trim: true, default: '' },
+          client: { type: String, trim: true, default: '' },
+          coverUrl: { type: String, default: null },
+          linkUrl: { type: String, default: '' },
+          metrics: { type: String, trim: true, default: '' },
+        },
+      ],
+      default: [],
+    },
+    achievements: {
+      type: [
+        {
+          title: { type: String, trim: true, required: true },
+          issuer: { type: String, trim: true, default: '' },
+          year: { type: Number, default: null },
+          description: { type: String, trim: true, default: '' },
+          badgeUrl: { type: String, default: null },
+        },
+      ],
+      default: [],
+    },
+    mediaGallery: {
+      type: [
+        {
+          type: { type: String, enum: ['IMAGE', 'VIDEO'], default: 'IMAGE' },
+          url: { type: String, required: true },
+          caption: { type: String, trim: true, default: '' },
+        },
+      ],
+      default: [],
+    },
+    showcaseSections: {
+      type: [
+        {
+          title: { type: String, trim: true, required: true },
+          content: { type: String, trim: true, default: '' },
+          sortOrder: { type: Number, default: 0 },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -194,6 +252,11 @@ organizationSchema.methods.toSafeObject = function () {
     membersCount: this.membersCount,
     jobsCount: this.jobsCount,
     settings: this.settings,
+    products: this.products || [],
+    projects: this.projects || [],
+    achievements: this.achievements || [],
+    mediaGallery: this.mediaGallery || [],
+    showcaseSections: this.showcaseSections || [],
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   };

@@ -137,6 +137,20 @@ export default function OrganizationMembersPage() {
                       <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
                         {member.role}
                       </Badge>
+                      {member.approvalStatus && (
+                        <Badge
+                          variant="outline"
+                          className={
+                            member.approvalStatus === 'PENDING_REVIEW'
+                              ? 'bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]'
+                              : member.approvalStatus === 'APPROVED'
+                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]'
+                              : 'bg-muted text-muted-foreground text-[10px]'
+                          }
+                        >
+                          {member.approvalStatus.replace('_', ' ')}
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">
                       {member.jobTitle || 'Team Member'} • {member.email}
@@ -144,18 +158,34 @@ export default function OrganizationMembersPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {member.role !== 'OWNER' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveMember(member.id)}
-                      className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                      title="Remove member"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                <div className="flex items-center gap-4">
+                  {/* Automated Profile Completion Score */}
+                  <div className="hidden sm:flex flex-col items-end gap-1 min-w-[90px]">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+                      <span>{member.profileCompletionScore ?? 0}%</span>
+                      <span className="text-[10px] text-muted-foreground">Profile</span>
+                    </div>
+                    <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        style={{ width: `${member.profileCompletionScore ?? 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {member.role !== 'OWNER' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                        title="Remove member"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

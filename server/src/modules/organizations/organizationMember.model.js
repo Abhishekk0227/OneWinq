@@ -67,6 +67,29 @@ const organizationMemberSchema = new Schema(
       type: [String],
       default: [], // Specific override permissions if customized
     },
+    profileCompletionScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    approvalStatus: {
+      type: String,
+      default: 'DRAFT',
+      index: true,
+    },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
+    draftProfile: {
+      type: Schema.Types.Mixed,
+      default: () => ({}),
+    },
+    publishedProfile: {
+      type: Schema.Types.Mixed,
+      default: () => ({}),
+    },
     metadata: {
       type: Schema.Types.Mixed,
       default: () => ({}),
@@ -96,6 +119,11 @@ organizationMemberSchema.methods.toSafeObject = function () {
     joinedAt: this.joinedAt,
     invitedBy: this.invitedBy?.toString ? this.invitedBy.toString() : null,
     permissions: this.permissions,
+    profileCompletionScore: this.profileCompletionScore ?? 0,
+    approvalStatus: this.approvalStatus || 'DRAFT',
+    isLocked: Boolean(this.isLocked),
+    draftProfile: this.draftProfile || {},
+    publishedProfile: this.publishedProfile || {},
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   };

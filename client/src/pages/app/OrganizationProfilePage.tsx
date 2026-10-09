@@ -17,6 +17,10 @@ import {
   Trash2,
   Link as LinkIcon,
   Sparkles,
+  Plus,
+  Package,
+  Award,
+  Layers,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +36,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
 import { ORGANIZATION_TYPE } from '@/constants/app.constants';
+import type { OrganizationProduct, OrganizationProject, OrganizationAchievement } from '@/types/organization.types';
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(120),
@@ -75,6 +80,15 @@ export default function OrganizationProfilePage() {
   const [uploadingLogo, setUploadingLogo] = React.useState(false);
   const [uploadingBanner, setUploadingBanner] = React.useState(false);
   const [showManualUrls, setShowManualUrls] = React.useState(false);
+
+  const [products, setProducts] = React.useState<OrganizationProduct[]>([]);
+  const [projects, setProjects] = React.useState<OrganizationProject[]>([]);
+  const [achievements, setAchievements] = React.useState<OrganizationAchievement[]>([]);
+  const [showcaseDirty, setShowcaseDirty] = React.useState(false);
+
+  const [newProduct, setNewProduct] = React.useState({ name: '', description: '', linkUrl: '', tag: '' });
+  const [newProject, setNewProject] = React.useState({ title: '', description: '', client: '', linkUrl: '', metrics: '' });
+  const [newAchievement, setNewAchievement] = React.useState({ title: '', issuer: '', year: '', description: '' });
 
   const logoFileInputRef = React.useRef<HTMLInputElement>(null);
   const bannerFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -131,8 +145,66 @@ export default function OrganizationProfilePage() {
         requireApprovalForCards: org.settings?.requireApprovalForCards ?? true,
         isPublicDirectory: org.settings?.isPublicDirectory ?? true,
       });
+
+      setProducts(org.products || []);
+      setProjects(org.projects || []);
+      setAchievements(org.achievements || []);
+      setShowcaseDirty(false);
     }
   }, [org, reset]);
+
+  const handleAddProduct = () => {
+    if (!newProduct.name.trim()) {
+      toast.error('Product / Service name is required');
+      return;
+    }
+    setProducts((prev) => [...prev, { ...newProduct }]);
+    setNewProduct({ name: '', description: '', linkUrl: '', tag: '' });
+    setShowcaseDirty(true);
+  };
+
+  const handleRemoveProduct = (index: number) => {
+    setProducts((prev) => prev.filter((_, i) => i !== index));
+    setShowcaseDirty(true);
+  };
+
+  const handleAddProject = () => {
+    if (!newProject.title.trim()) {
+      toast.error('Project title is required');
+      return;
+    }
+    setProjects((prev) => [...prev, { ...newProject }]);
+    setNewProject({ title: '', description: '', client: '', linkUrl: '', metrics: '' });
+    setShowcaseDirty(true);
+  };
+
+  const handleRemoveProject = (index: number) => {
+    setProjects((prev) => prev.filter((_, i) => i !== index));
+    setShowcaseDirty(true);
+  };
+
+  const handleAddAchievement = () => {
+    if (!newAchievement.title.trim()) {
+      toast.error('Achievement title is required');
+      return;
+    }
+    setAchievements((prev) => [
+      ...prev,
+      {
+        title: newAchievement.title,
+        issuer: newAchievement.issuer,
+        year: newAchievement.year ? Number(newAchievement.year) : null,
+        description: newAchievement.description,
+      },
+    ]);
+    setNewAchievement({ title: '', issuer: '', year: '', description: '' });
+    setShowcaseDirty(true);
+  };
+
+  const handleRemoveAchievement = (index: number) => {
+    setAchievements((prev) => prev.filter((_, i) => i !== index));
+    setShowcaseDirty(true);
+  };
 
   // Upload Handlers
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +277,9 @@ export default function OrganizationProfilePage() {
           country: data.country,
           isRemoteFriendly: data.isRemoteFriendly,
         },
+        products,
+        projects,
+        achievements,
         settings: {
           allowMemberJobPosting: data.allowMemberJobPosting,
           requireApprovalForCards: data.requireApprovalForCards,
@@ -215,6 +290,7 @@ export default function OrganizationProfilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org', orgId] });
+      setShowcaseDirty(false);
       toast.success('Organization profile updated successfully');
     },
     onError: (err: any) => {
@@ -366,10 +442,11 @@ export default function OrganizationProfilePage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Tabs defaultValue="branding">
-          <TabsList className="grid grid-cols-4 w-full max-w-xl">
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="branding">Branding & Media</TabsTrigger>
             <TabsTrigger value="contact">Location & Contact</TabsTrigger>
+            <TabsTrigger value="showcase">Showcase</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -702,7 +779,268 @@ export default function OrganizationProfilePage() {
             </Card>
           </TabsContent>
 
-          {/* Tab 4: Governance & Settings */}
+          {/* Tab 4: Company Showcase & Offerings */}
+          <TabsContent value="showcase" className="mt-6 space-y-6">
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Live Public Showcase Experience</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Visitors can explore your 8-section company landing page at /company/{org?.slug}
+                    </p>
+                  </div>
+                </div>
+                {org?.slug && (
+                  <a
+                    href={`/company/${org.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs shrink-0"
+                  >
+                    View Live Showcase <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Products & Services Sub-manager */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-base">Products & Offerings ({products.length})</CardTitle>
+                      <CardDescription>Featured products and solutions created by your team.</CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {products.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {products.map((prod, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-border bg-card/60 flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm truncate">{prod.name}</span>
+                            {prod.tag && <Badge variant="outline" className="text-[10px] py-0">{prod.tag}</Badge>}
+                          </div>
+                          {prod.description && <p className="text-xs text-muted-foreground line-clamp-2">{prod.description}</p>}
+                          {prod.linkUrl && (
+                            <a href={prod.linkUrl} target="_blank" rel="noreferrer" className="text-[11px] text-primary hover:underline inline-flex items-center gap-1">
+                              Visit Link <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveProduct(idx)}
+                          className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add product form */}
+                <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Plus className="h-3.5 w-3.5 text-primary" /> Add Product or Service
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <Input
+                      placeholder="Product Name *"
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Tag (e.g. SaaS, Hardware)"
+                      value={newProduct.tag}
+                      onChange={(e) => setNewProduct({ ...newProduct, tag: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Direct URL (optional)"
+                      value={newProduct.linkUrl}
+                      onChange={(e) => setNewProduct({ ...newProduct, linkUrl: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    placeholder="Short description of this product or solution..."
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" size="sm" variant="outline" onClick={handleAddProduct} className="text-xs">
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Product
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Projects & Case Studies Sub-manager */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-base">Projects & Client Case Studies ({projects.length})</CardTitle>
+                      <CardDescription>Highlight high-impact initiatives and measurable outcomes.</CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {projects.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {projects.map((proj, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-border bg-card/60 flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm truncate">{proj.title}</span>
+                            {proj.client && <Badge variant="secondary" className="text-[10px] py-0">{proj.client}</Badge>}
+                          </div>
+                          {proj.metrics && <p className="text-xs font-medium text-primary">{proj.metrics}</p>}
+                          {proj.description && <p className="text-xs text-muted-foreground line-clamp-2">{proj.description}</p>}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveProject(idx)}
+                          className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add project form */}
+                <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Plus className="h-3.5 w-3.5 text-primary" /> Add Project or Case Study
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <Input
+                      placeholder="Project Title *"
+                      value={newProject.title}
+                      onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Client / Beneficiary"
+                      value={newProject.client}
+                      onChange={(e) => setNewProject({ ...newProject, client: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Key Metric (e.g. +300% ROI)"
+                      value={newProject.metrics}
+                      onChange={(e) => setNewProject({ ...newProject, metrics: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    placeholder="Brief description of the work and impact achieved..."
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" size="sm" variant="outline" onClick={handleAddProject} className="text-xs">
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Project
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Achievements & Awards Sub-manager */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-base">Achievements & Certifications ({achievements.length})</CardTitle>
+                      <CardDescription>Industry awards, ISO accreditations, and official milestones.</CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {achievements.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {achievements.map((ach, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl border border-border bg-card/60 flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0">
+                          <span className="font-semibold text-sm block truncate">{ach.title}</span>
+                          <p className="text-xs text-muted-foreground">
+                            {ach.issuer || 'Awarded'}{ach.year ? ` • ${ach.year}` : ''}
+                          </p>
+                          {ach.description && <p className="text-xs text-muted-foreground line-clamp-2">{ach.description}</p>}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveAchievement(idx)}
+                          className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 shrink-0"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add achievement form */}
+                <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3">
+                  <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Plus className="h-3.5 w-3.5 text-primary" /> Add Milestone / Accreditation
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <Input
+                      placeholder="Title or Honor *"
+                      value={newAchievement.title}
+                      onChange={(e) => setNewAchievement({ ...newAchievement, title: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Awarding Body / Issuer"
+                      value={newAchievement.issuer}
+                      onChange={(e) => setNewAchievement({ ...newAchievement, issuer: e.target.value })}
+                    />
+                    <Input
+                      placeholder="Year (e.g. 2024)"
+                      type="number"
+                      value={newAchievement.year}
+                      onChange={(e) => setNewAchievement({ ...newAchievement, year: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    placeholder="Short description or criteria met..."
+                    value={newAchievement.description}
+                    onChange={(e) => setNewAchievement({ ...newAchievement, description: e.target.value })}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" size="sm" variant="outline" onClick={handleAddAchievement} className="text-xs">
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Achievement
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 5: Governance & Settings */}
           <TabsContent value="settings" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
@@ -762,7 +1100,7 @@ export default function OrganizationProfilePage() {
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <Button
             type="submit"
-            disabled={updateMutation.isPending || !isDirty}
+            disabled={updateMutation.isPending || (!isDirty && !showcaseDirty)}
             className="px-6 py-2.5 font-semibold"
           >
             {updateMutation.isPending ? (
