@@ -227,6 +227,7 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
     expiresAt,
   });
 
+  const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
   const orgName = organization?.name || 'Organization';
   const inviteLink = `${process.env.APP_URL || 'https://one-winq.vercel.app'}/invitation?token=${rawToken}`;
 
