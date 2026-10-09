@@ -45,27 +45,43 @@ export default function OrganizationMembersPage() {
 
   const members = (data as any)?.data?.members || [];
 
+  const [lastInviteLink, setLastInviteLink] = React.useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = React.useState(false);
+
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
 
     try {
       setIsInviting(true);
-      const res = await organizationsApi.inviteMember(orgId, {
+      const res: any = await organizationsApi.inviteMember(orgId, {
         email: inviteEmail.trim(),
         role: inviteRole,
         jobTitle: inviteTitle.trim(),
       });
+      const generatedLink = res?.data?.inviteLink || res?.inviteLink;
+      if (generatedLink) {
+        setLastInviteLink(generatedLink);
+      } else {
+        setIsInviteOpen(false);
+      }
       toast.success('Invitation sent successfully!');
-      setIsInviteOpen(false);
       setInviteEmail('');
       setInviteTitle('');
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'members'] });
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitation');
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to send invitation');
     } finally {
       setIsInviting(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    if (!lastInviteLink) return;
+    navigator.clipboard.writeText(lastInviteLink);
+    setCopiedLink(true);
+    toast.success('Invitation link copied to clipboard!');
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -197,67 +213,112 @@ export default function OrganizationMembersPage() {
       {isInviteOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in-50 zoom-in-95">
-            <h3 className="text-lg font-bold">Invite New Member</h3>
-            <p className="text-xs text-muted-foreground">
-              Send an email invitation link to join {activeContext.name}.
-            </p>
+            {lastInviteLink ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                    <Check className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Invitation Created!</h3>
+                    <p className="text-xs text-muted-foreground">
+                      An invitation email has been dispatched. You can also copy and share this link directly:
+                    </p>
+                  </div>
+                </div>
 
-            <form onSubmit={handleInvite} className="space-y-3.5">
-              <div>
-                <label className="text-xs font-semibold mb-1 block">Email Address *</label>
-                <Input
-                  type="email"
-                  placeholder="colleague@example.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
-                />
-              </div>
+                <div className="flex items-center gap-2">
+                  <Input value={lastInviteLink} readOnly className="font-mono text-xs select-all bg-muted/40" />
+                  <Button type="button" size="sm" onClick={handleCopyLink} className="shrink-0 font-semibold">
+                    {copiedLink ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
 
-              <div>
-                <label className="text-xs font-semibold mb-1 block">Role</label>
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value={ORGANIZATION_ROLE.MEMBER}>Member / Employee</option>
-                  <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager</option>
-                  <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR / Recruiter</option>
-                  <option value={ORGANIZATION_ROLE.ADMIN}>Administrator</option>
-                </select>
+                <div className="pt-2 flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setIsInviteOpen(false);
+                      setLastInviteLink(null);
+                    }}
+                  >
+                    Done
+                  </Button>
+                </div>
               </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold">Invite New Member</h3>
+                <p className="text-xs text-muted-foreground">
+                  Send an email invitation link to join {activeContext.name}.
+                </p>
 
-              <div>
-                <label className="text-xs font-semibold mb-1 block">Job Title / Role</label>
-                <Input
-                  placeholder="e.g. Senior Software Engineer"
-                  value={inviteTitle}
-                  onChange={(e) => setInviteTitle(e.target.value)}
-                />
-              </div>
+                <form onSubmit={handleInvite} className="space-y-3.5">
+                  <div>
+                    <label className="text-xs font-semibold mb-1 block">Email Address *</label>
+                    <Input
+                      type="email"
+                      placeholder="colleague@example.com"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      required
+                    />
+                  </div>
 
-              <div className="pt-2 flex justify-end gap-2.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsInviteOpen(false)}
-                  disabled={isInviting}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isInviting}>
-                  {isInviting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    'Send Invitation'
-                  )}
-                </Button>
-              </div>
-            </form>
+                  <div>
+                    <label className="text-xs font-semibold mb-1 block">Role</label>
+                    <select
+                      value={inviteRole}
+                      onChange={(e) => setInviteRole(e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value={ORGANIZATION_ROLE.MEMBER}>Member / Employee</option>
+                      <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager</option>
+                      <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR / Recruiter</option>
+                      <option value={ORGANIZATION_ROLE.ADMIN}>Administrator</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold mb-1 block">Job Title / Role</label>
+                    <Input
+                      placeholder="e.g. Senior Software Engineer"
+                      value={inviteTitle}
+                      onChange={(e) => setInviteTitle(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="pt-2 flex justify-end gap-2.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsInviteOpen(false)}
+                      disabled={isInviting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isInviting}>
+                      {isInviting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Invitation'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

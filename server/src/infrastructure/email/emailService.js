@@ -210,6 +210,13 @@ class EmailService {
       false,
     );
   }
+
+  /**
+   * Universal send alias — ensures any caller using emailService.send(...) succeeds without error.
+   */
+  async send(options) {
+    return this.sendNotificationEmail(options);
+  }
 }
 
 // Singleton — one adapter instance per process

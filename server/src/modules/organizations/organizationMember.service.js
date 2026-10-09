@@ -227,30 +227,32 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
     expiresAt,
   });
 
-  const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
-
-  // Send invitation email asynchronously (non-blocking)
+  const orgName = organization?.name || 'Organization';
   const inviteLink = `${process.env.APP_URL || 'https://one-winq.vercel.app'}/invitation?token=${rawToken}`;
-  emailService
-    .send({
-      to: normalizedEmail,
-      subject: `You have been invited to join ${organization.name} on OneWinq`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>Join ${organization.name} on OneWinq</h2>
-          <p>You have been invited to join <strong>${organization.name}</strong> as a <strong>${role}</strong>.</p>
-          <div style="margin: 25px 0;">
-            <a href="${inviteLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-              Accept Invitation
-            </a>
+
+  // Send invitation email safely (non-blocking)
+  Promise.resolve()
+    .then(() =>
+      emailService.sendNotificationEmail({
+        to: normalizedEmail,
+        subject: `You have been invited to join ${orgName} on OneWinq`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2>Join ${orgName} on OneWinq</h2>
+            <p>You have been invited to join <strong>${orgName}</strong> as a <strong>${role}</strong>.</p>
+            <div style="margin: 25px 0;">
+              <a href="${inviteLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+                Accept Invitation
+              </a>
+            </div>
+            <p style="color: #64748b; font-size: 13px;">This invitation link will expire in 7 days.</p>
           </div>
-          <p style="color: #64748b; font-size: 13px;">This invitation link will expire in 7 days.</p>
-        </div>
-      `,
-      text: `You have been invited to join ${organization.name} on OneWinq as a ${role}. Accept your invitation here: ${inviteLink}`,
-    })
+        `,
+        text: `You have been invited to join ${orgName} on OneWinq as a ${role}. Accept your invitation here: ${inviteLink}`,
+      }),
+    )
     .catch((err) => {
-      logger.error('[Organization] Failed sending invitation email', { error: err.message, email: normalizedEmail });
+      logger.error('[Organization] Failed sending invitation email', { error: err?.message, email: normalizedEmail });
     });
 
   return {

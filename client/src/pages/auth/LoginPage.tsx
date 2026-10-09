@@ -36,7 +36,8 @@ export default function LoginPage() {
     },
   })
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/app'
+  const redirectParam = new URLSearchParams(location.search).get('redirect')
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || redirectParam || '/app'
 
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null)
