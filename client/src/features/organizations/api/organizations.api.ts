@@ -138,4 +138,27 @@ export const organizationsApi = {
     apiClient.get<never, ApiResponse<{ tickets: EventTicketPass[] }>>(
       `/organizations/${organizationId}/events/my-tickets`
     ),
+
+  // Custom Roles & Permissions
+  listRoles: (organizationId: string) =>
+    apiClient.get<never, ApiResponse<{ roles: OrganizationRoleItem[] }>>(
+      `/organizations/${organizationId}/roles`
+    ),
+
+  createRole: (organizationId: string, data: Partial<OrganizationRoleItem>) =>
+    apiClient.post<never, ApiResponse<{ role: OrganizationRoleItem }>>(
+      `/organizations/${organizationId}/roles`,
+      data
+    ),
+
+  updateRole: (organizationId: string, roleId: string, data: Partial<OrganizationRoleItem>) =>
+    apiClient.put<never, ApiResponse<{ role: OrganizationRoleItem }>>(
+      `/organizations/${organizationId}/roles/${roleId}`,
+      data
+    ),
+
+  deleteRole: (organizationId: string, roleId: string) =>
+    apiClient.delete<never, ApiResponse<{ deleted: boolean; roleId: string }>>(
+      `/organizations/${organizationId}/roles/${roleId}`
+    ),
 };

@@ -33,6 +33,9 @@ const settingsSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Only lowercase alphanumeric and hyphens'),
   allowMemberJobPosting: z.boolean(),
   requireApprovalForCards: z.boolean(),
+  requireApprovalForProfileChanges: z.boolean(),
+  allowCustomThemes: z.boolean(),
+  defaultVisibility: z.enum(['public', 'internal', 'private']),
   isPublicDirectory: z.boolean(),
 });
 
@@ -62,6 +65,9 @@ export default function OrganizationSettingsPage() {
       slug: '',
       allowMemberJobPosting: true,
       requireApprovalForCards: true,
+      requireApprovalForProfileChanges: true,
+      allowCustomThemes: true,
+      defaultVisibility: 'public',
       isPublicDirectory: true,
     },
   });
@@ -72,6 +78,9 @@ export default function OrganizationSettingsPage() {
         slug: org.slug || '',
         allowMemberJobPosting: org.settings?.allowMemberJobPosting ?? true,
         requireApprovalForCards: org.settings?.requireApprovalForCards ?? true,
+        requireApprovalForProfileChanges: org.settings?.requireApprovalForProfileChanges ?? true,
+        allowCustomThemes: org.settings?.allowCustomThemes ?? true,
+        defaultVisibility: org.settings?.defaultVisibility || 'public',
         isPublicDirectory: org.settings?.isPublicDirectory ?? true,
       });
     }
@@ -84,6 +93,9 @@ export default function OrganizationSettingsPage() {
         settings: {
           allowMemberJobPosting: data.allowMemberJobPosting,
           requireApprovalForCards: data.requireApprovalForCards,
+          requireApprovalForProfileChanges: data.requireApprovalForProfileChanges,
+          allowCustomThemes: data.allowCustomThemes,
+          defaultVisibility: data.defaultVisibility,
           isPublicDirectory: data.isPublicDirectory,
         },
       });
@@ -166,10 +178,54 @@ export default function OrganizationSettingsPage() {
             <label className="flex items-start gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
               <input
                 type="checkbox"
+                {...register('requireApprovalForProfileChanges')}
+                className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
+              />
+              <div>
+                <span className="text-sm font-semibold">Enforce Profile Change Moderation Workflow</span>
+                <p className="text-xs text-muted-foreground">
+                  When enabled, employee/member profile edits are saved in a draft sandbox and require administrator sign-off before being published live.
+                </p>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
+              <input
+                type="checkbox"
+                {...register('allowCustomThemes')}
+                className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
+              />
+              <div>
+                <span className="text-sm font-semibold">Allow Members to Customize Profile Color Themes</span>
+                <p className="text-xs text-muted-foreground">
+                  When disabled, all member cards strictly adhere to corporate brand colors and layouts.
+                </p>
+              </div>
+            </label>
+
+            <div className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-1.5">
+              <label className="text-sm font-semibold block text-foreground">
+                Default Member Profile Visibility
+              </label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Governs initial exposure for newly onboarded staff and students.
+              </p>
+              <select
+                {...register('defaultVisibility')}
+                className="w-full sm:w-64 h-9 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="public">Public (Worldwide discovery & NFC taps)</option>
+                <option value="internal">Internal (Authenticated organization members only)</option>
+                <option value="private">Private (Restricted to member and admins)</option>
+              </select>
+            </div>
+
+            <label className="flex items-start gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
+              <input
+                type="checkbox"
                 {...register('allowMemberJobPosting')}
                 className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-              >
-              </input>
+              />
               <div>
                 <span className="text-sm font-semibold">Allow Department Leads to Post Jobs</span>
                 <p className="text-xs text-muted-foreground">
@@ -183,8 +239,7 @@ export default function OrganizationSettingsPage() {
                 type="checkbox"
                 {...register('requireApprovalForCards')}
                 className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-              >
-              </input>
+              />
               <div>
                 <span className="text-sm font-semibold">Require Approval for Employee Cards</span>
                 <p className="text-xs text-muted-foreground">
@@ -198,8 +253,7 @@ export default function OrganizationSettingsPage() {
                 type="checkbox"
                 {...register('isPublicDirectory')}
                 className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-              >
-              </input>
+              />
               <div>
                 <span className="text-sm font-semibold">Public Enterprise Directory</span>
                 <p className="text-xs text-muted-foreground">

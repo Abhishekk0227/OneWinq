@@ -17,7 +17,55 @@ export interface OrganizationLocation {
   city?: string;
   state?: string;
   country?: string;
+  zipCode?: string;
   isRemoteFriendly?: boolean;
+}
+
+export interface OrganizationContact {
+  email?: string;
+  phone?: string;
+  supportEmail?: string;
+  workingHours?: string;
+  directionsUrl?: string;
+}
+
+export interface OrganizationCustomMetric {
+  label: string;
+  value: string;
+}
+
+export interface OrganizationOverviewStats {
+  foundedYear?: number | null;
+  locationShort?: string;
+  teamSize?: string;
+  customerBase?: string;
+  customMetrics?: OrganizationCustomMetric[];
+}
+
+export interface OrganizationValueItem {
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface OrganizationAboutStory {
+  aboutCompany?: string;
+  mission?: string;
+  vision?: string;
+  story?: string;
+  values?: OrganizationValueItem[];
+}
+
+export interface OrganizationBranding {
+  logoUrl?: string | null;
+  coverUrl?: string | null;
+  faviconUrl?: string | null;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  fontHeading?: string;
+  fontBody?: string;
+  themeMode?: 'light' | 'dark' | 'system';
 }
 
 export interface OrganizationSocialLink {
@@ -28,16 +76,25 @@ export interface OrganizationSocialLink {
 export interface OrganizationSettings {
   allowMemberJobPosting?: boolean;
   requireApprovalForCards?: boolean;
+  requireApprovalForProfileChanges?: boolean;
+  allowCustomThemes?: boolean;
+  defaultVisibility?: 'public' | 'internal' | 'private';
   isPublicDirectory?: boolean;
   defaultTemplateId?: string | null;
 }
 
 export interface OrganizationProduct {
   name: string;
+  title?: string;
   description?: string;
   imageUrl?: string | null;
   linkUrl?: string;
+  ctaUrl?: string;
   tag?: string;
+  category?: string;
+  badge?: string;
+  order?: number;
+  isVisible?: boolean;
 }
 
 export interface OrganizationProject {
@@ -45,22 +102,50 @@ export interface OrganizationProject {
   description?: string;
   client?: string;
   coverUrl?: string | null;
+  imageUrl?: string | null;
   linkUrl?: string;
+  projectUrl?: string;
   metrics?: string;
+  category?: string;
+  status?: 'all' | 'ongoing' | 'completed';
+  order?: number;
+  isVisible?: boolean;
 }
 
 export interface OrganizationAchievement {
   title: string;
+  subtitle?: string;
   issuer?: string;
   year?: number | null;
   description?: string;
   badgeUrl?: string | null;
+  metric?: string;
+  order?: number;
+  isVisible?: boolean;
 }
 
 export interface OrganizationMediaItem {
-  type: 'IMAGE' | 'VIDEO';
+  title?: string;
+  type?: 'all' | 'photo' | 'video' | 'news' | 'event' | 'IMAGE' | 'VIDEO';
   url: string;
+  thumbnailUrl?: string | null;
+  date?: string;
   caption?: string;
+  description?: string;
+  order?: number;
+  isVisible?: boolean;
+}
+
+export interface OrganizationRoleItem {
+  _id?: string;
+  id?: string;
+  name: string;
+  displayName: string;
+  description?: string;
+  permissions: string[];
+  isSystem?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Organization {
@@ -78,6 +163,10 @@ export interface Organization {
   size?: string;
   foundedYear?: number | null;
   location?: OrganizationLocation;
+  contact?: OrganizationContact;
+  overviewStats?: OrganizationOverviewStats;
+  about?: OrganizationAboutStory;
+  branding?: OrganizationBranding;
   contactEmail?: string;
   contactPhone?: string;
   socialLinks?: OrganizationSocialLink[];

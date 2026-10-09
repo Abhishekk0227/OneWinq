@@ -9,7 +9,73 @@ const organizationLocationSchema = new Schema(
     city: { type: String, trim: true, default: '' },
     state: { type: String, trim: true, default: '' },
     country: { type: String, trim: true, default: '' },
+    zipCode: { type: String, trim: true, default: '' },
     isRemoteFriendly: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
+const organizationContactSchema = new Schema(
+  {
+    email: { type: String, trim: true, default: '' },
+    phone: { type: String, trim: true, default: '' },
+    supportEmail: { type: String, trim: true, default: '' },
+    workingHours: { type: String, trim: true, default: '' },
+    directionsUrl: { type: String, trim: true, default: '' },
+  },
+  { _id: false },
+);
+
+const organizationOverviewStatsSchema = new Schema(
+  {
+    foundedYear: { type: Number, default: null },
+    locationShort: { type: String, trim: true, default: '' },
+    teamSize: { type: String, trim: true, default: '' },
+    customerBase: { type: String, trim: true, default: '' },
+    customMetrics: {
+      type: [
+        {
+          label: { type: String, trim: true, required: true },
+          value: { type: String, trim: true, required: true },
+        },
+      ],
+      default: [],
+    },
+  },
+  { _id: false },
+);
+
+const organizationAboutStorySchema = new Schema(
+  {
+    aboutCompany: { type: String, trim: true, default: '' },
+    mission: { type: String, trim: true, default: '' },
+    vision: { type: String, trim: true, default: '' },
+    story: { type: String, trim: true, default: '' },
+    values: {
+      type: [
+        {
+          title: { type: String, trim: true, required: true },
+          description: { type: String, trim: true, default: '' },
+          icon: { type: String, trim: true, default: 'Sparkles' },
+        },
+      ],
+      default: [],
+    },
+  },
+  { _id: false },
+);
+
+const organizationBrandingSchema = new Schema(
+  {
+    logoUrl: { type: String, default: null },
+    coverUrl: { type: String, default: null },
+    faviconUrl: { type: String, default: null },
+    primaryColor: { type: String, default: '#7c3aed' },
+    secondaryColor: { type: String, default: '#6366f1' },
+    accentColor: { type: String, default: '#06b6d4' },
+    fontHeading: { type: String, default: 'Inter' },
+    fontBody: { type: String, default: 'Inter' },
+    themeMode: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
   },
   { _id: false },
 );
@@ -26,6 +92,13 @@ const organizationSettingsSchema = new Schema(
   {
     allowMemberJobPosting: { type: Boolean, default: false },
     requireApprovalForCards: { type: Boolean, default: true },
+    requireApprovalForProfileChanges: { type: Boolean, default: true },
+    allowCustomThemes: { type: Boolean, default: true },
+    defaultVisibility: {
+      type: String,
+      enum: ['public', 'internal', 'private'],
+      default: 'public',
+    },
     isPublicDirectory: { type: Boolean, default: true },
     defaultTemplateId: {
       type: Schema.Types.ObjectId,
@@ -113,6 +186,22 @@ const organizationSchema = new Schema(
       type: organizationLocationSchema,
       default: () => ({}),
     },
+    contact: {
+      type: organizationContactSchema,
+      default: () => ({}),
+    },
+    overviewStats: {
+      type: organizationOverviewStatsSchema,
+      default: () => ({}),
+    },
+    about: {
+      type: organizationAboutStorySchema,
+      default: () => ({}),
+    },
+    branding: {
+      type: organizationBrandingSchema,
+      default: () => ({}),
+    },
     contactEmail: {
       type: String,
       trim: true,
@@ -157,15 +246,21 @@ const organizationSchema = new Schema(
       type: organizationSettingsSchema,
       default: () => ({}),
     },
-    // ---- 8-Section Company Brand Showcase -----------------------------------
+    // ---- 8-Section Company Brand Showcase & Offerings -----------------------
     products: {
       type: [
         {
           name: { type: String, trim: true, required: true },
+          title: { type: String, trim: true },
           description: { type: String, trim: true, default: '' },
           imageUrl: { type: String, default: null },
           linkUrl: { type: String, default: '' },
+          ctaUrl: { type: String, default: '' },
           tag: { type: String, trim: true, default: '' },
+          category: { type: String, trim: true, default: '' },
+          badge: { type: String, trim: true, default: '' },
+          order: { type: Number, default: 0 },
+          isVisible: { type: Boolean, default: true },
         },
       ],
       default: [],
@@ -177,8 +272,14 @@ const organizationSchema = new Schema(
           description: { type: String, trim: true, default: '' },
           client: { type: String, trim: true, default: '' },
           coverUrl: { type: String, default: null },
+          imageUrl: { type: String, default: null },
           linkUrl: { type: String, default: '' },
+          projectUrl: { type: String, default: '' },
           metrics: { type: String, trim: true, default: '' },
+          category: { type: String, trim: true, default: '' },
+          status: { type: String, enum: ['all', 'ongoing', 'completed'], default: 'completed' },
+          order: { type: Number, default: 0 },
+          isVisible: { type: Boolean, default: true },
         },
       ],
       default: [],
@@ -187,10 +288,14 @@ const organizationSchema = new Schema(
       type: [
         {
           title: { type: String, trim: true, required: true },
+          subtitle: { type: String, trim: true, default: '' },
           issuer: { type: String, trim: true, default: '' },
           year: { type: Number, default: null },
           description: { type: String, trim: true, default: '' },
           badgeUrl: { type: String, default: null },
+          metric: { type: String, trim: true, default: '' },
+          order: { type: Number, default: 0 },
+          isVisible: { type: Boolean, default: true },
         },
       ],
       default: [],
@@ -198,9 +303,28 @@ const organizationSchema = new Schema(
     mediaGallery: {
       type: [
         {
-          type: { type: String, enum: ['IMAGE', 'VIDEO'], default: 'IMAGE' },
+          title: { type: String, trim: true, default: '' },
+          type: { type: String, enum: ['all', 'photo', 'video', 'news', 'event', 'IMAGE', 'VIDEO'], default: 'photo' },
           url: { type: String, required: true },
+          thumbnailUrl: { type: String, default: null },
+          date: { type: String, trim: true, default: '' },
           caption: { type: String, trim: true, default: '' },
+          description: { type: String, trim: true, default: '' },
+          order: { type: Number, default: 0 },
+          isVisible: { type: Boolean, default: true },
+        },
+      ],
+      default: [],
+    },
+    navigation: {
+      type: [
+        {
+          navId: { type: String, trim: true },
+          label: { type: String, trim: true },
+          targetSectionId: { type: String, trim: true },
+          icon: { type: String, trim: true },
+          order: { type: Number, default: 0 },
+          isVisible: { type: Boolean, default: true },
         },
       ],
       default: [],
@@ -243,6 +367,10 @@ organizationSchema.methods.toSafeObject = function () {
     size: this.size,
     foundedYear: this.foundedYear,
     location: this.location,
+    contact: this.contact,
+    overviewStats: this.overviewStats,
+    about: this.about,
+    branding: this.branding,
     contactEmail: this.contactEmail,
     contactPhone: this.contactPhone,
     socialLinks: this.socialLinks,
@@ -256,6 +384,7 @@ organizationSchema.methods.toSafeObject = function () {
     projects: this.projects || [],
     achievements: this.achievements || [],
     mediaGallery: this.mediaGallery || [],
+    navigation: this.navigation || [],
     showcaseSections: this.showcaseSections || [],
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

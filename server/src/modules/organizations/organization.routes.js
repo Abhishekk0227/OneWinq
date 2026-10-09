@@ -315,6 +315,41 @@ router.get(
   eventController.getMyTickets,
 );
 
+// ---- Custom Organization Roles ---------------------------------------------
+import * as organizationRoleController from './organizationRole.controller.js';
+
+router.get(
+  '/:organizationId/roles',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.ROLES_VIEW),
+  organizationRoleController.listRoles,
+);
+
+router.post(
+  '/:organizationId/roles',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.ROLES_MANAGE),
+  organizationRoleController.createRole,
+);
+
+router.put(
+  '/:organizationId/roles/:roleId',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.ROLES_MANAGE),
+  organizationRoleController.updateRole,
+);
+
+router.delete(
+  '/:organizationId/roles/:roleId',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.ROLES_MANAGE),
+  organizationRoleController.deleteRole,
+);
+
 export default router;
 
 

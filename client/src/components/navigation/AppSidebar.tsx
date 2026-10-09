@@ -22,6 +22,7 @@ import {
   Briefcase,
   FileCheck,
   Calendar,
+  KeyRound,
   ArrowLeft,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
@@ -83,6 +84,7 @@ export function AppSidebar() {
     { label: 'Job Postings', to: '/app/org/jobs', icon: Briefcase },
     { label: 'Applicants', to: '/app/org/applications', icon: FileCheck },
     { label: 'Company Events', to: '/app/org/events', icon: Calendar },
+    { label: 'Roles & Access', to: '/app/org/roles', icon: KeyRound },
     { label: 'Corporate Cards', to: '/app/org/cards', icon: CreditCard },
     { label: 'Audit Logs', to: '/app/org/audit', icon: ShieldAlert },
     { label: 'Org Settings', to: '/app/org/settings', icon: Settings },

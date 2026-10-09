@@ -188,4 +188,32 @@ export const EVENT_REGISTRATION_STATUS = {
 } as const
 export type EventRegistrationStatus = typeof EVENT_REGISTRATION_STATUS[keyof typeof EVENT_REGISTRATION_STATUS]
 
+export const ORGANIZATION_PERMISSION = {
+  ORG_EDIT: 'org:edit',
+  ORG_DELETE: 'org:delete',
+  MEMBERS_VIEW: 'members:view',
+  MEMBERS_INVITE: 'members:invite',
+  MEMBERS_EDIT: 'members:edit',
+  MEMBERS_REMOVE: 'members:remove',
+  DEPARTMENTS_MANAGE: 'departments:manage',
+  JOBS_VIEW: 'jobs:view',
+  JOBS_CREATE: 'jobs:create',
+  JOBS_EDIT: 'jobs:edit',
+  JOBS_DELETE: 'jobs:delete',
+  APPLICATIONS_VIEW: 'applications:view',
+  APPLICATIONS_MANAGE: 'applications:manage',
+  CARDS_MANAGE: 'cards:manage',
+  EVENTS_VIEW: 'events:view',
+  EVENTS_MANAGE: 'events:manage',
+  APPROVALS_VIEW: 'approvals:view',
+  APPROVALS_MANAGE: 'approvals:manage',
+  ROLES_VIEW: 'roles:view',
+  ROLES_MANAGE: 'roles:manage',
+  SETTINGS_MANAGE: 'settings:manage',
+  SHOWCASE_MANAGE: 'showcase:manage',
+  ANALYTICS_VIEW: 'analytics:view',
+  AUDIT_VIEW: 'audit:view',
+} as const
+export type OrganizationPermission = typeof ORGANIZATION_PERMISSION[keyof typeof ORGANIZATION_PERMISSION]
+
 

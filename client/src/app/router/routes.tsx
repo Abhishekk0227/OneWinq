@@ -53,6 +53,7 @@ const JobsPage = lazyWithRetry(() => import('@/pages/app/JobsPage'))
 const MyApplicationsPage = lazyWithRetry(() => import('@/pages/app/MyApplicationsPage'))
 const OrganizationApprovalsPage = lazyWithRetry(() => import('@/pages/app/OrganizationApprovalsPage'))
 const OrganizationEventsPage = lazyWithRetry(() => import('@/pages/app/OrganizationEventsPage'))
+const OrganizationRolesPage = lazyWithRetry(() => import('@/pages/app/OrganizationRolesPage'))
 const CompanyShowcasePage = lazyWithRetry(() => import('@/pages/public/CompanyShowcasePage'))
 
 // Admin pages
@@ -417,6 +418,14 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspended>
                     <OrganizationEventsPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'org/roles',
+                element: (
+                  <Suspended>
+                    <OrganizationRolesPage />
                   </Suspended>
                 ),
               },

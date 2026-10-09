@@ -80,7 +80,63 @@ export const updateOrganizationSchema = z.object({
       city: z.string().trim().default(''),
       state: z.string().trim().default(''),
       country: z.string().trim().default(''),
+      zipCode: z.string().trim().default(''),
       isRemoteFriendly: z.boolean().default(false),
+    })
+    .optional(),
+  contact: z
+    .object({
+      email: z.string().trim().default(''),
+      phone: z.string().trim().default(''),
+      supportEmail: z.string().trim().default(''),
+      workingHours: z.string().trim().default(''),
+      directionsUrl: z.string().trim().default(''),
+    })
+    .optional(),
+  overviewStats: z
+    .object({
+      foundedYear: z.coerce.number().nullable().optional(),
+      locationShort: z.string().trim().default(''),
+      teamSize: z.string().trim().default(''),
+      customerBase: z.string().trim().default(''),
+      customMetrics: z
+        .array(
+          z.object({
+            label: z.string().trim().min(1),
+            value: z.string().trim().min(1),
+          }),
+        )
+        .default([]),
+    })
+    .optional(),
+  about: z
+    .object({
+      aboutCompany: z.string().trim().default(''),
+      mission: z.string().trim().default(''),
+      vision: z.string().trim().default(''),
+      story: z.string().trim().default(''),
+      values: z
+        .array(
+          z.object({
+            title: z.string().trim().min(1),
+            description: z.string().trim().default(''),
+            icon: z.string().trim().default('Sparkles'),
+          }),
+        )
+        .default([]),
+    })
+    .optional(),
+  branding: z
+    .object({
+      logoUrl: z.string().nullable().optional(),
+      coverUrl: z.string().nullable().optional(),
+      faviconUrl: z.string().nullable().optional(),
+      primaryColor: z.string().default('#7c3aed'),
+      secondaryColor: z.string().default('#6366f1'),
+      accentColor: z.string().default('#06b6d4'),
+      fontHeading: z.string().default('Inter'),
+      fontBody: z.string().default('Inter'),
+      themeMode: z.enum(['light', 'dark', 'system']).default('system'),
     })
     .optional(),
   contactEmail: z.string().email().or(z.literal('')).optional(),
@@ -97,6 +153,9 @@ export const updateOrganizationSchema = z.object({
     .object({
       allowMemberJobPosting: z.boolean().optional(),
       requireApprovalForCards: z.boolean().optional(),
+      requireApprovalForProfileChanges: z.boolean().optional(),
+      allowCustomThemes: z.boolean().optional(),
+      defaultVisibility: z.enum(['public', 'internal', 'private']).optional(),
       isPublicDirectory: z.boolean().optional(),
       defaultTemplateId: z.string().nullable().optional(),
     })
@@ -105,10 +164,16 @@ export const updateOrganizationSchema = z.object({
     .array(
       z.object({
         name: z.string().trim().min(1),
+        title: z.string().trim().optional(),
         description: z.string().trim().default(''),
         imageUrl: z.string().nullable().optional(),
         linkUrl: z.string().default(''),
+        ctaUrl: z.string().default(''),
         tag: z.string().trim().default(''),
+        category: z.string().trim().default(''),
+        badge: z.string().trim().default(''),
+        order: z.number().default(0),
+        isVisible: z.boolean().default(true),
       }),
     )
     .optional(),
@@ -119,8 +184,14 @@ export const updateOrganizationSchema = z.object({
         description: z.string().trim().default(''),
         client: z.string().trim().default(''),
         coverUrl: z.string().nullable().optional(),
+        imageUrl: z.string().nullable().optional(),
         linkUrl: z.string().default(''),
+        projectUrl: z.string().default(''),
         metrics: z.string().trim().default(''),
+        category: z.string().trim().default(''),
+        status: z.enum(['all', 'ongoing', 'completed']).default('completed'),
+        order: z.number().default(0),
+        isVisible: z.boolean().default(true),
       }),
     )
     .optional(),
@@ -128,19 +199,41 @@ export const updateOrganizationSchema = z.object({
     .array(
       z.object({
         title: z.string().trim().min(1),
+        subtitle: z.string().trim().default(''),
         issuer: z.string().trim().default(''),
         year: z.number().nullable().optional(),
         description: z.string().trim().default(''),
         badgeUrl: z.string().nullable().optional(),
+        metric: z.string().trim().default(''),
+        order: z.number().default(0),
+        isVisible: z.boolean().default(true),
       }),
     )
     .optional(),
   mediaGallery: z
     .array(
       z.object({
-        type: z.enum(['IMAGE', 'VIDEO']).default('IMAGE'),
+        title: z.string().trim().default(''),
+        type: z.enum(['all', 'photo', 'video', 'news', 'event', 'IMAGE', 'VIDEO']).default('photo'),
         url: z.string().min(1),
+        thumbnailUrl: z.string().nullable().optional(),
+        date: z.string().trim().default(''),
         caption: z.string().trim().default(''),
+        description: z.string().trim().default(''),
+        order: z.number().default(0),
+        isVisible: z.boolean().default(true),
+      }),
+    )
+    .optional(),
+  navigation: z
+    .array(
+      z.object({
+        navId: z.string().trim().optional(),
+        label: z.string().trim().optional(),
+        targetSectionId: z.string().trim().optional(),
+        icon: z.string().trim().optional(),
+        order: z.number().default(0),
+        isVisible: z.boolean().default(true),
       }),
     )
     .optional(),

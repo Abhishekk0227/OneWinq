@@ -1,5 +1,6 @@
 import { ProfileApproval } from './profileApproval.model.js';
 import { OrganizationMember } from './organizationMember.model.js';
+import { Organization } from './organization.model.js';
 import { calculateObjectDiff } from '../../utils/objectDiff.util.js';
 import { calculateProfileCompletionScore } from './profileScore.util.js';
 import { recordOrgAudit } from './organizationAuditLog.service.js';
@@ -10,6 +11,29 @@ export async function submitDraftProfile(organizationId, memberId, userId, draft
   const member = await OrganizationMember.findOne({ _id: memberId, organizationId });
   if (!member) {
     throw new NotFoundError('Organization member not found');
+  }
+
+  // Check organization governance policy
+  const org = await Organization.findById(organizationId);
+  const requiresApproval = org?.settings?.requireApprovalForProfileChanges ?? true;
+
+  if (!requiresApproval) {
+    // Immediate publishing without moderation queue
+    member.publishedProfile = draftProfileData;
+    member.draftProfile = draftProfileData;
+    member.approvalStatus = PROFILE_APPROVAL_STATUS.APPROVED;
+    member.isLocked = false;
+    member.profileCompletionScore = calculateProfileCompletionScore(draftProfileData);
+    await member.save();
+
+    await recordOrgAudit(organizationId, userId, {
+      action: 'PROFILE_UPDATED_DIRECT',
+      targetType: 'OrganizationMember',
+      targetId: member._id.toString(),
+      details: { memberId: member._id.toString() },
+    });
+
+    return { autoApproved: true, member: member.toSafeObject() };
   }
 
   // Calculate deep diff between live published profile and the new draft
