@@ -26,6 +26,7 @@ import { toast } from '@/stores/toastStore'
 import { disconnectSocket } from '@/lib/socket/socketClient'
 import { cn } from '@/lib/utils/cn'
 import { BrandLogo } from './BrandLogo'
+import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -84,12 +85,9 @@ export function AppHeader() {
         {/* Mobile Brand Logo */}
         <BrandLogo to="/app" className="lg:hidden shrink-0" imgClassName="h-6 sm:h-7" />
 
-        {/* Workspace Title & Badge — desktop only */}
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground hidden lg:inline">
-            Workspace
-          </span>
-          <span className="text-muted-foreground text-xs hidden lg:inline">/</span>
+        {/* Workspace Context Switcher (Dynamic Personal vs Org mode) */}
+        <WorkspaceContextSwitcher />
+
           {isStaff ? (
             <Link to="/admin">
               <Badge
@@ -114,7 +112,6 @@ export function AppHeader() {
               PRO MEMBER
             </Badge>
           )}
-        </div>
       </div>
 
       {/* Right Actions */}

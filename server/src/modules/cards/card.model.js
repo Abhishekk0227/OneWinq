@@ -93,6 +93,23 @@ const cardSchema = new Schema(
       ref: 'ProfessionalIdentity',
       default: null,
     },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
+      index: true,
+    },
+    organizationMemberId: {
+      type: Schema.Types.ObjectId,
+      ref: 'OrganizationMember',
+      default: null,
+      index: true,
+    },
+    isCorporate: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     customSlug: {
       type: String,
       trim: true,

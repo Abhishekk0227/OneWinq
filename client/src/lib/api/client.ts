@@ -1,6 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { env } from '@/app/config/env'
 import { useAuthStore } from '@/stores/authStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import type { ApiResponse, ApiErrorResponse } from '@/types/api.types'
 
 export class ApiError extends Error {
@@ -28,17 +29,24 @@ export const apiClient = axios.create({
   timeout: 30000,
 })
 
-// Request interceptor: attach bearer token from authStore
+// Request interceptor: attach bearer token from authStore and active org header
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    const orgContext = useOrganizationContextStore.getState().activeContext
+    if (orgContext?.type === 'ORGANIZATION' && orgContext.organizationId && config.headers) {
+      config.headers['x-organization-id'] = orgContext.organizationId
+    }
+
     return config
   },
   (error) => Promise.reject(error)
 )
+
 
 // Concurrency lock for refresh token rotation
 let isRefreshing = false

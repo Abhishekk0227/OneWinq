@@ -17,18 +17,26 @@ import {
   LayoutTemplate,
   Plus,
   Wifi,
+  Building2,
+  Network,
+  Briefcase,
+  FileCheck,
+  ArrowLeft,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { queryKeys } from '@/lib/query/queryKeys'
 import { useAuthStore } from '@/stores/authStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useUIStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils/cn'
 
 export function AppSidebar() {
   const { user } = useAuthStore()
   const { isSidebarCollapsed, openModal } = useUIStore()
+  const { activeContext, switchToPersonal } = useOrganizationContextStore()
+  const isOrgMode = activeContext.type === 'ORGANIZATION'
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
 
   const { data: unreadData } = useQuery({
@@ -48,10 +56,12 @@ export function AppSidebar() {
   const activeCard = cards.find((c: any) => c.state === 'ACTIVE' || c.status === 'ACTIVE')
   const activeCardCode = activeCard?.cardCode?.toLowerCase() || activeCard?.cardUid?.toLowerCase()
 
-  const navItems = [
+  const personalNavItems = [
     { label: 'Home Feed', to: '/app', icon: Home, end: true },
     { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
     { label: 'Discover People', to: '/app/network', icon: Compass },
+    { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
+    { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },
     { label: 'My Profile', to: '/app/profile', icon: UserCircle },
     { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate },
     { label: 'Connections', to: '/app/connections', icon: Users },
@@ -62,6 +72,20 @@ export function AppSidebar() {
     { label: 'Orders', to: '/app/orders', icon: Package },
     { label: 'Settings', to: '/app/settings', icon: Settings },
   ]
+
+  const orgNavItems = [
+    { label: 'Overview & Stats', to: '/app/org/dashboard', icon: LayoutDashboard },
+    { label: 'Company Profile', to: '/app/org/profile', icon: Building2 },
+    { label: 'Team Members', to: '/app/org/members', icon: Users },
+    { label: 'Departments', to: '/app/org/departments', icon: Network },
+    { label: 'Job Postings', to: '/app/org/jobs', icon: Briefcase },
+    { label: 'Applicants', to: '/app/org/applications', icon: FileCheck },
+    { label: 'Corporate Cards', to: '/app/org/cards', icon: CreditCard },
+    { label: 'Audit Logs', to: '/app/org/audit', icon: ShieldAlert },
+    { label: 'Org Settings', to: '/app/org/settings', icon: Settings },
+  ]
+
+  const navItems = isOrgMode ? orgNavItems : personalNavItems
 
   return (
     <aside
@@ -84,23 +108,41 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Prominent "+ New Post" Action Button */}
+      {/* Prominent Action Button: New Post (Personal) vs Switch to Personal (Org) */}
       <div className={cn('px-3 pt-4 pb-1', isSidebarCollapsed && 'px-2')}>
-        <button
-          type="button"
-          onClick={() => openModal('CREATE_POST')}
-          className={cn(
-            'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-md active:scale-95 cursor-pointer',
-            'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:shadow-primary/35 hover:brightness-105',
-            isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
-          )}
-          title="Create New Post"
-          aria-label="Create New Post"
-        >
-          <Plus className={cn('h-5 w-5 stroke-[2.5]', !isSidebarCollapsed && 'h-4 w-4')} />
-          {!isSidebarCollapsed && <span>New Post</span>}
-        </button>
+        {isOrgMode ? (
+          <button
+            type="button"
+            onClick={switchToPersonal}
+            className={cn(
+              'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-sm active:scale-95 cursor-pointer',
+              'bg-muted/80 hover:bg-muted text-foreground border border-border/80 hover:border-primary/50',
+              isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-xs'
+            )}
+            title="Switch back to Personal Workspace"
+            aria-label="Switch back to Personal Workspace"
+          >
+            <ArrowLeft className="h-4 w-4 text-primary shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Personal Mode</span>}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => openModal('CREATE_POST')}
+            className={cn(
+              'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-md active:scale-95 cursor-pointer',
+              'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:shadow-primary/35 hover:brightness-105',
+              isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
+            )}
+            title="Create New Post"
+            aria-label="Create New Post"
+          >
+            <Plus className={cn('h-5 w-5 stroke-[2.5]', !isSidebarCollapsed && 'h-4 w-4')} />
+            {!isSidebarCollapsed && <span>New Post</span>}
+          </button>
+        )}
       </div>
+
 
       {/* Navigation links */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1 custom-scrollbar">

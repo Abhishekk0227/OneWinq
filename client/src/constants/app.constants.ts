@@ -95,3 +95,66 @@ export const NOTIFICATION_TYPE = {
 } as const
 export type NotificationType = typeof NOTIFICATION_TYPE[keyof typeof NOTIFICATION_TYPE]
 
+export const ORGANIZATION_TYPE = {
+  COMPANY: 'COMPANY',
+  STARTUP: 'STARTUP',
+  COLLEGE: 'COLLEGE',
+  UNIVERSITY: 'UNIVERSITY',
+  HOSPITAL: 'HOSPITAL',
+  NGO: 'NGO',
+  OTHER: 'OTHER',
+} as const
+export type OrganizationType = typeof ORGANIZATION_TYPE[keyof typeof ORGANIZATION_TYPE]
+
+export const ORGANIZATION_STATUS = {
+  ACTIVE: 'ACTIVE',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION',
+  SUSPENDED: 'SUSPENDED',
+  DEACTIVATED: 'DEACTIVATED',
+} as const
+export type OrganizationStatus = typeof ORGANIZATION_STATUS[keyof typeof ORGANIZATION_STATUS]
+
+export const ORGANIZATION_ROLE = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  HR_MANAGER: 'HR_MANAGER',
+  MANAGER: 'MANAGER',
+  MEMBER: 'MEMBER',
+} as const
+export type OrganizationRole = typeof ORGANIZATION_ROLE[keyof typeof ORGANIZATION_ROLE]
+
+export const JOB_STATUS = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  CLOSED: 'CLOSED',
+  ARCHIVED: 'ARCHIVED',
+} as const
+export type JobStatus = typeof JOB_STATUS[keyof typeof JOB_STATUS]
+
+export const EMPLOYMENT_TYPE = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  CONTRACT: 'CONTRACT',
+  INTERNSHIP: 'INTERNSHIP',
+} as const
+export type EmploymentType = typeof EMPLOYMENT_TYPE[keyof typeof EMPLOYMENT_TYPE]
+
+export const WORKPLACE_TYPE = {
+  ON_SITE: 'ON_SITE',
+  HYBRID: 'HYBRID',
+  REMOTE: 'REMOTE',
+} as const
+export type WorkplaceType = typeof WORKPLACE_TYPE[keyof typeof WORKPLACE_TYPE]
+
+export const APPLICATION_STATUS = {
+  SUBMITTED: 'SUBMITTED',
+  IN_REVIEW: 'IN_REVIEW',
+  SHORTLISTED: 'SHORTLISTED',
+  INTERVIEW_SCHEDULED: 'INTERVIEW_SCHEDULED',
+  OFFERED: 'OFFERED',
+  REJECTED: 'REJECTED',
+  WITHDRAWN: 'WITHDRAWN',
+} as const
+export type ApplicationStatus = typeof APPLICATION_STATUS[keyof typeof APPLICATION_STATUS]
+
+
