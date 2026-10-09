@@ -15,6 +15,21 @@ export const organizationsApi = {
       '/me/organizations'
     ),
 
+  getMyPendingInvitations: () =>
+    apiClient.get<never, ApiResponse<{ invitations: any[] }>>(
+      '/organizations/my/invitations'
+    ),
+
+  acceptMyPendingInvitation: (invitationId: string) =>
+    apiClient.post<never, ApiResponse<{ member: any; organization: any }>>(
+      `/organizations/my/invitations/${invitationId}/accept`
+    ),
+
+  declineMyPendingInvitation: (invitationId: string) =>
+    apiClient.post<never, ApiResponse<{ success: boolean; message: string }>>(
+      `/organizations/my/invitations/${invitationId}/decline`
+    ),
+
   create: (data: Partial<Organization>) =>
     apiClient.post<never, ApiResponse<{ organization: Organization }>>(
       '/organizations',

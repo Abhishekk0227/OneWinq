@@ -9,6 +9,8 @@ import { analyticsApi } from '@/features/analytics/api/analytics.api'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { discoveryApi } from '@/features/discovery/api/discovery.api'
+import { organizationsApi } from '@/features/organizations/api/organizations.api'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { queryKeys } from '@/lib/query/queryKeys'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
@@ -38,6 +40,8 @@ import {
   Edit3,
   LayoutTemplate,
   MapPin,
+  Building2,
+  Mail,
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -145,6 +149,42 @@ export default function DashboardPage() {
     },
   })
 
+  // Pending Organization Invitations for user's email
+  const { data: pendingOrgInvitesData, refetch: refetchPendingOrgInvites } = useQuery({
+    queryKey: ['myPendingOrgInvitations'],
+    queryFn: () => organizationsApi.getMyPendingInvitations(),
+  })
+  const pendingOrgInvitations = (pendingOrgInvitesData as any)?.data?.invitations || []
+
+  const { switchContext } = useOrganizationContextStore()
+
+  const acceptOrgInviteMutation = useMutation({
+    mutationFn: (invitationId: string) => organizationsApi.acceptMyPendingInvitation(invitationId),
+    onSuccess: (res: any) => {
+      const org = res?.data?.organization || res?.organization
+      toast.success(`Welcome to ${org?.name || 'the team'}! Invitation accepted.`)
+      refetchPendingOrgInvites()
+      queryClient.invalidateQueries({ queryKey: ['userOrganizations'] })
+      if (org?.id) {
+        switchContext('ORGANIZATION', org.id, org.name)
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to accept invitation')
+    },
+  })
+
+  const declineOrgInviteMutation = useMutation({
+    mutationFn: (invitationId: string) => organizationsApi.declineMyPendingInvitation(invitationId),
+    onSuccess: () => {
+      toast.default('Invitation declined.')
+      refetchPendingOrgInvites()
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to decline invitation')
+    },
+  })
+
   if (isProfileLoading) {
     return <LoadingScreen message="Loading your OneWinq command center..." />
   }
@@ -218,6 +258,67 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-5 sm:space-y-8 text-left pb-24">
+      {/* Pending Organization Invitations Banner */}
+      {pendingOrgInvitations.length > 0 && (
+        <div className="space-y-3">
+          {pendingOrgInvitations.map((inv: any) => (
+            <div
+              key={inv.id}
+              className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-primary/30 bg-primary/5 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2"
+            >
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                  {inv.organization?.logoUrl ? (
+                    <img src={inv.organization.logoUrl} alt={inv.organization.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Building2 className="h-6 w-6 text-primary" />
+                  )}
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-sm text-foreground">
+                      Invitation to join {inv.organization?.name || 'Organization'}
+                    </span>
+                    <Badge className="bg-primary/15 text-primary border-primary/20 text-[10px] font-bold uppercase">
+                      {inv.role}
+                    </Badge>
+                    {inv.department && (
+                      <Badge variant="outline" className="text-[10px]">
+                        {inv.department.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {inv.jobTitle ? <span>{inv.jobTitle} • </span> : null}
+                    Invited {inv.invitedBy?.displayName ? `by ${inv.invitedBy.displayName}` : ''} • Expires in {Math.max(1, Math.ceil((new Date(inv.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                <Button
+                  size="sm"
+                  onClick={() => acceptOrgInviteMutation.mutate(inv.id)}
+                  disabled={acceptOrgInviteMutation.isPending}
+                  className="font-bold text-xs h-9 shadow-xs"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Accept & Join
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => declineOrgInviteMutation.mutate(inv.id)}
+                  disabled={declineOrgInviteMutation.isPending}
+                  className="font-semibold text-xs h-9 text-muted-foreground hover:text-destructive"
+                >
+                  Decline
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* 1. Hero Identity Banner */}
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card p-4 sm:p-6 lg:p-8 shadow-sm">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />

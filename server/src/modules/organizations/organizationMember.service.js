@@ -18,6 +18,7 @@ import {
   ORGANIZATION_ROLE,
   DEFAULT_ROLE_PERMISSIONS,
   ERROR_CODE,
+  NOTIFICATION_TYPE,
 } from '../../config/constants.js';
 import {
   NotFoundError,
@@ -26,7 +27,19 @@ import {
   ForbiddenError,
 } from '../../shared/errors.js';
 import { emailService } from '../../infrastructure/email/emailService.js';
+import { notificationService } from '../notifications/notification.service.js';
 import logger from '../../utils/logger.js';
+
+export function getAppBaseUrl() {
+  const envUrl = process.env.APP_URL || '';
+  if (process.env.NODE_ENV === 'development' && envUrl.includes('localhost')) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  if (envUrl && !envUrl.includes('vercel.app')) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  return 'https://www.onewinq.com';
+}
 
 /**
  * List members of an organization with search and filtering.
@@ -318,7 +331,32 @@ export async function resendInvitation(organizationId, invitationId, invitedByUs
 
   const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
   const orgName = organization?.name || 'Organization';
-  const inviteLink = `${process.env.APP_URL || 'https://one-winq.vercel.app'}/invitation?token=${rawToken}`;
+  const inviteLink = `${getAppBaseUrl()}/invitation?token=${rawToken}`;
+
+  // In-app notification for existing users on OneWinq
+  const targetUser = await User.findOne({ email: invitation.email }).lean();
+  if (targetUser) {
+    notificationService
+      .createNotification({
+        recipientId: targetUser._id,
+        actorId: invitedByUserId || null,
+        type: NOTIFICATION_TYPE.ORGANIZATION_INVITATION,
+        title: `Invitation to join ${orgName}`,
+        body: `You have a renewed invitation to join ${orgName} as a ${invitation.role}.`,
+        entityType: 'organization',
+        entityId: organizationId.toString(),
+        linkUrl: `/invitation?token=${rawToken}`,
+        metadata: {
+          organizationId: organizationId.toString(),
+          organizationName: orgName,
+          role: invitation.role,
+          token: rawToken,
+        },
+      })
+      .catch((err) =>
+        logger.warn('[Organization] Failed sending in-app notification on resend', { error: err.message }),
+      );
+  }
 
   Promise.resolve()
     .then(() =>
@@ -492,7 +530,31 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
 
   const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
   const orgName = organization?.name || 'Organization';
-  const inviteLink = `${process.env.APP_URL || 'https://one-winq.vercel.app'}/invitation?token=${rawToken}`;
+  const inviteLink = `${getAppBaseUrl()}/invitation?token=${rawToken}`;
+
+  // In-app notification if invited user is already registered on OneWinq
+  if (existingUser) {
+    notificationService
+      .createNotification({
+        recipientId: existingUser._id,
+        actorId: invitedByUserId,
+        type: NOTIFICATION_TYPE.ORGANIZATION_INVITATION,
+        title: `Invitation to join ${orgName}`,
+        body: `You have been invited to join ${orgName} as a ${role}. Click here to review and accept.`,
+        entityType: 'organization',
+        entityId: organizationId.toString(),
+        linkUrl: `/invitation?token=${rawToken}`,
+        metadata: {
+          organizationId: organizationId.toString(),
+          organizationName: orgName,
+          role,
+          token: rawToken,
+        },
+      })
+      .catch((err) =>
+        logger.warn('[Organization] Failed sending in-app invitation notification', { error: err.message }),
+      );
+  }
 
   // Send invitation email safely (non-blocking)
   Promise.resolve()
@@ -729,4 +791,150 @@ export async function acceptInvitationWithRegistration({ token, displayName, use
       slug: organization.slug,
     },
   };
+}
+
+/**
+ * List all pending organization invitations for the currently authenticated user.
+ */
+export async function listMyPendingInvitations(userEmail) {
+  if (!userEmail) return [];
+  const normalizedEmail = userEmail.toLowerCase().trim();
+  const now = new Date();
+
+  const invitations = await OrganizationInvitation.find({
+    email: normalizedEmail,
+    status: 'PENDING',
+    expiresAt: { $gt: now },
+  })
+    .populate('organizationId', 'name slug logoUrl tagline type')
+    .populate('departmentId', 'name code')
+    .populate('invitedBy', 'displayName avatarUrl email')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return invitations.map((inv) => {
+    const org = inv.organizationId;
+    const dept = inv.departmentId;
+    const inviter = inv.invitedBy;
+
+    return {
+      id: inv._id.toString(),
+      organizationId: org?._id?.toString() || null,
+      organization: org
+        ? {
+            id: org._id.toString(),
+            name: org.name,
+            slug: org.slug,
+            logoUrl: org.logoUrl || null,
+            tagline: org.tagline || '',
+            type: org.type,
+          }
+        : null,
+      department: dept
+        ? {
+            id: dept._id.toString(),
+            name: dept.name,
+            code: dept.code,
+          }
+        : null,
+      invitedBy: inviter
+        ? {
+            id: inviter._id.toString(),
+            displayName: inviter.displayName || 'Team Member',
+            avatarUrl: inviter.avatarUrl || null,
+          }
+        : null,
+      role: inv.role,
+      jobTitle: inv.jobTitle || '',
+      status: inv.status,
+      expiresAt: inv.expiresAt,
+      createdAt: inv.createdAt,
+    };
+  });
+}
+
+/**
+ * Accept a pending invitation directly from the user's dashboard / notifications.
+ */
+export async function acceptMyPendingInvitation(userId, userEmail, invitationId) {
+  const normalizedEmail = userEmail.toLowerCase().trim();
+  const invitation = await OrganizationInvitation.findOne({
+    _id: invitationId,
+    email: normalizedEmail,
+    status: 'PENDING',
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!invitation) {
+    throw new NotFoundError('Invitation not found or has expired', ERROR_CODE.INVITATION_INVALID);
+  }
+
+  const organization = await Organization.findById(invitation.organizationId);
+  if (!organization) {
+    throw new NotFoundError('Organization not found');
+  }
+
+  let member = await OrganizationMember.findOne({
+    organizationId: invitation.organizationId,
+    userId,
+  });
+
+  if (member && member.status === ORGANIZATION_MEMBER_STATUS.ACTIVE) {
+    invitation.status = 'ACCEPTED';
+    await invitation.save();
+    return { member: member.toSafeObject(), organization: organization.toSafeObject() };
+  }
+
+  if (member) {
+    member.status = ORGANIZATION_MEMBER_STATUS.ACTIVE;
+    member.role = invitation.role;
+    member.departmentId = invitation.departmentId;
+    member.jobTitle = invitation.jobTitle;
+    member.permissions = DEFAULT_ROLE_PERMISSIONS[invitation.role] || [];
+    await member.save();
+  } else {
+    member = await OrganizationMember.create({
+      organizationId: invitation.organizationId,
+      userId,
+      role: invitation.role,
+      departmentId: invitation.departmentId,
+      jobTitle: invitation.jobTitle,
+      status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+      permissions: DEFAULT_ROLE_PERMISSIONS[invitation.role] || [],
+      invitedBy: invitation.invitedBy,
+      joinedAt: new Date(),
+    });
+
+    await Organization.findByIdAndUpdate(invitation.organizationId, {
+      $inc: { membersCount: 1 },
+    });
+  }
+
+  invitation.status = 'ACCEPTED';
+  await invitation.save();
+
+  logger.info(`[Organization] User ${userId} accepted pending invitation to ${organization.name}`);
+
+  return { member: member.toSafeObject(), organization: organization.toSafeObject() };
+}
+
+/**
+ * Decline a pending organization invitation.
+ */
+export async function declineMyPendingInvitation(userEmail, invitationId) {
+  const normalizedEmail = userEmail.toLowerCase().trim();
+  const invitation = await OrganizationInvitation.findOne({
+    _id: invitationId,
+    email: normalizedEmail,
+    status: 'PENDING',
+  });
+
+  if (!invitation) {
+    throw new NotFoundError('Invitation not found');
+  }
+
+  invitation.status = 'REJECTED';
+  await invitation.save();
+
+  return { success: true, message: 'Invitation declined' };
 }

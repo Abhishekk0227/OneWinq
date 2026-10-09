@@ -63,7 +63,12 @@ function resolveNotificationLink(n) {
       return n.entityId ? `/app?postId=${n.entityId}` : '/app';
     case 'SECURITY_ALERT':
       return '/app/settings';
+    case 'ORGANIZATION_INVITATION':
+      return n.linkUrl || (n.metadata?.token ? `/invitation?token=${n.metadata.token}` : '/app');
     default:
+      if (n.entityType === 'organization') {
+        return n.linkUrl || (n.metadata?.token ? `/invitation?token=${n.metadata.token}` : '/app');
+      }
       if (n.entityType === 'connection') return '/app/connections';
       if (n.entityType === 'conversation') return n.entityId ? `/app/messages?cid=${n.entityId}` : '/app/messages';
       if (n.entityType === 'profile') return username ? `/u/${username}` : '/app/profile';

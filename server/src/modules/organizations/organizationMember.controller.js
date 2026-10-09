@@ -1,4 +1,5 @@
 import * as memberService from './organizationMember.service.js';
+import { User } from '../users/user.model.js';
 import { sendSuccess } from '../../shared/response.js';
 import { HTTP } from '../../config/constants.js';
 
@@ -173,6 +174,68 @@ export const organizationMemberController = {
       return sendSuccess(res, {
         statusCode: HTTP.CREATED,
         message: 'Account registered and invitation accepted successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getMyInvitations(req, res, next) {
+    try {
+      const user = await User.findById(req.user.id).select('email').lean();
+      if (!user?.email) {
+        return sendSuccess(res, {
+          statusCode: HTTP.OK,
+          message: 'No pending invitations',
+          data: { invitations: [] },
+        });
+      }
+      const invitations = await memberService.listMyPendingInvitations(user.email);
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Pending invitations retrieved',
+        data: { invitations },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async acceptMyInvitation(req, res, next) {
+    try {
+      const user = await User.findById(req.user.id).select('email').lean();
+      if (!user?.email) {
+        return res.status(400).json({ message: 'User email not found' });
+      }
+      const result = await memberService.acceptMyPendingInvitation(
+        req.user.id,
+        user.email,
+        req.params.invitationId,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitation accepted successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async declineMyInvitation(req, res, next) {
+    try {
+      const user = await User.findById(req.user.id).select('email').lean();
+      if (!user?.email) {
+        return res.status(400).json({ message: 'User email not found' });
+      }
+      const result = await memberService.declineMyPendingInvitation(
+        user.email,
+        req.params.invitationId,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitation declined successfully',
         data: result,
       });
     } catch (err) {

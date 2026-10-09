@@ -205,6 +205,7 @@ export const NOTIFICATION_TYPE = Object.freeze({
   POST_COMMENT: 'POST_COMMENT',
   SYSTEM_ANNOUNCEMENT: 'SYSTEM_ANNOUNCEMENT',
   SECURITY_ALERT: 'SECURITY_ALERT',
+  ORGANIZATION_INVITATION: 'ORGANIZATION_INVITATION',
 });
 
 // ---- Report lifecycle & categories -----------------------------------------

@@ -37,7 +37,7 @@ const notificationSchema = new Schema(
     },
     entityType: {
       type: String,
-      enum: ['connection', 'conversation', 'profile', 'card', 'order', 'report', 'ticket', 'post', 'system'],
+      enum: ['connection', 'conversation', 'profile', 'card', 'order', 'report', 'ticket', 'post', 'system', 'organization'],
       default: 'system',
     },
     entityId: {

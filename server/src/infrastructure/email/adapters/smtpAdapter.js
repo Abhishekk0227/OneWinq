@@ -48,7 +48,7 @@ export class SmtpAdapter extends EmailProviderAdapter {
       this.validate();
     }
 
-    const fromAddress = config.email.from.address || config.email.smtp.user;
+    const fromAddress = config.email.smtp.user || config.email.from.address;
     const fromName = config.email.from.name || 'OneWinq';
 
     const mailOptions = {

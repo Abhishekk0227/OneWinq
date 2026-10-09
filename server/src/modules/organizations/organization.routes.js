@@ -38,6 +38,15 @@ router.get('/', validateQuery(listOrganizationsQuerySchema), organizationControl
 // Authenticated: Get organizations the current user belongs to
 router.get('/my', authenticate, organizationController.getMyOrganizations);
 
+// Authenticated: Get user's pending invitations sent to their email
+router.get('/my/invitations', authenticate, organizationMemberController.getMyInvitations);
+
+// Authenticated: Accept a pending invitation directly from dashboard
+router.post('/my/invitations/:invitationId/accept', authenticate, organizationMemberController.acceptMyInvitation);
+
+// Authenticated: Decline a pending invitation from dashboard
+router.post('/my/invitations/:invitationId/decline', authenticate, organizationMemberController.declineMyInvitation);
+
 // Public: Preview invitation details by token
 router.get('/invitations/preview', organizationMemberController.previewInvitation);
 

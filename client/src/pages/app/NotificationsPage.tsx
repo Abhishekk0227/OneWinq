@@ -24,6 +24,7 @@ import {
   LifeBuoy,
   Megaphone,
   ArrowRight,
+  Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -31,6 +32,11 @@ type FilterTab = 'all' | 'unread' | 'orders_cards' | 'social' | 'system'
 
 function getNotificationIcon(type: string): { icon: React.ReactNode; bg: string } {
   switch (type) {
+    case 'ORGANIZATION_INVITATION':
+      return {
+        icon: <Building2 className="h-4 w-4 text-primary" />,
+        bg: 'bg-primary/10 border-primary/20',
+      }
     case 'CONNECTION_REQUEST':
       return {
         icon: <UserPlus className="h-4 w-4 text-primary" />,
