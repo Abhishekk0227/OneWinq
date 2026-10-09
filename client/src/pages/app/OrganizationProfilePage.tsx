@@ -12,12 +12,18 @@ import {
   Loader2,
   Sliders,
   Image as ImageIcon,
+  UploadCloud,
+  Camera,
+  Trash2,
+  Link as LinkIcon,
+  Sparkles,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
+import { mediaApi } from '@/features/media/api/media.api';
 import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -66,6 +72,13 @@ export default function OrganizationProfilePage() {
 
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
 
+  const [uploadingLogo, setUploadingLogo] = React.useState(false);
+  const [uploadingBanner, setUploadingBanner] = React.useState(false);
+  const [showManualUrls, setShowManualUrls] = React.useState(false);
+
+  const logoFileInputRef = React.useRef<HTMLInputElement>(null);
+  const bannerFileInputRef = React.useRef<HTMLInputElement>(null);
+
   const { data: orgData, isLoading } = useQuery({
     queryKey: ['org', orgId, 'details'],
     queryFn: () => organizationsApi.getById(orgId),
@@ -79,6 +92,7 @@ export default function OrganizationProfilePage() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
@@ -119,6 +133,55 @@ export default function OrganizationProfilePage() {
       });
     }
   }, [org, reset]);
+
+  // Upload Handlers
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Logo image must be smaller than 5MB');
+      if (logoFileInputRef.current) logoFileInputRef.current.value = '';
+      return;
+    }
+
+    try {
+      setUploadingLogo(true);
+      const res = await mediaApi.uploadFile(file, 'PROFILE_PHOTO');
+      setValue('logoUrl', res.publicUrl, { shouldDirty: true });
+      toast.success('Logo uploaded! Click "Save Profile" to finalize.');
+    } catch (err: any) {
+      console.error('[LogoUploadError]', err);
+      toast.error(err?.message || 'Failed to upload logo image');
+    } finally {
+      setUploadingLogo(false);
+      if (logoFileInputRef.current) logoFileInputRef.current.value = '';
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Banner image must be smaller than 10MB');
+      if (bannerFileInputRef.current) bannerFileInputRef.current.value = '';
+      return;
+    }
+
+    try {
+      setUploadingBanner(true);
+      const res = await mediaApi.uploadFile(file, 'PROFILE_COVER');
+      setValue('bannerUrl', res.publicUrl, { shouldDirty: true });
+      toast.success('Cover banner uploaded! Click "Save Profile" to finalize.');
+    } catch (err: any) {
+      console.error('[BannerUploadError]', err);
+      toast.error(err?.message || 'Failed to upload banner image');
+    } finally {
+      setUploadingBanner(false);
+      if (bannerFileInputRef.current) bannerFileInputRef.current.value = '';
+    }
+  };
 
   const updateMutation = useMutation({
     mutationFn: (data: FormValues) => {
@@ -189,28 +252,89 @@ export default function OrganizationProfilePage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      {/* Header Banner Preview */}
-      <div className="relative rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
-        <div className="h-40 w-full bg-gradient-to-r from-primary/20 via-primary/10 to-muted relative overflow-hidden">
+      {/* Hidden file inputs for direct media uploads */}
+      <input
+        ref={logoFileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+        className="hidden"
+        onChange={handleLogoUpload}
+      />
+      <input
+        ref={bannerFileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        className="hidden"
+        onChange={handleBannerUpload}
+      />
+
+      {/* Header Banner & Logo Interactive Preview */}
+      <div className="relative rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs group">
+        <div className="h-44 sm:h-52 w-full bg-gradient-to-r from-primary/20 via-primary/10 to-muted relative overflow-hidden">
           {previewBanner ? (
             <img src={previewBanner} alt="Banner" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 text-xs">
-              Banner preview (customize below)
+            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/50 text-xs gap-1">
+              <ImageIcon className="h-6 w-6 opacity-40" />
+              <span>No cover banner uploaded</span>
             </div>
           )}
+
+          {/* Quick Upload Banner Overlay Button */}
+          <div className="absolute top-3 right-3 flex gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={uploadingBanner}
+              onClick={() => bannerFileInputRef.current?.click()}
+              className="bg-card/85 hover:bg-card backdrop-blur-md border-border/80 text-foreground text-xs shadow-sm h-8"
+            >
+              {uploadingBanner ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Uploading...
+                </>
+              ) : (
+                <>
+                  <Camera className="h-3.5 w-3.5 mr-1.5" /> Change Banner
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
-        <div className="p-6 pt-0 relative flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-12">
+        <div className="p-6 pt-0 relative flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-14">
           <div className="flex items-end gap-4">
-            <div className="h-24 w-24 rounded-2xl bg-card border-4 border-card shadow-md flex items-center justify-center text-primary overflow-hidden shrink-0">
-              {previewLogo ? (
-                <img src={previewLogo} alt="Logo" className="w-full h-full object-cover" />
-              ) : (
-                <Building2 className="h-10 w-10 text-muted-foreground" />
-              )}
+            {/* Interactive Logo Avatar with Quick Upload Overlay */}
+            <div className="relative group/logo">
+              <div className="h-28 w-28 rounded-2xl bg-card border-4 border-card shadow-lg flex items-center justify-center text-primary overflow-hidden shrink-0">
+                {previewLogo ? (
+                  <img src={previewLogo} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <Building2 className="h-12 w-12 text-muted-foreground/60" />
+                )}
+              </div>
+
+              {/* Hover upload badge on Logo */}
+              <button
+                type="button"
+                disabled={uploadingLogo}
+                onClick={() => logoFileInputRef.current?.click()}
+                className="absolute inset-0 rounded-2xl bg-black/50 backdrop-blur-2xs opacity-0 group-hover/logo:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold cursor-pointer m-1"
+                title="Upload new logo image"
+              >
+                {uploadingLogo ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <Camera className="h-5 w-5 mb-0.5" />
+                    <span>Upload</span>
+                  </>
+                )}
+              </button>
             </div>
-            <div className="mb-1">
+
+            <div className="mb-2">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight">{previewName}</h1>
                 {org?.isVerified && (
@@ -225,7 +349,7 @@ export default function OrganizationProfilePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-end sm:self-auto mb-1">
+          <div className="flex items-center gap-2 self-end sm:self-auto mb-2">
             {org?.website && (
               <a
                 href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
@@ -241,10 +365,10 @@ export default function OrganizationProfilePage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Tabs defaultValue="general">
+        <Tabs defaultValue="branding">
           <TabsList className="grid grid-cols-4 w-full max-w-xl">
             <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="branding">Branding</TabsTrigger>
+            <TabsTrigger value="branding">Branding & Media</TabsTrigger>
             <TabsTrigger value="contact">Location & Contact</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -340,34 +464,156 @@ export default function OrganizationProfilePage() {
             </Card>
           </TabsContent>
 
-          {/* Tab 2: Branding */}
+          {/* Tab 2: Branding & Media Assets with Direct File Upload */}
           <TabsContent value="branding" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Logos & Media Assets</CardTitle>
+                <CardTitle>Logos & Visual Brand Assets</CardTitle>
                 <CardDescription>
-                  Assets used for employee profile banners, NFC badge covers, and corporate identity.
+                  Upload your high-resolution company logo and cover banner used across employee badges, job posts, and profiles.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Logo Image URL
-                  </label>
-                  <Input {...register('logoUrl')} placeholder="https://example.com/logo.png" />
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Square PNG or SVG recommended (512x512px).
-                  </p>
+              <CardContent className="space-y-6">
+                {/* 1. Logo Upload Section */}
+                <div className="p-5 rounded-2xl border border-border/80 bg-muted/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Organization Logo</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Recommended: Square image (PNG, JPG, SVG, WebP up to 5MB, at least 512×512px).
+                      </p>
+                    </div>
+                    {previewLogo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setValue('logoUrl', '', { shouldDirty: true })}
+                        className="text-xs text-destructive hover:bg-destructive/10 h-8"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-5">
+                    <div className="h-24 w-24 rounded-2xl bg-card border-2 border-dashed border-border flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                      {previewLogo ? (
+                        <img src={previewLogo} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <Building2 className="h-10 w-10 text-muted-foreground/40" />
+                      )}
+                    </div>
+
+                    <div className="space-y-2 text-center sm:text-left flex-1">
+                      <Button
+                        type="button"
+                        disabled={uploadingLogo}
+                        onClick={() => logoFileInputRef.current?.click()}
+                        className="font-semibold shadow-xs"
+                      >
+                        {uploadingLogo ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading Logo...
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="h-4 w-4 mr-2" /> Upload Logo File
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-[11px] text-muted-foreground">
+                        Files are automatically optimized and served via high-speed CDN.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Cover Banner Image URL
-                  </label>
-                  <Input {...register('bannerUrl')} placeholder="https://example.com/cover-banner.jpg" />
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Horizontal image recommended (1920x640px).
-                  </p>
+                {/* 2. Banner Upload Section */}
+                <div className="p-5 rounded-2xl border border-border/80 bg-muted/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Cover Banner Image</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Recommended: Horizontal image (PNG, JPG, WebP up to 10MB, at least 1920×640px).
+                      </p>
+                    </div>
+                    {previewBanner && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setValue('bannerUrl', '', { shouldDirty: true })}
+                        className="text-xs text-destructive hover:bg-destructive/10 h-8"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="h-36 sm:h-44 w-full rounded-2xl bg-card border-2 border-dashed border-border overflow-hidden relative flex items-center justify-center shadow-xs">
+                      {previewBanner ? (
+                        <img src={previewBanner} alt="Banner" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-muted-foreground/40 text-xs gap-1.5 p-4 text-center">
+                          <ImageIcon className="h-8 w-8" />
+                          <span>No cover banner uploaded</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                      <Button
+                        type="button"
+                        disabled={uploadingBanner}
+                        onClick={() => bannerFileInputRef.current?.click()}
+                        className="font-semibold shadow-xs w-full sm:w-auto"
+                      >
+                        {uploadingBanner ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading Banner...
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="h-4 w-4 mr-2" /> Upload Banner File
+                          </>
+                        )}
+                      </Button>
+                      <span className="text-[11px] text-muted-foreground">
+                        Displayed on top of company profile and job openings.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Manual URL override accordion toggle */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualUrls(!showManualUrls)}
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-medium transition-colors cursor-pointer"
+                  >
+                    <LinkIcon className="h-3.5 w-3.5" />
+                    <span>{showManualUrls ? 'Hide manual image URLs' : 'Or paste custom image URLs directly'}</span>
+                  </button>
+
+                  {showManualUrls && (
+                    <div className="mt-4 p-4 rounded-xl border border-border/70 bg-card space-y-4 animate-in fade-in-50 duration-200">
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                          Direct Logo Image URL
+                        </label>
+                        <Input {...register('logoUrl')} placeholder="https://example.com/logo.png" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                          Direct Cover Banner URL
+                        </label>
+                        <Input {...register('bannerUrl')} placeholder="https://example.com/cover-banner.jpg" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
