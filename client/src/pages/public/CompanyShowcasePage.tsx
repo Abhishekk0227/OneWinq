@@ -27,6 +27,7 @@ import {
   Lightbulb,
   Heart,
   TrendingUp,
+  Crown,
 } from 'lucide-react';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
@@ -618,6 +619,44 @@ export default function CompanyShowcasePage() {
                     </div>
                   )}
                 </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section: Executive Leadership & Board */}
+        {org.executives && org.executives.length > 0 && (
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Crown className="h-4 w-4 text-amber-500" /> Executive Leadership & Board
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Meet the leadership team and directors steering {org.name}.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {org.executives.map((exec) => (
+                <Card key={exec.id} className="p-4 text-center space-y-3 hover:border-amber-500/40 transition-all shadow-xs relative overflow-hidden group">
+                  <div className="h-16 w-16 rounded-full bg-amber-500/10 border-2 border-amber-500/30 text-amber-600 mx-auto flex items-center justify-center font-bold text-lg overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
+                    {exec.avatarUrl ? (
+                      <img src={exec.avatarUrl} alt={exec.displayName} className="h-full w-full object-cover" />
+                    ) : (
+                      exec.displayName?.[0] || 'L'
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-sm text-foreground line-clamp-1">{exec.displayName}</h3>
+                    <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider">
+                      {exec.executivePosition?.replace(/_/g, ' ') || 'Executive'}
+                    </Badge>
+                    {exec.jobTitle && (
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">{exec.jobTitle}</p>
+                    )}
+                  </div>
+                </Card>
               ))}
             </div>
           </section>

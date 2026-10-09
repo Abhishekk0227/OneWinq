@@ -180,6 +180,16 @@ export interface Organization {
   projects?: OrganizationProject[];
   achievements?: OrganizationAchievement[];
   mediaGallery?: OrganizationMediaItem[];
+  executives?: Array<{
+    id: string;
+    displayName: string;
+    username: string;
+    avatarUrl?: string | null;
+    role: string;
+    jobTitle?: string;
+    executivePosition?: string;
+    executiveOrder?: number;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -227,6 +237,9 @@ export interface OrganizationMember {
   role: OrganizationRole;
   jobTitle: string;
   employeeId?: string;
+  isExecutive?: boolean;
+  executivePosition?: string | null;
+  executiveOrder?: number;
   department?: { id: string; name: string; code: string } | null;
   status: string;
   profileCompletionScore?: number;
@@ -235,6 +248,65 @@ export interface OrganizationMember {
   draftProfile?: any;
   publishedProfile?: any;
   joinedAt: string;
+}
+
+export interface OrganizationInvitationItem {
+  id: string;
+  organizationId: string;
+  email: string;
+  role: OrganizationRole;
+  jobTitle?: string;
+  departmentId?: string | null;
+  department?: { id: string; name: string; code?: string } | null;
+  invitedBy?: {
+    id: string;
+    displayName: string;
+    email: string;
+    avatarUrl?: string | null;
+  } | null;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'REVOKED';
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvitationPreviewData {
+  invitation: {
+    id: string;
+    email: string;
+    role: OrganizationRole;
+    jobTitle?: string;
+    status: string;
+    isExpired: boolean;
+    expiresAt: string;
+  };
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl?: string | null;
+    tagline?: string;
+    description?: string;
+    website?: string;
+  };
+  department?: {
+    id: string;
+    name: string;
+    code?: string;
+  } | null;
+  invitedBy?: {
+    id: string;
+    displayName: string;
+    email: string;
+    avatarUrl?: string | null;
+  } | null;
+  userExists: boolean;
+  existingUser?: {
+    displayName: string;
+    username: string;
+    email: string;
+    avatarUrl?: string | null;
+  } | null;
 }
 
 export interface ProfileApprovalDiff {

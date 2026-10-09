@@ -38,8 +38,14 @@ router.get('/', validateQuery(listOrganizationsQuerySchema), organizationControl
 // Authenticated: Get organizations the current user belongs to
 router.get('/my', authenticate, organizationController.getMyOrganizations);
 
+// Public: Preview invitation details by token
+router.get('/invitations/preview', organizationMemberController.previewInvitation);
+
 // Authenticated: Accept invitation to an organization
 router.post('/invitations/accept', authenticate, organizationMemberController.acceptInvite);
+
+// Public: Register new account and accept invitation in one step
+router.post('/invitations/accept-register', organizationMemberController.acceptInviteWithRegistration);
 
 // Public: Resolve organization by public vanity slug
 router.get('/slug/:slug', organizationController.getBySlug);
@@ -81,12 +87,36 @@ router.get(
   organizationMemberController.listMembers,
 );
 
+router.get(
+  '/:organizationId/invitations',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.MEMBERS_VIEW),
+  organizationMemberController.listInvitations,
+);
+
 router.post(
   '/:organizationId/invitations',
   authenticate,
   resolveOrgContext,
   requireOrgPermission(ORGANIZATION_PERMISSION.MEMBERS_INVITE),
   organizationMemberController.invite,
+);
+
+router.post(
+  '/:organizationId/invitations/:invitationId/resend',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.MEMBERS_INVITE),
+  organizationMemberController.resendInvitation,
+);
+
+router.delete(
+  '/:organizationId/invitations/:invitationId',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.MEMBERS_INVITE),
+  organizationMemberController.revokeInvitation,
 );
 
 router.get(

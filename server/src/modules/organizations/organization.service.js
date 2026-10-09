@@ -119,7 +119,33 @@ export async function getOrganizationBySlug(slug) {
     throw new NotFoundError('Organization not found', ERROR_CODE.ORGANIZATION_NOT_FOUND);
   }
 
-  return organization.toSafeObject();
+  const safeOrg = organization.toSafeObject();
+
+  // Fetch appointed executive leaders for public showcase
+  const executiveMembers = await OrganizationMember.find({
+    organizationId: organization._id,
+    status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+    isExecutive: true,
+  })
+    .populate('userId', 'displayName username avatarUrl')
+    .sort({ executiveOrder: 1, createdAt: 1 })
+    .lean();
+
+  safeOrg.executives = executiveMembers.map((m) => {
+    const u = m.userId || {};
+    return {
+      id: m._id.toString(),
+      displayName: u.displayName || 'Executive Leader',
+      username: u.username || '',
+      avatarUrl: u.avatarUrl || null,
+      role: m.role,
+      jobTitle: m.jobTitle,
+      executivePosition: m.executivePosition || 'Executive',
+      executiveOrder: m.executiveOrder || 0,
+    };
+  });
+
+  return safeOrg;
 }
 
 /**

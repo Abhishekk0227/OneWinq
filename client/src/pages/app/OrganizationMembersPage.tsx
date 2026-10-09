@@ -7,7 +7,6 @@ import {
   Mail,
   Shield,
   Search,
-  MoreVertical,
   Trash2,
   Building2,
   Copy,
@@ -15,8 +14,16 @@ import {
   Loader2,
   Network,
   Edit2,
-  Filter,
+  Crown,
+  Sparkles,
+  RefreshCw,
+  Ban,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  Send,
   X,
+  ExternalLink,
 } from 'lucide-react';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
@@ -26,7 +33,25 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { ORGANIZATION_ROLE } from '@/constants/app.constants';
-import type { Department, OrganizationMember } from '@/types/organization.types';
+import type { Department, OrganizationMember, OrganizationInvitationItem } from '@/types/organization.types';
+
+const EXECUTIVE_POSITIONS = [
+  { value: 'CEO', label: 'CEO (Chief Executive Officer)' },
+  { value: 'FOUNDER', label: 'Founder' },
+  { value: 'CO_FOUNDER', label: 'Co-Founder' },
+  { value: 'MANAGING_DIRECTOR', label: 'Managing Director' },
+  { value: 'DIRECTOR', label: 'Director' },
+  { value: 'CHAIRMAN', label: 'Chairman of the Board' },
+  { value: 'PRESIDENT', label: 'President' },
+  { value: 'VICE_PRESIDENT', label: 'Vice President' },
+  { value: 'CTO', label: 'CTO (Chief Technology Officer)' },
+  { value: 'COO', label: 'COO (Chief Operating Officer)' },
+  { value: 'CFO', label: 'CFO (Chief Financial Officer)' },
+  { value: 'DEAN', label: 'Dean (Academic / Institution)' },
+  { value: 'PRINCIPAL', label: 'Principal (Educational)' },
+  { value: 'MEDICAL_DIRECTOR', label: 'Medical Director (Healthcare)' },
+  { value: 'OTHER', label: 'Other Executive Leadership' },
+];
 
 export default function OrganizationMembersPage() {
   const queryClient = useQueryClient();
@@ -34,9 +59,18 @@ export default function OrganizationMembersPage() {
   const deptQueryParam = searchParams.get('dept') || 'ALL';
 
   const { activeContext } = useOrganizationContextStore();
+  const [activeTab, setActiveTab] = React.useState<'WORKFORCE' | 'INVITATIONS'>('WORKFORCE');
+
+  // Active workforce filters
   const [search, setSearch] = React.useState('');
   const [selectedDeptId, setSelectedDeptId] = React.useState<string>(deptQueryParam);
+  const [executiveFilter, setExecutiveFilter] = React.useState<'ALL' | 'EXECUTIVES' | 'STANDARD'>('ALL');
 
+  // Invitations filters
+  const [inviteSearch, setInviteSearch] = React.useState('');
+  const [inviteStatusFilter, setInviteStatusFilter] = React.useState<string>('ALL');
+
+  // Invite Member Modal State
   const [isInviteOpen, setIsInviteOpen] = React.useState(false);
   const [inviteEmail, setInviteEmail] = React.useState('');
   const [inviteRole, setInviteRole] = React.useState<string>(ORGANIZATION_ROLE.MEMBER);
@@ -49,10 +83,17 @@ export default function OrganizationMembersPage() {
   const [editRole, setEditRole] = React.useState<string>('');
   const [editTitle, setEditTitle] = React.useState<string>('');
   const [editDeptId, setEditDeptId] = React.useState<string>('');
+  const [editIsExecutive, setEditIsExecutive] = React.useState<boolean>(false);
+  const [editExecutivePosition, setEditExecutivePosition] = React.useState<string>('CEO');
+  const [editExecutiveOrder, setEditExecutiveOrder] = React.useState<number>(0);
   const [isSavingEdit, setIsSavingEdit] = React.useState(false);
 
   const [lastInviteLink, setLastInviteLink] = React.useState<string | null>(null);
   const [copiedLink, setCopiedLink] = React.useState(false);
+
+  // Action pending states for invitations
+  const [resendingId, setResendingId] = React.useState<string | null>(null);
+  const [revokingId, setRevokingId] = React.useState<string | null>(null);
 
   if (activeContext.type !== 'ORGANIZATION') {
     return <div className="p-8 text-center text-muted-foreground">Select an organization first</div>;
@@ -68,7 +109,7 @@ export default function OrganizationMembersPage() {
   });
   const departments: Department[] = (deptData as any)?.data?.departments || [];
 
-  // Fetch members with query & department filter
+  // Fetch active members
   const { data, isLoading } = useQuery({
     queryKey: ['org', orgId, 'members', search, selectedDeptId],
     queryFn: () =>
@@ -83,7 +124,26 @@ export default function OrganizationMembersPage() {
   if (selectedDeptId === 'UNASSIGNED') {
     rawMembers = rawMembers.filter((m) => !m.department);
   }
+  if (executiveFilter === 'EXECUTIVES') {
+    rawMembers = rawMembers.filter((m) => Boolean(m.isExecutive));
+  } else if (executiveFilter === 'STANDARD') {
+    rawMembers = rawMembers.filter((m) => !m.isExecutive);
+  }
   const members = rawMembers;
+
+  // Fetch invitations
+  const { data: inviteData, isLoading: isLoadingInvites } = useQuery({
+    queryKey: ['org', orgId, 'invitations', inviteSearch, inviteStatusFilter],
+    queryFn: () =>
+      organizationsApi.listInvitations(orgId, {
+        q: inviteSearch || undefined,
+        status: inviteStatusFilter !== 'ALL' ? inviteStatusFilter : undefined,
+      }),
+    enabled: !!orgId,
+  });
+
+  const invitations: OrganizationInvitationItem[] = (inviteData as any)?.data?.invitations || [];
+  const pendingInvitesCount = invitations.filter((i) => i.status === 'PENDING').length;
 
   const handleOpenInvite = () => {
     setLastInviteLink(null);
@@ -112,10 +172,11 @@ export default function OrganizationMembersPage() {
       } else {
         setIsInviteOpen(false);
       }
-      toast.success('Invitation sent successfully!');
+      toast.success('Invitation dispatched successfully!');
       setInviteEmail('');
       setInviteTitle('');
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['org', orgId, 'invitations'] });
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'departments'] });
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || 'Failed to send invitation');
@@ -124,9 +185,10 @@ export default function OrganizationMembersPage() {
     }
   };
 
-  const handleCopyLink = () => {
-    if (!lastInviteLink) return;
-    navigator.clipboard.writeText(lastInviteLink);
+  const handleCopyLink = (linkToCopy?: string) => {
+    const link = linkToCopy || lastInviteLink;
+    if (!link) return;
+    navigator.clipboard.writeText(link);
     setCopiedLink(true);
     toast.success('Invitation link copied to clipboard!');
     setTimeout(() => setCopiedLink(false), 2000);
@@ -137,6 +199,9 @@ export default function OrganizationMembersPage() {
     setEditRole(member.role);
     setEditTitle(member.jobTitle || '');
     setEditDeptId(member.department?.id || '');
+    setEditIsExecutive(Boolean(member.isExecutive));
+    setEditExecutivePosition(member.executivePosition || 'CEO');
+    setEditExecutiveOrder(member.executiveOrder || 0);
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
@@ -149,8 +214,11 @@ export default function OrganizationMembersPage() {
         role: editRole,
         jobTitle: editTitle.trim(),
         departmentId: editDeptId ? editDeptId : null,
+        isExecutive: editIsExecutive,
+        executivePosition: editIsExecutive ? editExecutivePosition : null,
+        executiveOrder: editIsExecutive ? Number(editExecutiveOrder) : 0,
       });
-      toast.success('Member details updated successfully');
+      toast.success('Member updated successfully with executive settings');
       setEditingMember(null);
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'members'] });
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'departments'] });
@@ -162,7 +230,7 @@ export default function OrganizationMembersPage() {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this member?')) return;
+    if (!confirm('Are you sure you want to remove this member from the organization?')) return;
     try {
       await organizationsApi.removeMember(orgId, memberId);
       toast.success('Member removed');
@@ -173,13 +241,47 @@ export default function OrganizationMembersPage() {
     }
   };
 
+  const handleResendInvite = async (invitationId: string) => {
+    try {
+      setResendingId(invitationId);
+      const res: any = await organizationsApi.resendInvitation(orgId, invitationId);
+      const newLink = res?.data?.inviteLink || res?.inviteLink;
+      if (newLink) {
+        navigator.clipboard.writeText(newLink);
+        toast.success('Invitation refreshed & link copied to clipboard!');
+      } else {
+        toast.success('Invitation email re-sent successfully!');
+      }
+      queryClient.invalidateQueries({ queryKey: ['org', orgId, 'invitations'] });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to resend invitation');
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const handleRevokeInvite = async (invitationId: string) => {
+    if (!confirm('Are you sure you want to revoke this invitation? The recipient will no longer be able to use it.')) return;
+    try {
+      setRevokingId(invitationId);
+      await organizationsApi.revokeInvitation(orgId, invitationId);
+      toast.success('Invitation revoked');
+      queryClient.invalidateQueries({ queryKey: ['org', orgId, 'invitations'] });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to revoke invitation');
+    } finally {
+      setRevokingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Top Header & Action */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Team Members</h1>
+          <h1 className="text-2xl font-bold tracking-tight">User Management & Workforce</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Manage your employees, faculty, and departments within {activeContext.name}.
+            Manage your team, appoint executive leadership, and track workforce invitations for {activeContext.name}.
           </p>
         </div>
 
@@ -189,168 +291,392 @@ export default function OrganizationMembersPage() {
         </Button>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
-        <div className="relative flex-1">
-          <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, email, or role..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9.5 h-10 bg-background"
-          />
-        </div>
+      {/* Segmented Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-border pb-px">
+        <button
+          onClick={() => setActiveTab('WORKFORCE')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === 'WORKFORCE'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          <span>Active Workforce</span>
+          <Badge variant="secondary" className="text-[11px] px-1.5 py-0 h-5 font-bold">
+            {members.length}
+          </Badge>
+        </button>
 
-        {/* Department Filter Dropdown */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground pl-1">
-            <Network className="h-3.5 w-3.5 text-primary" />
-            <span className="font-medium hidden md:inline">Department:</span>
-          </div>
-          <select
-            value={selectedDeptId}
-            onChange={(e) => {
-              setSelectedDeptId(e.target.value);
-              setSearchParams(e.target.value !== 'ALL' ? { dept: e.target.value } : {});
-            }}
-            className="h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="ALL">All Departments ({departments.reduce((acc, d) => acc + (d.membersCount || 0), 0)} assigned)</option>
-            <option value="UNASSIGNED">Unassigned / No Department</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name} {dept.code ? `[${dept.code}]` : ''} ({dept.membersCount || 0})
-              </option>
-            ))}
-          </select>
-        </div>
+        <button
+          onClick={() => setActiveTab('INVITATIONS')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === 'INVITATIONS'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Mail className="h-4 w-4" />
+          <span>Invitations & Onboarding</span>
+          {pendingInvitesCount > 0 && (
+            <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0 h-5 font-bold">
+              {pendingInvitesCount} Pending
+            </Badge>
+          )}
+        </button>
       </div>
 
-      {/* Members List */}
-      <Card padding="none" className="overflow-hidden shadow-xs border-border/80">
-        <div className="divide-y divide-border/60">
-          {isLoading ? (
-            <div className="p-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              <span>Loading workforce directory...</span>
+      {/* TAB 1: ACTIVE WORKFORCE */}
+      {activeTab === 'WORKFORCE' && (
+        <div className="space-y-4">
+          {/* Filters Bar */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+            <div className="relative flex-1">
+              <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search active team by name, email, or role..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9.5 h-10 bg-background"
+              />
             </div>
-          ) : members.length === 0 ? (
-            <div className="p-12 text-center text-sm text-muted-foreground space-y-3">
-              <Users className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-              <p className="font-semibold text-foreground">No members found</p>
-              <p className="text-xs max-w-sm mx-auto">
-                {selectedDeptId !== 'ALL'
-                  ? 'There are currently no members assigned to this department.'
-                  : 'No team members match your active search filters.'}
-              </p>
-              {selectedDeptId !== 'ALL' && (
-                <Button size="sm" variant="outline" onClick={() => setSelectedDeptId('ALL')}>
-                  Show All Members
-                </Button>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {/* Executive Filter Dropdown */}
+              <div className="flex items-center gap-1.5">
+                <Crown className="h-3.5 w-3.5 text-amber-500 hidden sm:inline" />
+                <select
+                  value={executiveFilter}
+                  onChange={(e) => setExecutiveFilter(e.target.value as any)}
+                  className="h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="ALL">All Roles</option>
+                  <option value="EXECUTIVES">👑 Executives & C-Suite</option>
+                  <option value="STANDARD">Regular Team</option>
+                </select>
+              </div>
+
+              {/* Department Filter Dropdown */}
+              <div className="flex items-center gap-1.5">
+                <Network className="h-3.5 w-3.5 text-primary hidden sm:inline" />
+                <select
+                  value={selectedDeptId}
+                  onChange={(e) => {
+                    setSelectedDeptId(e.target.value);
+                    setSearchParams(e.target.value !== 'ALL' ? { dept: e.target.value } : {});
+                  }}
+                  className="h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="ALL">All Departments ({departments.reduce((acc, d) => acc + (d.membersCount || 0), 0)})</option>
+                  <option value="UNASSIGNED">Unassigned</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name} {dept.code ? `[${dept.code}]` : ''} ({dept.membersCount || 0})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Members List Card */}
+          <Card padding="none" className="overflow-hidden shadow-xs border-border/80">
+            <div className="divide-y divide-border/60">
+              {isLoading ? (
+                <div className="p-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>Loading workforce directory...</span>
+                </div>
+              ) : members.length === 0 ? (
+                <div className="p-12 text-center text-sm text-muted-foreground space-y-3">
+                  <Users className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                  <p className="font-semibold text-foreground">No members found</p>
+                  <p className="text-xs max-w-sm mx-auto">
+                    {selectedDeptId !== 'ALL'
+                      ? 'There are currently no members matching these filter criteria.'
+                      : 'No team members match your active search.'}
+                  </p>
+                  {(selectedDeptId !== 'ALL' || executiveFilter !== 'ALL') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedDeptId('ALL');
+                        setExecutiveFilter('ALL');
+                      }}
+                    >
+                      Reset Filters
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                members.map((member: any) => (
+                  <div
+                    key={member.id}
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="relative">
+                        <div className="h-11 w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
+                          {member.avatarUrl ? (
+                            <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
+                          ) : (
+                            member.displayName?.[0] || 'U'
+                          )}
+                        </div>
+                        {member.isExecutive && (
+                          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs border-2 border-background" title="Executive Leader">
+                            <Crown className="h-2.5 w-2.5" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-sm truncate text-foreground">{member.displayName}</span>
+
+                          {/* Executive Badge */}
+                          {member.isExecutive && (
+                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                              <Crown className="h-3 w-3 text-amber-500" />
+                              <span>{member.executivePosition?.replace(/_/g, ' ') || 'Executive'}</span>
+                            </Badge>
+                          )}
+
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
+                            {member.role}
+                          </Badge>
+
+                          {/* Department Badge */}
+                          {member.department ? (
+                            <Badge
+                              variant="secondary"
+                              className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                            >
+                              <Network className="h-3 w-3 mr-1 shrink-0" />
+                              {member.department.name} {member.department.code ? `[${member.department.code}]` : ''}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground/70">
+                              Unassigned
+                            </Badge>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground truncate">
+                          <span className="font-medium text-foreground/80">{member.jobTitle || 'Team Member'}</span> • {member.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 self-end sm:self-auto">
+                      {/* Automated Profile Completion Score */}
+                      <div className="hidden md:flex flex-col items-end gap-1 min-w-[90px]">
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+                          <span>{member.profileCompletionScore ?? 0}%</span>
+                          <span className="text-[10px] text-muted-foreground">Profile</span>
+                        </div>
+                        <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-300"
+                            style={{ width: `${member.profileCompletionScore ?? 0}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenEdit(member)}
+                          className="h-8 text-xs font-semibold gap-1.5"
+                          title="Edit Member / Appoint Executive Position"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit & Appoint</span>
+                        </Button>
+
+                        {member.role !== 'OWNER' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveMember(member.id)}
+                            className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                            title="Remove member"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
-          ) : (
-            members.map((member: any) => (
-              <div
-                key={member.id}
-                className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <div className="h-11 w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
-                    {member.avatarUrl ? (
-                      <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
-                    ) : (
-                      member.displayName?.[0] || 'U'
-                    )}
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-sm truncate text-foreground">{member.displayName}</span>
-                      <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
-                        {member.role}
-                      </Badge>
-                      {/* Department Badge */}
-                      {member.department ? (
-                        <Badge
-                          variant="secondary"
-                          className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
-                        >
-                          <Network className="h-3 w-3 mr-1 shrink-0" />
-                          {member.department.name} {member.department.code ? `[${member.department.code}]` : ''}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] text-muted-foreground/70">
-                          Unassigned
-                        </Badge>
-                      )}
-                      {member.approvalStatus && (
-                        <Badge
-                          variant="outline"
-                          className={
-                            member.approvalStatus === 'PENDING_REVIEW'
-                              ? 'bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]'
-                              : member.approvalStatus === 'APPROVED'
-                              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]'
-                              : 'bg-muted text-muted-foreground text-[10px]'
-                          }
-                        >
-                          {member.approvalStatus.replace('_', ' ')}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      <span className="font-medium text-foreground/80">{member.jobTitle || 'Team Member'}</span> • {member.email}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 self-end sm:self-auto">
-                  {/* Automated Profile Completion Score */}
-                  <div className="hidden md:flex flex-col items-end gap-1 min-w-[90px]">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-                      <span>{member.profileCompletionScore ?? 0}%</span>
-                      <span className="text-[10px] text-muted-foreground">Profile</span>
-                    </div>
-                    <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-300"
-                        style={{ width: `${member.profileCompletionScore ?? 0}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenEdit(member)}
-                      className="h-8 text-xs font-semibold gap-1.5"
-                      title="Edit Member / Change Department"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                      <span>Edit & Assign</span>
-                    </Button>
-
-                    {member.role !== 'OWNER' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveMember(member.id)}
-                        className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                        title="Remove member"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+          </Card>
         </div>
-      </Card>
+      )}
 
-      {/* Invite Member Modal with Department Selector */}
+      {/* TAB 2: INVITATIONS & PENDING */}
+      {activeTab === 'INVITATIONS' && (
+        <div className="space-y-4">
+          {/* Invitation Filters */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+            <div className="relative flex-1">
+              <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search invitations by recipient email or role..."
+                value={inviteSearch}
+                onChange={(e) => setInviteSearch(e.target.value)}
+                className="pl-9.5 h-10 bg-background"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {['ALL', 'PENDING', 'ACCEPTED', 'EXPIRED', 'REVOKED'].map((st) => (
+                <Button
+                  key={st}
+                  size="sm"
+                  variant={inviteStatusFilter === st ? 'default' : 'outline'}
+                  onClick={() => setInviteStatusFilter(st)}
+                  className="h-9 text-xs font-semibold shrink-0"
+                >
+                  {st === 'ALL' ? 'All' : st.charAt(0) + st.slice(1).toLowerCase()}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Invitations List */}
+          <Card padding="none" className="overflow-hidden shadow-xs border-border/80">
+            <div className="divide-y divide-border/60">
+              {isLoadingInvites ? (
+                <div className="p-12 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span>Loading invitations...</span>
+                </div>
+              ) : invitations.length === 0 ? (
+                <div className="p-12 text-center text-sm text-muted-foreground space-y-3">
+                  <Mail className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                  <p className="font-semibold text-foreground">No invitations found</p>
+                  <p className="text-xs max-w-sm mx-auto">
+                    There are no sent invitations matching your current filter. Send a new invitation to onboard team members!
+                  </p>
+                  <Button size="sm" onClick={handleOpenInvite} className="gap-1.5">
+                    <UserPlus className="h-4 w-4" /> Send Invite
+                  </Button>
+                </div>
+              ) : (
+                invitations.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="h-10 w-10 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0 shadow-2xs">
+                        <Mail className="h-5 w-5" />
+                      </div>
+
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-sm truncate text-foreground">{inv.email}</span>
+
+                          {/* Status Badge */}
+                          {inv.status === 'PENDING' && (
+                            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] font-bold flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              Pending Accept
+                            </Badge>
+                          )}
+                          {inv.status === 'ACCEPTED' && (
+                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] font-bold flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Accepted & Joined
+                            </Badge>
+                          )}
+                          {inv.status === 'EXPIRED' && (
+                            <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] font-bold flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              Expired
+                            </Badge>
+                          )}
+                          {inv.status === 'REVOKED' && (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                              Revoked
+                            </Badge>
+                          )}
+
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
+                            {inv.role}
+                          </Badge>
+
+                          {inv.department && (
+                            <Badge
+                              variant="secondary"
+                              className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                            >
+                              <Network className="h-3 w-3 mr-1 shrink-0" />
+                              {inv.department.name}
+                            </Badge>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground">
+                          {inv.jobTitle ? <span className="font-medium text-foreground/80">{inv.jobTitle} • </span> : null}
+                          Sent {new Date(inv.createdAt).toLocaleDateString()}
+                          {inv.invitedBy?.displayName ? ` by ${inv.invitedBy.displayName}` : ''}
+                          {inv.status === 'PENDING' && ` • Expires ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                      {(inv.status === 'PENDING' || inv.status === 'EXPIRED') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResendInvite(inv.id)}
+                          disabled={resendingId === inv.id}
+                          className="h-8 text-xs font-semibold gap-1.5"
+                          title="Resend invitation email and refresh expiry"
+                        >
+                          {resendingId === inv.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          )}
+                          <span>Resend</span>
+                        </Button>
+                      )}
+
+                      {inv.status === 'PENDING' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeInvite(inv.id)}
+                          disabled={revokingId === inv.id}
+                          className="h-8 text-xs font-semibold text-muted-foreground hover:text-destructive gap-1"
+                          title="Revoke this invitation"
+                        >
+                          {revokingId === inv.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Ban className="h-3.5 w-3.5" />
+                          )}
+                          <span>Revoke</span>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* MODAL 1: INVITE MEMBER MODAL */}
       {isInviteOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in-50 zoom-in-95">
@@ -361,16 +687,16 @@ export default function OrganizationMembersPage() {
                     <Check className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold">Invitation Created!</h3>
+                    <h3 className="text-lg font-bold">Invitation Dispatched!</h3>
                     <p className="text-xs text-muted-foreground">
-                      An invitation email has been dispatched. You can also copy and share this link directly:
+                      An invitation email has been sent. You can also copy and share this link directly:
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <Input value={lastInviteLink} readOnly className="font-mono text-xs select-all bg-muted/40" />
-                  <Button type="button" size="sm" onClick={handleCopyLink} className="shrink-0 font-semibold">
+                  <Button type="button" size="sm" onClick={() => handleCopyLink()} className="shrink-0 font-semibold">
                     {copiedLink ? (
                       <>
                         <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> Copied
@@ -442,16 +768,16 @@ export default function OrganizationMembersPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold mb-1 block">Role</label>
+                    <label className="text-xs font-semibold mb-1 block">Role / Authorization Level</label>
                     <select
                       value={inviteRole}
                       onChange={(e) => setInviteRole(e.target.value)}
                       className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                      <option value={ORGANIZATION_ROLE.MEMBER}>Member / Employee</option>
-                      <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager</option>
-                      <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR / Recruiter</option>
-                      <option value={ORGANIZATION_ROLE.ADMIN}>Administrator</option>
+                      <option value={ORGANIZATION_ROLE.MEMBER}>Member (Standard Employee Access)</option>
+                      <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager (Team Oversight)</option>
+                      <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (Recruitment & Approvals)</option>
+                      <option value={ORGANIZATION_ROLE.ADMIN}>Administrator (Full Operational Control)</option>
                     </select>
                   </div>
 
@@ -491,13 +817,13 @@ export default function OrganizationMembersPage() {
         </div>
       )}
 
-      {/* Edit Member & Assign Department Modal */}
+      {/* MODAL 2: EDIT MEMBER & APPOINT EXECUTIVE LEADERSHIP */}
       {editingMember && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in-50 zoom-in-95">
+          <div className="bg-card border border-border rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in-50 zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold">Edit Member & Department</h3>
+                <h3 className="text-lg font-bold">Edit Member & Appointments</h3>
                 <p className="text-xs text-muted-foreground">{editingMember.displayName} ({editingMember.email})</p>
               </div>
               <Button
@@ -511,7 +837,7 @@ export default function OrganizationMembersPage() {
               </Button>
             </div>
 
-            <form onSubmit={handleSaveEdit} className="space-y-3.5">
+            <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold mb-1 block flex items-center gap-1.5">
                   <Network className="h-3.5 w-3.5 text-primary" /> Assign Department
@@ -528,24 +854,23 @@ export default function OrganizationMembersPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Assign this member to a specific organizational department or team.
-                </p>
               </div>
 
               <div>
-                <label className="text-xs font-semibold mb-1 block">Role</label>
+                <label className="text-xs font-semibold mb-1 block flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5 text-primary" /> Organization Role & Authorization
+                </label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   disabled={editingMember.role === 'OWNER'}
                 >
-                  <option value={ORGANIZATION_ROLE.OWNER}>Owner</option>
-                  <option value={ORGANIZATION_ROLE.ADMIN}>Administrator</option>
-                  <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR / Recruiter</option>
-                  <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager</option>
-                  <option value={ORGANIZATION_ROLE.MEMBER}>Member / Employee</option>
+                  <option value={ORGANIZATION_ROLE.OWNER}>Owner (Complete Governance & Billing)</option>
+                  <option value={ORGANIZATION_ROLE.ADMIN}>Administrator (Full Operational Control)</option>
+                  <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (Recruitment & Approvals)</option>
+                  <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager (Team Oversight)</option>
+                  <option value={ORGANIZATION_ROLE.MEMBER}>Member (Standard Employee Access)</option>
                 </select>
               </div>
 
@@ -554,8 +879,67 @@ export default function OrganizationMembersPage() {
                 <Input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  placeholder="e.g. Lead Clinical Specialist"
+                  placeholder="e.g. Chief Product Officer, Professor, etc."
                 />
+              </div>
+
+              {/* Special Executive Leadership Appointment Section */}
+              <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Executive Leadership Appointment</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Showcase on company leadership board and highlight with C-Suite honors.
+                      </p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    id="isExecutiveCheckbox"
+                    checked={editIsExecutive}
+                    onChange={(e) => setEditIsExecutive(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                  />
+                </div>
+
+                {editIsExecutive && (
+                  <div className="space-y-3 pt-2 border-t border-amber-500/20">
+                    <div>
+                      <label className="text-xs font-semibold mb-1 block text-foreground">
+                        Executive Position / Title
+                      </label>
+                      <select
+                        value={editExecutivePosition}
+                        onChange={(e) => setEditExecutivePosition(e.target.value)}
+                        className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-semibold"
+                      >
+                        {EXECUTIVE_POSITIONS.map((pos) => (
+                          <option key={pos.value} value={pos.value}>
+                            {pos.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold mb-1 block text-foreground">
+                        Leadership Hierarchy Order (Rank)
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editExecutiveOrder}
+                        onChange={(e) => setEditExecutiveOrder(parseInt(e.target.value, 10) || 0)}
+                        placeholder="0 for primary (CEO/Founder), 1, 2..."
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        Lower numbers appear first on the public leadership board and showcases.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex justify-end gap-2.5">
@@ -571,10 +955,10 @@ export default function OrganizationMembersPage() {
                   {isSavingEdit ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      Saving Changes...
                     </>
                   ) : (
-                    'Save Changes'
+                    'Save Appointments'
                   )}
                 </Button>
               </div>

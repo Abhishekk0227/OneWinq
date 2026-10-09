@@ -85,6 +85,69 @@ export const organizationMemberController = {
     }
   },
 
+  async listInvitations(req, res, next) {
+    try {
+      const result = await memberService.listOrganizationInvitations(
+        req.params.organizationId,
+        req.query,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitations retrieved successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async resendInvitation(req, res, next) {
+    try {
+      const result = await memberService.resendInvitation(
+        req.params.organizationId,
+        req.params.invitationId,
+        req.user.id,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitation resent successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async revokeInvitation(req, res, next) {
+    try {
+      const result = await memberService.revokeInvitation(
+        req.params.organizationId,
+        req.params.invitationId,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitation revoked successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async previewInvitation(req, res, next) {
+    try {
+      const token = req.query.token || req.params.token;
+      const result = await memberService.getInvitationPreview(token);
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Invitation preview retrieved successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async acceptInvite(req, res, next) {
     try {
       const member = await memberService.acceptInvitation(req.user.id, req.body.token);
@@ -92,6 +155,25 @@ export const organizationMemberController = {
         statusCode: HTTP.OK,
         message: 'Invitation accepted successfully',
         data: { member },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async acceptInviteWithRegistration(req, res, next) {
+    try {
+      const result = await memberService.acceptInvitationWithRegistration({
+        token: req.body.token,
+        displayName: req.body.displayName,
+        username: req.body.username,
+        password: req.body.password,
+        req,
+      });
+      return sendSuccess(res, {
+        statusCode: HTTP.CREATED,
+        message: 'Account registered and invitation accepted successfully',
+        data: result,
       });
     } catch (err) {
       next(err);

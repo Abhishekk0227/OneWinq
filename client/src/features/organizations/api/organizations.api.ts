@@ -5,6 +5,8 @@ import type {
   UserOrganizationMembership,
   OrganizationMember,
   Department,
+  OrganizationInvitationItem,
+  InvitationPreviewData,
 } from '@/types/organization.types';
 
 export const organizationsApi = {
@@ -41,16 +43,38 @@ export const organizationsApi = {
       { params }
     ),
 
+  listInvitations: (organizationId: string, params?: { status?: string; q?: string; page?: number; limit?: number }) =>
+    apiClient.get<never, ApiResponse<{ invitations: OrganizationInvitationItem[]; pagination: any }>>(
+      `/organizations/${organizationId}/invitations`,
+      { params }
+    ),
+
   inviteMember: (organizationId: string, data: { email: string; role?: string; departmentId?: string; jobTitle?: string }) =>
     apiClient.post<never, ApiResponse<{ invitation: any; inviteLink: string }>>(
       `/organizations/${organizationId}/invitations`,
       data
     ),
 
+  resendInvitation: (organizationId: string, invitationId: string) =>
+    apiClient.post<never, ApiResponse<{ invitation: OrganizationInvitationItem; inviteLink: string }>>(
+      `/organizations/${organizationId}/invitations/${invitationId}/resend`
+    ),
+
+  revokeInvitation: (organizationId: string, invitationId: string) =>
+    apiClient.delete<never, ApiResponse<{ success: boolean; message: string }>>(
+      `/organizations/${organizationId}/invitations/${invitationId}`
+    ),
+
+  getInvitationPreview: (token: string) =>
+    apiClient.get<never, ApiResponse<InvitationPreviewData>>(
+      '/organizations/invitations/preview',
+      { params: { token } }
+    ),
+
   updateMember: (
     organizationId: string,
     memberId: string,
-    data: { departmentId?: string | null; role?: string; jobTitle?: string; employeeId?: string; status?: string } | Partial<OrganizationMember>
+    data: { departmentId?: string | null; role?: string; jobTitle?: string; employeeId?: string; status?: string; isExecutive?: boolean; executivePosition?: string | null; executiveOrder?: number } | Partial<OrganizationMember>
   ) =>
     apiClient.patch<never, ApiResponse<{ member: OrganizationMember }>>(
       `/organizations/${organizationId}/members/${memberId}`,
@@ -66,6 +90,12 @@ export const organizationsApi = {
     apiClient.post<never, ApiResponse<{ member: OrganizationMember }>>(
       '/organizations/invitations/accept',
       { token }
+    ),
+
+  acceptInvitationWithRegistration: (data: { token: string; displayName: string; username: string; password: string }) =>
+    apiClient.post<never, ApiResponse<{ accessToken: string; refreshToken: string; user: any; member: OrganizationMember; organization: any }>>(
+      '/organizations/invitations/accept-register',
+      data
     ),
 
   listDepartments: (organizationId: string) =>
