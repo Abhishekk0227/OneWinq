@@ -249,6 +249,72 @@ router.get(
   },
 );
 
+// ---- Profile Approvals & Moderation Workflow -------------------------------
+import { profileApprovalController } from './profileApproval.controller.js';
+
+router.post(
+  '/:organizationId/approvals/submit',
+  authenticate,
+  resolveOrgContext,
+  profileApprovalController.submit,
+);
+
+router.get(
+  '/:organizationId/approvals',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.APPROVALS_VIEW),
+  profileApprovalController.list,
+);
+
+router.post(
+  '/:organizationId/approvals/:approvalId/review',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.APPROVALS_MANAGE),
+  profileApprovalController.review,
+);
+
+// ---- Enterprise Events & Smart Ticketing -----------------------------------
+import { eventController } from '../events/event.controller.js';
+
+router.post(
+  '/:organizationId/events',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.EVENTS_MANAGE),
+  eventController.create,
+);
+
+router.get(
+  '/:organizationId/events',
+  authenticate,
+  resolveOrgContext,
+  requireOrgPermission(ORGANIZATION_PERMISSION.EVENTS_VIEW),
+  eventController.list,
+);
+
+router.post(
+  '/:organizationId/events/:eventId/rsvp',
+  authenticate,
+  resolveOrgContext,
+  eventController.rsvp,
+);
+
+router.post(
+  '/:organizationId/events/:eventId/cancel',
+  authenticate,
+  resolveOrgContext,
+  eventController.cancel,
+);
+
+router.get(
+  '/:organizationId/events/my-tickets',
+  authenticate,
+  resolveOrgContext,
+  eventController.getMyTickets,
+);
+
 export default router;
 
 

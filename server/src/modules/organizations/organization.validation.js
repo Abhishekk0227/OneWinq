@@ -101,6 +101,58 @@ export const updateOrganizationSchema = z.object({
       defaultTemplateId: z.string().nullable().optional(),
     })
     .optional(),
+  products: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1),
+        description: z.string().trim().default(''),
+        imageUrl: z.string().nullable().optional(),
+        linkUrl: z.string().default(''),
+        tag: z.string().trim().default(''),
+      }),
+    )
+    .optional(),
+  projects: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1),
+        description: z.string().trim().default(''),
+        client: z.string().trim().default(''),
+        coverUrl: z.string().nullable().optional(),
+        linkUrl: z.string().default(''),
+        metrics: z.string().trim().default(''),
+      }),
+    )
+    .optional(),
+  achievements: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1),
+        issuer: z.string().trim().default(''),
+        year: z.number().nullable().optional(),
+        description: z.string().trim().default(''),
+        badgeUrl: z.string().nullable().optional(),
+      }),
+    )
+    .optional(),
+  mediaGallery: z
+    .array(
+      z.object({
+        type: z.enum(['IMAGE', 'VIDEO']).default('IMAGE'),
+        url: z.string().min(1),
+        caption: z.string().trim().default(''),
+      }),
+    )
+    .optional(),
+  showcaseSections: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1),
+        content: z.string().trim().default(''),
+        sortOrder: z.number().default(0),
+      }),
+    )
+    .optional(),
 });
 
 export const listOrganizationsQuerySchema = z.object({

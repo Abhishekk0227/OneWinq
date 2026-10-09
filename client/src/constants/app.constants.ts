@@ -157,4 +157,35 @@ export const APPLICATION_STATUS = {
 } as const
 export type ApplicationStatus = typeof APPLICATION_STATUS[keyof typeof APPLICATION_STATUS]
 
+export const PROFILE_APPROVAL_STATUS = {
+  DRAFT: 'DRAFT',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CHANGES_REQUESTED: 'CHANGES_REQUESTED',
+} as const
+export type ProfileApprovalStatus = typeof PROFILE_APPROVAL_STATUS[keyof typeof PROFILE_APPROVAL_STATUS]
+
+export const EVENT_STATUS = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED',
+} as const
+export type EventStatus = typeof EVENT_STATUS[keyof typeof EVENT_STATUS]
+
+export const EVENT_ELIGIBILITY_TYPE = {
+  ALL: 'ALL',
+  DEPARTMENTS: 'DEPARTMENTS',
+  ROLES: 'ROLES',
+} as const
+export type EventEligibilityType = typeof EVENT_ELIGIBILITY_TYPE[keyof typeof EVENT_ELIGIBILITY_TYPE]
+
+export const EVENT_REGISTRATION_STATUS = {
+  REGISTERED: 'REGISTERED',
+  CHECKED_IN: 'CHECKED_IN',
+  CANCELLED: 'CANCELLED',
+} as const
+export type EventRegistrationStatus = typeof EVENT_REGISTRATION_STATUS[keyof typeof EVENT_REGISTRATION_STATUS]
+
 
