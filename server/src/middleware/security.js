@@ -51,7 +51,16 @@ const corsOptions = {
   },
   credentials: true, // Required for HTTP-only cookie to be sent cross-origin
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Request-ID',
+    'x-organization-id',
+    'X-Organization-ID',
+    'Accept',
+    'Cache-Control',
+    'X-Requested-With',
+  ],
   exposedHeaders: ['X-Request-ID'],
   maxAge: 86400, // Pre-flight cache: 24 hours
 };
