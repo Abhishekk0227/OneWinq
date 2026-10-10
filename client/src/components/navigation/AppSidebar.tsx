@@ -75,20 +75,112 @@ export function AppSidebar() {
     { label: 'Settings', to: '/app/settings', icon: Settings },
   ]
 
-  const orgNavItems = [
-    { label: 'Overview & Stats', to: '/app/org/dashboard', icon: LayoutDashboard },
-    { label: 'Company Profile', to: '/app/org/profile', icon: Building2 },
-    { label: 'Team Members', to: '/app/org/members', icon: Users },
-    { label: 'Profile Approvals', to: '/app/org/approvals', icon: FileCheck },
-    { label: 'Departments', to: '/app/org/departments', icon: Network },
-    { label: 'Job Postings', to: '/app/org/jobs', icon: Briefcase },
-    { label: 'Applicants', to: '/app/org/applications', icon: FileCheck },
-    { label: 'Company Events', to: '/app/org/events', icon: Calendar },
-    { label: 'Roles & Access', to: '/app/org/roles', icon: KeyRound },
-    { label: 'Corporate Cards', to: '/app/org/cards', icon: CreditCard },
-    { label: 'Audit Logs', to: '/app/org/audit', icon: ShieldAlert },
-    { label: 'Org Settings', to: '/app/org/settings', icon: Settings },
-  ]
+  // Role & Permission Checks for Organization Mode
+  const orgRole = activeContext.type === 'ORGANIZATION' ? (activeContext.role || 'MEMBER').toUpperCase() : ''
+  const orgPermissions = activeContext.type === 'ORGANIZATION' ? (activeContext.permissions || []) : []
+
+  const isOrgOwner = orgRole === 'OWNER'
+  const isOrgAdmin = isOrgOwner || orgRole === 'ADMIN'
+  const isOrgHR = isOrgAdmin || orgRole === 'HR_MANAGER'
+  const isOrgManager = isOrgHR || orgRole === 'MANAGER'
+
+  const hasPerm = (perm: string) => isOrgOwner || orgPermissions.includes(perm)
+
+  const orgNavItems: Array<{ label: string; to: string; icon: any; end?: boolean }> = []
+
+  // 1. Dashboard / Hub (Adapts label based on role)
+  orgNavItems.push({
+    label: isOrgAdmin ? 'Overview & Stats' : isOrgHR ? 'HR Workspace' : 'Member Hub',
+    to: '/app/org/dashboard',
+    icon: LayoutDashboard,
+    end: true,
+  })
+
+  // 2. Company Profile Studio (Only for Owner/Admin or permitted editors)
+  if (isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')) {
+    orgNavItems.push({
+      label: 'Company Profile',
+      to: '/app/org/profile',
+      icon: Building2,
+    })
+  }
+
+  // 3. Team Members / Directory (Roster management for admins/HR, Colleague Directory for members)
+  orgNavItems.push({
+    label: isOrgHR || hasPerm('members:invite') ? 'Team Members' : 'Colleague Directory',
+    to: '/app/org/members',
+    icon: Users,
+  })
+
+  // 4. Profile Approvals (Managers, HR, Admins)
+  if (isOrgManager || hasPerm('approvals:view') || hasPerm('approvals:manage')) {
+    orgNavItems.push({
+      label: 'Profile Approvals',
+      to: '/app/org/approvals',
+      icon: FileCheck,
+    })
+  }
+
+  // 5. Departments (Managers, HR, Admins)
+  if (isOrgManager || hasPerm('departments:manage')) {
+    orgNavItems.push({
+      label: 'Departments',
+      to: '/app/org/departments',
+      icon: Network,
+    })
+  }
+
+  // 6. Job Postings (HR, Admins)
+  if (isOrgHR || hasPerm('jobs:view') || hasPerm('jobs:create')) {
+    orgNavItems.push({
+      label: 'Job Postings',
+      to: '/app/org/jobs',
+      icon: Briefcase,
+    })
+  }
+
+  // 7. Applicants (HR, Admins)
+  if (isOrgHR || hasPerm('applications:view') || hasPerm('applications:manage')) {
+    orgNavItems.push({
+      label: 'Applicants',
+      to: '/app/org/applications',
+      icon: FileCheck,
+    })
+  }
+
+  // 8. Company Events (Visible to all members of the organization)
+  orgNavItems.push({
+    label: 'Company Events',
+    to: '/app/org/events',
+    icon: Calendar,
+  })
+
+  // 9. Roles & Access (Strictly Owner/Admin or roles:manage)
+  if (isOrgAdmin || hasPerm('roles:manage')) {
+    orgNavItems.push({
+      label: 'Roles & Access',
+      to: '/app/org/roles',
+      icon: KeyRound,
+    })
+  }
+
+  // 10. Audit Logs (Strictly Owner/Admin or audit:view)
+  if (isOrgAdmin || hasPerm('audit:view')) {
+    orgNavItems.push({
+      label: 'Audit Logs',
+      to: '/app/org/audit',
+      icon: ShieldAlert,
+    })
+  }
+
+  // 11. Org Settings (Strictly Owner/Admin or settings:manage)
+  if (isOrgAdmin || hasPerm('settings:manage')) {
+    orgNavItems.push({
+      label: 'Org Settings',
+      to: '/app/org/settings',
+      icon: Settings,
+    })
+  }
 
   const navItems = isOrgMode ? orgNavItems : personalNavItems
 

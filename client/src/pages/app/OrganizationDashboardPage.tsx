@@ -19,10 +19,11 @@ import { jobsApi } from '@/features/jobs/api/jobs.api';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { MemberHubView } from '@/components/organization/MemberHubView';
 
 export default function OrganizationDashboardPage() {
   const navigate = useNavigate();
-  const { activeContext } = useOrganizationContextStore();
+  const { activeContext, memberships } = useOrganizationContextStore();
 
   if (activeContext.type !== 'ORGANIZATION') {
     return (
@@ -41,6 +42,8 @@ export default function OrganizationDashboardPage() {
   }
 
   const orgId = activeContext.organizationId;
+  const role = (activeContext.role || 'MEMBER').toUpperCase();
+  const currentMembership = memberships.find((m: any) => m.organization?.id === orgId);
 
   // Fetch organization details
   const { data: orgData } = useQuery({
@@ -48,6 +51,11 @@ export default function OrganizationDashboardPage() {
     queryFn: () => organizationsApi.getById(orgId),
   });
   const org = (orgData as any)?.data?.organization || activeContext;
+
+  // If user joined as regular MEMBER, show the dedicated Member Hub
+  if (role === 'MEMBER') {
+    return <MemberHubView org={org} membership={currentMembership} />;
+  }
 
   // Fetch jobs
   const { data: jobsData } = useQuery({

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
@@ -227,10 +228,18 @@ const profileSchema = z.object({
 type FormValues = z.infer<typeof profileSchema>;
 
 export default function OrganizationProfilePage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeContext } = useOrganizationContextStore();
 
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const canEditProfile =
+    userRole === 'OWNER' ||
+    userRole === 'ADMIN' ||
+    permissions.includes('org:edit') ||
+    permissions.includes('showcase:manage');
 
   const [uploadingLogo, setUploadingLogo] = React.useState(false);
   const [uploadingBanner, setUploadingBanner] = React.useState(false);
@@ -640,6 +649,28 @@ export default function OrganizationProfilePage() {
         <p className="text-sm text-muted-foreground mt-1">
           Switch to an organization workspace to manage its profile.
         </p>
+      </div>
+    );
+  }
+
+  if (!canEditProfile) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <Building2 className="h-7 w-7" />
+        </div>
+        <h2 className="text-xl font-bold">Access Restricted</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">
+          Editing the organization brand studio and public showcase is restricted to organization administrators.
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={() => window.open(`/c/${org?.slug || activeContext.slug}`, '_blank')} variant="outline">
+            <ExternalLink className="h-4 w-4 mr-2" /> View Public Showcase
+          </Button>
+          <Button onClick={() => navigate('/app/org/dashboard')}>
+            Return to Dashboard
+          </Button>
+        </div>
       </div>
     );
   }

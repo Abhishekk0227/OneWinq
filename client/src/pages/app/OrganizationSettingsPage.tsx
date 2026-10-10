@@ -47,12 +47,33 @@ export default function OrganizationSettingsPage() {
   const { activeContext, switchToPersonal, fetchMemberships } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
 
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const canManageSettings = userRole === 'OWNER' || userRole === 'ADMIN' || permissions.includes('settings:manage');
+
   const { data: orgData, isLoading } = useQuery({
     queryKey: ['org', orgId, 'details'],
     queryFn: () => organizationsApi.getById(orgId),
-    enabled: !!orgId,
+    enabled: !!orgId && canManageSettings,
   });
   const org = (orgData as any)?.data?.organization;
+
+  if (!canManageSettings) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <Settings className="h-7 w-7" />
+        </div>
+        <h2 className="text-xl font-bold">Access Restricted</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">
+          Organization governance and privacy settings are managed exclusively by organization administrators.
+        </p>
+        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
+          Return to Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const {
     register,

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShieldAlert,
@@ -17,19 +18,42 @@ import { organizationsApi } from '@/features/organizations/api/organizations.api
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export default function OrganizationAuditPage() {
+  const navigate = useNavigate();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
   const [searchQuery, setSearchQuery] = React.useState('');
 
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const canViewAudit = userRole === 'OWNER' || userRole === 'ADMIN' || permissions.includes('audit:view');
+
   const { data: auditData, isLoading } = useQuery({
     queryKey: ['org', orgId, 'auditLogs'],
     queryFn: () => organizationsApi.listAuditLogs(orgId, { limit: 100 }),
-    enabled: !!orgId,
+    enabled: !!orgId && canViewAudit,
   });
 
   const logs = (auditData as any)?.data?.logs || [];
+
+  if (!canViewAudit) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <ShieldAlert className="h-7 w-7" />
+        </div>
+        <h2 className="text-xl font-bold">Access Restricted</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">
+          Compliance and audit logs are visible exclusively to organization owners and authorized administrators.
+        </p>
+        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
+          Return to Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const filteredLogs = logs.filter((log: any) => {
     if (!searchQuery.trim()) {return true;}
