@@ -96,7 +96,23 @@ export const router = createBrowserRouter([
 
       // Public Company Brand Showcase
       {
+        path: 'c/:slug',
+        element: (
+          <Suspended>
+            <CompanyShowcasePage />
+          </Suspended>
+        ),
+      },
+      {
         path: 'company/:slug',
+        element: (
+          <Suspended>
+            <CompanyShowcasePage />
+          </Suspended>
+        ),
+      },
+      {
+        path: 'org/:slug',
         element: (
           <Suspended>
             <CompanyShowcasePage />
@@ -117,14 +133,6 @@ export const router = createBrowserRouter([
       // Public NFC Tap & Digital Card QR Resolution
       {
         path: 'p/c/:cardUid',
-        element: (
-          <Suspended>
-            <CardTapRedirectPage />
-          </Suspended>
-        ),
-      },
-      {
-        path: 'c/:cardUid',
         element: (
           <Suspended>
             <CardTapRedirectPage />

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { cardsApi } from '@/features/cards/api/cards.api'
+import { organizationsApi } from '@/features/organizations/api/organizations.api'
 import { Wifi, ShieldAlert, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
@@ -15,6 +16,21 @@ export default function CardTapRedirectPage() {
     enabled: !!cardUid,
     retry: false,
   })
+
+  // Fallback: If card is not found or error, check if cardUid is actually an organization slug
+  const { data: orgFallbackData, isLoading: isOrgFallbackLoading } = useQuery({
+    queryKey: ['fallbackOrgCheck', cardUid],
+    queryFn: () => organizationsApi.getBySlug(cardUid || ''),
+    enabled: !!error && !!cardUid,
+    retry: false,
+  })
+
+  useEffect(() => {
+    const org = orgFallbackData?.data?.organization
+    if (org?.slug) {
+      navigate(`/c/${org.slug}`, { replace: true })
+    }
+  }, [orgFallbackData, navigate])
 
   const tapData = data?.data
 
@@ -39,7 +55,7 @@ export default function CardTapRedirectPage() {
     }
   }, [destination, navigate])
 
-  if (isLoading) {
+  if (isLoading || (error && isOrgFallbackLoading) || orgFallbackData?.data?.organization) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground">
         <div className="flex flex-col items-center space-y-6 max-w-sm text-center">

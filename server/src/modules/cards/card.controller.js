@@ -6,6 +6,8 @@ import {
   validate,
 } from './card.validation.js';
 import { successResponse } from '../../shared/response.js';
+import { Organization } from '../organizations/organization.model.js';
+import { ORGANIZATION_STATUS } from '../../config/constants.js';
 
 export const cardController = {
   /**
@@ -13,8 +15,9 @@ export const cardController = {
    * Public NFC tap resolution
    */
   async resolveTap(req, res, next) {
+    const rawIdentifier = req.params.cardUid || req.params.cardCode;
     try {
-      const result = await cardService.resolveTap(req.params.cardUid || req.params.cardCode, {
+      const result = await cardService.resolveTap(rawIdentifier, {
         ip: req.ip,
         userAgent: req.headers['user-agent'],
       });
@@ -22,6 +25,31 @@ export const cardController = {
         successResponse(result, 'Card tap resolved successfully.'),
       );
     } catch (err) {
+      // Fallback: If not a physical card, check if identifier is an organization slug
+      if (rawIdentifier) {
+        try {
+          const org = await Organization.findOne({
+            slug: String(rawIdentifier).toLowerCase().trim(),
+            status: { $ne: ORGANIZATION_STATUS.DEACTIVATED },
+          });
+          if (org) {
+            return res.status(200).json(
+              successResponse(
+                {
+                  isOrganization: true,
+                  slug: org.slug,
+                  displayName: org.name,
+                  redirectUrl: `/c/${org.slug}`,
+                  organization: org.toSafeObject(),
+                },
+                'Organization showcase resolved successfully.',
+              ),
+            );
+          }
+        } catch {
+          // Ignore and continue to next(err)
+        }
+      }
       return next(err);
     }
   },

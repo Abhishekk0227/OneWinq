@@ -309,7 +309,7 @@ export default function CardsPage() {
           <DialogDescription>
             Scan this QR code with any phone to open your digital profile:{' '}
             <code className="text-primary text-xs">
-              {selectedCardForQr && `/c/${selectedCardForQr.cardCode || selectedCardForQr.cardUid}`}
+              {selectedCardForQr && `/p/c/${selectedCardForQr.cardCode || selectedCardForQr.cardUid}`}
             </code>
           </DialogDescription>
         </DialogHeader>
@@ -317,7 +317,7 @@ export default function CardsPage() {
         <div className="flex flex-col items-center justify-center p-6 space-y-4 bg-muted/20 rounded-2xl border border-border">
           <div className="p-4 bg-white rounded-2xl shadow-md">
             <QRCodeSVG
-              value={`${window.location.origin}/c/${selectedCardForQr?.cardCode || selectedCardForQr?.cardUid}`}
+              value={`${window.location.origin}/p/c/${selectedCardForQr?.cardCode || selectedCardForQr?.cardUid}`}
               size={180}
               level="H"
               includeMargin

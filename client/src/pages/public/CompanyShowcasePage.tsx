@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { cardsApi } from '@/features/cards/api/cards.api';
 import {
   Building2,
   Globe,
@@ -125,15 +126,37 @@ function getShowcaseTaxonomy(type: string) {
 }
 
 export default function CompanyShowcasePage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, cardUid } = useParams<{ slug?: string; cardUid?: string }>();
+  const effectiveSlug = (slug || cardUid || '').trim();
+  const navigate = useNavigate();
 
-  const { data: orgData, isLoading, error } = useQuery({
-    queryKey: ['publicOrgShowcase', slug],
-    queryFn: () => organizationsApi.getBySlug(slug!),
-    enabled: !!slug,
+  const { data: orgData, isLoading: isOrgLoading, error: orgError } = useQuery({
+    queryKey: ['publicOrgShowcase', effectiveSlug],
+    queryFn: () => organizationsApi.getBySlug(effectiveSlug),
+    enabled: !!effectiveSlug,
+    retry: false,
   });
 
   const org: Organization = (orgData as any)?.data?.organization;
+
+  // Fallback check: if no organization matches, verify if this identifier is an NFC card
+  const { data: cardData, isLoading: isCardLoading } = useQuery({
+    queryKey: ['fallbackCardCheck', effectiveSlug],
+    queryFn: () => cardsApi.resolveTap(effectiveSlug),
+    enabled: (!!orgError || (!isOrgLoading && !org)) && !!effectiveSlug,
+    retry: false,
+  });
+
+  React.useEffect(() => {
+    if (cardData?.data) {
+      const tap = cardData.data;
+      if (tap.username) {
+        navigate(`/u/${tap.username}`, { replace: true });
+      } else if (tap.redirectUrl) {
+        navigate(tap.redirectUrl, { replace: true });
+      }
+    }
+  }, [cardData, navigate]);
 
   // Fetch live jobs for this company
   const { data: jobsData } = useQuery({
@@ -143,7 +166,7 @@ export default function CompanyShowcasePage() {
   });
   const jobs = (jobsData as any)?.data?.jobs || [];
 
-  if (isLoading) {
+  if (isOrgLoading || (isCardLoading && !org)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -151,7 +174,7 @@ export default function CompanyShowcasePage() {
     );
   }
 
-  if (error || !org) {
+  if (!org) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
         <Building2 className="h-16 w-16 text-muted-foreground/40 mb-4" />

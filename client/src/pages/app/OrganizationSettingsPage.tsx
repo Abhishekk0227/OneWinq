@@ -145,21 +145,32 @@ export default function OrganizationSettingsPage() {
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                 Custom Slug
               </label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-mono text-muted-foreground">onewinq.me/u/</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-mono text-muted-foreground">{window.location.host}/c/</span>
                 <Input {...register('slug')} className="font-mono text-sm max-w-xs" />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://onewinq.me/u/${org?.slug}`);
-                    toast.success('Link copied to clipboard');
+                    const url = `${window.location.origin}/c/${org?.slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('Company profile link copied to clipboard');
                   }}
                   className="h-10 px-3"
                 >
                   <Copy className="h-4 w-4 mr-1" /> Copy Link
                 </Button>
+                {org?.slug && (
+                  <a
+                    href={`/c/${org.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 h-10 px-3 text-xs font-semibold rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors shadow-xs"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Preview Profile
+                  </a>
+                )}
               </div>
               {errors.slug && <p className="text-xs text-destructive mt-1">{errors.slug.message}</p>}
             </div>
