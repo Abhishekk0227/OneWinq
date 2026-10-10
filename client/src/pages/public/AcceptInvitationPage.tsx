@@ -234,9 +234,9 @@ export default function AcceptInvitationPage() {
       <Card className="max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border-border/80 relative overflow-hidden">
         {/* Organization Header */}
         <div className="text-center space-y-3">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto overflow-hidden shadow-xs">
+          <div className="h-16 w-16 rounded-2xl bg-white dark:bg-card border border-primary/20 text-primary flex items-center justify-center mx-auto overflow-hidden shadow-xs p-1.5">
             {organization?.logoUrl ? (
-              <img src={organization.logoUrl} alt={organization.name} className="h-full w-full object-cover" />
+              <img src={organization.logoUrl} alt={organization.name} className="h-full w-full object-contain" />
             ) : (
               <Building2 className="h-8 w-8" />
             )}

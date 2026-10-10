@@ -78,9 +78,9 @@ export default function OrganizationDashboardPage() {
       {/* Organization Header Banner */}
       <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary overflow-hidden shrink-0">
+          <div className="h-16 w-16 rounded-2xl bg-white dark:bg-card border border-primary/20 flex items-center justify-center text-primary overflow-hidden shrink-0 p-1.5 shadow-2xs">
             {org.logoUrl ? (
-              <img src={org.logoUrl} alt={org.name} className="h-full w-full object-cover" />
+              <img src={org.logoUrl} alt={org.name} className="h-full w-full object-contain" />
             ) : (
               <Building2 className="h-8 w-8" />
             )}

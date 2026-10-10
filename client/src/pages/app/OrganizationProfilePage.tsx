@@ -722,11 +722,11 @@ export default function OrganizationProfilePage() {
             {/* Interactive Logo Avatar with Quick Upload Overlay */}
             <div className="relative group/logo">
               <div
-                className="h-28 w-28 rounded-2xl bg-card border-4 border-card shadow-lg flex items-center justify-center overflow-hidden shrink-0"
+                className="h-28 w-28 rounded-2xl bg-white dark:bg-card border-4 border-card shadow-lg flex items-center justify-center overflow-hidden shrink-0 p-2"
                 style={{ borderColor: previewPrimary }}
               >
                 {previewLogo ? (
-                  <img src={previewLogo} alt="Logo" className="w-full h-full object-cover" />
+                  <img src={previewLogo} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
                   <Building2 className="h-12 w-12 text-muted-foreground/60" />
                 )}

@@ -238,11 +238,11 @@ export default function CompanyShowcasePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 pb-6 border-b border-border/80">
             <div className="flex items-end gap-5">
               <div
-                className="h-28 w-28 sm:h-36 sm:w-36 rounded-3xl bg-card border-4 border-background shadow-xl flex items-center justify-center overflow-hidden shrink-0"
+                className="h-28 w-28 sm:h-36 sm:w-36 rounded-3xl bg-white dark:bg-card border-4 border-background shadow-xl flex items-center justify-center overflow-hidden shrink-0 p-2"
                 style={{ borderColor: primaryColor }}
               >
                 {logoImage ? (
-                  <img src={logoImage} alt={org.name} className="w-full h-full object-cover" />
+                  <img src={logoImage} alt={org.name} className="w-full h-full object-contain" />
                 ) : (
                   <Building2 className="h-14 w-14 text-primary" />
                 )}
