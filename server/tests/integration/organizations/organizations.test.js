@@ -248,4 +248,48 @@ describe('Unified Platform Organizations & Recruitment Integration', () => {
     expect(auditRes.status).toBe(200);
     expect(auditRes.body.data.logs.length).toBeGreaterThan(0);
   });
+
+  it('allows owner/admin to create and list custom organization roles', async () => {
+    if (skipIfNoDb()) return;
+
+    // 1. Create Organization
+    const orgRes = await request(app)
+      .post('/api/v1/organizations')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({
+        name: 'Apex Academy',
+        slug: 'apex-academy',
+        type: ORGANIZATION_TYPE.COLLEGE,
+      });
+
+    expect(orgRes.status).toBe(201);
+    const orgId = orgRes.body.data.organization.id;
+
+    // 2. Create custom role
+    const createRoleRes = await request(app)
+      .post(`/api/v1/organizations/${orgId}/roles`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({
+        name: 'DEAN_ACADEMICS',
+        displayName: 'Dean of Academics',
+        description: 'Oversees faculty courses and student events.',
+        permissions: [ORGANIZATION_PERMISSION.EVENTS_VIEW, ORGANIZATION_PERMISSION.EVENTS_MANAGE],
+      });
+
+    expect(createRoleRes.status).toBe(201);
+    expect(createRoleRes.body.success).toBe(true);
+    expect(createRoleRes.body.data.role.name).toBe('DEAN_ACADEMICS');
+    expect(createRoleRes.body.data.role.displayName).toBe('Dean of Academics');
+
+    // 3. List roles
+    const listRolesRes = await request(app)
+      .get(`/api/v1/organizations/${orgId}/roles`)
+      .set('Authorization', `Bearer ${ownerToken}`);
+
+    expect(listRolesRes.status).toBe(200);
+    const roleNames = listRolesRes.body.data.roles.map((r) => r.name);
+    expect(roleNames).toContain('DEAN_ACADEMICS');
+    expect(roleNames).toContain('OWNER');
+    expect(roleNames).toContain('ADMIN');
+  });
 });
