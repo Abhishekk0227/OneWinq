@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Shield,
@@ -92,9 +93,14 @@ const PERMISSION_GROUPS = [
 ];
 
 export default function OrganizationRolesPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
+
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const canManageRoles = userRole === 'OWNER' || userRole === 'ADMIN' || permissions.includes('roles:manage');
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingRole, setEditingRole] = React.useState<OrganizationRoleItem | null>(null);
@@ -108,10 +114,27 @@ export default function OrganizationRolesPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['org', orgId, 'roles'],
     queryFn: () => organizationsApi.listRoles(orgId),
-    enabled: !!orgId,
+    enabled: !!orgId && canManageRoles,
   });
 
   const roles = (data as any)?.data?.roles || [];
+
+  if (!canManageRoles) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <KeyRound className="h-7 w-7" />
+        </div>
+        <h2 className="text-xl font-bold">Access Restricted</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">
+          Custom roles and permission matrices are managed exclusively by organization administrators.
+        </p>
+        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
+          Return to Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const createMutation = useMutation({
     mutationFn: (payload: any) => organizationsApi.createRole(orgId, payload),

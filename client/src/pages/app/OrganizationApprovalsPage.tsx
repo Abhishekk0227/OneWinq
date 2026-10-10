@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileCheck2,
@@ -26,9 +27,20 @@ import { PROFILE_APPROVAL_STATUS } from '@/constants/app.constants';
 import type { ProfileApproval } from '@/types/organization.types';
 
 export default function OrganizationApprovalsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
+
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const canViewApprovals =
+    userRole === 'OWNER' ||
+    userRole === 'ADMIN' ||
+    userRole === 'HR_MANAGER' ||
+    userRole === 'MANAGER' ||
+    permissions.includes('approvals:view') ||
+    permissions.includes('approvals:manage');
 
   const [activeTab, setActiveTab] = React.useState<string>('PENDING_REVIEW');
   const [selectedApproval, setSelectedApproval] = React.useState<ProfileApproval | null>(null);
@@ -41,7 +53,7 @@ export default function OrganizationApprovalsPage() {
         status: activeTab === 'ALL' ? undefined : activeTab,
         limit: 50,
       }),
-    enabled: !!orgId,
+    enabled: !!orgId && canViewApprovals,
   });
 
   const approvals: ProfileApproval[] = (approvalsData as any)?.data?.approvals || [];
@@ -85,6 +97,23 @@ export default function OrganizationApprovalsPage() {
         <p className="text-sm text-muted-foreground mt-1">
           Switch to an organization workspace to review employee profile submissions.
         </p>
+      </div>
+    );
+  }
+
+  if (!canViewApprovals) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center max-w-md mx-auto">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <FileCheck2 className="h-7 w-7" />
+        </div>
+        <h2 className="text-xl font-bold">Access Restricted</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-6">
+          Profile approvals and identity moderation are restricted to organization managers and administrators.
+        </p>
+        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
+          Return to Dashboard
+        </Button>
       </div>
     );
   }

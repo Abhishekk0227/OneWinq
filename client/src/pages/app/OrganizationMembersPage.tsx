@@ -99,6 +99,16 @@ export default function OrganizationMembersPage() {
     return <div className="p-8 text-center text-muted-foreground">Select an organization first</div>;
   }
 
+  const userRole = (activeContext.role || 'MEMBER').toUpperCase();
+  const permissions = activeContext.permissions || [];
+  const isOwner = userRole === 'OWNER';
+  const isAdmin = isOwner || userRole === 'ADMIN';
+  const isHR = isAdmin || userRole === 'HR_MANAGER';
+  const canInvite = isHR || isOwner || permissions.includes('members:invite');
+  const canEditMember = isAdmin || isOwner || permissions.includes('members:edit');
+  const canRemoveMember = isAdmin || isOwner || permissions.includes('members:remove');
+  const isMemberOnly = !canInvite && !canEditMember && !canRemoveMember;
+
   const orgId = activeContext.organizationId;
 
   // Fetch departments for dropdowns & filters
@@ -279,52 +289,60 @@ export default function OrganizationMembersPage() {
       {/* Top Header & Action */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">User Management & Workforce</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isMemberOnly ? 'Colleague Directory' : 'User Management & Workforce'}
+          </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Manage your team, appoint executive leadership, and track workforce invitations for {activeContext.name}.
+            {isMemberOnly
+              ? `Browse, connect with, and view verified members of ${activeContext.name}.`
+              : `Manage your team, appoint executive leadership, and track workforce invitations for ${activeContext.name}.`}
           </p>
         </div>
 
-        <Button onClick={handleOpenInvite} className="shadow-xs font-semibold">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite Member
-        </Button>
+        {canInvite && (
+          <Button onClick={handleOpenInvite} className="shadow-xs font-semibold">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Invite Member
+          </Button>
+        )}
       </div>
 
       {/* Segmented Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-px">
-        <button
-          onClick={() => setActiveTab('WORKFORCE')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'WORKFORCE'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          <span>Active Workforce</span>
-          <Badge variant="secondary" className="text-[11px] px-1.5 py-0 h-5 font-bold">
-            {members.length}
-          </Badge>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('INVITATIONS')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-            activeTab === 'INVITATIONS'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Mail className="h-4 w-4" />
-          <span>Invitations & Onboarding</span>
-          {pendingInvitesCount > 0 && (
-            <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0 h-5 font-bold">
-              {pendingInvitesCount} Pending
+      {!isMemberOnly && (
+        <div className="flex items-center gap-2 border-b border-border pb-px">
+          <button
+            onClick={() => setActiveTab('WORKFORCE')}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+              activeTab === 'WORKFORCE'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span>Active Workforce</span>
+            <Badge variant="secondary" className="text-[11px] px-1.5 py-0 h-5 font-bold">
+              {members.length}
             </Badge>
-          )}
-        </button>
-      </div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('INVITATIONS')}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+              activeTab === 'INVITATIONS'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Mail className="h-4 w-4" />
+            <span>Invitations & Onboarding</span>
+            {pendingInvitesCount > 0 && (
+              <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0 h-5 font-bold">
+                {pendingInvitesCount} Pending
+              </Badge>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* TAB 1: ACTIVE WORKFORCE */}
       {activeTab === 'WORKFORCE' && (
@@ -484,30 +502,44 @@ export default function OrganizationMembersPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenEdit(member)}
-                          className="h-8 text-xs font-semibold gap-1.5"
-                          title="Edit Member / Appoint Executive Position"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                          <span>Edit & Appoint</span>
-                        </Button>
-
-                        {member.role !== 'OWNER' && (
+                      {canEditMember ? (
+                        <div className="flex items-center gap-1.5">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => handleRemoveMember(member.id)}
-                            className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                            title="Remove member"
+                            onClick={() => handleOpenEdit(member)}
+                            className="h-8 text-xs font-semibold gap-1.5"
+                            title="Edit Member / Appoint Executive Position"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Edit2 className="h-3.5 w-3.5" />
+                            <span>Edit & Appoint</span>
                           </Button>
-                        )}
-                      </div>
+
+                          {canRemoveMember && member.role !== 'OWNER' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveMember(member.id)}
+                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                              title="Remove member"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        (member.user?.username || (member as any).username) && (
+                          <a
+                            href={`/u/${member.user?.username || (member as any).username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold hover:border-primary/50 hover:text-primary transition-colors bg-card shadow-2xs"
+                          >
+                            <span>Profile</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )
+                      )}
                     </div>
                   </div>
                 ))
