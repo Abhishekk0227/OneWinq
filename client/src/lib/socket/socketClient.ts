@@ -54,6 +54,7 @@ export function connectSocket(token?: string): Socket | null {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() })
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      queryClient.invalidateQueries({ queryKey: ['myPendingOrgInvitations'] })
 
       const item = payload?.notification || payload
       if (item?.title) {
@@ -63,6 +64,17 @@ export function connectSocket(token?: string): Socket | null {
 
     socketInstance.on('notification_new', handleNotification)
     socketInstance.on('notification:new', handleNotification)
+
+    socketInstance.on('organization_invitation', (payload?: any) => {
+      queryClient.invalidateQueries({ queryKey: ['myPendingOrgInvitations'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      toast.info(
+        `You have been invited to join ${payload?.organizationName || 'an organization'}! Review it in your dashboard.`,
+        'Company Invitation'
+      )
+    })
 
     socketInstance.on('new_message_notification', () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list() })

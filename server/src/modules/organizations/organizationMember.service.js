@@ -28,6 +28,7 @@ import {
 } from '../../shared/errors.js';
 import { emailService } from '../../infrastructure/email/emailService.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { socketEmitter } from '../../infrastructure/sockets/socketEmitter.js';
 import logger from '../../utils/logger.js';
 
 export function getAppBaseUrl() {
@@ -304,6 +305,92 @@ export async function listOrganizationInvitations(organizationId, { page = 1, li
   };
 }
 
+export function getInvitationEmailHtml({ orgName, role, departmentName, inviterName, inviteLink }) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitation to join ${orgName}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #09090b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #09090b; padding: 40px 15px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 540px; background-color: #18181b; border: 1px solid #27272a; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+          <!-- Header Branding -->
+          <tr>
+            <td style="padding: 32px 32px 20px 32px; text-align: center; border-bottom: 1px solid #27272a;">
+              <div style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff;">
+                One<span style="color: #a855f7;">Winq</span>
+              </div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #a1a1aa; margin-top: 4px;">
+                Workforce Identity & Enterprise Platform
+              </div>
+            </td>
+          </tr>
+
+          <!-- Main Body -->
+          <tr>
+            <td style="padding: 32px;">
+              <h1 style="font-size: 20px; font-weight: 700; color: #ffffff; margin: 0 0 14px 0; line-height: 1.4;">
+                You've been invited to join <span style="color: #c084fc;">${orgName}</span>
+              </h1>
+              <p style="font-size: 14px; line-height: 1.6; color: #d4d4d8; margin: 0 0 20px 0;">
+                ${inviterName ? `<strong>${inviterName}</strong> has invited you` : 'You have been invited'} to join the workforce at <strong>${orgName}</strong> on OneWinq as a <strong>${role}</strong>${departmentName ? ` in the <strong>${departmentName}</strong> department` : ''}.
+              </p>
+
+              <!-- Card Box -->
+              <table role="presentation" width="100%" style="background-color: #27272a; border-radius: 12px; margin: 0 0 24px 0; padding: 16px;">
+                <tr>
+                  <td>
+                    <div style="font-size: 11px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px;">Organization</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #ffffff; margin-top: 2px;">${orgName}</div>
+                    <div style="font-size: 13px; color: #c084fc; margin-top: 4px;">Role: ${role}</div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Action Button -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${inviteLink}" style="display: inline-block; background: linear-gradient(135deg, #9333ea, #7c3aed); color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);">
+                      Accept Invitation & Join →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="font-size: 12px; line-height: 1.5; color: #a1a1aa; text-align: center; margin: 0 0 14px 0;">
+                Already have a OneWinq account? You can also review and accept this invitation directly on your OneWinq Dashboard.
+              </p>
+
+              <p style="font-size: 11px; color: #71717a; text-align: center; margin: 0; word-break: break-all;">
+                Or copy and paste this link in your browser:<br/>
+                <a href="${inviteLink}" style="color: #a855f7; text-decoration: underline;">${inviteLink}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px; background-color: #121214; border-top: 1px solid #27272a; text-align: center;">
+              <p style="font-size: 11px; color: #71717a; margin: 0;">
+                This invitation link will expire in 7 days. If you did not expect this invitation, you can ignore this email.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+}
+
 /**
  * Resend an invitation with refreshed expiry and token.
  */
@@ -329,12 +416,22 @@ export async function resendInvitation(organizationId, invitationId, invitedByUs
   }
   await invitation.save();
 
-  const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
+  const [organization, inviterUser, departmentDoc] = await Promise.all([
+    Organization.findById(organizationId).select('name slug logoUrl').lean(),
+    invitedByUserId ? User.findById(invitedByUserId).select('displayName email avatarUrl').lean() : null,
+    invitation.departmentId ? Department.findById(invitation.departmentId).select('name').lean() : null,
+  ]);
+
   const orgName = organization?.name || 'Organization';
+  const inviterName = inviterUser?.displayName || 'Team Administrator';
+  const departmentName = departmentDoc?.name || '';
   const inviteLink = `${getAppBaseUrl()}/invitation?token=${rawToken}`;
 
-  // In-app notification for existing users on OneWinq
-  const targetUser = await User.findOne({ email: invitation.email }).lean();
+  // In-app notification for existing users on OneWinq (case-insensitive lookup)
+  const normalizedEmail = invitation.email.toLowerCase().trim();
+  const emailRegex = new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+  const targetUser = await User.findOne({ email: emailRegex }).lean();
+
   if (targetUser) {
     notificationService
       .createNotification({
@@ -342,7 +439,7 @@ export async function resendInvitation(organizationId, invitationId, invitedByUs
         actorId: invitedByUserId || null,
         type: NOTIFICATION_TYPE.ORGANIZATION_INVITATION,
         title: `Invitation to join ${orgName}`,
-        body: `You have a renewed invitation to join ${orgName} as a ${invitation.role}.`,
+        body: `You have an invitation to join ${orgName} as a ${invitation.role}. Review and accept on your dashboard.`,
         entityType: 'organization',
         entityId: organizationId.toString(),
         linkUrl: `/invitation?token=${rawToken}`,
@@ -356,25 +453,29 @@ export async function resendInvitation(organizationId, invitationId, invitedByUs
       .catch((err) =>
         logger.warn('[Organization] Failed sending in-app notification on resend', { error: err.message }),
       );
+
+    // Real-time socket event to instantly update dashboard/counter
+    socketEmitter.emitToUser(targetUser._id.toString(), 'organization_invitation', {
+      organizationId: organizationId.toString(),
+      organizationName: orgName,
+      role: invitation.role,
+      token: rawToken,
+    });
   }
 
+  // Send branded invitation email
   Promise.resolve()
     .then(() =>
       emailService.sendNotificationEmail({
         to: invitation.email,
         subject: `Reminder: You have been invited to join ${orgName} on OneWinq`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2>Join ${orgName} on OneWinq</h2>
-            <p>You have been invited to join <strong>${orgName}</strong> as a <strong>${invitation.role}</strong>.</p>
-            <div style="margin: 25px 0;">
-              <a href="${inviteLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-                Accept Invitation
-              </a>
-            </div>
-            <p style="color: #64748b; font-size: 13px;">This invitation link will expire in 7 days.</p>
-          </div>
-        `,
+        html: getInvitationEmailHtml({
+          orgName,
+          role: invitation.role,
+          departmentName,
+          inviterName,
+          inviteLink,
+        }),
         text: `You have been invited to join ${orgName} on OneWinq as a ${invitation.role}. Accept your invitation here: ${inviteLink}`,
       }),
     )
@@ -491,9 +592,10 @@ export async function getInvitationPreview(rawToken) {
  */
 export async function inviteMember(organizationId, invitedByUserId, { email, role = ORGANIZATION_ROLE.MEMBER, departmentId = null, jobTitle = '' }) {
   const normalizedEmail = email.toLowerCase().trim();
+  const emailRegex = new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
 
   // Check if already an active member
-  const existingUser = await User.findOne({ email: normalizedEmail }).lean();
+  const existingUser = await User.findOne({ email: emailRegex }).lean();
   if (existingUser) {
     const existingMember = await OrganizationMember.findOne({
       organizationId,
@@ -512,7 +614,7 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
 
   // Invalidate any prior pending invitations for this email in this org
   await OrganizationInvitation.updateMany(
-    { organizationId, email: normalizedEmail, status: 'PENDING' },
+    { organizationId, email: emailRegex, status: 'PENDING' },
     { status: 'REVOKED' },
   );
 
@@ -528,8 +630,15 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
     expiresAt,
   });
 
-  const organization = await Organization.findById(organizationId).select('name slug logoUrl').lean();
+  const [organization, inviterUser, departmentDoc] = await Promise.all([
+    Organization.findById(organizationId).select('name slug logoUrl').lean(),
+    invitedByUserId ? User.findById(invitedByUserId).select('displayName email avatarUrl').lean() : null,
+    departmentId ? Department.findById(departmentId).select('name').lean() : null,
+  ]);
+
   const orgName = organization?.name || 'Organization';
+  const inviterName = inviterUser?.displayName || 'Team Administrator';
+  const departmentName = departmentDoc?.name || '';
   const inviteLink = `${getAppBaseUrl()}/invitation?token=${rawToken}`;
 
   // In-app notification if invited user is already registered on OneWinq
@@ -537,10 +646,10 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
     notificationService
       .createNotification({
         recipientId: existingUser._id,
-        actorId: invitedByUserId,
+        actorId: invitedByUserId || null,
         type: NOTIFICATION_TYPE.ORGANIZATION_INVITATION,
         title: `Invitation to join ${orgName}`,
-        body: `You have been invited to join ${orgName} as a ${role}. Click here to review and accept.`,
+        body: `You have been invited to join ${orgName} as a ${role}. Review and accept on your dashboard.`,
         entityType: 'organization',
         entityId: organizationId.toString(),
         linkUrl: `/invitation?token=${rawToken}`,
@@ -554,26 +663,29 @@ export async function inviteMember(organizationId, invitedByUserId, { email, rol
       .catch((err) =>
         logger.warn('[Organization] Failed sending in-app invitation notification', { error: err.message }),
       );
+
+    // Real-time socket event so user's dashboard and notification badges update instantly
+    socketEmitter.emitToUser(existingUser._id.toString(), 'organization_invitation', {
+      organizationId: organizationId.toString(),
+      organizationName: orgName,
+      role,
+      token: rawToken,
+    });
   }
 
-  // Send invitation email safely (non-blocking)
+  // Send branded invitation email
   Promise.resolve()
     .then(() =>
       emailService.sendNotificationEmail({
         to: normalizedEmail,
         subject: `You have been invited to join ${orgName} on OneWinq`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2>Join ${orgName} on OneWinq</h2>
-            <p>You have been invited to join <strong>${orgName}</strong> as a <strong>${role}</strong>.</p>
-            <div style="margin: 25px 0;">
-              <a href="${inviteLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-                Accept Invitation
-              </a>
-            </div>
-            <p style="color: #64748b; font-size: 13px;">This invitation link will expire in 7 days.</p>
-          </div>
-        `,
+        html: getInvitationEmailHtml({
+          orgName,
+          role,
+          departmentName,
+          inviterName,
+          inviteLink,
+        }),
         text: `You have been invited to join ${orgName} on OneWinq as a ${role}. Accept your invitation here: ${inviteLink}`,
       }),
     )
@@ -799,10 +911,11 @@ export async function acceptInvitationWithRegistration({ token, displayName, use
 export async function listMyPendingInvitations(userEmail) {
   if (!userEmail) return [];
   const normalizedEmail = userEmail.toLowerCase().trim();
+  const emailRegex = new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
   const now = new Date();
 
   const invitations = await OrganizationInvitation.find({
-    email: normalizedEmail,
+    email: emailRegex,
     status: 'PENDING',
     expiresAt: { $gt: now },
   })
@@ -858,9 +971,10 @@ export async function listMyPendingInvitations(userEmail) {
  */
 export async function acceptMyPendingInvitation(userId, userEmail, invitationId) {
   const normalizedEmail = userEmail.toLowerCase().trim();
+  const emailRegex = new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
   const invitation = await OrganizationInvitation.findOne({
     _id: invitationId,
-    email: normalizedEmail,
+    email: emailRegex,
     status: 'PENDING',
     expiresAt: { $gt: new Date() },
   });
@@ -923,9 +1037,10 @@ export async function acceptMyPendingInvitation(userId, userEmail, invitationId)
  */
 export async function declineMyPendingInvitation(userEmail, invitationId) {
   const normalizedEmail = userEmail.toLowerCase().trim();
+  const emailRegex = new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
   const invitation = await OrganizationInvitation.findOne({
     _id: invitationId,
-    email: normalizedEmail,
+    email: emailRegex,
     status: 'PENDING',
   });
 

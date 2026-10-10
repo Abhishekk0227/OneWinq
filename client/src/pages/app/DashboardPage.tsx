@@ -267,9 +267,9 @@ export default function DashboardPage() {
               className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-primary/30 bg-primary/5 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2"
             >
               <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                <div className="h-12 w-12 rounded-2xl bg-white dark:bg-card border border-border/80 text-primary flex items-center justify-center shrink-0 overflow-hidden shadow-xs p-1">
                   {inv.organization?.logoUrl ? (
-                    <img src={inv.organization.logoUrl} alt={inv.organization.name} className="h-full w-full object-cover" />
+                    <img src={inv.organization.logoUrl} alt={inv.organization.name} className="h-full w-full object-contain" />
                   ) : (
                     <Building2 className="h-6 w-6 text-primary" />
                   )}
@@ -313,6 +313,16 @@ export default function DashboardPage() {
                 >
                   Decline
                 </Button>
+                {inv.organization?.slug && (
+                  <a
+                    href={`/c/${inv.organization.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 h-9 rounded-xl border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" /> View Company
+                  </a>
+                )}
               </div>
             </div>
           ))}
@@ -862,6 +872,89 @@ export default function DashboardPage() {
 
         {/* Right Column (4 cols): Identity Health & NFC Card Widget — Sticky on Desktop */}
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start">
+          {/* Company Invitations Section Widget */}
+          {pendingOrgInvitations.length > 0 && (
+            <div className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border/80">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                  <Building2 className="h-4 w-4 text-primary" />
+                  <span>Company Invitations</span>
+                  <Badge className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0 font-extrabold ml-1">
+                    {pendingOrgInvitations.length}
+                  </Badge>
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {pendingOrgInvitations.map((inv: any) => (
+                  <div
+                    key={inv.id}
+                    className="p-3.5 rounded-2xl border border-primary/20 bg-background/80 shadow-2xs space-y-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-white dark:bg-card border border-border flex items-center justify-center overflow-hidden shrink-0 p-1">
+                        {inv.organization?.logoUrl ? (
+                          <img
+                            src={inv.organization.logoUrl}
+                            alt={inv.organization.name}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <Building2 className="h-5 w-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <h3 className="font-bold text-xs text-foreground truncate">
+                            {inv.organization?.name || 'Organization'}
+                          </h3>
+                          <Badge className="bg-primary/15 text-primary border-primary/20 text-[9px] uppercase font-bold shrink-0">
+                            {inv.role}
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {inv.department?.name ? `${inv.department.name} • ` : ''}
+                          {inv.invitedBy?.displayName ? `Invited by ${inv.invitedBy.displayName}` : 'Invited to team'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                      <Button
+                        size="sm"
+                        onClick={() => acceptOrgInviteMutation.mutate(inv.id)}
+                        disabled={acceptOrgInviteMutation.isPending}
+                        className="flex-1 font-bold text-xs h-8"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => declineOrgInviteMutation.mutate(inv.id)}
+                        disabled={declineOrgInviteMutation.isPending}
+                        className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      >
+                        Decline
+                      </Button>
+                      {inv.organization?.slug && (
+                        <a
+                          href={`/c/${inv.organization.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="h-8 px-2 inline-flex items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:text-foreground text-xs"
+                          title="View Company Profile"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Linked NFC Smart Card Widget */}
           <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-border">

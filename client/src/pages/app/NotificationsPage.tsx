@@ -134,7 +134,10 @@ function resolveItemLink(item: any): string | null {
       return '/app/settings'
     case 'SECURITY_ALERT':
       return '/app/settings'
+    case 'ORGANIZATION_INVITATION':
+      return item.linkUrl || (item.metadata?.token ? `/invitation?token=${item.metadata.token}` : '/app/dashboard')
     default:
+      if (item.entityType === 'organization') return item.linkUrl || '/app/dashboard'
       if (item.entityType === 'connection') return '/app/connections'
       if (item.entityType === 'conversation') return item.entityId ? `/app/messages?cid=${item.entityId}` : '/app/messages'
       if (item.entityType === 'profile') return username ? `/u/${username}` : '/app/profile'
@@ -149,6 +152,8 @@ function resolveItemLink(item: any): string | null {
 
 function resolveActionLabel(item: any): string {
   switch (item.type) {
+    case 'ORGANIZATION_INVITATION':
+      return 'Review Invitation'
     case 'CONNECTION_REQUEST':
       return 'Respond to Request'
     case 'CONNECTION_ACCEPTED':
