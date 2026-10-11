@@ -40,6 +40,8 @@ export const createJobSchema = z.object({
     .default({}),
   skills: z.array(z.string().trim()).default([]),
   experienceLevel: z.string().trim().default(''),
+  applicationMethod: z.enum(['INTERNAL', 'EXTERNAL']).default('INTERNAL'),
+  externalApplyUrl: z.string().trim().nullable().optional(),
   status: z.enum(Object.values(JOB_STATUS)).default(JOB_STATUS.PUBLISHED),
   expiresAt: z.coerce.date().nullable().optional(),
 });
@@ -69,6 +71,8 @@ export const updateJobSchema = z.object({
     .optional(),
   skills: z.array(z.string().trim()).optional(),
   experienceLevel: z.string().trim().optional(),
+  applicationMethod: z.enum(['INTERNAL', 'EXTERNAL']).optional(),
+  externalApplyUrl: z.string().trim().nullable().optional(),
   status: z.enum(Object.values(JOB_STATUS)).optional(),
   expiresAt: z.coerce.date().nullable().optional(),
 });
@@ -87,12 +91,17 @@ export const listJobsQuerySchema = z.object({
 });
 
 export const applyJobSchema = z.object({
-  resumeUrl: z.string().url().nullable().optional(),
+  resumeUrl: z.string().nullable().optional(),
   coverLetter: z.string().trim().max(5000).default(''),
 });
 
 export const updateApplicationStatusSchema = z.object({
-  status: z.enum(Object.values(APPLICATION_STATUS)),
+  status: z.preprocess((val) => {
+    if (val === 'APPLIED') return 'SUBMITTED';
+    if (val === 'SCREENING') return 'IN_REVIEW';
+    if (val === 'INTERVIEW') return 'INTERVIEW_SCHEDULED';
+    return val;
+  }, z.enum(Object.values(APPLICATION_STATUS))),
   comment: z.string().trim().max(1000).default(''),
 });
 

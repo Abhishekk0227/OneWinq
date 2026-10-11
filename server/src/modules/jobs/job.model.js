@@ -93,6 +93,16 @@ const jobSchema = new Schema(
       trim: true,
       default: '', // 'Entry', 'Mid', 'Senior', 'Lead', 'Executive'
     },
+    applicationMethod: {
+      type: String,
+      enum: ['INTERNAL', 'EXTERNAL'],
+      default: 'INTERNAL',
+    },
+    externalApplyUrl: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     status: {
       type: String,
       enum: Object.values(JOB_STATUS),
@@ -143,6 +153,8 @@ jobSchema.methods.toSafeObject = function () {
     salary: this.salary,
     skills: this.skills,
     experienceLevel: this.experienceLevel,
+    applicationMethod: this.applicationMethod || 'INTERNAL',
+    externalApplyUrl: this.externalApplyUrl || null,
     status: this.status,
     applicationsCount: this.applicationsCount,
     viewsCount: this.viewsCount,

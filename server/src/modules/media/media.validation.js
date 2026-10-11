@@ -59,6 +59,8 @@ export const PURPOSE_RULES = Object.freeze({
     maxBytes: 25 * 1024 * 1024, // 25MB
     allowedMimes: [
       'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'image/jpeg',
       'image/png',
       'image/webp',

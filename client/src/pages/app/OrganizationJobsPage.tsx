@@ -18,6 +18,8 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
+  ExternalLink,
+  Link2,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,6 +67,8 @@ const jobFormSchema = z.object({
   isDisclosed: z.boolean().default(true),
   skills: z.string().optional(), // Comma-delimited
   experienceLevel: z.string().optional(),
+  applicationMethod: z.enum(['INTERNAL', 'EXTERNAL']).default('INTERNAL'),
+  externalApplyUrl: z.string().optional(),
   description: z.string().trim().min(20, 'Description must be at least 20 characters'),
   status: z.enum([
     JOB_STATUS.DRAFT,
@@ -107,18 +111,23 @@ export default function OrganizationJobsPage() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
       employmentType: EMPLOYMENT_TYPE.FULL_TIME,
       workplaceType: WORKPLACE_TYPE.REMOTE,
-      currency: 'USD',
+      applicationMethod: 'INTERNAL',
+      externalApplyUrl: '',
+      currency: 'INR',
       period: 'YEARLY',
       isDisclosed: true,
       status: JOB_STATUS.PUBLISHED,
     },
   });
+
+  const selectedAppMethod = watch('applicationMethod');
 
   const handleOpenCreate = () => {
     setEditingJob(null);
@@ -127,6 +136,8 @@ export default function OrganizationJobsPage() {
       departmentId: '',
       employmentType: EMPLOYMENT_TYPE.FULL_TIME,
       workplaceType: WORKPLACE_TYPE.REMOTE,
+      applicationMethod: 'INTERNAL',
+      externalApplyUrl: '',
       city: '',
       country: '',
       minSalary: undefined,
@@ -149,6 +160,8 @@ export default function OrganizationJobsPage() {
       departmentId: (job.department as any)?.id || (job.department as any) || '',
       employmentType: job.employmentType,
       workplaceType: job.workplaceType,
+      applicationMethod: job.applicationMethod || 'INTERNAL',
+      externalApplyUrl: job.externalApplyUrl || '',
       city: job.location?.city || '',
       country: job.location?.country || '',
       minSalary: job.salary?.min ?? undefined,
@@ -176,6 +189,8 @@ export default function OrganizationJobsPage() {
         departmentId: data.departmentId || null,
         employmentType: data.employmentType,
         workplaceType: data.workplaceType,
+        applicationMethod: data.applicationMethod || 'INTERNAL',
+        externalApplyUrl: data.applicationMethod === 'EXTERNAL' ? (data.externalApplyUrl?.trim() || null) : null,
         location: {
           city: data.city || '',
           country: data.country || '',
@@ -356,6 +371,15 @@ export default function OrganizationJobsPage() {
                           {job.department.name}
                         </Badge>
                       )}
+                      {job.applicationMethod === 'EXTERNAL' ? (
+                        <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20 flex items-center gap-1 font-medium">
+                          <ExternalLink className="h-3 w-3" /> External Form
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs bg-sky-500/10 text-sky-600 border-sky-500/20 font-medium">
+                          Easy Apply
+                        </Badge>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
@@ -484,6 +508,71 @@ export default function OrganizationJobsPage() {
             </label>
             <Input {...register('title')} placeholder="e.g. Senior Backend Engineer" />
             {errors.title && <p className="text-xs text-destructive mt-1">{errors.title.message}</p>}
+          </div>
+
+          {/* Application Intake Method */}
+          <div className="p-3.5 rounded-xl border border-border/80 bg-muted/20 space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
+              Application Intake Method *
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                  selectedAppMethod === 'INTERNAL'
+                    ? 'border-primary/60 bg-primary/5 ring-1 ring-primary/20'
+                    : 'border-border bg-background hover:border-border/80'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="INTERNAL"
+                  {...register('applicationMethod')}
+                  className="mt-1"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-foreground block">OneWinq Easy Apply</span>
+                  <span className="text-[11px] text-muted-foreground block leading-tight">
+                    Candidates apply in-app with verified OneWinq profiles and resumes. Manage pipeline via ATS.
+                  </span>
+                </div>
+              </label>
+
+              <label
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                  selectedAppMethod === 'EXTERNAL'
+                    ? 'border-primary/60 bg-primary/5 ring-1 ring-primary/20'
+                    : 'border-border bg-background hover:border-border/80'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value="EXTERNAL"
+                  {...register('applicationMethod')}
+                  className="mt-1"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-foreground block">Custom Application Form</span>
+                  <span className="text-[11px] text-muted-foreground block leading-tight">
+                    Direct applicants to your Google Form, Typeform, or company careers portal.
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {selectedAppMethod === 'EXTERNAL' && (
+              <div className="mt-2 space-y-1 pt-1">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <ExternalLink className="h-3.5 w-3.5 text-primary" /> External Form / Application Link *
+                </label>
+                <Input
+                  {...register('externalApplyUrl')}
+                  placeholder="https://forms.gle/... or https://company.com/apply"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  When applicants click Apply, they will be directed directly to this form in a new tab.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
