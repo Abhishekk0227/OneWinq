@@ -56,6 +56,11 @@ export const useOrganizationContextStore = create<OrganizationContextState>()(
 
       switchToPersonal: () => {
         set({ activeContext: { type: 'PERSONAL' } });
+        try {
+          localStorage.removeItem('onewinq-org-context');
+        } catch {
+          // ignore
+        }
       },
 
       switchToOrganization: (organizationId: string) => {
@@ -83,6 +88,11 @@ export const useOrganizationContextStore = create<OrganizationContextState>()(
           memberships: [],
           isLoading: false,
         });
+        try {
+          localStorage.removeItem('onewinq-org-context');
+        } catch {
+          // ignore
+        }
       },
     }),
     {

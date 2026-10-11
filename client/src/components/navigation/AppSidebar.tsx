@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { BrandLogo } from './BrandLogo'
 import {
   LayoutDashboard,
@@ -35,6 +35,7 @@ import { useUIStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils/cn'
 
 export function AppSidebar() {
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { isSidebarCollapsed, openModal } = useUIStore()
   const { activeContext, switchToPersonal } = useOrganizationContextStore()
@@ -210,7 +211,10 @@ export function AppSidebar() {
         {isOrgMode ? (
           <button
             type="button"
-            onClick={switchToPersonal}
+            onClick={() => {
+              switchToPersonal()
+              navigate('/app')
+            }}
             className={cn(
               'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-sm active:scale-95 cursor-pointer',
               'bg-muted/80 hover:bg-muted text-foreground border border-border/80 hover:border-primary/50',

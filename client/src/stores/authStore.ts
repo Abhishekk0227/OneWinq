@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { User } from '@/types/auth.types'
 import { queryClient } from '@/lib/query/queryClient'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 
 interface AuthState {
   user: User | null
@@ -22,10 +23,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setAuth: (user, accessToken) => {
     const prevUser = get().user
-    // If switching account or logging in fresh, clear any residual query cache from a previous user
-    if (!prevUser || prevUser._id !== user._id) {
-      queryClient.clear()
+    const isDifferentUser = !prevUser || prevUser._id !== user._id
+
+    // If switching account or logging in fresh, cancel all queries and clear any residual data
+    if (isDifferentUser) {
+      try {
+        queryClient.cancelQueries()
+        queryClient.clear()
+        queryClient.removeQueries()
+      } catch {
+        // ignore
+      }
+
+      try {
+        useOrganizationContextStore.getState().clearContext()
+        localStorage.removeItem('onewinq-org-context')
+        useOrganizationContextStore.getState().fetchMemberships()
+      } catch {
+        // ignore
+      }
     }
+
     set({
       user,
       accessToken,
@@ -52,8 +70,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }),
 
   logout: () => {
-    // Clear all React Query cache so previous user data is never leaked or displayed
-    queryClient.clear()
+    // 1. Purge all React Query cached data and cancel pending queries
+    try {
+      queryClient.cancelQueries()
+      queryClient.clear()
+      queryClient.removeQueries()
+    } catch {
+      // ignore
+    }
+
+    // 2. Wipe active organization context and remove persisted storage
+    try {
+      useOrganizationContextStore.getState().clearContext()
+      localStorage.removeItem('onewinq-org-context')
+    } catch {
+      // ignore
+    }
+
+    // 3. Clear auth store state
     set({
       user: null,
       accessToken: null,

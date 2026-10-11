@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -53,9 +54,16 @@ const eventFormSchema = z.object({
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
 export default function OrganizationEventsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
+
+  React.useEffect(() => {
+    if (!orgId) {
+      navigate('/app', { replace: true });
+    }
+  }, [orgId, navigate]);
 
   const [activeTab, setActiveTab] = React.useState<'EVENTS' | 'MY_TICKETS'>('EVENTS');
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -156,9 +164,12 @@ export default function OrganizationEventsPage() {
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-bold">No Organization Selected</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 mb-4">
           Switch to an organization workspace to view enterprise events.
         </p>
+        <Button onClick={() => navigate('/app')} variant="outline">
+          Return to Personal Feed
+        </Button>
       </div>
     );
   }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   FileCheck,
   Search,
@@ -33,10 +33,17 @@ import { APPLICATION_STATUS } from '@/constants/app.constants';
 import type { JobApplication, Job } from '@/types/organization.types';
 
 export default function OrganizationApplicationsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
+
+  React.useEffect(() => {
+    if (!orgId) {
+      navigate('/app', { replace: true });
+    }
+  }, [orgId, navigate]);
 
   const selectedJobId = searchParams.get('jobId') || '';
   const [statusFilter, setStatusFilter] = React.useState<string>('ALL');
@@ -131,9 +138,12 @@ export default function OrganizationApplicationsPage() {
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-bold">No Organization Selected</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 mb-4">
           Switch to an organization workspace to review applicant pipelines.
         </p>
+        <Button onClick={() => navigate('/app')} variant="outline">
+          Return to Personal Feed
+        </Button>
       </div>
     );
   }

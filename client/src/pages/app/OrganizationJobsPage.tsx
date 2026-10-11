@@ -86,6 +86,12 @@ export default function OrganizationJobsPage() {
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
 
+  React.useEffect(() => {
+    if (!orgId) {
+      navigate('/app', { replace: true });
+    }
+  }, [orgId, navigate]);
+
   const [activeTab, setActiveTab] = React.useState<string>('ALL');
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -264,9 +270,12 @@ export default function OrganizationJobsPage() {
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-bold">No Organization Selected</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 mb-4">
           Switch to an organization workspace to view job openings.
         </p>
+        <Button onClick={() => navigate('/app')} variant="outline">
+          Return to Personal Feed
+        </Button>
       </div>
     );
   }
