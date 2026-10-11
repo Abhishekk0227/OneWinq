@@ -418,6 +418,8 @@ export interface Job {
   applicationMethod?: 'INTERNAL' | 'EXTERNAL';
   externalApplyUrl?: string | null;
   status: JobStatus;
+  hasApplied?: boolean;
+  applicationStatus?: ApplicationStatus | null;
   applicationsCount?: number;
   viewsCount?: number;
   publishedAt?: string;

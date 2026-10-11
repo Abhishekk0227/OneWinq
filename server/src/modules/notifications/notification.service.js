@@ -65,10 +65,13 @@ function resolveNotificationLink(n) {
       return '/app/settings';
     case 'ORGANIZATION_INVITATION':
       return n.linkUrl || (n.metadata?.token ? `/invitation?token=${n.metadata.token}` : '/app');
+    case 'APPLICATION_STATUS_UPDATE':
+      return '/app/my-applications';
     default:
       if (n.entityType === 'organization') {
         return n.linkUrl || (n.metadata?.token ? `/invitation?token=${n.metadata.token}` : '/app');
       }
+      if (n.entityType === 'application') return '/app/my-applications';
       if (n.entityType === 'connection') return '/app/connections';
       if (n.entityType === 'conversation') return n.entityId ? `/app/messages?cid=${n.entityId}` : '/app/messages';
       if (n.entityType === 'profile') return username ? `/u/${username}` : '/app/profile';

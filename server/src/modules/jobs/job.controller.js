@@ -71,7 +71,7 @@ export const jobController = {
 
   async getPublicJob(req, res, next) {
     try {
-      const job = await jobService.getJobById(req.params.jobId);
+      const job = await jobService.getJobById(req.params.jobId, req.user?.id);
       return sendSuccess(res, {
         statusCode: HTTP.OK,
         message: 'Job details retrieved successfully',
@@ -84,7 +84,7 @@ export const jobController = {
 
   async listPublicJobs(req, res, next) {
     try {
-      const result = await jobService.listPublicJobs(req.query);
+      const result = await jobService.listPublicJobs(req.query, req.user?.id);
       return sendSuccess(res, {
         statusCode: HTTP.OK,
         message: 'Jobs retrieved successfully',

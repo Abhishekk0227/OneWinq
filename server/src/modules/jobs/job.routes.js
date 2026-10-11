@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { jobController } from './job.controller.js';
-import { authenticate } from '../../middleware/authenticate.js';
+import { authenticate, optionalAuthenticate } from '../../middleware/authenticate.js';
 import {
   listJobsQuerySchema,
   applyJobSchema,
@@ -10,11 +10,11 @@ import {
 
 const router = Router();
 
-// Public: Search and list job postings
-router.get('/', validateQuery(listJobsQuerySchema), jobController.listPublicJobs);
+// Public / Authenticated: Search and list job postings (attaches hasApplied if logged in)
+router.get('/', optionalAuthenticate, validateQuery(listJobsQuerySchema), jobController.listPublicJobs);
 
-// Public: Get job details
-router.get('/:jobId', jobController.getPublicJob);
+// Public / Authenticated: Get job details (attaches hasApplied if logged in)
+router.get('/:jobId', optionalAuthenticate, jobController.getPublicJob);
 
 // Authenticated: Apply for a job posting
 router.post(

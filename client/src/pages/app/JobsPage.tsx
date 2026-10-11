@@ -36,7 +36,7 @@ import {
   EMPLOYMENT_TYPE,
   WORKPLACE_TYPE,
 } from '@/constants/app.constants';
-import type { Job } from '@/types/organization.types';
+import type { Job, JobApplication } from '@/types/organization.types';
 
 const applySchema = z.object({
   resumeUrl: z.string().trim().optional(),
@@ -67,6 +67,24 @@ export default function JobsPage() {
   });
 
   const jobs: Job[] = (jobsData as any)?.data?.jobs || [];
+
+  // Fetch candidate's submitted applications to ensure instantaneous Applied badge synchronization
+  const { data: myAppsData } = useQuery({
+    queryKey: ['myApplications'],
+    queryFn: () => jobsApi.getMyApplications({ limit: 100 }),
+  });
+  const myApplications: JobApplication[] = (myAppsData as any)?.data?.applications || [];
+
+  const appliedJobIds = React.useMemo(() => {
+    const set = new Set<string>();
+    jobs.forEach((j) => {
+      if (j.hasApplied) set.add(j.id);
+    });
+    myApplications.forEach((app) => {
+      if (app.jobId) set.add(app.jobId);
+    });
+    return set;
+  }, [jobs, myApplications]);
 
   const {
     register,
@@ -292,10 +310,18 @@ export default function JobsPage() {
                   </div>
 
                   <div className="self-end md:self-center shrink-0">
-                    {job.applicationMethod === 'EXTERNAL' && job.externalApplyUrl ? (
+                    {job.hasApplied || appliedJobIds.has(job.id) ? (
+                      <Button
+                        disabled
+                        variant="outline"
+                        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 cursor-default font-semibold shadow-none gap-1.5 h-10 px-4 select-none opacity-90"
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Applied
+                      </Button>
+                    ) : job.applicationMethod === 'EXTERNAL' && job.externalApplyUrl ? (
                       <Button
                         onClick={() => window.open(job.externalApplyUrl!, '_blank', 'noopener,noreferrer')}
-                        className="shadow-sm bg-purple-600 hover:bg-purple-700 text-white gap-1.5"
+                        className="shadow-sm bg-purple-600 hover:bg-purple-700 text-white gap-1.5 h-10 px-4"
                       >
                         Apply via Form <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -306,7 +332,7 @@ export default function JobsPage() {
                           setUploadedResume(null);
                           reset();
                         }}
-                        className="shadow-sm"
+                        className="shadow-sm h-10 px-4"
                       >
                         Quick Apply <ArrowRight className="h-4 w-4 ml-1.5" />
                       </Button>
