@@ -18,6 +18,11 @@ import {
   FileCheck,
   Settings,
   AlertCircle,
+  CreditCard,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  X,
 } from 'lucide-react';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
@@ -28,9 +33,10 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
 import { ORGANIZATION_PERMISSION } from '@/constants/app.constants';
+import { cn } from '@/lib/utils/cn';
 import type { OrganizationRoleItem } from '@/types/organization.types';
 
-// Group permissions into logical business domains
+// Group permissions into logical business domains (All 24 granular permissions)
 const PERMISSION_GROUPS = [
   {
     name: 'Workforce & Members',
@@ -78,7 +84,14 @@ const PERMISSION_GROUPS = [
     ],
   },
   {
-    name: 'Organization Studio & Roles',
+    name: 'Digital ID Cards & Badges',
+    icon: CreditCard,
+    permissions: [
+      { key: ORGANIZATION_PERMISSION.CARDS_MANAGE, label: 'Manage NFC & Smart Cards' },
+    ],
+  },
+  {
+    name: 'Organization Studio & Governance',
     icon: Settings,
     permissions: [
       { key: ORGANIZATION_PERMISSION.ORG_EDIT, label: 'Edit Organization Profile & Studio' },
@@ -88,9 +101,19 @@ const PERMISSION_GROUPS = [
       { key: ORGANIZATION_PERMISSION.SETTINGS_MANAGE, label: 'Manage Governance Policies' },
       { key: ORGANIZATION_PERMISSION.AUDIT_VIEW, label: 'View Compliance Audit Logs' },
       { key: ORGANIZATION_PERMISSION.ANALYTICS_VIEW, label: 'View Workspace Analytics' },
+      { key: ORGANIZATION_PERMISSION.ORG_DELETE, label: 'Delete Organization Workspace' },
     ],
   },
 ];
+
+const ALL_PERMISSIONS_MAP: Record<string, { label: string; groupName: string }> = Object.fromEntries(
+  PERMISSION_GROUPS.flatMap((group) =>
+    group.permissions.map((p) => [
+      p.key,
+      { label: p.label, groupName: group.name },
+    ])
+  )
+);
 
 export default function OrganizationRolesPage() {
   const navigate = useNavigate();
@@ -104,6 +127,8 @@ export default function OrganizationRolesPage() {
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingRole, setEditingRole] = React.useState<OrganizationRoleItem | null>(null);
+  const [inspectingRole, setInspectingRole] = React.useState<OrganizationRoleItem | null>(null);
+  const [expandedRoleIds, setExpandedRoleIds] = React.useState<Record<string, boolean>>({});
 
   // Form State
   const [name, setName] = React.useState('');
@@ -335,11 +360,72 @@ export default function OrganizationRolesPage() {
                     {role.description || 'No description provided.'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 space-y-3">
                   <div className="border-t border-border/70 pt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{role.permissions?.length || 0} permissions granted</span>
+                    <span className="font-semibold text-foreground/90">
+                      {role.permissions?.length || 0} of 24 permissions granted
+                    </span>
                     {isSystem && <span className="text-[11px] font-medium text-primary">System Managed</span>}
                   </div>
+
+                  {/* Inline preview toggle & view modal trigger */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedRoleIds((prev) => ({
+                          ...prev,
+                          [roleId]: !prev[roleId],
+                        }))
+                      }
+                      className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>{expandedRoleIds[roleId] ? 'Hide access list' : 'View granted access'}</span>
+                      {expandedRoleIds[roleId] ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
+                    </button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setInspectingRole(role)}
+                      className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      Full Matrix
+                    </Button>
+                  </div>
+
+                  {/* Inline Expanded Granted Permissions List */}
+                  {expandedRoleIds[roleId] && (
+                    <div className="pt-2 border-t border-dashed border-border/60 space-y-2 animate-in fade-in duration-200">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Granted Capabilities:
+                      </div>
+                      {(!role.permissions || role.permissions.length === 0) ? (
+                        <p className="text-xs text-muted-foreground italic">No permissions granted.</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto pr-1">
+                          {role.permissions.map((permKey: string) => {
+                            const meta = ALL_PERMISSIONS_MAP[permKey];
+                            return (
+                              <span
+                                key={permKey}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary/10 text-primary border border-primary/20"
+                                title={permKey}
+                              >
+                                <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500 shrink-0" />
+                                <span>{meta?.label || permKey}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -489,6 +575,112 @@ export default function OrganizationRolesPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Role Permissions Breakdown Modal */}
+      {inspectingRole && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in-50 zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card z-10">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground">
+                    {inspectingRole.displayName}
+                  </h3>
+                  {inspectingRole.isSystem ? (
+                    <Badge variant="outline" className="text-[10px] py-0 text-muted-foreground">
+                      <Lock className="h-2.5 w-2.5 mr-1" /> Built-in
+                    </Badge>
+                  ) : (
+                    <Badge variant="default" className="text-[10px] py-0 bg-primary/20 text-primary border-primary/30">
+                      Custom
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  System key: <span className="font-mono">{inspectingRole.name}</span> • Granted{' '}
+                  <span className="font-bold text-primary">
+                    {inspectingRole.permissions?.length || 0} of 24
+                  </span>{' '}
+                  permissions
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setInspectingRole(null)}>
+                ✕
+              </Button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Description */}
+              {inspectingRole.description && (
+                <div className="p-3.5 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground leading-relaxed">
+                  {inspectingRole.description}
+                </div>
+              )}
+
+              {/* Grouped Permission Breakdown */}
+              <div className="space-y-4">
+                {PERMISSION_GROUPS.map((group) => {
+                  const GroupIcon = group.icon;
+                  const grantedInGroup = group.permissions.filter((p) =>
+                    inspectingRole.permissions?.includes(p.key)
+                  );
+
+                  return (
+                    <div
+                      key={group.name}
+                      className="rounded-xl border border-border/80 bg-muted/15 p-4 space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                            <GroupIcon className="h-3.5 w-3.5" />
+                          </div>
+                          <span className="text-xs font-bold text-foreground">
+                            {group.name}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-medium text-muted-foreground">
+                          {grantedInGroup.length} / {group.permissions.length} granted
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        {group.permissions.map((perm) => {
+                          const isGranted = inspectingRole.permissions?.includes(perm.key);
+                          return (
+                            <div
+                              key={perm.key}
+                              className={cn(
+                                'flex items-center gap-2 p-2 rounded-lg text-xs border transition-colors',
+                                isGranted
+                                  ? 'bg-emerald-500/10 border-emerald-500/20 text-foreground font-medium'
+                                  : 'bg-muted/30 border-border/40 text-muted-foreground opacity-60'
+                              )}
+                            >
+                              {isGranted ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                              ) : (
+                                <X className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                              )}
+                              <span className="truncate">{perm.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-border flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setInspectingRole(null)}>
+                Close
+              </Button>
+            </div>
           </div>
         </div>
       )}

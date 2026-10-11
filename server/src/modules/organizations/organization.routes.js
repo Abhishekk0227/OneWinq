@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { organizationController } from './organization.controller.js';
 import { organizationMemberController } from './organizationMember.controller.js';
 import { departmentController } from '../departments/department.controller.js';
-import { authenticate } from '../../middleware/authenticate.js';
+import { authenticate, optionalAuthenticate } from '../../middleware/authenticate.js';
 import { resolveOrgContext } from '../../middleware/resolveOrgContext.js';
 import { requireOrgPermission } from '../../middleware/requireOrgPermission.js';
 import {
@@ -32,11 +32,14 @@ const router = Router();
 
 // ---- Public & Root Endpoints -----------------------------------------------
 
-// Public: List/search organizations for directory discovery
-router.get('/', validateQuery(listOrganizationsQuerySchema), organizationController.list);
+// Public: List/search organizations for directory discovery (with optional auth for follow status)
+router.get('/', optionalAuthenticate, validateQuery(listOrganizationsQuerySchema), organizationController.list);
 
 // Authenticated: Get organizations the current user belongs to
 router.get('/my', authenticate, organizationController.getMyOrganizations);
+
+// Authenticated: Get organizations followed by current user
+router.get('/my/following', authenticate, organizationController.getMyFollowedOrganizations);
 
 // Authenticated: Get user's pending invitations sent to their email
 router.get('/my/invitations', authenticate, organizationMemberController.getMyInvitations);
@@ -58,6 +61,12 @@ router.post('/invitations/accept-register', organizationMemberController.acceptI
 
 // Public: Resolve organization by public vanity slug
 router.get('/slug/:slug', organizationController.getBySlug);
+
+// Authenticated: Toggle follow an organization
+router.post('/:organizationId/follow', authenticate, organizationController.toggleFollow);
+
+// Public / Authenticated: Get follow status for an organization
+router.get('/:organizationId/follow-status', optionalAuthenticate, organizationController.getFollowStatus);
 
 // Authenticated: Create a new organization
 router.post(

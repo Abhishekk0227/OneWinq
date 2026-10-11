@@ -210,4 +210,28 @@ export const organizationsApi = {
     apiClient.delete<never, ApiResponse<{ deleted: boolean; roleId: string }>>(
       `/organizations/${organizationId}/roles/${roleId}`
     ),
+
+  // Public Directory Discovery
+  listPublic: (params?: { q?: string; type?: string; industry?: string; page?: number; limit?: number }) =>
+    apiClient.get<never, ApiResponse<{ organizations: Organization[]; pagination: any }>>(
+      '/organizations',
+      { params }
+    ),
+
+  // Company Follow System
+  toggleFollow: (organizationId: string) =>
+    apiClient.post<never, ApiResponse<{ isFollowing: boolean; followersCount: number }>>(
+      `/organizations/${organizationId}/follow`
+    ),
+
+  getFollowStatus: (organizationId: string) =>
+    apiClient.get<never, ApiResponse<{ isFollowing: boolean; followersCount: number }>>(
+      `/organizations/${organizationId}/follow-status`
+    ),
+
+  getMyFollowedOrganizations: (params?: { page?: number; limit?: number }) =>
+    apiClient.get<never, ApiResponse<{ organizations: Organization[]; pagination: any }>>(
+      '/organizations/my/following',
+      { params }
+    ),
 };

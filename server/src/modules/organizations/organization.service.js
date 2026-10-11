@@ -1,5 +1,6 @@
 import { Organization } from './organization.model.js';
 import { OrganizationMember } from './organizationMember.model.js';
+import { OrganizationFollow } from './organizationFollow.model.js';
 import {
   ORGANIZATION_ROLE,
   ORGANIZATION_MEMBER_STATUS,
@@ -230,7 +231,7 @@ export async function getUserOrganizations(userId) {
  * @param {object} query
  * @returns {Promise<object>}
  */
-export async function listPublicOrganizations({ page = 1, limit = 20, q, type, industry, isVerified }) {
+export async function listPublicOrganizations({ page = 1, limit = 20, q, type, industry, isVerified, currentUserId }) {
   const filter = {
     status: ORGANIZATION_STATUS.ACTIVE,
   };
@@ -267,24 +268,41 @@ export async function listPublicOrganizations({ page = 1, limit = 20, q, type, i
       .lean(),
   ]);
 
+  let followedOrgIdSet = new Set();
+  if (currentUserId && organizations.length > 0) {
+    const orgIds = organizations.map((o) => o._id);
+    const follows = await OrganizationFollow.find({
+      userId: currentUserId,
+      organizationId: { $in: orgIds },
+    })
+      .select('organizationId')
+      .lean();
+    followedOrgIdSet = new Set(follows.map((f) => f.organizationId.toString()));
+  }
+
   return {
-    organizations: organizations.map((org) => ({
-      id: org._id.toString(),
-      name: org.name,
-      slug: org.slug,
-      type: org.type,
-      tagline: org.tagline,
-      description: org.description,
-      logoUrl: org.logoUrl,
-      bannerUrl: org.bannerUrl,
-      website: org.website,
-      industry: org.industry,
-      size: org.size,
-      location: org.location,
-      isVerified: org.isVerified,
-      membersCount: org.membersCount,
-      jobsCount: org.jobsCount,
-    })),
+    organizations: organizations.map((org) => {
+      const id = org._id.toString();
+      return {
+        id,
+        name: org.name,
+        slug: org.slug,
+        type: org.type,
+        tagline: org.tagline,
+        description: org.description,
+        logoUrl: org.logoUrl,
+        bannerUrl: org.bannerUrl,
+        website: org.website,
+        industry: org.industry,
+        size: org.size,
+        location: org.location,
+        isVerified: org.isVerified,
+        membersCount: org.membersCount,
+        followersCount: org.followersCount || 0,
+        jobsCount: org.jobsCount,
+        isFollowing: followedOrgIdSet.has(id),
+      };
+    }),
     pagination: {
       page,
       limit,

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cardsApi } from '@/features/cards/api/cards.api';
 import {
   Building2,
@@ -29,9 +29,13 @@ import {
   Heart,
   TrendingUp,
   Crown,
+  Bell,
+  UserCheck,
 } from 'lucide-react';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
+import { useAuthStore } from '@/stores/authStore';
+import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -166,6 +170,38 @@ export default function CompanyShowcasePage() {
   });
   const jobs = (jobsData as any)?.data?.jobs || [];
 
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const orgId = org?.id || (org as any)?._id;
+
+  // Follow Status Query
+  const { data: followData } = useQuery({
+    queryKey: ['org', orgId, 'follow-status'],
+    queryFn: () => organizationsApi.getFollowStatus(orgId),
+    enabled: !!orgId,
+  });
+  const followState = (followData as any)?.data || {
+    isFollowing: false,
+    followersCount: org?.followersCount || 0,
+  };
+
+  const followMutation = useMutation({
+    mutationFn: () => organizationsApi.toggleFollow(orgId),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['org', orgId, 'follow-status'] });
+      queryClient.invalidateQueries({ queryKey: ['publicOrgShowcase', slug] });
+      const isNowFollowing = res?.data?.isFollowing;
+      if (isNowFollowing) {
+        toast.success(`You are now following ${org.name}`);
+      } else {
+        toast.default(`Unfollowed ${org.name}`);
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Please log in to follow');
+    },
+  });
+
   if (isOrgLoading || (isCardLoading && !org)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -289,6 +325,31 @@ export default function CompanyShowcasePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5 self-stretch sm:self-auto">
+              {/* Organization Follow Button */}
+              <Button
+                size="sm"
+                variant={followState.isFollowing ? 'secondary' : 'default'}
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login');
+                    return;
+                  }
+                  followMutation.mutate();
+                }}
+                disabled={followMutation.isPending}
+                className="font-semibold shadow-xs"
+              >
+                {followState.isFollowing ? (
+                  <>
+                    <UserCheck className="h-3.5 w-3.5 mr-1.5 text-primary" /> Following ({followState.followersCount})
+                  </>
+                ) : (
+                  <>
+                    <Bell className="h-3.5 w-3.5 mr-1.5" /> Follow {followState.followersCount > 0 ? `(${followState.followersCount})` : ''}
+                  </>
+                )}
+              </Button>
+
               {org.website && (
                 <a
                   href={org.website.startsWith('http') ? org.website : `https://${org.website}`}

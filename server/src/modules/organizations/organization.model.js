@@ -237,6 +237,11 @@ const organizationSchema = new Schema(
       default: 1,
       min: 0,
     },
+    followersCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     jobsCount: {
       type: Number,
       default: 0,
@@ -378,6 +383,7 @@ organizationSchema.methods.toSafeObject = function () {
     isVerified: this.isVerified,
     verifiedAt: this.verifiedAt,
     membersCount: this.membersCount,
+    followersCount: this.followersCount || 0,
     jobsCount: this.jobsCount,
     settings: this.settings,
     products: this.products || [],
