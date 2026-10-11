@@ -117,7 +117,7 @@ export function MobileMenuDrawer() {
       items: [
         { label: 'Home Feed', to: '/app', icon: Home, end: true },
         { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
-        { label: 'Discover People', to: '/app/network', icon: Compass },
+        { label: 'Discover & Network', to: '/app/network', icon: Compass },
         { label: 'My Profile', to: '/app/profile', icon: UserCircle },
         { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate, highlight: true },
       ],

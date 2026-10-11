@@ -1,4 +1,5 @@
 import * as organizationService from './organization.service.js';
+import * as followService from './organizationFollow.service.js';
 import { sendSuccess } from '../../shared/response.js';
 import { HTTP } from '../../config/constants.js';
 
@@ -75,7 +76,10 @@ export const organizationController = {
    */
   async list(req, res, next) {
     try {
-      const result = await organizationService.listPublicOrganizations(req.query);
+      const result = await organizationService.listPublicOrganizations({
+        ...req.query,
+        currentUserId: req.user?.id,
+      });
       return sendSuccess(res, {
         statusCode: HTTP.OK,
         message: 'Organizations retrieved successfully',
@@ -101,4 +105,57 @@ export const organizationController = {
       next(err);
     }
   },
+
+  /**
+   * Toggle follow/unfollow an organization.
+   */
+  async toggleFollow(req, res, next) {
+    try {
+      const result = await followService.toggleFollowOrganization(
+        req.user.id,
+        req.params.organizationId,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: result.isFollowing ? 'Organization followed' : 'Organization unfollowed',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * Get follow status for an organization.
+   */
+  async getFollowStatus(req, res, next) {
+    try {
+      const userId = req.user?.id || null;
+      const result = await followService.getFollowStatus(userId, req.params.organizationId);
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Follow status retrieved',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * Get organizations followed by current user.
+   */
+  async getMyFollowedOrganizations(req, res, next) {
+    try {
+      const result = await followService.getFollowedOrganizations(req.user.id, req.query);
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Followed organizations retrieved successfully',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
+
