@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Users,
   UserPlus,
@@ -54,11 +54,19 @@ const EXECUTIVE_POSITIONS = [
 ];
 
 export default function OrganizationMembersPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const deptQueryParam = searchParams.get('dept') || 'ALL';
 
   const { activeContext } = useOrganizationContextStore();
+
+  React.useEffect(() => {
+    if (activeContext.type !== 'ORGANIZATION') {
+      navigate('/app', { replace: true });
+    }
+  }, [activeContext.type, navigate]);
+
   const [activeTab, setActiveTab] = React.useState<'WORKFORCE' | 'INVITATIONS'>('WORKFORCE');
 
   // Active workforce filters

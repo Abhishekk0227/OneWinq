@@ -1,4 +1,6 @@
-import { Outlet } from 'react-router-dom'
+import * as React from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { AppSidebar } from '@/components/navigation/AppSidebar'
 import { AppHeader } from '@/components/navigation/AppHeader'
 import { MobileNav } from '@/components/navigation/MobileNav'
@@ -6,6 +8,18 @@ import { MobileMenuDrawer } from '@/components/navigation/MobileMenuDrawer'
 import { CreatePostModal } from '@/components/posts/CreatePostModal'
 
 export function AppLayout() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { activeContext } = useOrganizationContextStore()
+
+  // Guard: If browsing an organization-specific route while in Personal workspace mode,
+  // automatically redirect to personal app dashboard rather than displaying empty states.
+  React.useEffect(() => {
+    if (location.pathname.startsWith('/app/org') && activeContext.type === 'PERSONAL') {
+      navigate('/app', { replace: true })
+    }
+  }, [location.pathname, activeContext.type, navigate])
+
   return (
     <div className="min-h-screen flex bg-background text-foreground w-full overflow-x-clip">
       {/* Sidebar for Desktop */}
