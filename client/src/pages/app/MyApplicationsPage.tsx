@@ -30,18 +30,27 @@ export default function MyApplicationsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case APPLICATION_STATUS.SUBMITTED:
       case APPLICATION_STATUS.APPLIED:
         return (
           <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-500/20">
             Application Submitted
           </Badge>
         );
+      case APPLICATION_STATUS.IN_REVIEW:
       case APPLICATION_STATUS.SCREENING:
         return (
           <Badge variant="outline" className="bg-purple-500/10 text-purple-600 border-purple-500/20">
             Under Review / Screening
           </Badge>
         );
+      case APPLICATION_STATUS.SHORTLISTED:
+        return (
+          <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 border-indigo-500/20">
+            Shortlisted
+          </Badge>
+        );
+      case APPLICATION_STATUS.INTERVIEW_SCHEDULED:
       case APPLICATION_STATUS.INTERVIEW:
         return (
           <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">

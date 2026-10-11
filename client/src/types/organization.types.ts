@@ -415,6 +415,8 @@ export interface Job {
   salary?: JobSalary;
   skills: string[];
   experienceLevel?: string;
+  applicationMethod?: 'INTERNAL' | 'EXTERNAL';
+  externalApplyUrl?: string | null;
   status: JobStatus;
   applicationsCount?: number;
   viewsCount?: number;

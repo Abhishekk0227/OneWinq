@@ -68,11 +68,9 @@ export default function OrganizationApplicationsPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ appId, status, comment }: { appId: string; status: string; comment?: string }) =>
       jobsApi.updateAppStatus(orgId, appId, { status, comment }),
-    onSuccess: (data) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'applications'] });
-      if (selectedApp && (data as any)?.data?.application) {
-        setSelectedApp((data as any).data.application);
-      }
+      setSelectedApp((prev) => (prev ? { ...prev, status: variables.status as any } : null));
       toast.success('Applicant status updated');
     },
     onError: (err: any) => {
@@ -83,12 +81,9 @@ export default function OrganizationApplicationsPage() {
   const addNoteMutation = useMutation({
     mutationFn: ({ appId, note }: { appId: string; note: string }) =>
       jobsApi.addAppNote(orgId, appId, { note }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org', orgId, 'applications'] });
       setNewNote('');
-      if (selectedApp && (data as any)?.data?.application) {
-        setSelectedApp((data as any).data.application);
-      }
       toast.success('Internal note added');
     },
     onError: (err: any) => {
@@ -107,10 +102,15 @@ export default function OrganizationApplicationsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case APPLICATION_STATUS.SUBMITTED:
       case APPLICATION_STATUS.APPLIED:
         return <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-500/20">Applied</Badge>;
+      case APPLICATION_STATUS.IN_REVIEW:
       case APPLICATION_STATUS.SCREENING:
         return <Badge variant="outline" className="bg-purple-500/10 text-purple-600 border-purple-500/20">Screening</Badge>;
+      case APPLICATION_STATUS.SHORTLISTED:
+        return <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 border-indigo-500/20">Shortlisted</Badge>;
+      case APPLICATION_STATUS.INTERVIEW_SCHEDULED:
       case APPLICATION_STATUS.INTERVIEW:
         return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">Interview</Badge>;
       case APPLICATION_STATUS.OFFERED:
@@ -119,6 +119,8 @@ export default function OrganizationApplicationsPage() {
         return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Hired</Badge>;
       case APPLICATION_STATUS.REJECTED:
         return <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/20">Rejected</Badge>;
+      case APPLICATION_STATUS.WITHDRAWN:
+        return <Badge variant="outline" className="bg-zinc-500/10 text-zinc-600 border-zinc-500/20">Withdrawn</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -177,9 +179,10 @@ export default function OrganizationApplicationsPage() {
             className="h-9 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
           >
             <option value="ALL">All Stages</option>
-            <option value={APPLICATION_STATUS.APPLIED}>Applied</option>
-            <option value={APPLICATION_STATUS.SCREENING}>Screening</option>
-            <option value={APPLICATION_STATUS.INTERVIEW}>Interview</option>
+            <option value={APPLICATION_STATUS.SUBMITTED}>Applied</option>
+            <option value={APPLICATION_STATUS.IN_REVIEW}>Screening</option>
+            <option value={APPLICATION_STATUS.SHORTLISTED}>Shortlisted</option>
+            <option value={APPLICATION_STATUS.INTERVIEW_SCHEDULED}>Interview</option>
             <option value={APPLICATION_STATUS.OFFERED}>Offered</option>
             <option value={APPLICATION_STATUS.HIRED}>Hired</option>
             <option value={APPLICATION_STATUS.REJECTED}>Rejected</option>
@@ -348,8 +351,9 @@ export default function OrganizationApplicationsPage() {
               </span>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: APPLICATION_STATUS.SCREENING, label: 'Move to Screening' },
-                  { key: APPLICATION_STATUS.INTERVIEW, label: 'Invite to Interview' },
+                  { key: APPLICATION_STATUS.IN_REVIEW, label: 'Move to Screening' },
+                  { key: APPLICATION_STATUS.SHORTLISTED, label: 'Shortlist' },
+                  { key: APPLICATION_STATUS.INTERVIEW_SCHEDULED, label: 'Invite to Interview' },
                   { key: APPLICATION_STATUS.OFFERED, label: 'Extend Offer' },
                   { key: APPLICATION_STATUS.HIRED, label: 'Mark as Hired' },
                   { key: APPLICATION_STATUS.REJECTED, label: 'Reject' },

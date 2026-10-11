@@ -14,11 +14,16 @@ import {
   ArrowRight,
   ExternalLink,
   Sparkles,
+  UploadCloud,
+  FileText,
+  CheckCircle,
+  Trash2,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
+import { mediaApi } from '@/features/media/api/media.api';
 import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +39,7 @@ import {
 import type { Job } from '@/types/organization.types';
 
 const applySchema = z.object({
-  resumeUrl: z.string().trim().url('Please provide a valid URL to your resume/portfolio').or(z.literal('')).optional(),
+  resumeUrl: z.string().trim().optional(),
   coverLetter: z.string().trim().max(3000).optional(),
 });
 
@@ -46,6 +51,9 @@ export default function JobsPage() {
   const [selectedEmployment, setSelectedEmployment] = React.useState<string>('ALL');
   const [selectedWorkplace, setSelectedWorkplace] = React.useState<string>('ALL');
   const [applyingJob, setApplyingJob] = React.useState<Job | null>(null);
+  const [uploadedResume, setUploadedResume] = React.useState<{ name: string; url: string; size?: number } | null>(null);
+  const [isUploadingResume, setIsUploadingResume] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { data: jobsData, isLoading } = useQuery({
     queryKey: ['publicJobs', { q: searchQuery, employmentType: selectedEmployment, workplaceType: selectedWorkplace }],
@@ -63,22 +71,64 @@ export default function JobsPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<ApplyFormValues>({
     resolver: zodResolver(applySchema),
   });
 
+  const handleResumeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (!validTypes.includes(file.type) && !['pdf', 'doc', 'docx'].includes(fileExt || '')) {
+      toast.error('Please upload a PDF, DOC, or DOCX document');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be under 10MB');
+      return;
+    }
+
+    try {
+      setIsUploadingResume(true);
+      const result = await mediaApi.uploadFile(file, 'PRIVATE_DOCUMENT');
+      setUploadedResume({
+        name: file.name,
+        url: result.publicUrl,
+        size: file.size,
+      });
+      setValue('resumeUrl', result.publicUrl);
+      toast.success('Resume uploaded successfully');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to upload resume document');
+    } finally {
+      setIsUploadingResume(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const applyMutation = useMutation({
     mutationFn: ({ jobId, values }: { jobId: string; values: ApplyFormValues }) =>
       jobsApi.apply(jobId, {
-        resumeUrl: values.resumeUrl || null,
+        resumeUrl: values.resumeUrl || uploadedResume?.url || null,
         coverLetter: values.coverLetter || '',
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['publicJobs'] });
       queryClient.invalidateQueries({ queryKey: ['myApplications'] });
       setApplyingJob(null);
+      setUploadedResume(null);
       reset();
       toast.success('Your application has been submitted successfully!');
     },
@@ -185,6 +235,15 @@ export default function JobsPage() {
                         <Badge variant="outline" className="text-xs bg-primary/5 text-primary">
                           {job.workplaceType.replace('_', ' ')}
                         </Badge>
+                        {job.applicationMethod === 'EXTERNAL' ? (
+                          <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20 flex items-center gap-1 font-medium">
+                            <ExternalLink className="h-3 w-3" /> External Form
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-sky-500/10 text-sky-600 border-sky-500/20 font-medium">
+                            Easy Apply
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
@@ -233,15 +292,25 @@ export default function JobsPage() {
                   </div>
 
                   <div className="self-end md:self-center shrink-0">
-                    <Button
-                      onClick={() => {
-                        setApplyingJob(job);
-                        reset();
-                      }}
-                      className="shadow-sm"
-                    >
-                      Quick Apply <ArrowRight className="h-4 w-4 ml-1.5" />
-                    </Button>
+                    {job.applicationMethod === 'EXTERNAL' && job.externalApplyUrl ? (
+                      <Button
+                        onClick={() => window.open(job.externalApplyUrl!, '_blank', 'noopener,noreferrer')}
+                        className="shadow-sm bg-purple-600 hover:bg-purple-700 text-white gap-1.5"
+                      >
+                        Apply via Form <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          setApplyingJob(job);
+                          setUploadedResume(null);
+                          reset();
+                        }}
+                        className="shadow-sm"
+                      >
+                        Quick Apply <ArrowRight className="h-4 w-4 ml-1.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -253,7 +322,12 @@ export default function JobsPage() {
       {/* Quick Apply Modal */}
       <Dialog
         open={!!applyingJob}
-        onOpenChange={(open) => !open && setApplyingJob(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setApplyingJob(null);
+            setUploadedResume(null);
+          }
+        }}
         className="max-w-xl"
       >
         {applyingJob && (
@@ -270,19 +344,97 @@ export default function JobsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                Resume / CV Link (URL)
+            {/* Resume Upload or Link */}
+            <div className="space-y-2.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                Resume / CV Document
               </label>
-              <Input
-                {...register('resumeUrl')}
-                placeholder="https://drive.google.com/file/... or LinkedIn/GitHub profile"
-              />
-              {errors.resumeUrl && (
-                <p className="text-xs text-destructive mt-1">{errors.resumeUrl.message}</p>
-              )}
-              <p className="text-[11px] text-muted-foreground mt-1">
-                Your OneWinq verified profile information will be shared automatically.
+
+              {/* Document File Uploader */}
+              <div className="p-3.5 rounded-xl border border-dashed border-border bg-muted/20 space-y-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleResumeFileUpload}
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="hidden"
+                />
+
+                {uploadedResume ? (
+                  <div className="flex items-center justify-between p-2.5 rounded-lg bg-background border border-border">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-foreground truncate max-w-[260px] sm:max-w-[340px]">
+                          {uploadedResume.name}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                          <CheckCircle className="h-3 w-3 text-emerald-500" /> Document ready for submission
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setUploadedResume(null);
+                        setValue('resumeUrl', '');
+                      }}
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      title="Remove file"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                    <div>
+                      <span className="text-xs font-medium text-foreground block">
+                        Upload your Resume / CV
+                      </span>
+                      <span className="text-[11px] text-muted-foreground block">
+                        PDF, DOC, DOCX up to 10MB
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isUploadingResume}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="shrink-0 gap-1.5 text-xs h-8"
+                    >
+                      {isUploadingResume ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="h-3.5 w-3.5 text-primary" /> Select File
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Or external portfolio / cloud link fallback */}
+              <div className="pt-1">
+                <span className="text-[11px] text-muted-foreground block mb-1">
+                  Or enter link to online portfolio / Google Drive:
+                </span>
+                <Input
+                  {...register('resumeUrl')}
+                  placeholder="https://drive.google.com/... or portfolio URL"
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                Your verified OneWinq profile information will also be shared automatically.
               </p>
             </div>
 
@@ -301,7 +453,7 @@ export default function JobsPage() {
               <Button type="button" variant="outline" onClick={() => setApplyingJob(null)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={applyMutation.isPending}>
+              <Button type="submit" disabled={applyMutation.isPending || isUploadingResume}>
                 {applyMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...
