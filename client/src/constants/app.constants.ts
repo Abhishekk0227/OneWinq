@@ -214,7 +214,40 @@ export const ORGANIZATION_PERMISSION = {
   SHOWCASE_MANAGE: 'showcase:manage',
   ANALYTICS_VIEW: 'analytics:view',
   AUDIT_VIEW: 'audit:view',
-} as const
-export type OrganizationPermission = typeof ORGANIZATION_PERMISSION[keyof typeof ORGANIZATION_PERMISSION]
+} as const;
+export type OrganizationPermission = typeof ORGANIZATION_PERMISSION[keyof typeof ORGANIZATION_PERMISSION];
+
+export const CURRENCY_OPTIONS = [
+  { code: 'INR', symbol: '₹', label: 'INR (₹) - Indian Rupee' },
+  { code: 'USD', symbol: '$', label: 'USD ($) - US Dollar' },
+  { code: 'EUR', symbol: '€', label: 'EUR (€) - Euro' },
+  { code: 'GBP', symbol: '£', label: 'GBP (£) - British Pound' },
+  { code: 'CAD', symbol: 'CA$', label: 'CAD (CA$) - Canadian Dollar' },
+  { code: 'AUD', symbol: 'AU$', label: 'AUD (AU$) - Australian Dollar' },
+  { code: 'SGD', symbol: 'SG$', label: 'SGD (SG$) - Singapore Dollar' },
+  { code: 'AED', symbol: 'AED', label: 'AED (AED) - UAE Dirham' },
+  { code: 'JPY', symbol: '¥', label: 'JPY (¥) - Japanese Yen' },
+  { code: 'CHF', symbol: 'CHF', label: 'CHF (CHF) - Swiss Franc' },
+] as const;
+
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  CAD: 'CA$',
+  AUD: 'AU$',
+  SGD: 'SG$',
+  AED: 'AED',
+  JPY: '¥',
+  CHF: 'CHF',
+  CNY: '¥',
+};
+
+export function getCurrencySymbol(currency?: string): string {
+  if (!currency) return '₹';
+  const upper = currency.toUpperCase().trim();
+  return CURRENCY_SYMBOLS[upper] || upper;
+}
 
 

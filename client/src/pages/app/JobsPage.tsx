@@ -6,7 +6,7 @@ import {
   Filter,
   MapPin,
   Building2,
-  DollarSign,
+  Banknote,
   Calendar,
   CheckCircle2,
   Send,
@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
+import { getCurrencySymbol } from '@/constants/app.constants';
 import {
   EMPLOYMENT_TYPE,
   WORKPLACE_TYPE,
@@ -202,11 +203,13 @@ export default function JobsPage() {
                       </div>
 
                       {job.salary && job.salary.min && job.salary.isDisclosed && (
-                        <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1 pt-0.5">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          {job.salary.currency} {job.salary.min.toLocaleString()}
-                          {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
-                          {job.salary.period?.toLowerCase()}
+                        <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5 pt-0.5">
+                          <Banknote className="h-3.5 w-3.5" />
+                          <span>
+                            {getCurrencySymbol(job.salary.currency)} {job.salary.min.toLocaleString()}
+                            {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
+                            {job.salary.period?.toLowerCase()}
+                          </span>
                         </p>
                       )}
 

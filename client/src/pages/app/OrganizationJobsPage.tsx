@@ -9,7 +9,7 @@ import {
   Users,
   Eye,
   Calendar,
-  DollarSign,
+  Banknote,
   MapPin,
   Building2,
   Trash2,
@@ -36,6 +36,8 @@ import {
   JOB_STATUS,
   EMPLOYMENT_TYPE,
   WORKPLACE_TYPE,
+  CURRENCY_OPTIONS,
+  getCurrencySymbol,
 } from '@/constants/app.constants';
 import type { Job } from '@/types/organization.types';
 
@@ -58,7 +60,7 @@ const jobFormSchema = z.object({
   country: z.string().optional(),
   minSalary: z.preprocess((v) => (v === '' ? undefined : Number(v)), z.number().optional()),
   maxSalary: z.preprocess((v) => (v === '' ? undefined : Number(v)), z.number().optional()),
-  currency: z.string().default('USD'),
+  currency: z.string().default('INR'),
   period: z.enum(['YEARLY', 'MONTHLY', 'HOURLY']).default('YEARLY'),
   isDisclosed: z.boolean().default(true),
   skills: z.string().optional(), // Comma-delimited
@@ -129,7 +131,7 @@ export default function OrganizationJobsPage() {
       country: '',
       minSalary: undefined,
       maxSalary: undefined,
-      currency: 'USD',
+      currency: 'INR',
       period: 'YEARLY',
       isDisclosed: true,
       skills: '',
@@ -151,7 +153,7 @@ export default function OrganizationJobsPage() {
       country: job.location?.country || '',
       minSalary: job.salary?.min ?? undefined,
       maxSalary: job.salary?.max ?? undefined,
-      currency: job.salary?.currency || 'USD',
+      currency: job.salary?.currency || 'INR',
       period: job.salary?.period || 'YEARLY',
       isDisclosed: job.salary?.isDisclosed ?? true,
       skills: (job.skills || []).join(', '),
@@ -365,12 +367,13 @@ export default function OrganizationJobsPage() {
                         </span>
                       )}
                       {job.salary && job.salary.min && job.salary.isDisclosed && (
-                        <span className="flex items-center gap-1 font-semibold text-foreground">
-                          <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
-                          {job.salary.currency}{' '}
-                          {job.salary.min.toLocaleString()}
-                          {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
-                          {job.salary.period?.toLowerCase()}
+                        <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                          <Banknote className="h-3.5 w-3.5 text-emerald-500" />
+                          <span>
+                            {getCurrencySymbol(job.salary.currency)} {job.salary.min.toLocaleString()}
+                            {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
+                            {job.salary.period?.toLowerCase()}
+                          </span>
                         </span>
                       )}
                       <span className="flex items-center gap-1">
@@ -552,28 +555,38 @@ export default function OrganizationJobsPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Compensation Range
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="text-[11px] text-muted-foreground block mb-1">Currency *</label>
+                <select
+                  {...register('currency')}
+                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  {CURRENCY_OPTIONS.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="text-[11px] text-muted-foreground block mb-1">Min Salary</label>
-                <Input {...register('minSalary')} type="number" placeholder="80000" />
+                <Input {...register('minSalary')} type="number" placeholder="3000" />
               </div>
               <div>
                 <label className="text-[11px] text-muted-foreground block mb-1">Max Salary</label>
-                <Input {...register('maxSalary')} type="number" placeholder="130000" />
+                <Input {...register('maxSalary')} type="number" placeholder="5000" />
               </div>
               <div>
-                <label className="text-[11px] text-muted-foreground block mb-1">Currency & Period</label>
-                <div className="flex gap-2">
-                  <Input {...register('currency')} className="w-20" placeholder="USD" />
-                  <select
-                    {...register('period')}
-                    className="flex-1 h-10 px-2 rounded-xl border border-border bg-background text-xs"
-                  >
-                    <option value="YEARLY">Yearly</option>
-                    <option value="MONTHLY">Monthly</option>
-                    <option value="HOURLY">Hourly</option>
-                  </select>
-                </div>
+                <label className="text-[11px] text-muted-foreground block mb-1">Pay Period *</label>
+                <select
+                  {...register('period')}
+                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="YEARLY">Yearly</option>
+                  <option value="HOURLY">Hourly</option>
+                </select>
               </div>
             </div>
           </div>

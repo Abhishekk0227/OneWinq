@@ -31,6 +31,7 @@ import {
   Crown,
   Bell,
   UserCheck,
+  Banknote,
 } from 'lucide-react';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
@@ -39,6 +40,7 @@ import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { getCurrencySymbol } from '@/constants/app.constants';
 import type {
   Organization,
   OrganizationProduct,
@@ -769,10 +771,17 @@ export default function CompanyShowcasePage() {
                 <Card key={job.id} className="p-4 flex items-center justify-between hover:border-primary/40 transition-all">
                   <div>
                     <h3 className="font-bold text-sm text-foreground">{job.title}</h3>
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
                       <span className="capitalize">{job.employmentType?.replace('_', ' ')}</span>
                       <span>• {job.workplaceType?.replace('_', ' ')}</span>
                       {job.location?.city && <span>• {job.location.city}</span>}
+                      {job.salary && job.salary.min && job.salary.isDisclosed && (
+                        <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                          • {getCurrencySymbol(job.salary.currency)} {job.salary.min.toLocaleString()}
+                          {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
+                          {job.salary.period?.toLowerCase()}
+                        </span>
+                      )}
                     </div>
                   </div>
 
