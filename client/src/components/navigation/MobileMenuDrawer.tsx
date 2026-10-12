@@ -22,9 +22,6 @@ import {
   Plus,
   Edit3,
   Download,
-  Sun,
-  Moon,
-  Monitor,
   Building2,
   Briefcase,
   FileCheck,
@@ -36,7 +33,6 @@ import {
 import { triggerPWAInstall } from '@/components/pwa/InstallAppPrompt'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
-import { useTheme } from '@/app/providers/ThemeProvider'
 import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 import { Avatar } from '@/components/ui/Avatar'
@@ -67,7 +63,6 @@ export function MobileMenuDrawer() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const { isMobileMenuOpen, setMobileMenuOpen, openModal } = useUIStore()
-  const { theme, setTheme, resolvedTheme } = useTheme()
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
 
   // Unread notifications count
@@ -379,17 +374,17 @@ export function MobileMenuDrawer() {
         {/* Prominent Action Button */}
         <div className="px-4 pt-3 pb-1">
           {isOrgMode ? (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   handleClose()
                   navigate('/app/org/jobs?action=create')
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-primary via-primary-600 to-primary-700 shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
+                className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-primary via-primary-600 to-primary-700 shadow-sm shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
               >
-                <Briefcase className="h-4 w-4 stroke-[2.5]" />
-                <span>Post a Job Opening</span>
+                <Briefcase className="h-3.5 w-3.5 stroke-[2.2] shrink-0" />
+                <span className="truncate">Post Job</span>
               </button>
               <button
                 type="button"
@@ -397,10 +392,10 @@ export function MobileMenuDrawer() {
                   handleClose()
                   openModal('CREATE_POST')
                 }}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors cursor-pointer"
+                className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors cursor-pointer border border-primary/20"
               >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Create Company Feed Post</span>
+                <Plus className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Create Post</span>
               </button>
             </div>
           ) : (
@@ -520,56 +515,7 @@ export function MobileMenuDrawer() {
           </button>
         </div>
 
-        {/* Appearance Mode Switcher */}
-        <div className="px-3 py-2.5 border-t border-border bg-card/40">
-          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground mb-2 px-1">
-            <span>Appearance</span>
-            <span className="text-[11px] font-normal text-muted-foreground capitalize">
-              {theme === 'system' ? `System (${resolvedTheme})` : theme}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-1 bg-muted/60 p-1 rounded-xl border border-border/60">
-            <button
-              type="button"
-              onClick={() => setTheme('light')}
-              className={cn(
-                'flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer',
-                theme === 'light'
-                  ? 'bg-card text-foreground shadow-xs font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Sun className="h-3.5 w-3.5 text-amber-500" />
-              <span>Light</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setTheme('dark')}
-              className={cn(
-                'flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer',
-                theme === 'dark'
-                  ? 'bg-card text-foreground shadow-xs font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Moon className="h-3.5 w-3.5 text-primary" />
-              <span>Dark</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setTheme('system')}
-              className={cn(
-                'flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer',
-                theme === 'system'
-                  ? 'bg-card text-foreground shadow-xs font-semibold'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Monitor className="h-3.5 w-3.5" />
-              <span>System</span>
-            </button>
-          </div>
-        </div>
+
 
         {/* Drawer Footer with Logout */}
         <div className="p-4 border-t border-border bg-card/50 flex items-center justify-between">
