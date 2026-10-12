@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Briefcase,
   Plus,
@@ -83,6 +83,7 @@ type JobFormValues = z.infer<typeof jobFormSchema>;
 export default function OrganizationJobsPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { activeContext } = useOrganizationContextStore();
   const orgId = activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '';
 
@@ -158,6 +159,20 @@ export default function OrganizationJobsPage() {
     });
     setIsModalOpen(true);
   };
+
+  React.useEffect(() => {
+    if (searchParams.get('action') === 'create') {
+      handleOpenCreate();
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('action');
+          return next;
+        },
+        { replace: true }
+      );
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleOpenEdit = (job: Job) => {
     setEditingJob(job);

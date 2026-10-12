@@ -131,14 +131,12 @@ export function AppSidebar() {
     })
   }
 
-  // 6. Job Postings (HR, Admins)
-  if (isOrgHR || hasPerm('jobs:view') || hasPerm('jobs:create')) {
-    orgNavItems.push({
-      label: 'Job Postings',
-      to: '/app/org/jobs',
-      icon: Briefcase,
-    })
-  }
+  // 6. Job Postings & Recruitment (Always available in organization workspace)
+  orgNavItems.push({
+    label: 'Job Postings',
+    to: '/app/org/jobs',
+    icon: Briefcase,
+  })
 
   // 7. Applicants (HR, Admins)
   if (isOrgHR || hasPerm('applications:view') || hasPerm('applications:manage')) {
@@ -206,26 +204,42 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Prominent Action Button: New Post (Personal) vs Switch to Personal (Org) */}
+      {/* Prominent Action Button: Post a Job (Org) vs New Post (Personal) */}
       <div className={cn('px-3 pt-4 pb-1', isSidebarCollapsed && 'px-2')}>
         {isOrgMode ? (
-          <button
-            type="button"
-            onClick={() => {
-              switchToPersonal()
-              navigate('/app')
-            }}
-            className={cn(
-              'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-sm active:scale-95 cursor-pointer',
-              'bg-muted/80 hover:bg-muted text-foreground border border-border/80 hover:border-primary/50',
-              isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-xs'
-            )}
-            title="Switch back to Personal Workspace"
-            aria-label="Switch back to Personal Workspace"
-          >
-            <ArrowLeft className="h-4 w-4 text-primary shrink-0" />
-            {!isSidebarCollapsed && <span className="truncate">Personal Mode</span>}
-          </button>
+          <div className="space-y-1.5">
+            <button
+              type="button"
+              onClick={() => navigate('/app/org/jobs?action=create')}
+              className={cn(
+                'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-md active:scale-95 cursor-pointer',
+                'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:shadow-primary/35 hover:brightness-105',
+                isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
+              )}
+              title="Post New Job Opening"
+              aria-label="Post New Job Opening"
+            >
+              <Briefcase className={cn('h-5 w-5', !isSidebarCollapsed && 'h-4 w-4 shrink-0')} />
+              {!isSidebarCollapsed && <span className="truncate">Post a Job</span>}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                switchToPersonal()
+                navigate('/app')
+              }}
+              className={cn(
+                'flex items-center justify-center gap-1.5 rounded-xl font-medium transition-all shadow-2xs active:scale-95 cursor-pointer',
+                'bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/80',
+                isSidebarCollapsed ? 'h-8 w-8 mx-auto' : 'w-full py-1.5 px-3 text-xs'
+              )}
+              title="Switch back to Personal Workspace"
+              aria-label="Switch back to Personal Workspace"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-primary shrink-0" />
+              {!isSidebarCollapsed && <span className="truncate">Exit to Personal</span>}
+            </button>
+          </div>
         ) : (
           <button
             type="button"

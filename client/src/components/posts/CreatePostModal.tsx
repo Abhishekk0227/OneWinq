@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { mediaApi } from '@/features/media/api/media.api'
@@ -21,6 +22,7 @@ import {
   Building2,
   ChevronDown,
   Check,
+  Briefcase,
 } from 'lucide-react'
 import type { PostMedia } from '@/types/posts.types'
 
@@ -33,6 +35,7 @@ interface PostingProfile {
 }
 
 export function CreatePostModal() {
+  const navigate = useNavigate()
   const { activeModal, closeModal } = useUIStore()
   const { user } = useAuthStore()
   const { activeContext, memberships } = useOrganizationContextStore()
@@ -245,6 +248,28 @@ export function CreatePostModal() {
             </div>
           </div>
         </DialogHeader>
+
+        {/* Quick link to Post a Job when in Organization Mode */}
+        {isPostingAsOrg && (
+          <div className="mt-3 flex items-center justify-between p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span className="text-foreground font-medium truncate">
+                Recruiting talent for {selectedProfile.name}?
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                closeModal()
+                navigate('/app/org/jobs?action=create')
+              }}
+              className="text-purple-600 dark:text-purple-400 font-bold hover:underline shrink-0 ml-2 cursor-pointer flex items-center gap-1"
+            >
+              Post a Job Opening →
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-3 sm:pt-4">
           {/* Author snippet & Visibility picker */}

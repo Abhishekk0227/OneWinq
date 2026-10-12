@@ -25,11 +25,20 @@ import {
   Sun,
   Moon,
   Monitor,
+  Building2,
+  Briefcase,
+  FileCheck,
+  Calendar,
+  Network,
+  KeyRound,
+  ArrowLeft,
 } from 'lucide-react'
 import { triggerPWAInstall } from '@/components/pwa/InstallAppPrompt'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
 import { useTheme } from '@/app/providers/ThemeProvider'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
+import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { BrandLogo } from './BrandLogo'
@@ -111,6 +120,75 @@ export function MobileMenuDrawer() {
     }
   }
 
+  const { activeContext, switchToPersonal } = useOrganizationContextStore()
+  const isOrgMode = activeContext.type === 'ORGANIZATION'
+
+  // Role & Permission Checks for Organization Mode
+  const orgRole = isOrgMode ? (activeContext.role || 'MEMBER').toUpperCase() : ''
+  const orgPermissions = isOrgMode ? (activeContext.permissions || []) : []
+  const isOrgOwner = orgRole === 'OWNER'
+  const isOrgAdmin = isOrgOwner || orgRole === 'ADMIN'
+  const isOrgHR = isOrgAdmin || orgRole === 'HR_MANAGER'
+  const isOrgManager = isOrgHR || orgRole === 'MANAGER'
+  const hasPerm = (perm: string) => isOrgOwner || orgPermissions.includes(perm)
+
+  const orgNavGroups: NavGroup[] = [
+    {
+      title: 'Organization Workspace',
+      items: [
+        {
+          label: isOrgAdmin ? 'Overview & Stats' : isOrgHR ? 'HR Workspace' : 'Member Hub',
+          to: '/app/org/dashboard',
+          icon: LayoutDashboard,
+          end: true,
+        },
+        ...(isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')
+          ? [{ label: 'Company Profile', to: '/app/org/profile', icon: Building2 }]
+          : []),
+        {
+          label: isOrgHR || hasPerm('members:invite') ? 'Team Members' : 'Colleague Directory',
+          to: '/app/org/members',
+          icon: Users,
+        },
+      ],
+    },
+    {
+      title: 'Recruitment & Talent',
+      items: [
+        {
+          label: 'Job Postings',
+          to: '/app/org/jobs',
+          icon: Briefcase,
+          highlight: true,
+        },
+        ...(isOrgHR || hasPerm('applications:view') || hasPerm('applications:manage')
+          ? [{ label: 'Applicants', to: '/app/org/applications', icon: FileCheck }]
+          : []),
+      ],
+    },
+    {
+      title: 'Operations & Management',
+      items: [
+        { label: 'Company Events', to: '/app/org/events', icon: Calendar },
+        ...(isOrgManager || hasPerm('approvals:view') || hasPerm('approvals:manage')
+          ? [{ label: 'Profile Approvals', to: '/app/org/approvals', icon: FileCheck }]
+          : []),
+        ...(isOrgManager || hasPerm('departments:manage')
+          ? [{ label: 'Departments', to: '/app/org/departments', icon: Network }]
+          : []),
+        ...(isOrgAdmin || hasPerm('roles:manage')
+          ? [{ label: 'Roles & Access', to: '/app/org/roles', icon: KeyRound }]
+          : []),
+        ...(isOrgAdmin || hasPerm('audit:view')
+          ? [{ label: 'Audit Logs', to: '/app/org/audit', icon: ShieldAlert }]
+          : []),
+        ...(isOrgAdmin || hasPerm('settings:manage')
+          ? [{ label: 'Org Settings', to: '/app/org/settings', icon: Settings }]
+          : []),
+      ],
+    },
+  ]
+
   const navGroups: NavGroup[] = [
     {
       title: 'Workspace',
@@ -118,6 +196,8 @@ export function MobileMenuDrawer() {
         { label: 'Home Feed', to: '/app', icon: Home, end: true },
         { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
         { label: 'Discover & Network', to: '/app/network', icon: Compass },
+        { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
+        { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },
         { label: 'My Profile', to: '/app/profile', icon: UserCircle },
         { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate, highlight: true },
       ],
@@ -152,6 +232,8 @@ export function MobileMenuDrawer() {
     },
   ]
 
+  const activeNavGroups = isOrgMode ? orgNavGroups : navGroups
+
   if (!isMobileMenuOpen) return null
 
   return (
@@ -178,84 +260,167 @@ export function MobileMenuDrawer() {
           </button>
         </div>
 
-        {/* User Profile Card */}
-        <div className="p-4 border-b border-border bg-muted/20">
-          <div className="flex items-center gap-3">
-            <Avatar
-              size="md"
-              src={user?.avatarUrl}
-              fallback={user?.displayName || user?.username}
-              alt={user?.displayName}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-foreground text-sm truncate">
-                  {user?.displayName || user?.username}
-                </span>
-                {isStaff ? (
-                  <Badge
-                    variant={user?.role === 'SUPPORT' ? 'default' : 'destructive'}
-                    className={cn(
-                      'text-[10px] px-1.5 py-0 font-bold shrink-0',
-                      user?.role === 'SUPPORT' && 'bg-sky-500 text-white'
-                    )}
-                  >
-                    {user?.role === 'SUPER_ADMIN' ? 'SUPER ADMIN' : user?.role === 'SUPPORT' ? 'SUPPORT' : 'ADMIN'}
-                  </Badge>
+        {/* Workspace Switcher */}
+        <div className="p-3 border-b border-border bg-muted/15">
+          <WorkspaceContextSwitcher />
+        </div>
+
+        {/* User Profile / Organization Header */}
+        {isOrgMode ? (
+          <div className="p-4 border-b border-border bg-gradient-to-r from-muted/30 to-primary/5">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-xl bg-card border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 shadow-2xs">
+                {activeContext.logoUrl ? (
+                  <img src={activeContext.logoUrl} alt={activeContext.name} className="h-full w-full object-contain" />
                 ) : (
-                  <Badge variant="subtle" className="text-[10px] px-1.5 py-0 font-medium shrink-0">
-                    PRO
-                  </Badge>
+                  <Building2 className="h-5 w-5" />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground truncate">
-                @{user?.username}
-              </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-foreground text-sm truncate">
+                    {activeContext.name}
+                  </span>
+                  <Badge variant="subtle" className="text-[10px] px-1.5 py-0 font-bold shrink-0 bg-primary/10 text-primary border-primary/20">
+                    {activeContext.role || 'MEMBER'}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  Workspace: @{activeContext.slug}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Quick profile actions */}
-          <div className="mt-3 flex items-center gap-2">
-            {user?.username && (
+            <div className="mt-3 flex items-center gap-2">
               <a
-                href={`/u/${user.username}`}
+                href={`/c/${activeContext.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors truncate"
               >
-                <span className="truncate">View Profile</span>
+                <span className="truncate">Public Showcase</span>
                 <ExternalLink className="h-3 w-3 shrink-0" />
               </a>
-            )}
-            <Link
-              to="/app/profile/edit"
-              onClick={handleClose}
-              className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-colors"
-            >
-              <Edit3 className="h-3 w-3" />
-              <span>Edit</span>
-            </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  switchToPersonal()
+                  handleClose()
+                  navigate('/app')
+                }}
+                className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                <span>Exit</span>
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-4 border-b border-border bg-muted/20">
+            <div className="flex items-center gap-3">
+              <Avatar
+                size="md"
+                src={user?.avatarUrl}
+                fallback={user?.displayName || user?.username}
+                alt={user?.displayName}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-foreground text-sm truncate">
+                    {user?.displayName || user?.username}
+                  </span>
+                  {isStaff ? (
+                    <Badge
+                      variant={user?.role === 'SUPPORT' ? 'default' : 'destructive'}
+                      className={cn(
+                        'text-[10px] px-1.5 py-0 font-bold shrink-0',
+                        user?.role === 'SUPPORT' && 'bg-sky-500 text-white'
+                      )}
+                    >
+                      {user?.role === 'SUPER_ADMIN' ? 'SUPER ADMIN' : user?.role === 'SUPPORT' ? 'SUPPORT' : 'ADMIN'}
+                    </Badge>
+                  ) : (
+                    <Badge variant="subtle" className="text-[10px] px-1.5 py-0 font-medium shrink-0">
+                      PRO
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate">
+                  @{user?.username}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick profile actions */}
+            <div className="mt-3 flex items-center gap-2">
+              {user?.username && (
+                <a
+                  href={`/u/${user.username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors truncate"
+                >
+                  <span className="truncate">View Profile</span>
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                </a>
+              )}
+              <Link
+                to="/app/profile/edit"
+                onClick={handleClose}
+                className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-colors"
+              >
+                <Edit3 className="h-3 w-3" />
+                <span>Edit</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Prominent Action Button */}
         <div className="px-4 pt-3 pb-1">
-          <button
-            type="button"
-            onClick={() => {
-              handleClose()
-              openModal('CREATE_POST')
-            }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-primary via-primary-600 to-primary-700 shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <Plus className="h-4 w-4 stroke-[2.5]" />
-            <span>Create New Post</span>
-          </button>
+          {isOrgMode ? (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose()
+                  navigate('/app/org/jobs?action=create')
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-primary via-primary-600 to-primary-700 shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
+              >
+                <Briefcase className="h-4 w-4 stroke-[2.5]" />
+                <span>Post a Job Opening</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose()
+                  openModal('CREATE_POST')
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Create Company Feed Post</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                handleClose()
+                openModal('CREATE_POST')
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-primary via-primary-600 to-primary-700 shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <span>Create New Post</span>
+            </button>
+          )}
         </div>
 
         {/* Navigation Sections List */}
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 custom-scrollbar">
-          {navGroups.map((group) => (
+          {activeNavGroups.map((group) => (
             <div key={group.title} className="space-y-1">
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                 {group.title}
