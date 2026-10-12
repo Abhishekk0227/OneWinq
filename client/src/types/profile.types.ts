@@ -317,6 +317,19 @@ export interface ProfileRecommendationResponse {
   missingRecommendedSections: string[]
 }
 
+export interface OrganizationAffiliation {
+  organizationId: string
+  organizationName: string
+  organizationSlug: string
+  organizationLogoUrl?: string | null
+  isVerifiedOrg: boolean
+  role: string
+  roleLabel: string
+  position: string
+  isHR: boolean
+  isExecutive?: boolean
+}
+
 export interface PublicProfileResponse {
   profile: Profile | null
   user: {
@@ -327,6 +340,7 @@ export interface PublicProfileResponse {
     avatarUrl?: string | null
     primaryProfession?: string
   }
+  organizationAffiliations?: OrganizationAffiliation[]
   activeMode?: VisibilityMode
   connectionState?: string
   connectionStatus?: string

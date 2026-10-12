@@ -24,6 +24,7 @@ import {
   Calendar,
   KeyRound,
   ArrowLeft,
+  FileText,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
@@ -88,12 +89,11 @@ export function AppSidebar() {
 
   const orgNavItems: Array<{ label: string; to: string; icon: any; end?: boolean }> = []
 
-  // 1. Company Feed (LinkedIn-style feed stream)
+  // 1. Company Posts (Dedicated Company Posts Hub)
   orgNavItems.push({
-    label: 'Company Feed',
-    to: '/app',
-    icon: Home,
-    end: true,
+    label: 'Company Posts',
+    to: '/app/org/posts',
+    icon: FileText,
   })
 
   // 2. Dashboard / Hub (Adapts label based on role)

@@ -1,7 +1,52 @@
 import * as profileService from './profile.service.js';
 import * as publicResolverService from './publicResolver.service.js';
 import { User } from '../users/user.model.js';
+import { OrganizationMember } from '../organizations/organizationMember.model.js';
 import { sendSuccess } from '../../shared/response.js';
+
+async function getOrganizationAffiliations(userId) {
+  try {
+    const memberships = await OrganizationMember.find({
+      userId,
+      status: 'ACTIVE',
+    })
+      .populate('organizationId', 'name slug logoUrl isVerified industry')
+      .lean();
+
+    return (memberships || [])
+      .filter((m) => m.organizationId)
+      .map((m) => {
+        const org = m.organizationId;
+        const role = m.role || 'MEMBER';
+        const roleLabel =
+          role === 'HR_MANAGER'
+            ? 'HR Manager'
+            : role === 'OWNER'
+            ? 'Founder & Owner'
+            : role === 'ADMIN'
+            ? 'Administrator'
+            : role === 'MANAGER'
+            ? 'Manager'
+            : 'Team Member';
+        const position = m.jobTitle || roleLabel;
+        const isHR = role === 'HR_MANAGER' || Boolean(m.jobTitle && /hr|human resources|recruiter|talent/i.test(m.jobTitle));
+        return {
+          organizationId: org._id?.toString(),
+          organizationName: org.name,
+          organizationSlug: org.slug,
+          organizationLogoUrl: org.logoUrl || null,
+          isVerifiedOrg: Boolean(org.isVerified),
+          role,
+          roleLabel,
+          position,
+          isHR: Boolean(isHR),
+          isExecutive: Boolean(m.isExecutive || role === 'OWNER' || role === 'ADMIN'),
+        };
+      });
+  } catch {
+    return [];
+  }
+}
 
 export async function getMyProfileController(req, res, next) {
   try {
@@ -9,6 +54,7 @@ export async function getMyProfileController(req, res, next) {
     const profile = await profileService.getOrCreateProfile(req.user.id, personaId);
     const personas = await profileService.listUserPersonas(req.user.id);
     const user = await User.findById(req.user.id).select('displayName username email avatarUrl').lean();
+    const organizationAffiliations = await getOrganizationAffiliations(req.user.id);
     return sendSuccess(res, {
       message: 'Profile retrieved.',
       data: {
@@ -16,6 +62,7 @@ export async function getMyProfileController(req, res, next) {
         personas,
         identities: [{ customTitle: profile.professionTitle || profile.personaName || 'Professional', isPrimary: true }],
         user,
+        organizationAffiliations,
       },
     });
   } catch (err) {

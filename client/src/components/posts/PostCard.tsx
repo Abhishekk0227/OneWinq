@@ -18,6 +18,7 @@ import {
   Plus,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { organizationsApi } from '@/features/organizations/api/organizations.api'
 import { queryKeys } from '@/lib/query/queryKeys'
@@ -34,15 +35,27 @@ import type { Post, PostComment } from '@/types/posts.types'
 export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => void }) {
   const queryClient = useQueryClient()
   const { user: currentUser } = useAuthStore()
+  const { activeContext } = useOrganizationContextStore()
   const isOrgPost = Boolean(post.author?.isOrganization || post.authorType === 'ORGANIZATION')
   const orgId =
     post.organization?._id ||
     post.organization?.id ||
     (isOrgPost ? post.author?._id || post.author?.id : null)
 
+  const isOrgManagerViewing =
+    Boolean(
+      isOrgPost &&
+      activeContext.type === 'ORGANIZATION' &&
+      orgId &&
+      String(activeContext.organizationId) === String(orgId)
+    )
+
   const isOwner =
-    (currentUser?._id && (currentUser._id === post.author?._id || currentUser._id === post.postedBy?._id)) ||
-    (!isOrgPost && currentUser?.username === post.author?.username)
+    Boolean(
+      (currentUser?._id && (currentUser._id === post.author?._id || currentUser._id === post.postedBy?._id)) ||
+      (!isOrgPost && currentUser?.username === post.author?.username) ||
+      isOrgManagerViewing
+    )
 
   // Local interaction states for instant optimistic feedback
   const [isLiked, setIsLiked] = React.useState(Boolean(post.isLiked))

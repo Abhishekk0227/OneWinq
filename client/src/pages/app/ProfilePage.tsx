@@ -42,6 +42,7 @@ import {
   Video,
   Building2,
   ShieldAlert,
+  ShieldCheck,
   FileKey,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
@@ -257,6 +258,7 @@ export default function ProfilePage() {
   })
 
   const profile = data?.data?.profile
+  const organizationAffiliations = (data?.data as any)?.organizationAffiliations || []
   const identities: any[] = (data?.data as any)?.identities || profile?.identities || []
   const rawMode = selectedMode || profile?.activeMode || VISIBILITY_MODE.PUBLIC
   const currentMode: VisibilityMode =
@@ -647,8 +649,51 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-
-
+                  {/* Verified Organization & HR Affiliation Badges */}
+                  {organizationAffiliations && organizationAffiliations.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 pt-2 max-w-full">
+                      {organizationAffiliations.map((affil: any) => {
+                        const isHrBadge = affil.isHR
+                        return (
+                          <Link
+                            key={affil.organizationId}
+                            to={`/c/${affil.organizationSlug}`}
+                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all hover:scale-[1.02] shadow-2xs ${
+                              isHrBadge
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                                : 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20'
+                            }`}
+                            title={`Verified ${affil.position || affil.roleLabel} at ${affil.organizationName}`}
+                          >
+                            {affil.organizationLogoUrl ? (
+                              <img
+                                src={affil.organizationLogoUrl}
+                                alt={affil.organizationName}
+                                className="h-4 w-4 rounded-md object-cover"
+                              />
+                            ) : (
+                              <Building2 className="h-3.5 w-3.5 shrink-0" />
+                            )}
+                            <span className="font-bold flex items-center gap-1.5 flex-wrap">
+                              {isHrBadge ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                  <span>{affil.position || 'HR Manager'}</span>
+                                </span>
+                              ) : (
+                                <span>{affil.position || affil.roleLabel}</span>
+                              )}
+                              <span className="text-muted-foreground font-normal">at</span>
+                              <span className="underline decoration-dotted underline-offset-2">{affil.organizationName}</span>
+                            </span>
+                            {affil.isVerifiedOrg && (
+                              <CheckCircle2 className="h-3 w-3 text-blue-500 shrink-0" />
+                            )}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
                   {profile.bio && (
                     <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
                       {profile.bio}
