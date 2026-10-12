@@ -4,6 +4,7 @@ import { postsApi } from '@/features/posts/api/posts.api'
 import { mediaApi } from '@/features/media/api/media.api'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
@@ -17,12 +18,24 @@ import {
   Sparkles,
   Send,
   Loader2,
+  Building2,
+  ChevronDown,
+  Check,
 } from 'lucide-react'
 import type { PostMedia } from '@/types/posts.types'
+
+interface PostingProfile {
+  type: 'PERSONAL' | 'ORGANIZATION'
+  orgId?: string
+  name: string
+  handle: string
+  avatarUrl?: string | null
+}
 
 export function CreatePostModal() {
   const { activeModal, closeModal } = useUIStore()
   const { user } = useAuthStore()
+  const { activeContext, memberships } = useOrganizationContextStore()
   const queryClient = useQueryClient()
 
   const isOpen = activeModal === 'CREATE_POST'
@@ -31,23 +44,124 @@ export function CreatePostModal() {
   const [mediaList, setMediaList] = React.useState<PostMedia[]>([])
   const [isUploading, setIsUploading] = React.useState(false)
   const [visibility, setVisibility] = React.useState<'PUBLIC' | 'CONNECTIONS_ONLY'>('PUBLIC')
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = React.useState(false)
+
+  // Build available posting profiles (Personal + any Organization user is member of)
+  const availableProfiles = React.useMemo<PostingProfile[]>(() => {
+    const list: PostingProfile[] = [
+      {
+        type: 'PERSONAL',
+        name: user?.displayName || user?.username || 'Personal',
+        handle: user?.username ? `@${user.username}` : '@you',
+        avatarUrl: user?.avatarUrl,
+      },
+    ]
+
+    // Add active organization if currently in org context
+    if (activeContext.type === 'ORGANIZATION') {
+      list.push({
+        type: 'ORGANIZATION',
+        orgId: activeContext.organizationId,
+        name: activeContext.name,
+        handle: `@${activeContext.slug}`,
+        avatarUrl: activeContext.logoUrl,
+      })
+    }
+
+    // Add other memberships if not already included
+    for (const m of memberships) {
+      const org = m.organization
+      if (org && org.id !== (activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '')) {
+        list.push({
+          type: 'ORGANIZATION',
+          orgId: org.id,
+          name: org.name,
+          handle: `@${org.slug}`,
+          avatarUrl: org.logoUrl || (org as any).branding?.logoUrl,
+        })
+      }
+    }
+
+    return list
+  }, [user, activeContext, memberships])
+
+  const [selectedProfile, setSelectedProfile] = React.useState<PostingProfile>(() => {
+    if (activeContext.type === 'ORGANIZATION') {
+      return {
+        type: 'ORGANIZATION',
+        orgId: activeContext.organizationId,
+        name: activeContext.name,
+        handle: `@${activeContext.slug}`,
+        avatarUrl: activeContext.logoUrl,
+      }
+    }
+    return {
+      type: 'PERSONAL',
+      name: user?.displayName || user?.username || 'Personal',
+      handle: user?.username ? `@${user.username}` : '@you',
+      avatarUrl: user?.avatarUrl,
+    }
+  })
+
+  // Synchronize when modal opens or active context updates
+  React.useEffect(() => {
+    if (isOpen) {
+      if (activeContext.type === 'ORGANIZATION') {
+        setSelectedProfile({
+          type: 'ORGANIZATION',
+          orgId: activeContext.organizationId,
+          name: activeContext.name,
+          handle: `@${activeContext.slug}`,
+          avatarUrl: activeContext.logoUrl,
+        })
+      } else {
+        setSelectedProfile({
+          type: 'PERSONAL',
+          name: user?.displayName || user?.username || 'Personal',
+          handle: user?.username ? `@${user.username}` : '@you',
+          avatarUrl: user?.avatarUrl,
+        })
+      }
+    }
+  }, [isOpen, activeContext, user])
+
+  const dropdownRef = React.useRef<HTMLDivElement | null>(null)
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsProfileDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const imageInputRef = React.useRef<HTMLInputElement | null>(null)
   const videoInputRef = React.useRef<HTMLInputElement | null>(null)
 
   const createPostMutation = useMutation({
-    mutationFn: (payload: { content: string; media: PostMedia[]; visibility: string }) =>
-      postsApi.createPost(payload),
+    mutationFn: (payload: {
+      content: string
+      media: PostMedia[]
+      visibility: string
+      organizationId?: string | null
+      authorType?: 'USER' | 'ORGANIZATION'
+    }) => postsApi.createPost(payload),
     onSuccess: () => {
-      toast.success('Your post is published and visible to the network!')
+      toast.success(
+        selectedProfile.type === 'ORGANIZATION'
+          ? `Post published on behalf of ${selectedProfile.name}!`
+          : 'Your post is published and visible to the network!'
+      )
       setContent('')
       setMediaList([])
       closeModal()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
     },
     onError: (err: unknown) => {
-      const apiErr = err as { message?: string }
-      toast.error(apiErr.message || 'Failed to publish post')
+      const apiErr = err as { message?: string; response?: { data?: { message?: string } } }
+      toast.error(apiErr.response?.data?.message || apiErr.message || 'Failed to publish post')
     },
   })
 
@@ -89,12 +203,27 @@ export function CreatePostModal() {
       toast.error('Please write something or attach media to post.')
       return
     }
-    createPostMutation.mutate({
-      content: content.trim(),
-      media: mediaList,
-      visibility,
-    })
+
+    if (selectedProfile.type === 'ORGANIZATION') {
+      createPostMutation.mutate({
+        content: content.trim(),
+        media: mediaList,
+        visibility: 'PUBLIC',
+        organizationId: selectedProfile.orgId,
+        authorType: 'ORGANIZATION',
+      })
+    } else {
+      createPostMutation.mutate({
+        content: content.trim(),
+        media: mediaList,
+        visibility,
+        organizationId: null,
+        authorType: 'USER',
+      })
+    }
   }
+
+  const isPostingAsOrg = selectedProfile.type === 'ORGANIZATION'
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
@@ -102,14 +231,16 @@ export function CreatePostModal() {
         <DialogHeader className="pb-3 border-b border-border pr-8">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center text-primary shrink-0">
-              <Sparkles className="h-4 w-4" />
+              {isPostingAsOrg ? <Building2 className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">
-                Create New Post
+                {isPostingAsOrg ? `Create Company Update` : `Create New Post`}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
-                Broadcast insights, milestones, or questions to your professional circle.
+                {isPostingAsOrg
+                  ? `Broadcasting update on behalf of ${selectedProfile.name} to followers and the network.`
+                  : `Broadcast insights, milestones, or questions to your professional circle.`}
               </DialogDescription>
             </div>
           </div>
@@ -118,50 +249,162 @@ export function CreatePostModal() {
         <form onSubmit={handleSubmit} className="space-y-4 pt-3 sm:pt-4">
           {/* Author snippet & Visibility picker */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              <Avatar
-                size="sm"
-                src={user?.avatarUrl}
-                fallback={user?.displayName || user?.username}
-                alt={user?.displayName}
-                className="shrink-0"
-              />
-              <div className="leading-tight min-w-0">
-                <div className="text-xs sm:text-sm font-bold text-foreground truncate max-w-[130px] sm:max-w-[200px]">
-                  {user?.displayName || user?.username}
+            {/* Interactive Profile Selector */}
+            <div className="relative min-w-0" ref={dropdownRef}>
+              {availableProfiles.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-2xl border border-border/80 hover:border-primary/50 bg-card/60 hover:bg-card text-left transition-all shadow-2xs group cursor-pointer"
+                >
+                  {isPostingAsOrg ? (
+                    <div className="h-8 w-8 rounded-xl border border-border bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0">
+                      {selectedProfile.avatarUrl ? (
+                        <img src={selectedProfile.avatarUrl} alt={selectedProfile.name} className="h-full w-full object-contain" />
+                      ) : (
+                        <Building2 className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                  ) : (
+                    <Avatar
+                      size="sm"
+                      src={selectedProfile.avatarUrl}
+                      fallback={selectedProfile.name}
+                      alt={selectedProfile.name}
+                      className="shrink-0"
+                    />
+                  )}
+                  <div className="leading-tight min-w-0 pr-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs sm:text-sm font-bold text-foreground truncate max-w-[140px] sm:max-w-[200px]">
+                        {selectedProfile.name}
+                      </span>
+                      {isPostingAsOrg && (
+                        <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1 py-0.2 rounded font-semibold uppercase tracking-wider">
+                          Company
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground truncate max-w-[140px] sm:max-w-[200px] flex items-center gap-1">
+                      <span>{selectedProfile.handle}</span>
+                      <span className="text-primary font-medium group-hover:underline text-[10px]">• Switch</span>
+                    </div>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors ml-0.5" />
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar
+                    size="sm"
+                    src={selectedProfile.avatarUrl}
+                    fallback={selectedProfile.name}
+                    alt={selectedProfile.name}
+                    className="shrink-0"
+                  />
+                  <div className="leading-tight min-w-0">
+                    <div className="text-xs sm:text-sm font-bold text-foreground truncate max-w-[130px] sm:max-w-[200px]">
+                      {selectedProfile.name}
+                    </div>
+                    <div className="text-[11px] sm:text-xs text-muted-foreground truncate max-w-[130px] sm:max-w-[200px]">
+                      {selectedProfile.handle}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[11px] sm:text-xs text-muted-foreground truncate max-w-[130px] sm:max-w-[200px]">
-                  @{user?.username}
+              )}
+
+              {/* Dropdown Menu for Profile Selection */}
+              {isProfileDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1.5 w-72 rounded-2xl border border-border bg-popover/95 backdrop-blur-md p-1.5 shadow-xl z-50 animate-in fade-in slide-in-from-top-1">
+                  <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Post as profile:
+                  </div>
+                  <div className="space-y-1">
+                    {availableProfiles.map((prof, idx) => {
+                      const isSelected =
+                        (prof.type === 'PERSONAL' && selectedProfile.type === 'PERSONAL') ||
+                        (prof.type === 'ORGANIZATION' &&
+                          selectedProfile.type === 'ORGANIZATION' &&
+                          prof.orgId === selectedProfile.orgId)
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedProfile(prof)
+                            setIsProfileDropdownOpen(false)
+                          }}
+                          className={`w-full flex items-center justify-between gap-2.5 p-2 rounded-xl text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : 'hover:bg-muted text-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {prof.type === 'ORGANIZATION' ? (
+                              <div className="h-7 w-7 rounded-lg border border-border bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0">
+                                {prof.avatarUrl ? (
+                                  <img src={prof.avatarUrl} alt={prof.name} className="h-full w-full object-contain" />
+                                ) : (
+                                  <Building2 className="h-3.5 w-3.5 text-primary" />
+                                )}
+                              </div>
+                            ) : (
+                              <Avatar
+                                size="sm"
+                                src={prof.avatarUrl}
+                                fallback={prof.name}
+                                alt={prof.name}
+                                className="h-7 w-7 shrink-0"
+                              />
+                            )}
+                            <div className="min-w-0 leading-tight">
+                              <div className="text-xs font-bold truncate">{prof.name}</div>
+                              <div className="text-[10px] text-muted-foreground truncate">{prof.handle}</div>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-xl bg-muted/60 border border-border text-xs shrink-0">
-              <button
-                type="button"
-                onClick={() => setVisibility('PUBLIC')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
-                  visibility === 'PUBLIC'
-                    ? 'bg-card text-foreground shadow-sm font-bold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
+            {/* Visibility Mode Selector */}
+            {isPostingAsOrg ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shrink-0">
                 <Globe className="h-3 w-3" />
-                <span>Public</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setVisibility('CONNECTIONS_ONLY')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
-                  visibility === 'CONNECTIONS_ONLY'
-                    ? 'bg-card text-foreground shadow-sm font-bold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Users className="h-3 w-3" />
-                <span>Network</span>
-              </button>
-            </div>
+                <span>Public Broadcast</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-xl bg-muted/60 border border-border text-xs shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setVisibility('PUBLIC')}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
+                    visibility === 'PUBLIC'
+                      ? 'bg-card text-foreground shadow-sm font-bold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Globe className="h-3 w-3" />
+                  <span>Public</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibility('CONNECTIONS_ONLY')}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-all text-xs ${
+                    visibility === 'CONNECTIONS_ONLY'
+                      ? 'bg-card text-foreground shadow-sm font-bold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Users className="h-3 w-3" />
+                  <span>Network</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Text Area */}

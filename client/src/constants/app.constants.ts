@@ -219,6 +219,7 @@ export const ORGANIZATION_PERMISSION = {
   SHOWCASE_MANAGE: 'showcase:manage',
   ANALYTICS_VIEW: 'analytics:view',
   AUDIT_VIEW: 'audit:view',
+  POSTS_MANAGE: 'posts:manage',
 } as const;
 export type OrganizationPermission = typeof ORGANIZATION_PERMISSION[keyof typeof ORGANIZATION_PERMISSION];
 

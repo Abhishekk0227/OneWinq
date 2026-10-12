@@ -35,6 +35,8 @@ import {
 } from 'lucide-react';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
+import { postsApi } from '@/features/posts/api/posts.api';
+import { PostCard } from '@/components/posts/PostCard';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -171,6 +173,14 @@ export default function CompanyShowcasePage() {
     enabled: !!org?.id,
   });
   const jobs = (jobsData as any)?.data?.jobs || [];
+
+  // Fetch recent company posts/updates
+  const { data: postsData, refetch: refetchCompanyPosts } = useQuery({
+    queryKey: ['publicOrgPosts', org?.id || (org as any)?._id],
+    queryFn: () => postsApi.getFeed({ organizationId: org?.id || (org as any)?._id }),
+    enabled: !!(org?.id || (org as any)?._id),
+  });
+  const companyPosts = (postsData as any)?.data?.posts || [];
 
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
@@ -743,6 +753,26 @@ export default function CompanyShowcasePage() {
                     )}
                   </div>
                 </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section: Company Updates & Posts */}
+        {companyPosts.length > 0 && (
+          <section id="updates" className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" /> Company Updates & Broadcasts
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Official announcements, insights, and media shared by {org.name}.
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-2xl">
+              {companyPosts.map((p: any) => (
+                <PostCard key={p._id} post={p} onRefresh={() => refetchCompanyPosts()} />
               ))}
             </div>
           </section>

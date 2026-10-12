@@ -99,6 +99,7 @@ const PERMISSION_GROUPS = [
       { key: ORGANIZATION_PERMISSION.ROLES_VIEW, label: 'View Custom Roles' },
       { key: ORGANIZATION_PERMISSION.ROLES_MANAGE, label: 'Create & Edit Custom Roles' },
       { key: ORGANIZATION_PERMISSION.SETTINGS_MANAGE, label: 'Manage Governance Policies' },
+      { key: ORGANIZATION_PERMISSION.POSTS_MANAGE, label: 'Publish & Manage Company Updates & Posts' },
       { key: ORGANIZATION_PERMISSION.AUDIT_VIEW, label: 'View Compliance Audit Logs' },
       { key: ORGANIZATION_PERMISSION.ANALYTICS_VIEW, label: 'View Workspace Analytics' },
       { key: ORGANIZATION_PERMISSION.ORG_DELETE, label: 'Delete Organization Workspace' },

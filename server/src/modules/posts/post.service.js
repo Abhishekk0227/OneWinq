@@ -4,19 +4,36 @@ import { PostLike } from './postLike.model.js';
 import { PostSave } from './postSave.model.js';
 import { User } from '../users/user.model.js';
 import { ProfessionalIdentity } from '../profiles/professionalIdentity.model.js';
-import { POST_STATE, COMMENT_STATE, APP_EVENT } from '../../config/constants.js';
+import { Organization } from '../organizations/organization.model.js';
+import { OrganizationMember } from '../organizations/organizationMember.model.js';
+import { OrganizationFollow } from '../organizations/organizationFollow.model.js';
+import { Connection } from '../connections/connection.model.js';
+import {
+  POST_STATE,
+  COMMENT_STATE,
+  APP_EVENT,
+  ORGANIZATION_ROLE,
+  ORGANIZATION_MEMBER_STATUS,
+  ORGANIZATION_PERMISSION,
+} from '../../config/constants.js';
 import { NotFoundError, ForbiddenError, ValidationError } from '../../shared/errors.js';
 import { eventBus } from '../../events/eventBus.js';
 import { filterToCardActive } from '../cards/cardGate.js';
 
 /**
- * Helper to enrich an array of posts with isLiked, isSaved, and author's primary profession.
+ * Helper to enrich an array of posts with isLiked, isSaved, followed status, and author info.
  */
 async function enrichPosts(posts, viewerId) {
   if (!posts || posts.length === 0) return [];
 
   const postIds = posts.map((p) => p._id);
-  const authorIds = [...new Set(posts.map((p) => p.authorId?._id?.toString() || p.authorId?.toString()).filter(Boolean))];
+  const authorIds = [
+    ...new Set(
+      posts
+        .map((p) => p.authorId?._id?.toString() || p.authorId?.toString())
+        .filter(Boolean),
+    ),
+  ];
 
   // Fetch primary professions for authors
   const primaryIdentities = await ProfessionalIdentity.find({
@@ -41,21 +58,61 @@ async function enrichPosts(posts, viewerId) {
     : [];
   const savedPostIdSet = new Set(viewerSaves.map((s) => s.postId.toString()));
 
+  // Fetch followed organizations for viewer
+  let followedOrgIdSet = new Set();
+  if (viewerId) {
+    const orgFollows = await OrganizationFollow.find({ userId: viewerId }).select('organizationId').lean();
+    followedOrgIdSet = new Set(orgFollows.map((f) => f.organizationId.toString()));
+  }
+
   return posts.map((post) => {
     const postObj = post.toObject ? post.toObject() : { ...post };
     const authorIdStr = postObj.authorId?._id?.toString() || postObj.authorId?.toString();
     const primaryProfession = authorIdStr ? authorProfessionMap[authorIdStr] || null : null;
 
-    if (postObj.authorId && typeof postObj.authorId === 'object') {
+    const isOrgPost = postObj.authorType === 'ORGANIZATION' && postObj.organizationId;
+
+    if (isOrgPost) {
+      const org = postObj.organizationId;
+      const orgIdStr = org._id ? org._id.toString() : org.toString();
+      const orgName = org.name || 'Organization';
+      const orgSlug = org.slug || 'company';
+      const orgAvatar = org.branding?.logoUrl || org.logoUrl || null;
+      const orgHeadline = org.industry || org.tagline || 'Company';
+
+      postObj.organization = typeof org === 'object' ? org : { _id: orgIdStr };
+      postObj.isFollowingOrg = followedOrgIdSet.has(orgIdStr);
+
+      if (postObj.authorId && typeof postObj.authorId === 'object') {
+        postObj.postedBy = {
+          _id: postObj.authorId._id,
+          displayName: postObj.authorId.displayName,
+          username: postObj.authorId.username,
+        };
+      }
+
       postObj.author = {
-        _id: postObj.authorId._id,
-        displayName: postObj.authorId.displayName,
-        username: postObj.authorId.username,
-        avatarUrl: postObj.authorId.avatarUrl,
-        primaryProfession,
+        _id: orgIdStr,
+        displayName: orgName,
+        username: orgSlug,
+        avatarUrl: orgAvatar,
+        primaryProfession: orgHeadline,
+        isOrganization: true,
       };
-      delete postObj.authorId;
+    } else {
+      if (postObj.authorId && typeof postObj.authorId === 'object') {
+        postObj.author = {
+          _id: postObj.authorId._id,
+          displayName: postObj.authorId.displayName,
+          username: postObj.authorId.username,
+          avatarUrl: postObj.authorId.avatarUrl,
+          primaryProfession,
+          isOrganization: false,
+        };
+      }
     }
+
+    delete postObj.authorId;
 
     postObj.isLiked = likedPostIdSet.has(postObj._id.toString());
     postObj.isSaved = savedPostIdSet.has(postObj._id.toString());
@@ -67,16 +124,55 @@ async function enrichPosts(posts, viewerId) {
  * Create a new post.
  */
 export async function createPost(userId, data) {
+  let authorType = data.authorType || 'USER';
+  let organizationId = data.organizationId || null;
+
+  if (organizationId) {
+    authorType = 'ORGANIZATION';
+    const org = await Organization.findById(organizationId);
+    if (!org) {
+      throw new NotFoundError('Organization not found');
+    }
+
+    const membership = await OrganizationMember.findOne({
+      organizationId,
+      userId,
+      status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+    }).lean();
+
+    if (!membership) {
+      throw new ForbiddenError('You must be an active member to post on behalf of this organization');
+    }
+
+    const allowedRoles = [
+      ORGANIZATION_ROLE.OWNER,
+      ORGANIZATION_ROLE.ADMIN,
+      ORGANIZATION_ROLE.HR_MANAGER,
+      ORGANIZATION_ROLE.MANAGER,
+    ];
+    const hasRole = allowedRoles.includes(membership.role);
+    const hasPermission =
+      Array.isArray(membership.permissions) &&
+      membership.permissions.includes(ORGANIZATION_PERMISSION.POSTS_MANAGE);
+
+    if (!hasRole && !hasPermission) {
+      throw new ForbiddenError('You do not have permission to publish posts for this organization');
+    }
+  }
+
   const post = await Post.create({
     authorId: userId,
+    organizationId: organizationId || null,
+    authorType,
     content: data.content || '',
     media: data.media || [],
-    visibility: data.visibility || 'PUBLIC',
+    visibility: authorType === 'ORGANIZATION' ? 'PUBLIC' : (data.visibility || 'PUBLIC'),
     state: POST_STATE.ACTIVE,
   });
 
   const populated = await Post.findById(post._id)
     .populate('authorId', 'displayName username avatarUrl')
+    .populate('organizationId', 'name slug logoUrl industry tagline isVerified branding')
     .lean();
 
   const [enriched] = await enrichPosts([populated], userId);
@@ -84,9 +180,19 @@ export async function createPost(userId, data) {
 }
 
 /**
- * Get feed of posts (all, my, saved, archived, or by author).
+ * Get feed of posts (all, following, my, saved, archived, or by author/org).
  */
-export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', authorUsername = null } = {}) {
+export async function getFeed(
+  viewerId,
+  {
+    page = 1,
+    limit = 20,
+    filter = 'all',
+    authorUsername = null,
+    organizationSlug = null,
+    organizationId = null,
+  } = {},
+) {
   const skip = (page - 1) * limit;
   let query = { state: POST_STATE.ACTIVE };
 
@@ -106,6 +212,7 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
 
     const rawPosts = await Post.find({ _id: { $in: postIds }, state: { $ne: POST_STATE.DELETED } })
       .populate('authorId', 'displayName username avatarUrl')
+      .populate('organizationId', 'name slug logoUrl industry tagline isVerified branding')
       .lean();
 
     // Preserve order of saves
@@ -134,12 +241,50 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
       throw new ForbiddenError('Sign in required to view your posts');
     }
     query = { authorId: viewerId, state: POST_STATE.ACTIVE };
+  } else if (organizationSlug || organizationId) {
+    let targetOrgId = organizationId;
+    if (!targetOrgId && organizationSlug) {
+      const org = await Organization.findOne({ slug: organizationSlug.toLowerCase() }).select('_id').lean();
+      if (!org) {
+        throw new NotFoundError('Organization not found');
+      }
+      targetOrgId = org._id;
+    }
+    query = { organizationId: targetOrgId, authorType: 'ORGANIZATION', state: POST_STATE.ACTIVE };
   } else if (authorUsername) {
     const author = await User.findOne({ username: authorUsername.toLowerCase() }).select('_id').lean();
     if (!author) {
       throw new NotFoundError('User not found');
     }
     query = { authorId: author._id, state: POST_STATE.ACTIVE };
+  } else if (filter === 'following') {
+    if (!viewerId) {
+      throw new ForbiddenError('Sign in required to view following feed');
+    }
+
+    const [follows, connections] = await Promise.all([
+      OrganizationFollow.find({ userId: viewerId }).select('organizationId').lean(),
+      Connection.find({
+        $or: [{ userLow: viewerId }, { userHigh: viewerId }],
+        state: 'CONNECTED',
+      }).select('userLow userHigh').lean(),
+    ]);
+
+    const followedOrgIds = follows.map((f) => f.organizationId);
+    const connectedUserIds = connections.map((c) =>
+      c.userLow.toString() === viewerId.toString() ? c.userHigh : c.userLow,
+    );
+
+    query = {
+      state: POST_STATE.ACTIVE,
+      $or: [
+        { organizationId: { $in: followedOrgIds }, authorType: 'ORGANIZATION' },
+        { authorId: { $in: [...connectedUserIds, viewerId] }, authorType: 'USER' },
+      ],
+    };
+  } else if (filter === 'all') {
+    // Show all active public posts from community and verified organizations
+    query = { state: POST_STATE.ACTIVE, visibility: 'PUBLIC' };
   }
 
   const [rawPosts, total] = await Promise.all([
@@ -148,6 +293,7 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
       .skip(skip)
       .limit(limit)
       .populate('authorId', 'displayName username avatarUrl')
+      .populate('organizationId', 'name slug logoUrl industry tagline isVerified branding')
       .lean(),
     Post.countDocuments(query),
   ]);
@@ -171,6 +317,7 @@ export async function getFeed(viewerId, { page = 1, limit = 20, filter = 'all', 
 export async function getPostById(postId, viewerId) {
   const post = await Post.findById(postId)
     .populate('authorId', 'displayName username avatarUrl')
+    .populate('organizationId', 'name slug logoUrl industry tagline isVerified branding')
     .lean();
 
   if (!post || post.state === POST_STATE.DELETED) {
@@ -186,7 +333,7 @@ export async function getPostById(postId, viewerId) {
 }
 
 /**
- * Update a post's content (owner only).
+ * Update a post's content (owner or org manager).
  */
 export async function updatePost(postId, userId, data) {
   const post = await Post.findById(postId);
@@ -194,8 +341,21 @@ export async function updatePost(postId, userId, data) {
     throw new NotFoundError('Post not found');
   }
 
-  if (post.authorId.toString() !== userId.toString()) {
-    throw new ForbiddenError('You can only edit your own posts');
+  const isAuthor = post.authorId.toString() === userId.toString();
+  let isOrgAdmin = false;
+  if (post.organizationId) {
+    const membership = await OrganizationMember.findOne({
+      organizationId: post.organizationId,
+      userId,
+      status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+    }).lean();
+    if (membership && [ORGANIZATION_ROLE.OWNER, ORGANIZATION_ROLE.ADMIN, ORGANIZATION_ROLE.MANAGER].includes(membership.role)) {
+      isOrgAdmin = true;
+    }
+  }
+
+  if (!isAuthor && !isOrgAdmin) {
+    throw new ForbiddenError('You can only edit your own posts or organization posts you manage');
   }
 
   post.content = data.content;
@@ -204,6 +364,7 @@ export async function updatePost(postId, userId, data) {
 
   const populated = await Post.findById(post._id)
     .populate('authorId', 'displayName username avatarUrl')
+    .populate('organizationId', 'name slug logoUrl industry tagline isVerified branding')
     .lean();
 
   const [enriched] = await enrichPosts([populated], userId);
@@ -211,7 +372,7 @@ export async function updatePost(postId, userId, data) {
 }
 
 /**
- * Delete a post (owner or admin).
+ * Delete a post (owner, platform admin, or org admin).
  */
 export async function deletePost(postId, userId, userRole) {
   const post = await Post.findById(postId);
@@ -219,10 +380,21 @@ export async function deletePost(postId, userId, userRole) {
     throw new NotFoundError('Post not found');
   }
 
-  const isOwner = post.authorId.toString() === userId.toString();
-  const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+  const isAuthor = post.authorId.toString() === userId.toString();
+  const isPlatformAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+  let isOrgAdmin = false;
+  if (post.organizationId) {
+    const membership = await OrganizationMember.findOne({
+      organizationId: post.organizationId,
+      userId,
+      status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+    }).lean();
+    if (membership && [ORGANIZATION_ROLE.OWNER, ORGANIZATION_ROLE.ADMIN, ORGANIZATION_ROLE.MANAGER].includes(membership.role)) {
+      isOrgAdmin = true;
+    }
+  }
 
-  if (!isOwner && !isAdmin) {
+  if (!isAuthor && !isPlatformAdmin && !isOrgAdmin) {
     throw new ForbiddenError('You cannot delete this post');
   }
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Heart,
   MessageSquare,
@@ -13,22 +13,33 @@ import {
   Send,
   CornerDownRight,
   Globe,
+  Building2,
+  Check,
+  Plus,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { postsApi } from '@/features/posts/api/posts.api'
+import { organizationsApi } from '@/features/organizations/api/organizations.api'
 import { queryKeys } from '@/lib/query/queryKeys'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { toast } from '@/stores/toastStore'
+import { cn } from '@/lib/utils/cn'
 import type { Post, PostComment } from '@/types/posts.types'
 
 /**
  * Individual Interactive Post Card
  */
 export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => void }) {
+  const queryClient = useQueryClient()
   const { user: currentUser } = useAuthStore()
-  const isOwner = currentUser?._id === post.author?._id || currentUser?.username === post.author?.username
+  const isOrgPost = Boolean(post.author?.isOrganization || post.authorType === 'ORGANIZATION')
+  const orgId = post.organization?._id || (isOrgPost ? post.author?._id : null)
+
+  const isOwner =
+    (currentUser?._id && (currentUser._id === post.author?._id || currentUser._id === post.postedBy?._id)) ||
+    (!isOrgPost && currentUser?.username === post.author?.username)
 
   // Local interaction states for instant optimistic feedback
   const [isLiked, setIsLiked] = React.useState(Boolean(post.isLiked))
@@ -36,6 +47,28 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
   const [isSaved, setIsSaved] = React.useState(Boolean(post.isSaved))
   const [savesCount, setSavesCount] = React.useState(post.savesCount || 0)
   const [sharesCount, setSharesCount] = React.useState(post.sharesCount || 0)
+  const [isFollowingOrg, setIsFollowingOrg] = React.useState(Boolean(post.isFollowingOrg))
+
+  const followOrgMutation = useMutation({
+    mutationFn: () => organizationsApi.toggleFollow(orgId!),
+    onSuccess: (res: any) => {
+      const isNowFollowing = res?.data?.isFollowing
+      setIsFollowingOrg(isNowFollowing)
+      toast.success(
+        isNowFollowing
+          ? `Now following ${post.author?.displayName}`
+          : `Unfollowed ${post.author?.displayName}`
+      )
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+      if (orgId) {
+        queryClient.invalidateQueries({ queryKey: ['org', orgId, 'follow-status'] })
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Please sign in to follow')
+    },
+  })
 
   // Edit post state
   const [isEditing, setIsEditing] = React.useState(false)
@@ -188,20 +221,36 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
       {/* Author Header (LinkedIn Style) */}
       <div className="flex items-start justify-between gap-3 min-w-0">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <Link to={`/u/${post.author?.username}`} target="_blank" className="shrink-0 mt-0.5">
-            <Avatar
-              src={post.author?.avatarUrl}
-              fallback={post.author?.displayName}
-              alt={post.author?.displayName}
-              size="md"
-              className="rounded-full ring-1 ring-border/80 hover:ring-primary/50 transition-all shrink-0"
-            />
-          </Link>
+          {isOrgPost ? (
+            <Link to={`/company/${post.author?.username}`} className="shrink-0 mt-0.5">
+              <div className="h-10 w-10 rounded-xl border border-border/80 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs hover:border-primary/50 transition-colors p-1">
+                {post.author?.avatarUrl ? (
+                  <img
+                    src={post.author.avatarUrl}
+                    alt={post.author.displayName}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <Building2 className="h-5 w-5 text-primary" />
+                )}
+              </div>
+            </Link>
+          ) : (
+            <Link to={`/u/${post.author?.username}`} target="_blank" className="shrink-0 mt-0.5">
+              <Avatar
+                src={post.author?.avatarUrl}
+                fallback={post.author?.displayName}
+                alt={post.author?.displayName}
+                size="md"
+                className="rounded-full ring-1 ring-border/80 hover:ring-primary/50 transition-all shrink-0"
+              />
+            </Link>
+          )}
+
           <div className="min-w-0 flex-1 space-y-0.5">
             <div className="flex items-center gap-1.5 flex-wrap">
               <Link
-                to={`/u/${post.author?.username}`}
-                target="_blank"
+                to={isOrgPost ? `/company/${post.author?.username}` : `/u/${post.author?.username}`}
                 className="text-sm font-bold text-foreground hover:text-primary hover:underline transition-colors truncate"
               >
                 {post.author?.displayName}
@@ -209,6 +258,11 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
               <span className="text-xs text-muted-foreground font-normal">
                 @{post.author?.username}
               </span>
+              {isOrgPost && (
+                <span className="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.2 rounded-md font-semibold">
+                  <Building2 className="h-2.5 w-2.5" /> Company
+                </span>
+              )}
             </div>
             {post.author?.primaryProfession && (
               <p className="text-xs text-muted-foreground truncate leading-tight">
@@ -231,6 +285,34 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
             </div>
           </div>
         </div>
+
+        {/* Follow Organization Button */}
+        {isOrgPost && orgId && !isOwner && currentUser && (
+          <button
+            type="button"
+            onClick={() => followOrgMutation.mutate()}
+            disabled={followOrgMutation.isPending}
+            className={cn(
+              'text-xs font-semibold px-2.5 py-1 rounded-full transition-all border flex items-center gap-1 shrink-0 cursor-pointer',
+              isFollowingOrg
+                ? 'border-border/80 text-muted-foreground bg-muted/40 hover:border-destructive/40 hover:text-destructive'
+                : 'border-primary/40 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-2xs'
+            )}
+            title={isFollowingOrg ? 'Click to unfollow' : 'Follow this company for feed updates'}
+          >
+            {isFollowingOrg ? (
+              <>
+                <Check className="h-3 w-3" />
+                <span>Following</span>
+              </>
+            ) : (
+              <>
+                <Plus className="h-3 w-3" />
+                <span>Follow</span>
+              </>
+            )}
+          </button>
+        )}
 
         {/* Action Menu (Owner) */}
         {isOwner && (
