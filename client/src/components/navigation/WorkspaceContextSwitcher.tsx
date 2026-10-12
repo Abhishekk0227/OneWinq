@@ -81,13 +81,13 @@ export function WorkspaceContextSwitcher({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-border/70 bg-card/80 hover:bg-card text-foreground transition-all duration-150 shadow-2xs cursor-pointer select-none',
+          'flex items-center gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-border/70 bg-card/80 hover:bg-card text-foreground transition-all duration-150 shadow-2xs cursor-pointer select-none min-w-0 shrink',
           isOpen && 'ring-2 ring-primary/20 border-primary/50'
         )}
         title="Switch active workspace"
         aria-label="Workspace context switcher"
       >
-        <div className="flex items-center justify-center h-6 w-6 rounded-lg bg-primary/10 text-primary shrink-0 overflow-hidden">
+        <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-lg bg-primary/10 text-primary shrink-0 overflow-hidden">
           {isPersonal ? (
             user?.avatarUrl ? (
               <img
@@ -96,7 +96,7 @@ export function WorkspaceContextSwitcher({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <User className="h-3.5 w-3.5" />
+              <User className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
             )
           ) : activeContext.logoUrl ? (
             <img
@@ -105,22 +105,22 @@ export function WorkspaceContextSwitcher({
               className="h-full w-full object-cover"
             />
           ) : (
-            <Building2 className="h-3.5 w-3.5" />
+            <Building2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
           )}
         </div>
 
-        <div className="flex flex-col items-start text-left min-w-0 max-w-[140px] sm:max-w-[200px]">
-          <span className="text-xs font-semibold truncate leading-none">
+        <div className="flex flex-col items-start text-left min-w-0 max-w-[85px] xs:max-w-[130px] sm:max-w-[200px]">
+          <span className="text-xs font-semibold truncate leading-none w-full">
             {isPersonal ? user?.displayName || 'Personal' : activeContext.name}
           </span>
-          <span className="text-[10px] text-muted-foreground mt-0.5 leading-none truncate">
+          <span className="text-[10px] text-muted-foreground mt-0.5 leading-none truncate w-full hidden xs:block">
             {isPersonal ? 'Personal' : activeContext.role}
           </span>
         </div>
 
         <ChevronDown
           className={cn(
-            'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 shrink-0',
+            'h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground transition-transform duration-200 shrink-0',
             isOpen && 'rotate-180 text-foreground'
           )}
         />
@@ -128,7 +128,7 @@ export function WorkspaceContextSwitcher({
 
       {/* Workspace Menu Dropdown */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-72 rounded-2xl border border-border/80 bg-card p-2 text-foreground shadow-xl backdrop-blur-xl z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-border/80 bg-card p-2 text-foreground shadow-xl backdrop-blur-xl z-50 animate-in fade-in-50 zoom-in-95 duration-150">
           <div className="px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
             Workspaces
           </div>

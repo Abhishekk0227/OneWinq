@@ -11,8 +11,6 @@ import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PostCard } from '@/components/posts/PostCard'
 import {
-  Image,
-  Video,
   PenSquare,
   Sparkles,
   Flame,
@@ -94,25 +92,7 @@ export default function FeedPage() {
         </div>
 
         {/* Quick action triggers */}
-        <div className="flex items-center justify-around sm:justify-between pt-1 border-t border-border/60 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-sky-500 transition-colors cursor-pointer"
-          >
-            <Image className="h-4 w-4 text-sky-500" />
-            <span>Media</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-emerald-500 transition-colors cursor-pointer"
-          >
-            <Video className="h-4 w-4 text-emerald-500" />
-            <span>Video</span>
-          </button>
-
+        <div className="flex items-center justify-between pt-1.5 border-t border-border/60 text-xs font-semibold">
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
