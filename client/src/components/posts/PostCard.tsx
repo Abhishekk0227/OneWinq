@@ -35,7 +35,10 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
   const queryClient = useQueryClient()
   const { user: currentUser } = useAuthStore()
   const isOrgPost = Boolean(post.author?.isOrganization || post.authorType === 'ORGANIZATION')
-  const orgId = post.organization?._id || (isOrgPost ? post.author?._id : null)
+  const orgId =
+    post.organization?._id ||
+    post.organization?.id ||
+    (isOrgPost ? post.author?._id || post.author?.id : null)
 
   const isOwner =
     (currentUser?._id && (currentUser._id === post.author?._id || currentUser._id === post.postedBy?._id)) ||
@@ -48,6 +51,10 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
   const [savesCount, setSavesCount] = React.useState(post.savesCount || 0)
   const [sharesCount, setSharesCount] = React.useState(post.sharesCount || 0)
   const [isFollowingOrg, setIsFollowingOrg] = React.useState(Boolean(post.isFollowingOrg))
+
+  React.useEffect(() => {
+    setIsFollowingOrg(Boolean(post.isFollowingOrg))
+  }, [post.isFollowingOrg])
 
   const followOrgMutation = useMutation({
     mutationFn: () => organizationsApi.toggleFollow(orgId!),
