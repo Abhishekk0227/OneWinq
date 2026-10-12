@@ -90,8 +90,9 @@ export function AppHeader() {
         <BrandLogo to="/app" className="lg:hidden shrink-0" imgClassName="h-6 sm:h-7" />
 
         {/* Workspace Context Switcher (Dynamic Personal vs Org mode) */}
-        <WorkspaceContextSwitcher />
+        <WorkspaceContextSwitcher className="min-w-0" />
 
+        <div className="hidden md:inline-flex items-center shrink-0">
           {isStaff ? (
             <Link to="/admin">
               <Badge
@@ -116,16 +117,17 @@ export function AppHeader() {
               PRO MEMBER
             </Badge>
           )}
+        </div>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-1.5 sm:gap-3">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Admin/Staff Console Direct Button — hidden on mobile (accessible via drawer) */}
         {isStaff && (
           <Link
             to="/admin"
             className={cn(
-              'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all',
+              'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all shrink-0',
               user?.role === 'SUPPORT'
                 ? 'bg-sky-600 hover:bg-sky-700'
                 : 'bg-primary hover:bg-primary-hover'
@@ -142,7 +144,7 @@ export function AppHeader() {
             href={`/u/${user.username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors shrink-0"
           >
             <span>View Profile</span>
             <ExternalLink className="h-3 w-3" />
@@ -154,11 +156,11 @@ export function AppHeader() {
           <button
             type="button"
             onClick={() => navigate('/app/org/jobs?action=create')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm shadow-purple-500/25 transition-all active:scale-95 cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm shadow-purple-500/25 transition-all active:scale-95 cursor-pointer shrink-0"
             title="Post a Job Opening"
           >
             <Briefcase className="h-3.5 w-3.5 stroke-[2.2]" />
-            <span className="hidden sm:inline">Post Job</span>
+            <span>Post Job</span>
           </button>
         )}
 
@@ -166,18 +168,18 @@ export function AppHeader() {
         <button
           type="button"
           onClick={() => openModal('CREATE_POST')}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-sm shadow-primary/20 transition-all active:scale-95 cursor-pointer"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-sm shadow-primary/20 transition-all active:scale-95 cursor-pointer shrink-0"
           title="Create New Post"
         >
           <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
-          <span className="hidden sm:inline">Post</span>
+          <span>Post</span>
         </button>
 
         {/* Theme Toggle (Sun/Moon) */}
         <button
           type="button"
           onClick={toggleTheme}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all cursor-pointer"
+          className="hidden sm:inline-flex rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all cursor-pointer shrink-0"
           aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           title={resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         >
