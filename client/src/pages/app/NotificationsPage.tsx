@@ -135,9 +135,9 @@ function resolveItemLink(item: any): string | null {
     case 'SECURITY_ALERT':
       return '/app/settings'
     case 'ORGANIZATION_INVITATION':
-      return item.linkUrl || (item.metadata?.token ? `/invitation?token=${item.metadata.token}` : '/app/dashboard')
+      return item.linkUrl || (item.metadata?.token ? `/invitation?token=${item.metadata.token}` : '/app')
     default:
-      if (item.entityType === 'organization') return item.linkUrl || '/app/dashboard'
+      if (item.entityType === 'organization') return item.linkUrl || '/app'
       if (item.entityType === 'connection') return '/app/connections'
       if (item.entityType === 'conversation') return item.entityId ? `/app/messages?cid=${item.entityId}` : '/app/messages'
       if (item.entityType === 'profile') return username ? `/u/${username}` : '/app/profile'

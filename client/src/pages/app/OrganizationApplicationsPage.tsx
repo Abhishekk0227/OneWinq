@@ -266,10 +266,19 @@ export default function OrganizationApplicationsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  {app.resumeUrl && (
+                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                  {(app.oneWinqProfileUrl || app.applicant?.username) && (
                     <span className="flex items-center gap-1 text-xs text-primary font-medium px-2 py-1 rounded-md bg-primary/10">
+                      <User className="h-3.5 w-3.5" /> OneWinq Profile
+                    </span>
+                  )}
+                  {app.resumeUrl ? (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium px-2 py-1 rounded-md bg-muted">
                       <FileText className="h-3.5 w-3.5" /> Resume attached
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground px-2 py-1 rounded-md bg-muted/60">
+                      Profile only
                     </span>
                   )}
                   <Button variant="ghost" size="sm" className="gap-1 text-xs font-semibold">
@@ -315,29 +324,42 @@ export default function OrganizationApplicationsPage() {
                 </span>
               </div>
 
-              {selectedApp.applicant?.username && (
-                <div className="pt-1">
+              {/* Profile Link Showcase */}
+              {(selectedApp.oneWinqProfileUrl || selectedApp.applicant?.username) && (
+                <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-3">
+                  <div className="text-xs">
+                    <span className="font-semibold text-foreground block">Verified OneWinq Digital Identity</span>
+                    <span className="text-muted-foreground text-[11px]">Direct public profile, credentials & showcase</span>
+                  </div>
                   <a
-                    href={`/u/${selectedApp.applicant.username}`}
+                    href={selectedApp.oneWinqProfileUrl || `/u/${selectedApp.applicant?.username}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:brightness-105 transition-all shadow-xs shrink-0"
                   >
-                    View OneWinq Identity Profile <ExternalLink className="h-3 w-3" />
+                    <User className="h-3.5 w-3.5" /> View OneWinq Profile <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               )}
 
-              {selectedApp.resumeUrl && (
-                <div className="pt-2 border-t border-border/60">
+              {selectedApp.resumeUrl ? (
+                <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-3">
+                  <div className="text-xs">
+                    <span className="font-semibold text-foreground block">Resume / CV Document</span>
+                    <span className="text-muted-foreground text-[11px]">Attached candidate document or portfolio</span>
+                  </div>
                   <a
                     href={selectedApp.resumeUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:brightness-105 transition-all shadow-xs"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold transition-all border border-border shadow-xs shrink-0"
                   >
-                    <FileText className="h-4 w-4" /> View Resume / CV <ExternalLink className="h-3 w-3" />
+                    <FileText className="h-4 w-4 text-primary" /> View Document <ExternalLink className="h-3 w-3" />
                   </a>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-border/60 text-xs text-muted-foreground italic">
+                  No additional resume document was attached (Candidate applied using their OneWinq profile).
                 </div>
               )}
             </div>

@@ -9,7 +9,7 @@ export const jobsApi = {
   getPublicJob: (jobId: string) =>
     apiClient.get<never, ApiResponse<{ job: Job }>>(`/jobs/${jobId}`),
 
-  apply: (jobId: string, data: { resumeUrl?: string | null; coverLetter?: string }) =>
+  apply: (jobId: string, data: { resumeUrl?: string | null; oneWinqProfileUrl?: string; coverLetter?: string }) =>
     apiClient.post<never, ApiResponse<{ application: JobApplication }>>(
       `/jobs/${jobId}/apply`,
       data

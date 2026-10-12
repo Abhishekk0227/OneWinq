@@ -51,6 +51,11 @@ const applicationSchema = new Schema(
       type: String,
       default: null,
     },
+    oneWinqProfileUrl: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     coverLetter: {
       type: String,
       trim: true,
@@ -95,6 +100,7 @@ applicationSchema.methods.toSafeObject = function () {
     applicantId: this.applicantId?.toString ? this.applicantId.toString() : this.applicantId,
     status: this.status,
     resumeUrl: this.resumeUrl,
+    oneWinqProfileUrl: this.oneWinqProfileUrl || (this.applicantSnapshot?.oneWinqProfileUrl || (this.applicantSnapshot?.username ? `/u/${this.applicantSnapshot.username}` : null)),
     coverLetter: this.coverLetter,
     applicantSnapshot: this.applicantSnapshot,
     internalNotes: this.internalNotes,

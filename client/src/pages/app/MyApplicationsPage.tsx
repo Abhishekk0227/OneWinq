@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   FileText,
+  CheckCircle2,
 } from 'lucide-react';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
@@ -134,10 +135,13 @@ export default function MyApplicationsPage() {
                     <p className="text-xs text-muted-foreground font-medium">
                       {app.organization?.name || 'Company'}
                     </p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         Applied on {new Date(app.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1 text-primary font-medium">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> OneWinq Profile Shared
                       </span>
                       {app.resumeUrl && (
                         <a
@@ -146,7 +150,7 @@ export default function MyApplicationsPage() {
                           rel="noreferrer"
                           className="flex items-center gap-1 text-primary hover:underline font-medium"
                         >
-                          <FileText className="h-3 w-3" /> Resume
+                          <FileText className="h-3 w-3" /> Resume Attached
                         </a>
                       )}
                     </div>

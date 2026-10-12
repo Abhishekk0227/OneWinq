@@ -27,11 +27,13 @@ import { z } from 'zod';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
 import { mediaApi } from '@/features/media/api/media.api';
 import { toast } from '@/stores/toastStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
 import { getCurrencySymbol } from '@/constants/app.constants';
 import {
@@ -138,10 +140,13 @@ export default function JobsPage() {
     }
   };
 
+  const { user } = useAuthStore();
+
   const applyMutation = useMutation({
     mutationFn: ({ jobId, values }: { jobId: string; values: ApplyFormValues }) =>
       jobsApi.apply(jobId, {
         resumeUrl: values.resumeUrl || uploadedResume?.url || null,
+        oneWinqProfileUrl: user?.username ? `/u/${user.username}` : undefined,
         coverLetter: values.coverLetter || '',
       }),
     onSuccess: () => {
@@ -397,11 +402,57 @@ export default function JobsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            {/* Resume Upload or Link */}
+            {/* Candidate OneWinq Profile Showcase */}
+            <div className="p-3.5 rounded-xl border border-primary/25 bg-primary/5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-primary flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Verified OneWinq Profile Attached
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  Auto-Shared
+                </span>
+              </div>
+              <div className="flex items-center gap-3 pt-0.5">
+                <Avatar
+                  src={user?.avatarUrl}
+                  fallback={user?.displayName}
+                  alt={user?.displayName}
+                  size="md"
+                  className="rounded-full ring-2 ring-primary/20 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-sm text-foreground truncate">
+                    {user?.displayName}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    @{user?.username} • {user?.headline || 'OneWinq Professional Profile'}
+                  </div>
+                </div>
+                {user?.username && (
+                  <a
+                    href={`/u/${user.username}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 shrink-0 bg-background px-2.5 py-1.5 rounded-lg border border-border shadow-2xs"
+                  >
+                    <span>View Profile</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground pt-1.5 border-t border-primary/15">
+                Your digital identity, work history, education, verified skills, and NFC card connections are automatically shared with this employer.
+              </p>
+            </div>
+
+            {/* Resume Upload or Link (Optional) */}
             <div className="space-y-2.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
-                Resume / CV Document
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                  Resume / CV Document <span className="text-muted-foreground/70 normal-case font-normal">(Optional)</span>
+                </label>
+                <span className="text-[10px] text-muted-foreground font-medium">Optional</span>
+              </div>
 
               {/* Document File Uploader */}
               <div className="p-3.5 rounded-xl border border-dashed border-border bg-muted/20 space-y-2">
@@ -446,7 +497,7 @@ export default function JobsPage() {
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                     <div>
                       <span className="text-xs font-medium text-foreground block">
-                        Upload your Resume / CV
+                        Upload your Resume / CV <span className="text-muted-foreground font-normal">(Optional)</span>
                       </span>
                       <span className="text-[11px] text-muted-foreground block">
                         PDF, DOC, DOCX up to 10MB
@@ -477,18 +528,14 @@ export default function JobsPage() {
               {/* Or external portfolio / cloud link fallback */}
               <div className="pt-1">
                 <span className="text-[11px] text-muted-foreground block mb-1">
-                  Or enter link to online portfolio / Google Drive:
+                  Or enter link to online portfolio / Google Drive <span className="font-normal">(Optional)</span>:
                 </span>
                 <Input
                   {...register('resumeUrl')}
-                  placeholder="https://drive.google.com/... or portfolio URL"
+                  placeholder="https://drive.google.com/... or portfolio URL (Optional)"
                   className="h-9 text-xs"
                 />
               </div>
-
-              <p className="text-[11px] text-muted-foreground">
-                Your verified OneWinq profile information will also be shared automatically.
-              </p>
             </div>
 
             <div>
