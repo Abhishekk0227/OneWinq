@@ -10,14 +10,11 @@ import {
   ExternalLink,
   Shield,
   HelpCircle,
-  Plus,
-  Briefcase,
   Sun,
   Moon,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
-import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -33,9 +30,7 @@ import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 export function AppHeader() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
-  const { activeContext } = useOrganizationContextStore()
-  const isOrgMode = activeContext.type === 'ORGANIZATION'
-  const { toggleSidebar, setMobileMenuOpen, openModal } = useUIStore()
+  const { toggleSidebar, setMobileMenuOpen } = useUIStore()
   const { theme, resolvedTheme, toggleTheme } = useTheme()
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
@@ -151,29 +146,7 @@ export function AppHeader() {
           </a>
         )}
 
-        {/* Quick Post a Job Action in Organization Mode */}
-        {isOrgMode && (
-          <button
-            type="button"
-            onClick={() => navigate('/app/org/jobs?action=create')}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm shadow-purple-500/25 transition-all active:scale-95 cursor-pointer shrink-0"
-            title="Post a Job Opening"
-          >
-            <Briefcase className="h-3.5 w-3.5 stroke-[2.2]" />
-            <span>Post Job</span>
-          </button>
-        )}
 
-        {/* Quick New Post Action */}
-        <button
-          type="button"
-          onClick={() => openModal('CREATE_POST')}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-sm shadow-primary/20 transition-all active:scale-95 cursor-pointer shrink-0"
-          title="Create New Post"
-        >
-          <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
-          <span>Post</span>
-        </button>
 
         {/* Theme Toggle (Sun/Moon) */}
         <button

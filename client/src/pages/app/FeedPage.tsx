@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
@@ -11,16 +10,13 @@ import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PostCard } from '@/components/posts/PostCard'
 import {
-  PenSquare,
   Sparkles,
   Flame,
   Globe,
   Building2,
-  Briefcase,
 } from 'lucide-react'
 
 export default function FeedPage() {
-  const navigate = useNavigate()
   const { user } = useAuthStore()
   const { openModal } = useUIStore()
   const { activeContext } = useOrganizationContextStore()
@@ -45,19 +41,7 @@ export default function FeedPage() {
   return (
     <div className="w-full max-w-xl sm:max-w-2xl mx-auto space-y-4 text-left pb-24 px-2 sm:px-0">
       {/* LinkedIn-Style "Start a post" Section */}
-      <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-3">
-        {isOrgMode && (
-          <div className="flex items-center justify-between text-xs font-semibold text-primary pb-1 border-b border-border/60">
-            <span className="flex items-center gap-1.5">
-              <Building2 className="h-3.5 w-3.5" />
-              Posting as <span className="underline font-bold">{activeContext.name}</span>
-            </span>
-            <span className="text-[11px] text-muted-foreground font-normal">
-              Followers will see this in their feed
-            </span>
-          </div>
-        )}
-
+      <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs">
         <div className="flex items-center gap-3">
           {isOrgMode ? (
             <div className="h-10 w-10 rounded-xl border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
@@ -89,29 +73,6 @@ export default function FeedPage() {
             </span>
             <Sparkles className="h-4 w-4 text-primary opacity-60 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
           </button>
-        </div>
-
-        {/* Quick action triggers */}
-        <div className="flex items-center justify-between pt-1.5 border-t border-border/60 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer"
-          >
-            <PenSquare className="h-4 w-4 text-amber-500" />
-            <span>Write post</span>
-          </button>
-
-          {isOrgMode && (
-            <button
-              type="button"
-              onClick={() => navigate('/app/org/jobs?action=create')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            >
-              <Briefcase className="h-4 w-4 text-primary" />
-              <span>Post a Job</span>
-            </button>
-          )}
         </div>
       </div>
 
