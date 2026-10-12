@@ -246,11 +246,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'dashboard',
-                element: (
-                  <Suspended>
-                    <DashboardPage />
-                  </Suspended>
-                ),
+                element: <Navigate to="/app/analytics" replace />,
               },
               {
                 path: 'profile',

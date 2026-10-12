@@ -91,7 +91,8 @@ export const listJobsQuerySchema = z.object({
 });
 
 export const applyJobSchema = z.object({
-  resumeUrl: z.string().nullable().optional(),
+  resumeUrl: z.string().trim().nullable().optional(),
+  oneWinqProfileUrl: z.string().trim().optional(),
   coverLetter: z.string().trim().max(5000).default(''),
 });
 

@@ -335,7 +335,7 @@ export default function OrganizationSettingsPage() {
               size="sm"
               onClick={() => {
                 switchToPersonal();
-                navigate('/app/dashboard');
+                navigate('/app');
               }}
             >
               Exit to Personal

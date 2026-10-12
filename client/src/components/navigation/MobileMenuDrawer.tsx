@@ -189,7 +189,6 @@ export function MobileMenuDrawer() {
       title: 'Workspace',
       items: [
         { label: 'Home Feed', to: '/app', icon: Home, end: true },
-        { label: 'Dashboard & Stats', to: '/app/dashboard', icon: LayoutDashboard },
         { label: 'Discover & Network', to: '/app/network', icon: Compass },
         { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
         { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },

@@ -445,11 +445,13 @@ export interface JobApplication {
     avatarUrl?: string | null;
     headline?: string;
     skills?: string[];
+    oneWinqProfileUrl?: string | null;
   };
   workplaceType?: WorkplaceType;
   employmentType?: EmploymentType;
   status: ApplicationStatus;
   resumeUrl?: string | null;
+  oneWinqProfileUrl?: string | null;
   coverLetter?: string;
   createdAt: string;
 }

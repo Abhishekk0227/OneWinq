@@ -345,11 +345,15 @@ export async function applyToJob(jobId, applicantUserId, applicationData) {
     Profile.findOne({ userId: applicantUserId, isActive: true }).lean(),
   ]);
 
+  const profileSlug = applicantUser?.username || applicantUserId.toString();
+  const oneWinqProfileUrl = applicationData.oneWinqProfileUrl || `/u/${profileSlug}`;
+
   const applicantSnapshot = {
-    displayName: applicantUser.displayName,
-    username: applicantUser.username,
-    email: applicantUser.email,
-    avatarUrl: applicantUser.avatarUrl,
+    displayName: applicantUser?.displayName || '',
+    username: applicantUser?.username || '',
+    email: applicantUser?.email || '',
+    avatarUrl: applicantUser?.avatarUrl || null,
+    oneWinqProfileUrl,
     headline: applicantProfile?.headline || '',
     bio: applicantProfile?.bio || '',
     skills: (applicantProfile?.skills || []).map((s) => (typeof s === 'string' ? s : s.name)),
@@ -362,6 +366,7 @@ export async function applyToJob(jobId, applicantUserId, applicationData) {
     organizationId: job.organizationId,
     applicantId: applicantUserId,
     resumeUrl: applicationData.resumeUrl || null,
+    oneWinqProfileUrl,
     coverLetter: applicationData.coverLetter || '',
     applicantSnapshot,
     status: APPLICATION_STATUS.SUBMITTED,
@@ -420,9 +425,11 @@ export async function listJobApplications(organizationId, jobId, { page = 1, lim
           avatarUrl: applicant.avatarUrl || a.applicantSnapshot?.avatarUrl || null,
           headline: a.applicantSnapshot?.headline || '',
           skills: a.applicantSnapshot?.skills || [],
+          oneWinqProfileUrl: a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || (applicant.username ? `/u/${applicant.username}` : null),
         },
         status: a.status,
         resumeUrl: a.resumeUrl,
+        oneWinqProfileUrl: a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || (applicant.username ? `/u/${applicant.username}` : null),
         coverLetter: a.coverLetter,
         internalNotesCount: (a.internalNotes || []).length,
         createdAt: a.createdAt,
@@ -630,6 +637,7 @@ export async function getUserApplications(applicantUserId, { page = 1, limit = 2
         location: job.location,
         status: a.status,
         resumeUrl: a.resumeUrl,
+        oneWinqProfileUrl: a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || null,
         createdAt: a.createdAt,
       };
     }),

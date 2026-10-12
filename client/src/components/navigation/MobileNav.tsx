@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, UserCircle, Home, Compass, Plus } from 'lucide-react'
+import { BarChart3, UserCircle, Home, Compass, Plus } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils/cn'
 
@@ -54,9 +54,9 @@ export function MobileNav() {
         </div>
       </button>
 
-      {/* Dashboard & Metrics */}
+      {/* Analytics & Metrics */}
       <NavLink
-        to="/app/dashboard"
+        to="/app/analytics"
         className={({ isActive }) =>
           cn(
             'flex flex-col items-center justify-center py-1 px-2 text-[11px] font-medium transition-colors',
@@ -66,8 +66,8 @@ export function MobileNav() {
           )
         }
       >
-        <LayoutDashboard className="h-5 w-5 mb-0.5" />
-        <span>Stats</span>
+        <BarChart3 className="h-5 w-5 mb-0.5" />
+        <span>Analytics</span>
       </NavLink>
 
       {/* Profile */}
