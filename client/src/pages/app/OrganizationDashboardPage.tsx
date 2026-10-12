@@ -119,8 +119,8 @@ export default function OrganizationDashboardPage() {
           </Button>
           <Button
             size="sm"
-            onClick={() => navigate('/app/org/jobs')}
-            className="flex-1 sm:flex-none"
+            onClick={() => navigate('/app/org/jobs?action=create')}
+            className="flex-1 sm:flex-none shadow-xs"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Post a Job

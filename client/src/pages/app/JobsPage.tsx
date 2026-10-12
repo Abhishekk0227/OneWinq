@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import {
   Briefcase,
   Search,
@@ -155,10 +157,13 @@ export default function JobsPage() {
     },
   });
 
+  const navigate = useNavigate();
+  const { activeContext, memberships, switchToOrganization } = useOrganizationContextStore();
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Hero Header */}
-      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 shadow-xs">
+      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="max-w-2xl space-y-2">
           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 mb-2">
             <Sparkles className="h-3 w-3 mr-1" /> Verified Talent Marketplace
@@ -168,6 +173,28 @@ export default function JobsPage() {
             Discover roles from high-growth startups, colleges, and verified enterprises within the OneWinq ecosystem.
           </p>
         </div>
+
+        <Button
+          onClick={() => {
+            if (activeContext.type === 'ORGANIZATION') {
+              navigate('/app/org/jobs?action=create');
+            } else if (memberships.length > 0) {
+              const orgId = memberships[0].organization?.id || (memberships[0].organization as any)?._id;
+              if (orgId) {
+                switchToOrganization(orgId);
+                navigate('/app/org/jobs?action=create');
+              } else {
+                navigate('/app/organizations/create');
+              }
+            } else {
+              navigate('/app/organizations/create');
+            }
+          }}
+          className="shrink-0 bg-primary hover:bg-primary-600 text-white shadow-md font-semibold cursor-pointer"
+        >
+          <Briefcase className="h-4 w-4 mr-2" />
+          Post a Job Opening
+        </Button>
       </div>
 
       {/* Filter and Search Bar */}

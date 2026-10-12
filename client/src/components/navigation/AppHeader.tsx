@@ -11,11 +11,13 @@ import {
   Shield,
   HelpCircle,
   Plus,
+  Briefcase,
   Sun,
   Moon,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -31,6 +33,8 @@ import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 export function AppHeader() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const { activeContext } = useOrganizationContextStore()
+  const isOrgMode = activeContext.type === 'ORGANIZATION'
   const { toggleSidebar, setMobileMenuOpen, openModal } = useUIStore()
   const { theme, resolvedTheme, toggleTheme } = useTheme()
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
@@ -143,6 +147,19 @@ export function AppHeader() {
             <span>View Profile</span>
             <ExternalLink className="h-3 w-3" />
           </a>
+        )}
+
+        {/* Quick Post a Job Action in Organization Mode */}
+        {isOrgMode && (
+          <button
+            type="button"
+            onClick={() => navigate('/app/org/jobs?action=create')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-sm shadow-purple-500/25 transition-all active:scale-95 cursor-pointer"
+            title="Post a Job Opening"
+          >
+            <Briefcase className="h-3.5 w-3.5 stroke-[2.2]" />
+            <span className="hidden sm:inline">Post Job</span>
+          </button>
         )}
 
         {/* Quick New Post Action */}
