@@ -10,6 +10,7 @@ import { isBlockedMutual } from '../connections/connection.service.js';
 import { NotFoundError } from '../../shared/errors.js';
 import { ACCOUNT_STATE, PROFILE_STATE, CARD_STATE, APP_EVENT } from '../../config/constants.js';
 import { buildSnapshotFromProfile, getOrCreateProfile } from './profile.service.js';
+import { OrganizationMember } from '../organizations/organizationMember.model.js';
 
 /**
  * Public profile resolver service.
@@ -168,6 +169,50 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
     }
   }
 
+  // 10b. Query organization affiliations (HR, Admin, Employee, etc.)
+  let organizationAffiliations = [];
+  try {
+    const memberships = await OrganizationMember.find({
+      userId: user._id,
+      status: 'ACTIVE',
+    })
+      .populate('organizationId', 'name slug logoUrl isVerified industry')
+      .lean();
+
+    organizationAffiliations = (memberships || [])
+      .filter((m) => m.organizationId)
+      .map((m) => {
+        const org = m.organizationId;
+        const role = m.role || 'MEMBER';
+        const roleLabel =
+          role === 'HR_MANAGER'
+            ? 'HR Manager'
+            : role === 'OWNER'
+            ? 'Founder & Owner'
+            : role === 'ADMIN'
+            ? 'Administrator'
+            : role === 'MANAGER'
+            ? 'Manager'
+            : 'Team Member';
+        const position = m.jobTitle || roleLabel;
+        const isHR = role === 'HR_MANAGER' || Boolean(m.jobTitle && /hr|human resources|recruiter|talent/i.test(m.jobTitle));
+        return {
+          organizationId: org._id?.toString(),
+          organizationName: org.name,
+          organizationSlug: org.slug,
+          organizationLogoUrl: org.logoUrl || null,
+          isVerifiedOrg: Boolean(org.isVerified),
+          role,
+          roleLabel,
+          position,
+          isHR: Boolean(isHR),
+          isExecutive: Boolean(m.isExecutive || role === 'OWNER' || role === 'ADMIN'),
+        };
+      });
+  } catch (_affilErr) {
+    organizationAffiliations = [];
+  }
+
   // 11. Return profile envelope (includes public user info + filtered content)
   const result = {
     user: {
@@ -179,6 +224,7 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
       primaryProfession: activeTitle || user.displayName,
       identities: [{ customTitle: activeTitle || 'Professional', isPrimary: true }],
     },
+    organizationAffiliations,
     activePersona: {
       id: profile._id ? profile._id.toString() : user._id.toString(),
       personaName: profile.personaName,

@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom'
-import { BarChart3, UserCircle, Home, Compass, Plus } from 'lucide-react'
+import { BarChart3, UserCircle, Home, Compass, Plus, FileText } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { cn } from '@/lib/utils/cn'
 
 export function MobileNav() {
   const { openModal } = useUIStore()
+  const { activeContext } = useOrganizationContextStore()
+  const isOrgMode = activeContext.type === 'ORGANIZATION'
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-border/60 bg-background/95 px-3 backdrop-blur-md lg:hidden">
-      {/* Home / Feed (Instagram-style default) */}
+      {/* Home / Feed or Company Posts */}
       <NavLink
-        to="/app"
+        to={isOrgMode ? '/app/org/posts' : '/app'}
         end
         className={({ isActive }) =>
           cn(
@@ -21,8 +24,8 @@ export function MobileNav() {
           )
         }
       >
-        <Home className="h-5 w-5 mb-0.5" />
-        <span>Home</span>
+        {isOrgMode ? <FileText className="h-5 w-5 mb-0.5" /> : <Home className="h-5 w-5 mb-0.5" />}
+        <span>{isOrgMode ? 'Posts' : 'Home'}</span>
       </NavLink>
 
       {/* Network / Discover */}

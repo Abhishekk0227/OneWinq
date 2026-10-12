@@ -6,12 +6,13 @@ import type {
   ProfessionalIdentity,
   PublicProfileResponse,
   ProfileVisibilitySettings,
+  OrganizationAffiliation,
 } from '@/types/profile.types'
 import type { VisibilityMode } from '@/constants/app.constants'
 
 export const profileApi = {
   getMyProfile: (params?: { personaId?: string }) =>
-    apiClient.get<never, ApiResponse<{ profile: Profile; personas?: ProfilePersona[]; identities?: ProfessionalIdentity[]; user?: { id: string; username: string; displayName: string; avatarUrl?: string | null } }>>('/profiles/me', { params }),
+    apiClient.get<never, ApiResponse<{ profile: Profile; personas?: ProfilePersona[]; identities?: ProfessionalIdentity[]; user?: { id: string; username: string; displayName: string; avatarUrl?: string | null }; organizationAffiliations?: OrganizationAffiliation[] }>>('/profiles/me', { params }),
 
   listPersonas: () =>
     apiClient.get<never, ApiResponse<{ personas: ProfilePersona[] }>>('/profiles/me/personas'),

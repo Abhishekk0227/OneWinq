@@ -29,6 +29,7 @@ import {
   Network,
   KeyRound,
   ArrowLeft,
+  FileText,
 } from 'lucide-react'
 import { triggerPWAInstall } from '@/components/pwa/InstallAppPrompt'
 import { useAuthStore } from '@/stores/authStore'
@@ -136,6 +137,11 @@ export function MobileMenuDrawer() {
           to: '/app/org/dashboard',
           icon: LayoutDashboard,
           end: true,
+        },
+        {
+          label: 'Company Posts',
+          to: '/app/org/posts',
+          icon: FileText,
         },
         ...(isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')
           ? [{ label: 'Company Profile', to: '/app/org/profile', icon: Building2 }]
