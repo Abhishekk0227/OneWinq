@@ -4,6 +4,23 @@ export interface PostAuthor {
   username: string
   avatarUrl?: string | null
   primaryProfession?: string | null
+  isOrganization?: boolean
+}
+
+export interface PostOrganization {
+  _id: string
+  name: string
+  slug: string
+  logoUrl?: string | null
+  industry?: string | null
+  tagline?: string | null
+  isVerified?: boolean
+  branding?: {
+    primaryColor?: string
+    secondaryColor?: string
+    logoUrl?: string
+    coverUrl?: string
+  }
 }
 
 export interface PostMedia {
@@ -28,6 +45,11 @@ export interface PostComment {
 export interface Post {
   _id: string
   author: PostAuthor
+  authorType?: 'USER' | 'ORGANIZATION'
+  organizationId?: string | PostOrganization | null
+  organization?: PostOrganization | null
+  postedBy?: { _id: string; displayName: string; username: string } | null
+  isFollowingOrg?: boolean
   content: string
   media: PostMedia[]
   state: 'ACTIVE' | 'ARCHIVED' | 'DELETED'

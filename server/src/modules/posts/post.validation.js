@@ -15,6 +15,8 @@ export const createPostSchema = z
       .max(10, 'Cannot attach more than 10 media items')
       .default([]),
     visibility: z.enum(['PUBLIC', 'CONNECTIONS_ONLY', 'PRIVATE']).default('PUBLIC'),
+    organizationId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid organization ID').nullable().optional(),
+    authorType: z.enum(['USER', 'ORGANIZATION']).optional(),
   })
   .refine(
     (data) => (data.content && data.content.trim().length > 0) || (data.media && data.media.length > 0),
@@ -36,8 +38,10 @@ export const addCommentSchema = z.object({
 export const feedQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
-  filter: z.enum(['all', 'my', 'saved', 'archived']).default('all'),
+  filter: z.enum(['all', 'my', 'saved', 'archived', 'following']).default('all'),
   authorUsername: z.string().optional(),
+  organizationId: z.string().optional(),
+  organizationSlug: z.string().optional(),
 });
 
 import { ValidationError } from '../../shared/errors.js';

@@ -21,6 +21,18 @@ const postSchema = new Schema(
       required: true,
       index: true,
     },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
+      index: true,
+    },
+    authorType: {
+      type: String,
+      enum: ['USER', 'ORGANIZATION'],
+      default: 'USER',
+      index: true,
+    },
     content: {
       type: String,
       trim: true,
@@ -80,6 +92,7 @@ const postSchema = new Schema(
 );
 
 postSchema.index({ authorId: 1, state: 1, createdAt: -1 });
+postSchema.index({ organizationId: 1, state: 1, createdAt: -1 });
 postSchema.index({ state: 1, createdAt: -1 });
 
 export const Post = mongoose.model('Post', postSchema);

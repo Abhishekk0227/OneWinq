@@ -3,7 +3,10 @@ import request from 'supertest';
 import { connectTestDb, clearTestDb, disconnectTestDb } from '../../helpers/db.js';
 import { generateAccessToken } from '../../../src/modules/auth/tokenService.js';
 import { User } from '../../../src/modules/users/user.model.js';
-import { ACCOUNT_STATE } from '../../../src/config/constants.js';
+import { Organization } from '../../../src/modules/organizations/organization.model.js';
+import { OrganizationMember } from '../../../src/modules/organizations/organizationMember.model.js';
+import { OrganizationFollow } from '../../../src/modules/organizations/organizationFollow.model.js';
+import { ACCOUNT_STATE, ORGANIZATION_ROLE, ORGANIZATION_MEMBER_STATUS } from '../../../src/config/constants.js';
 
 let app;
 let mongoose;
@@ -255,5 +258,70 @@ describe('Community Posts & Social Feed Endpoints', () => {
     // Post no longer returned
     const getRes = await request(app).get(`${BASE}/${postId}`);
     expect(getRes.status).toBe(404);
+  });
+
+  it('allows organization member to post as organization, appearing in followed feed', async () => {
+    if (skipIfNoDb()) return;
+
+    // Create an organization
+    const org = await Organization.create({
+      name: 'Acme Enterprise',
+      slug: 'acme-enterprise',
+      ownerId: user1._id,
+      industry: 'Software & Technology',
+    });
+
+    // Make user1 owner/admin in OrganizationMember
+    await OrganizationMember.create({
+      organizationId: org._id,
+      userId: user1._id,
+      role: ORGANIZATION_ROLE.OWNER,
+      status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+    });
+
+    // User1 publishes post on behalf of the organization
+    const orgPostRes = await request(app)
+      .post(BASE)
+      .set('Authorization', authHeader1)
+      .send({
+        content: 'Acme Corp is thrilled to launch our new product line!',
+        organizationId: org._id.toString(),
+        authorType: 'ORGANIZATION',
+      });
+
+    expect(orgPostRes.status).toBe(201);
+    expect(orgPostRes.body.data.post).toBeDefined();
+    expect(orgPostRes.body.data.post.author.isOrganization).toBe(true);
+    expect(orgPostRes.body.data.post.author.displayName).toBe('Acme Enterprise');
+    expect(orgPostRes.body.data.post.author.username).toBe('acme-enterprise');
+    expect(orgPostRes.body.data.post.organization.name).toBe('Acme Enterprise');
+
+    // User2 has not followed Acme yet -> following feed is empty
+    const unFollowedFeedRes = await request(app)
+      .get(`${BASE}?filter=following`)
+      .set('Authorization', authHeader2);
+    expect(unFollowedFeedRes.status).toBe(200);
+    expect(unFollowedFeedRes.body.data.posts).toHaveLength(0);
+
+    // User2 follows Acme Enterprise
+    await OrganizationFollow.create({
+      organizationId: org._id,
+      userId: user2._id,
+    });
+
+    // User2 checks following feed -> Acme Enterprise post now appears!
+    const followedFeedRes = await request(app)
+      .get(`${BASE}?filter=following`)
+      .set('Authorization', authHeader2);
+    expect(followedFeedRes.status).toBe(200);
+    expect(followedFeedRes.body.data.posts).toHaveLength(1);
+    expect(followedFeedRes.body.data.posts[0].content).toBe('Acme Corp is thrilled to launch our new product line!');
+    expect(followedFeedRes.body.data.posts[0].author.displayName).toBe('Acme Enterprise');
+    expect(followedFeedRes.body.data.posts[0].isFollowingOrg).toBe(true);
+
+    // Also appears in general discover feed
+    const generalFeedRes = await request(app).get(BASE);
+    expect(generalFeedRes.status).toBe(200);
+    expect(generalFeedRes.body.data.posts.some((p) => p.author.displayName === 'Acme Enterprise')).toBe(true);
   });
 });

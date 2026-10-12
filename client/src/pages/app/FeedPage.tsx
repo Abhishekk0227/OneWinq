@@ -14,16 +14,19 @@ import {
   PenSquare,
   Sparkles,
   Flame,
+  Globe,
+  Building2,
 } from 'lucide-react'
 
 export default function FeedPage() {
   const { user } = useAuthStore()
   const { openModal } = useUIStore()
+  const [feedTab, setFeedTab] = React.useState<'all' | 'following'>('all')
 
   // Query clean community feed stream
   const { data: feedData, isLoading, refetch } = useQuery({
-    queryKey: queryKeys.posts.feed({ filter: 'all' }),
-    queryFn: () => postsApi.getFeed({ filter: 'all' }),
+    queryKey: queryKeys.posts.feed({ filter: feedTab }),
+    queryFn: () => postsApi.getFeed({ filter: feedTab }),
   })
 
   const posts = feedData?.data?.posts || []
@@ -55,7 +58,7 @@ export default function FeedPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-sky-500 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-sky-500 transition-colors cursor-pointer"
           >
             <Image className="h-4 w-4 text-sky-500" />
             <span>Media</span>
@@ -64,7 +67,7 @@ export default function FeedPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-emerald-500 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-emerald-500 transition-colors cursor-pointer"
           >
             <Video className="h-4 w-4 text-emerald-500" />
             <span>Video</span>
@@ -73,7 +76,7 @@ export default function FeedPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-amber-500 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-muted/50 text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer"
           >
             <PenSquare className="h-4 w-4 text-amber-500" />
             <span>Write post</span>
@@ -81,16 +84,53 @@ export default function FeedPage() {
         </div>
       </div>
 
+      {/* Feed Category Filter Switcher */}
+      <div className="flex items-center gap-2 p-1 rounded-2xl bg-muted/50 border border-border/70 backdrop-blur-xs">
+        <button
+          type="button"
+          onClick={() => setFeedTab('all')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            feedTab === 'all'
+              ? 'bg-card text-foreground shadow-xs border border-border/80'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+          }`}
+        >
+          <Globe className="h-4 w-4 text-primary" />
+          <span>Discover</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setFeedTab('following')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            feedTab === 'following'
+              ? 'bg-card text-foreground shadow-xs border border-border/80'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+          }`}
+        >
+          <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          <span>Following & Network</span>
+        </button>
+      </div>
+
       {/* Unified Timeline Feed Stream */}
       {isLoading ? (
         <LoadingScreen message="Loading feed..." />
       ) : posts.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card p-8 shadow-xs">
-          <EmptyState
-            icon={<Flame className="h-8 w-8 text-primary" />}
-            title="No posts yet"
-            description="Be the first to share an update or insight with your network!"
-          />
+          {feedTab === 'following' ? (
+            <EmptyState
+              icon={<Building2 className="h-8 w-8 text-primary" />}
+              title="No updates from followed organizations"
+              description="Follow organizations or connect with professionals to see their company updates and announcements here in your feed!"
+            />
+          ) : (
+            <EmptyState
+              icon={<Flame className="h-8 w-8 text-primary" />}
+              title="No posts yet"
+              description="Be the first to share an update or insight with your network!"
+            />
+          )}
         </div>
       ) : (
         <div className="space-y-4">

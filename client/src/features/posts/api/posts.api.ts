@@ -3,10 +3,23 @@ import type { ApiResponse } from '@/types/api.types'
 import type { Post, FeedResponse, PostComment } from '@/types/posts.types'
 
 export const postsApi = {
-  getFeed: (params?: { page?: number; limit?: number; filter?: 'all' | 'my' | 'saved' | 'archived'; authorUsername?: string }) =>
+  getFeed: (params?: {
+    page?: number;
+    limit?: number;
+    filter?: 'all' | 'following' | 'my' | 'saved' | 'archived';
+    authorUsername?: string;
+    organizationSlug?: string;
+    organizationId?: string;
+  }) =>
     apiClient.get<never, ApiResponse<FeedResponse>>('/posts', { params }),
 
-  createPost: (payload: { content?: string; media?: { type: 'IMAGE' | 'VIDEO'; url: string; mediaId?: string | null }[]; visibility?: string }) =>
+  createPost: (payload: {
+    content?: string;
+    media?: { type: 'IMAGE' | 'VIDEO'; url: string; mediaId?: string | null }[];
+    visibility?: string;
+    organizationId?: string | null;
+    authorType?: 'USER' | 'ORGANIZATION';
+  }) =>
     apiClient.post<never, ApiResponse<{ post: Post }>>('/posts', payload),
 
   getPost: (id: string) =>
