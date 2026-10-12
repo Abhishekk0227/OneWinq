@@ -73,14 +73,15 @@ export function CreatePostModal() {
 
     // Add other memberships if not already included
     for (const m of memberships) {
-      const org = m.organization
-      if (org && org.id !== (activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '')) {
+      const org = m.organization as any
+      const orgId = org?.id || org?._id
+      if (org && orgId && orgId !== (activeContext.type === 'ORGANIZATION' ? activeContext.organizationId : '')) {
         list.push({
           type: 'ORGANIZATION',
-          orgId: org.id,
+          orgId,
           name: org.name,
           handle: `@${org.slug}`,
-          avatarUrl: org.logoUrl || (org as any).branding?.logoUrl,
+          avatarUrl: org.logoUrl || org.branding?.logoUrl,
         })
       }
     }
@@ -161,6 +162,8 @@ export function CreatePostModal() {
       closeModal()
       queryClient.invalidateQueries({ queryKey: ['posts'] })
       queryClient.invalidateQueries({ queryKey: ['feed'] })
+      queryClient.invalidateQueries({ queryKey: ['publicOrgPosts'] })
+      queryClient.invalidateQueries({ queryKey: ['org'] })
     },
     onError: (err: unknown) => {
       const apiErr = err as { message?: string; response?: { data?: { message?: string } } }

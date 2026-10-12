@@ -150,7 +150,8 @@ export async function createPost(userId, data) {
       ORGANIZATION_ROLE.HR_MANAGER,
       ORGANIZATION_ROLE.MANAGER,
     ];
-    const hasRole = allowedRoles.includes(membership.role);
+    const userRole = (membership.role || '').toUpperCase();
+    const hasRole = allowedRoles.includes(userRole);
     const hasPermission =
       Array.isArray(membership.permissions) &&
       membership.permissions.includes(ORGANIZATION_PERMISSION.POSTS_MANAGE);
@@ -262,24 +263,33 @@ export async function getFeed(
       throw new ForbiddenError('Sign in required to view following feed');
     }
 
-    const [follows, connections] = await Promise.all([
+    const [follows, connections, memberships] = await Promise.all([
       OrganizationFollow.find({ userId: viewerId }).select('organizationId').lean(),
       Connection.find({
         $or: [{ userLow: viewerId }, { userHigh: viewerId }],
         state: 'CONNECTED',
       }).select('userLow userHigh').lean(),
+      OrganizationMember.find({
+        userId: viewerId,
+        status: ORGANIZATION_MEMBER_STATUS.ACTIVE,
+      }).select('organizationId').lean(),
     ]);
 
-    const followedOrgIds = follows.map((f) => f.organizationId);
+    const followedOrgIds = [
+      ...new Set([
+        ...follows.map((f) => f.organizationId?.toString()).filter(Boolean),
+        ...memberships.map((m) => m.organizationId?.toString()).filter(Boolean),
+      ]),
+    ];
     const connectedUserIds = connections.map((c) =>
-      c.userLow.toString() === viewerId.toString() ? c.userHigh : c.userLow,
+      c.userLow.toString() === viewerId.toString() ? c.userHigh.toString() : c.userLow.toString(),
     );
 
     query = {
       state: POST_STATE.ACTIVE,
       $or: [
         { organizationId: { $in: followedOrgIds }, authorType: 'ORGANIZATION' },
-        { authorId: { $in: [...connectedUserIds, viewerId] }, authorType: 'USER' },
+        { authorId: { $in: [...connectedUserIds, viewerId.toString()] }, authorType: 'USER' },
       ],
     };
   } else if (filter === 'all') {

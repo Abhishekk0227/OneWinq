@@ -89,12 +89,19 @@ export function AppSidebar() {
 
   const orgNavItems: Array<{ label: string; to: string; icon: any; end?: boolean }> = []
 
-  // 1. Dashboard / Hub (Adapts label based on role)
+  // 1. Company Feed (LinkedIn-style feed stream)
+  orgNavItems.push({
+    label: 'Company Feed',
+    to: '/app',
+    icon: Home,
+    end: true,
+  })
+
+  // 2. Dashboard / Hub (Adapts label based on role)
   orgNavItems.push({
     label: isOrgAdmin ? 'Overview & Stats' : isOrgHR ? 'HR Workspace' : 'Member Hub',
     to: '/app/org/dashboard',
     icon: LayoutDashboard,
-    end: true,
   })
 
   // 2. Company Profile Studio (Only for Owner/Admin or permitted editors)
@@ -208,20 +215,36 @@ export function AppSidebar() {
       <div className={cn('px-3 pt-4 pb-1', isSidebarCollapsed && 'px-2')}>
         {isOrgMode ? (
           <div className="space-y-1.5">
-            <button
-              type="button"
-              onClick={() => navigate('/app/org/jobs?action=create')}
-              className={cn(
-                'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-md active:scale-95 cursor-pointer',
-                'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:shadow-primary/35 hover:brightness-105',
-                isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
-              )}
-              title="Post New Job Opening"
-              aria-label="Post New Job Opening"
-            >
-              <Briefcase className={cn('h-5 w-5', !isSidebarCollapsed && 'h-4 w-4 shrink-0')} />
-              {!isSidebarCollapsed && <span className="truncate">Post a Job</span>}
-            </button>
+            <div className={cn('grid gap-1.5', isSidebarCollapsed ? 'grid-cols-1' : 'grid-cols-2')}>
+              <button
+                type="button"
+                onClick={() => openModal('CREATE_POST')}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-xl font-bold transition-all shadow-xs active:scale-95 cursor-pointer',
+                  'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:brightness-105',
+                  isSidebarCollapsed ? 'h-9 w-9 mx-auto' : 'py-2 px-2 text-xs'
+                )}
+                title="Create Company Post"
+                aria-label="Create Company Post"
+              >
+                <Plus className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
+                {!isSidebarCollapsed && <span className="truncate">Post</span>}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/app/org/jobs?action=create')}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 rounded-xl font-bold transition-all shadow-xs active:scale-95 cursor-pointer',
+                  'bg-primary-soft hover:bg-primary-muted text-primary border border-primary/25',
+                  isSidebarCollapsed ? 'h-9 w-9 mx-auto' : 'py-2 px-2 text-xs'
+                )}
+                title="Post New Job Opening"
+                aria-label="Post New Job Opening"
+              >
+                <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                {!isSidebarCollapsed && <span className="truncate">Job</span>}
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => {

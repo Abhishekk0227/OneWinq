@@ -12,10 +12,15 @@ import {
   CreditCard,
   ShieldAlert,
   ExternalLink,
+  PenSquare,
+  Sparkles,
 } from 'lucide-react';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
+import { useUIStore } from '@/stores/uiStore';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
+import { postsApi } from '@/features/posts/api/posts.api';
+import { PostCard } from '@/components/posts/PostCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -23,6 +28,7 @@ import { MemberHubView } from '@/components/organization/MemberHubView';
 
 export default function OrganizationDashboardPage() {
   const navigate = useNavigate();
+  const { openModal } = useUIStore();
   const { activeContext, memberships } = useOrganizationContextStore();
 
   if (activeContext.type !== 'ORGANIZATION') {
@@ -81,6 +87,13 @@ export default function OrganizationDashboardPage() {
   const applications = (appsData as any)?.data?.applications || [];
   const applicationsCount = (appsData as any)?.data?.pagination?.total ?? 0;
 
+  // Fetch recent company posts
+  const { data: postsData, refetch: refetchPosts } = useQuery({
+    queryKey: ['org', orgId, 'posts'],
+    queryFn: () => postsApi.getFeed({ organizationId: orgId }),
+  });
+  const orgPosts = (postsData as any)?.data?.posts || [];
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Organization Header Banner */}
@@ -112,10 +125,11 @@ export default function OrganizationDashboardPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/app/org/profile')}
-            className="flex-1 sm:flex-none"
+            onClick={() => openModal('CREATE_POST')}
+            className="flex-1 sm:flex-none shadow-xs"
           >
-            Edit Profile
+            <PenSquare className="h-4 w-4 mr-1.5" />
+            Share Update
           </Button>
           <Button
             size="sm"
@@ -268,6 +282,39 @@ export default function OrganizationDashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* Company Updates & Broadcasts (LinkedIn Style) */}
+      <Card padding="md" className="space-y-4">
+        <CardHeader className="flex flex-row items-center justify-between pb-1">
+          <div>
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Company Updates & Broadcasts
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Official company updates, announcements, and articles published by {org.name}.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => openModal('CREATE_POST')} className="text-xs">
+            <PenSquare className="h-3.5 w-3.5 mr-1.5" /> New Post
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {orgPosts.length === 0 ? (
+            <div className="p-8 text-center rounded-2xl bg-muted/20 border border-dashed border-border text-xs text-muted-foreground space-y-3">
+              <p>No company updates published yet. Broadcast milestones, news, or insights to engage your followers!</p>
+              <Button size="sm" onClick={() => openModal('CREATE_POST')}>
+                Share First Post
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orgPosts.map((p: any) => (
+                <PostCard key={p._id} post={p} onRefresh={() => refetchPosts()} />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
