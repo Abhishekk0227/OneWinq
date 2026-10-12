@@ -75,8 +75,9 @@ export default function OrganizationPostsPage() {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
         <EmptyState
+          icon={<Building2 className="h-8 w-8 text-primary" />}
           title="Organization Workspace Required"
-          message="Please switch to an organization profile from the header workspace selector to manage company posts."
+          description="Please switch to an organization profile from the header workspace selector to manage company posts."
         />
       </div>
     )
@@ -263,9 +264,9 @@ export default function OrganizationPostsPage() {
       ) : filteredPosts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center bg-card/50">
           <EmptyState
-            icon={FileText}
+            icon={<FileText className="h-8 w-8 text-primary" />}
             title={searchQuery ? 'No matching posts found' : 'No company posts published yet'}
-            message={
+            description={
               searchQuery
                 ? `No posts matched "${searchQuery}". Try modifying your search keywords.`
                 : `Share news, updates, or announcements from ${activeContext.name} to engage with your followers and network!`
