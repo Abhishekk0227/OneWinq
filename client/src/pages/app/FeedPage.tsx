@@ -40,10 +40,10 @@ export default function FeedPage() {
   return (
     <div className="w-full max-w-xl sm:max-w-2xl mx-auto space-y-4 text-left pb-24 px-2 sm:px-0">
       {/* LinkedIn-Style "Start a post" Section */}
-      <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs">
-        <div className="flex items-center gap-3">
+      <div className="rounded-2xl sm:rounded-3xl border border-border bg-card p-3 sm:p-4 shadow-xs overflow-hidden">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {isOrgMode ? (
-            <div className="h-10 w-10 rounded-xl border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
+            <div className="h-10 w-10 rounded-full border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
               {activeContext.logoUrl ? (
                 <img src={activeContext.logoUrl} alt={activeContext.name} className="h-full w-full object-contain" />
               ) : (
@@ -63,9 +63,9 @@ export default function FeedPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex-1 text-left px-4 py-2.5 rounded-full border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer shadow-xs"
+            className="flex-1 min-w-0 text-left px-3.5 sm:px-4 py-2.5 rounded-full border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-xs sm:text-sm font-medium transition-all cursor-pointer shadow-xs flex items-center"
           >
-            <span className="truncate">
+            <span className="truncate block min-w-0 w-full">
               {isOrgMode
                 ? `Share an official update as ${activeContext.name}...`
                 : `Start a post, ${user?.displayName?.split(' ')[0] || 'there'}...`}

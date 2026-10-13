@@ -1,18 +1,13 @@
 import * as React from 'react'
-import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Plus,
   Building2,
-  ExternalLink,
   Search,
 } from 'lucide-react'
 import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useUIStore } from '@/stores/uiStore'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { EmptyState } from '@/components/common/EmptyState'
 import type { Post } from '@/types/posts.types'
@@ -67,52 +62,11 @@ export default function OrganizationPostsPage() {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 text-left pb-24 px-2 sm:px-4">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-              Organization Posts
-            </h1>
-            <Badge variant="subtle" className="text-xs font-semibold px-2.5 py-0.5">
-              Official Hub
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Publish and manage official news, announcements, and thought leadership for{' '}
-            <strong className="text-foreground">{activeContext.name}</strong>.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          {activeContext.slug && (
-            <Link
-              to={`/c/${activeContext.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-card hover:bg-muted text-foreground transition-colors shadow-2xs"
-            >
-              <span>View Public Page</span>
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-            </Link>
-          )}
-
-          <Button
-            size="sm"
-            onClick={() => openModal('CREATE_POST')}
-            leftIcon={<Plus className="h-4 w-4" />}
-            className="shadow-sm"
-          >
-            Create Post
-          </Button>
-        </div>
-      </div>
-
+    <div className="w-full max-w-4xl mx-auto space-y-4 text-left pb-24 px-2 sm:px-4">
       {/* Official Organization Post Composer Box */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
+      <div className="rounded-2xl sm:rounded-3xl border border-border bg-card p-3 sm:p-4 shadow-xs overflow-hidden">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="h-10 w-10 rounded-full border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
             {activeContext.logoUrl ? (
               <img
                 src={activeContext.logoUrl}
@@ -127,9 +81,9 @@ export default function OrganizationPostsPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex-1 text-left px-4 py-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer shadow-xs"
+            className="flex-1 min-w-0 text-left px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-full border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-xs sm:text-sm font-medium transition-all cursor-pointer shadow-xs flex items-center"
           >
-            <span className="truncate">
+            <span className="truncate block min-w-0 w-full">
               Share an official update as {activeContext.name}...
             </span>
           </button>
@@ -137,12 +91,12 @@ export default function OrganizationPostsPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/50 border border-border/70 w-fit">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 pt-1">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/50 border border-border/70 w-full sm:w-fit overflow-x-auto custom-scrollbar shrink-0">
           <button
             type="button"
             onClick={() => setFilterState('ALL')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               filterState === 'ALL'
                 ? 'bg-card text-foreground shadow-xs border border-border/80'
                 : 'text-muted-foreground hover:text-foreground'
@@ -153,7 +107,7 @@ export default function OrganizationPostsPage() {
           <button
             type="button"
             onClick={() => setFilterState('ACTIVE')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               filterState === 'ACTIVE'
                 ? 'bg-card text-foreground shadow-xs border border-border/80'
                 : 'text-muted-foreground hover:text-foreground'
@@ -164,7 +118,7 @@ export default function OrganizationPostsPage() {
           <button
             type="button"
             onClick={() => setFilterState('ARCHIVED')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               filterState === 'ARCHIVED'
                 ? 'bg-card text-foreground shadow-xs border border-border/80'
                 : 'text-muted-foreground hover:text-foreground'
@@ -174,7 +128,7 @@ export default function OrganizationPostsPage() {
           </button>
         </div>
 
-        <div className="relative flex-1 sm:max-w-xs">
+        <div className="relative w-full sm:max-w-xs min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
