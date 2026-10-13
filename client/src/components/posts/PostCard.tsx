@@ -237,13 +237,13 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
   }
 
   return (
-    <article id={post._id} className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-xs space-y-3 transition-all w-full max-w-full overflow-hidden">
+    <article id={post._id} className="rounded-xl border border-border bg-card p-3 sm:p-4 shadow-xs space-y-2.5 transition-all w-full max-w-full overflow-hidden">
       {/* Author Header (LinkedIn Style) */}
       <div className="flex items-start justify-between gap-3 min-w-0">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {isOrgPost ? (
             <Link to={`/company/${post.author?.username}`} className="shrink-0 mt-0.5">
-              <div className="h-10 w-10 rounded-xl border border-border/80 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs hover:border-primary/50 transition-colors p-1">
+              <div className="h-9 w-9 rounded-xl border border-border/80 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs hover:border-primary/50 transition-colors p-1">
                 {post.author?.avatarUrl ? (
                   <img
                     src={post.author.avatarUrl}
@@ -251,7 +251,7 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
                     className="h-full w-full object-contain"
                   />
                 ) : (
-                  <Building2 className="h-5 w-5 text-primary" />
+                  <Building2 className="h-4 w-4 text-primary" />
                 )}
               </div>
             </Link>
@@ -261,8 +261,8 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
                 src={post.author?.avatarUrl}
                 fallback={post.author?.displayName}
                 alt={post.author?.displayName}
-                size="md"
-                className="rounded-full ring-1 ring-border/80 hover:ring-primary/50 transition-all shrink-0"
+                size="sm"
+                className="rounded-full ring-1 border border-border/80 hover:ring-primary/50 transition-all shrink-0"
               />
             </Link>
           )}
@@ -280,7 +280,7 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
               </span>
               {isOrgPost && (
                 <span className="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.2 rounded-md font-semibold">
-                  <Building2 className="h-2.5 w-2.5" /> Company
+                  <Building2 className="h-2.5 w-2.5" /> Organization
                 </span>
               )}
             </div>

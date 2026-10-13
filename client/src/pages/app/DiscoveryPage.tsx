@@ -178,11 +178,11 @@ export default function DiscoveryPage() {
   const organizations: Organization[] = ((orgsData?.data as any)?.organizations || []) as Organization[]
 
   return (
-    <div className="space-y-6 text-left max-w-6xl mx-auto pb-16">
+    <div className="space-y-4 text-left max-w-6xl mx-auto pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="space-y-0.5">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
             Discover
           </h1>
           <p className="text-xs text-muted-foreground">
@@ -192,23 +192,23 @@ export default function DiscoveryPage() {
       </div>
 
       {/* Segmented Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border/80 pb-3">
+      <div className="flex items-center gap-2 border-b border-border/80 pb-2">
         <button
           type="button"
           onClick={() => setActiveTab('PEOPLE')}
           className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer select-none',
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer select-none',
             activeTab === 'PEOPLE'
               ? 'bg-primary text-white shadow-xs'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           )}
         >
-          <Users className="h-4 w-4" />
+          <Users className="h-3.5 w-3.5" />
           <span>People</span>
           {users.length > 0 && (
             <span
               className={cn(
-                'ml-1 px-1.5 py-0.2 text-[10px] rounded-full font-bold',
+                'ml-1 px-1.5 py-0.2 text-[9px] rounded-full font-bold',
                 activeTab === 'PEOPLE'
                   ? 'bg-white/20 text-white'
                   : 'bg-muted text-muted-foreground'
@@ -223,16 +223,16 @@ export default function DiscoveryPage() {
           type="button"
           onClick={() => setActiveTab('COMPANIES')}
           className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer select-none',
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer select-none',
             activeTab === 'COMPANIES'
               ? 'bg-primary text-white shadow-xs'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           )}
         >
-          <Building2 className="h-4 w-4" />
+          <Building2 className="h-3.5 w-3.5" />
           <span>Companies & Organizations</span>
           {organizations.length > 0 && activeTab === 'COMPANIES' && (
-            <span className="ml-1 px-1.5 py-0.2 text-[10px] rounded-full font-bold bg-white/20 text-white">
+            <span className="ml-1 px-1.5 py-0.2 text-[9px] rounded-full font-bold bg-white/20 text-white">
               {organizations.length}
             </span>
           )}
@@ -240,29 +240,29 @@ export default function DiscoveryPage() {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 p-4 rounded-2xl bg-card border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-card border border-border shadow-xs">
         <div className="relative flex-1 w-full">
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={
               activeTab === 'PEOPLE'
-                ? 'Search by name, role, skills (e.g. AI Architect, Rust, Design)...'
-                : 'Search companies by name, tagline, or industry (e.g. Acme, Fintech, Biotech)...'
+                ? 'Search by name, role, skills...'
+                : 'Search companies by name, tagline, or industry...'
             }
-            leftIcon={<Search className="h-4 w-4" />}
-            className="w-full"
+            leftIcon={<Search className="h-3.5 w-3.5" />}
+            className="w-full h-8.5 text-xs"
           />
         </div>
 
         {activeTab === 'PEOPLE' ? (
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <label className="flex items-center gap-2 text-xs font-semibold text-foreground/80 cursor-pointer select-none px-3 py-2 rounded-xl bg-muted/50 border border-border">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground/80 cursor-pointer select-none px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/80">
               <input
                 type="checkbox"
                 checked={remoteOnly}
                 onChange={(e) => setRemoteOnly(e.target.checked)}
-                className="rounded text-primary focus:ring-primary h-4 w-4"
+                className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
               />
               <span>Remote Only</span>
             </label>
@@ -272,7 +272,7 @@ export default function DiscoveryPage() {
             <select
               value={orgTypeFilter}
               onChange={(e) => setOrgTypeFilter(e.target.value)}
-              className="h-10 px-3 py-2 rounded-xl bg-muted/50 border border-border text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 w-full sm:w-auto cursor-pointer"
+              className="h-8.5 px-2.5 py-1 rounded-lg bg-muted/40 border border-border text-xs font-medium text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 w-full sm:w-auto cursor-pointer"
             >
               {ORG_TYPE_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -313,7 +313,7 @@ export default function DiscoveryPage() {
             }}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
             {organizations.map((org: Organization) => {
               const orgId = org.id || (org as any)._id
               const showcaseLink = `/c/${org.slug || orgId}`
@@ -322,23 +322,23 @@ export default function DiscoveryPage() {
               return (
                 <div
                   key={orgId}
-                  className="flex flex-col justify-between p-6 rounded-3xl border border-border bg-card shadow-xs hover:shadow-card hover:border-primary/40 transition-all duration-200 text-left space-y-4"
+                  className="flex flex-col justify-between p-3.5 sm:p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all duration-200 text-left space-y-3"
                 >
-                  <div className="space-y-3.5">
+                  <div className="space-y-2.5">
                     {/* Top Row: Logo & Brand Info */}
-                    <div className="flex items-start gap-3.5">
+                    <div className="flex items-start gap-2.5">
                       <Avatar
                         src={org.logoUrl || (org.branding as any)?.logoUrl || undefined}
                         fallback={org.name}
                         alt={org.name}
-                        size="lg"
-                        className="rounded-2xl shrink-0 border border-border/60 bg-muted/30"
+                        size="md"
+                        className="rounded-xl shrink-0 border border-border/60 bg-muted/30"
                       />
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <Link
                             to={showcaseLink}
-                            className="text-base font-bold text-foreground hover:text-primary transition-colors truncate block"
+                            className="text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
                           >
                             {org.name}
                           </Link>
@@ -351,8 +351,8 @@ export default function DiscoveryPage() {
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <Badge variant="outline" className="text-[10px] py-0 font-medium">
-                            {org.type || 'COMPANY'}
+                          <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-medium">
+                            {org.type || 'ORGANIZATION'}
                           </Badge>
                           {org.industry && (
                             <span className="text-[11px] text-muted-foreground truncate">
@@ -371,7 +371,7 @@ export default function DiscoveryPage() {
                     )}
 
                     {/* Meta Info: Location & Stats */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground pt-1">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted-foreground pt-0.5">
                       {org.location?.city && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3 shrink-0" />
@@ -386,11 +386,11 @@ export default function DiscoveryPage() {
                     </div>
                   </div>
 
-                  {/* Actions: View Showcase + Follow Button (NOT Connect!) */}
-                  <div className="flex items-center gap-2 pt-3 border-t border-border">
+                  {/* Actions: View Showcase + Follow Button */}
+                  <div className="flex items-center gap-2 pt-2.5 border-t border-border/60">
                     <Link to={showcaseLink} className="flex-1 min-w-[95px]">
-                      <Button variant="outline" size="sm" className="w-full text-xs h-8">
-                        View Company
+                      <Button variant="outline" size="sm" className="w-full text-xs h-7.5">
+                        View Organization
                       </Button>
                     </Link>
 
@@ -398,7 +398,7 @@ export default function DiscoveryPage() {
                       size="sm"
                       variant={isFollowing ? 'secondary' : 'default'}
                       className={cn(
-                        'text-xs h-8 px-3 font-semibold shrink-0 transition-all',
+                        'text-xs h-7.5 px-2.5 font-semibold shrink-0 transition-all',
                         isFollowing && 'hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
                       )}
                       isLoading={
@@ -431,17 +431,17 @@ export default function DiscoveryPage() {
       ) : (
         /* Users Grid */
         isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="p-6 rounded-3xl border border-border bg-card space-y-4">
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-14 w-14 rounded-2xl" />
-                <div className="space-y-2 flex-1">
+            <div key={i} className="p-3.5 sm:p-4 rounded-xl border border-border bg-card space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <div className="space-y-1.5 flex-1">
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
                 </div>
               </div>
-              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton className="h-8 w-full rounded-lg" />
             </div>
           ))}
         </div>
@@ -457,28 +457,28 @@ export default function DiscoveryPage() {
           }}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {users.map((person: DiscoveryUserCard) => {
             const targetId = person.id || (person as any)._id || person.userId || ''
             return (
               <div
                 key={targetId || person.username}
-                className="flex flex-col justify-between p-6 rounded-3xl border border-border bg-card shadow-sm hover:shadow-card hover:border-primary/40 transition-all duration-200 text-left space-y-4"
+                className="flex flex-col justify-between p-3.5 sm:p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all duration-200 text-left space-y-3"
               >
-                <div className="space-y-4">
+                <div className="space-y-2.5">
                   {/* User Top Card */}
-                  <div className="flex items-start gap-3.5">
+                  <div className="flex items-start gap-2.5">
                     <Avatar
                       src={person.avatarUrl || undefined}
                       fallback={person.displayName}
                       alt={person.displayName}
-                      size="lg"
-                      className="rounded-2xl shrink-0"
+                      size="md"
+                      className="rounded-xl shrink-0"
                     />
                     <div className="min-w-0 flex-1">
                       <Link
                         to={`/u/${person.username}`}
-                        className="text-base font-bold text-foreground hover:text-primary transition-colors truncate block"
+                        className="text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
                       >
                         {person.displayName}
                       </Link>
@@ -505,7 +505,7 @@ export default function DiscoveryPage() {
                           person.identities?.[0]?.customTitle?.trim() ||
                           'Basic Universal Template';
                         return (
-                          <p className="text-xs text-primary font-medium line-clamp-1 mt-1">
+                          <p className="text-xs text-primary font-medium line-clamp-1 mt-0.5">
                             {displayHeadline}
                           </p>
                         );
@@ -533,11 +533,11 @@ export default function DiscoveryPage() {
                       .slice(0, 2)
                     if (filteredIdentities.length === 0) return null
                     return (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {filteredIdentities.map((id: { customTitle: string }, i: number) => (
                           <span
                             key={i}
-                            className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-muted text-foreground/80 flex items-center gap-1"
+                            className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-muted text-foreground/80 flex items-center gap-1"
                           >
                             <Briefcase className="h-3 w-3 text-primary" />
                             <span>{id.customTitle}</span>
@@ -553,7 +553,7 @@ export default function DiscoveryPage() {
                       {person.skills.slice(0, 3).map((skill: { name: string }, sIdx: number) => (
                         <span
                           key={sIdx}
-                          className="px-2 py-0.5 rounded-md text-[10px] bg-primary-soft text-primary font-medium"
+                          className="px-1.5 py-0.5 rounded-md text-[10px] bg-primary-soft text-primary font-medium"
                         >
                           {skill.name}
                         </span>
@@ -586,9 +586,9 @@ export default function DiscoveryPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
+                <div className="flex flex-wrap items-center gap-2 pt-2.5 border-t border-border/60">
                   <Link to={`/u/${person.username}`} className="flex-1 min-w-[95px]">
-                    <Button variant="outline" size="sm" className="w-full text-xs h-8">
+                    <Button variant="outline" size="sm" className="w-full text-xs h-7.5">
                       View Profile
                     </Button>
                   </Link>
@@ -598,26 +598,26 @@ export default function DiscoveryPage() {
                       <Button
                         size="sm"
                         variant="default"
-                        className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-semibold h-8 px-2.5"
+                        className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-semibold h-7.5 px-2.5"
                         isLoading={startingChatUserId === targetId}
                         onClick={() => handleStartMessage(targetId)}
                         leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
                       >
                         Message
                       </Button>
-                      <Badge variant="success" className="py-1 px-2 text-[11px] font-medium whitespace-nowrap">
+                      <Badge variant="success" className="py-0.5 px-2 text-[10px] font-medium whitespace-nowrap">
                         Connected
                       </Badge>
                     </div>
                   ) : person.connectionState === 'PENDING_SENT' ? (
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <Badge variant="subtle" className="py-1 px-2.5 text-[11px]">
+                      <Badge variant="subtle" className="py-0.5 px-2 text-[10px]">
                         Requested
                       </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs text-muted-foreground hover:text-destructive h-8 px-2"
+                        className="text-xs text-muted-foreground hover:text-destructive h-7.5 px-2"
                         isLoading={withdrawMutation.isPending && withdrawMutation.variables === (person.connectionId || targetId)}
                         onClick={() => withdrawMutation.mutate(person.connectionId || targetId)}
                         title="Cancel sent request"
@@ -629,7 +629,7 @@ export default function DiscoveryPage() {
                     <div className="flex items-center gap-1.5 shrink-0">
                       <Button
                         size="sm"
-                        className="text-xs h-8 px-2.5"
+                        className="text-xs h-7.5 px-2.5"
                         isLoading={acceptMutation.isPending && acceptMutation.variables === (person.connectionId || targetId)}
                         onClick={() => acceptMutation.mutate(person.connectionId || targetId)}
                         leftIcon={<UserCheck className="h-3.5 w-3.5" />}
@@ -639,7 +639,7 @@ export default function DiscoveryPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-xs h-8 px-2 text-muted-foreground hover:text-destructive"
+                        className="text-xs h-7.5 px-2 text-muted-foreground hover:text-destructive"
                         isLoading={rejectMutation.isPending && rejectMutation.variables === (person.connectionId || targetId)}
                         onClick={() => rejectMutation.mutate(person.connectionId || targetId)}
                         title="Decline connection request"
@@ -650,7 +650,7 @@ export default function DiscoveryPage() {
                   ) : (
                     <Button
                       size="sm"
-                      className="text-xs"
+                      className="text-xs h-7.5 px-3"
                       isLoading={sendRequestMutation.isPending && sendRequestMutation.variables === targetId}
                       onClick={() => sendRequestMutation.mutate(targetId)}
                       leftIcon={<UserPlus className="h-3.5 w-3.5" />}

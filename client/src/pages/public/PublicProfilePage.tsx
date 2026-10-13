@@ -360,14 +360,15 @@ export default function PublicProfilePage() {
               <button
                 type="button"
                 onClick={() => setIsSectionsDrawerOpen(true)}
-                className="p-1.5 rounded-xl border border-border bg-card hover:bg-muted text-foreground transition-colors md:hidden shrink-0 cursor-pointer"
+                className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground transition-colors md:hidden shrink-0 cursor-pointer"
                 title="Open Profile Sections Sidebar"
                 aria-label="Open Profile Sections Sidebar"
               >
                 <Menu className="h-4 w-4 text-primary" />
               </button>
             )}
-            <BrandLogo to="/" imgClassName="h-5 sm:h-6 shrink-0" />
+            <BrandLogo to="/" className="hidden sm:inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
+            <BrandLogo to="/" collapsed className="sm:hidden shrink-0" imgClassName="h-6 w-6" />
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
@@ -375,7 +376,7 @@ export default function PublicProfilePage() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border border-border bg-card/90 hover:bg-muted text-xs font-semibold text-foreground transition-all active:scale-95 shadow-xs cursor-pointer shrink-0"
               title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} profile theme`}
               aria-label="Toggle profile theme"
             >
@@ -405,10 +406,10 @@ export default function PublicProfilePage() {
             {!isSelf && (
               <>
                 {connectionState === 'CONNECTED' ? (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
                     <Button
                       size="sm"
-                      className="h-8 text-xs px-2.5 sm:px-3 bg-primary hover:bg-primary/90 text-white font-semibold"
+                      className="h-7 sm:h-8 text-xs px-2 sm:px-2.5 bg-primary hover:bg-primary/90 text-white font-semibold"
                       isLoading={isStartingChat}
                       onClick={async () => {
                         const targetId =
@@ -440,19 +441,19 @@ export default function PublicProfilePage() {
                     >
                       Message
                     </Button>
-                    <Badge variant="success" className="py-1 px-2.5 text-xs">
+                    <Badge variant="success" className="py-0.5 px-2 text-[10px] sm:text-xs whitespace-nowrap">
                       Connected
                     </Badge>
                   </div>
                 ) : connectionState === 'PENDING_SENT' ? (
-                  <div className="flex items-center gap-1.5">
-                    <Badge variant="subtle" className="py-1 px-2.5 text-xs">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    <Badge variant="subtle" className="py-0.5 px-2 text-[10px] sm:text-xs whitespace-nowrap">
                       Requested
                     </Badge>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 text-xs text-muted-foreground hover:text-destructive px-2.5"
+                      className="h-7 sm:h-8 text-xs text-muted-foreground hover:text-destructive px-2"
                       isLoading={withdrawMutation.isPending}
                       onClick={() => {
                         const targetId = (data?.data as any)?.connectionId || (profileUser as any)?._id || (profileUser as any)?.id || (typeof profile.userId === 'object' ? (profile.userId as any)?._id : profile.userId)
@@ -463,10 +464,10 @@ export default function PublicProfilePage() {
                     </Button>
                   </div>
                 ) : connectionState === 'PENDING_RECEIVED' ? (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
                     <Button
                       size="sm"
-                      className="h-8 text-xs px-2.5"
+                      className="h-7 sm:h-8 text-xs px-2 sm:px-2.5"
                       isLoading={acceptMutation.isPending}
                       onClick={() => {
                         const targetId = (data?.data as any)?.connectionId || (profileUser as any)?._id || (profileUser as any)?.id || (typeof profile.userId === 'object' ? (profile.userId as any)?._id : profile.userId)
@@ -479,7 +480,7 @@ export default function PublicProfilePage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 text-xs px-2 text-muted-foreground hover:text-destructive"
+                      className="h-7 sm:h-8 text-xs px-1.5 sm:px-2 text-muted-foreground hover:text-destructive"
                       isLoading={rejectMutation.isPending}
                       onClick={() => {
                         const targetId = (data?.data as any)?.connectionId || (profileUser as any)?._id || (profileUser as any)?.id || (typeof profile.userId === 'object' ? (profile.userId as any)?._id : profile.userId)
@@ -494,13 +495,13 @@ export default function PublicProfilePage() {
                     size="sm"
                     onClick={() => setIsConnectModalOpen(true)}
                     leftIcon={<UserPlus className="h-3.5 w-3.5" />}
-                    className="h-8 text-xs px-2.5 sm:px-3"
+                    className="h-7 sm:h-8 text-xs px-2.5 sm:px-3"
                   >
                     Connect
                   </Button>
                 ) : (
                   <Link to={`/signup?returnUrl=${encodeURIComponent(window.location.pathname)}`}>
-                    <Button size="sm" className="h-8 text-xs px-2.5 sm:px-3">Join</Button>
+                    <Button size="sm" className="h-7 sm:h-8 text-xs px-2.5 sm:px-3">Join</Button>
                   </Link>
                 )}
               </>
@@ -658,11 +659,11 @@ export default function PublicProfilePage() {
 
                     <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
                       <div className="min-w-0 max-w-full">
-                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                           {profileUser.displayName}
                         </h1>
                         {(profile.headline || profile.professionTitle || (profile as any).templateName) && (
-                          <p className="text-base sm:text-lg font-medium text-primary mt-1 break-words [overflow-wrap:anywhere] min-w-0">
+                          <p className="text-sm sm:text-base font-medium text-primary mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
                             {profile.headline || profile.professionTitle || (profile as any).templateName}
                           </p>
                         )}
