@@ -748,18 +748,18 @@ export default function OrganizationProfilePage() {
           </div>
         </div>
 
-        <div className="p-6 pt-0 relative flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-14">
-          <div className="flex items-end gap-4">
+        <div className="p-4 sm:p-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-4 -mt-10 sm:-mt-14">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3.5 sm:gap-4 min-w-0 flex-1 w-full">
             {/* Interactive Logo Avatar with Quick Upload Overlay */}
-            <div className="relative group/logo">
+            <div className="relative group/logo shrink-0">
               <div
-                className="h-28 w-28 rounded-2xl bg-white dark:bg-card border-4 border-card shadow-lg flex items-center justify-center overflow-hidden shrink-0 p-2"
+                className="h-20 w-20 sm:h-28 sm:w-28 rounded-2xl bg-white dark:bg-card border-4 border-card shadow-lg flex items-center justify-center overflow-hidden shrink-0 p-1.5 sm:p-2"
                 style={{ borderColor: previewPrimary }}
               >
                 {previewLogo ? (
                   <img src={previewLogo} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
-                  <Building2 className="h-12 w-12 text-muted-foreground/60" />
+                  <Building2 className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/60" />
                 )}
               </div>
 
@@ -782,33 +782,33 @@ export default function OrganizationProfilePage() {
               </button>
             </div>
 
-            <div className="mb-2 space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">{previewName}</h1>
-                <Badge variant="outline" className="text-xs uppercase border-primary/40 font-semibold">
+            <div className="mb-1 sm:mb-2 space-y-1 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate max-w-full">{previewName}</h1>
+                <Badge variant="outline" className="text-[10px] sm:text-xs uppercase border-primary/40 font-semibold shrink-0">
                   {watchedType}
                 </Badge>
                 {org?.isVerified && (
-                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30">
+                  <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 shrink-0">
                     <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-2">
+              <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>Sector: <strong className="text-foreground">{taxonomy.sectorLabel}</strong></span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>slug: <span className="font-mono text-xs font-semibold text-foreground">/{org?.slug}</span></span>
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-end sm:self-auto mb-2">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end mb-2 pt-2 md:pt-0 border-t md:border-t-0 border-border/40">
             {org?.slug && (
               <a
                 href={`/c/${org.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-xs flex-1 sm:flex-initial"
               >
                 <Eye className="h-3.5 w-3.5" /> View Public Showcase <ExternalLink className="h-3 w-3 opacity-70" />
               </a>
@@ -818,7 +818,7 @@ export default function OrganizationProfilePage() {
                 href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-border hover:bg-muted text-muted-foreground transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-border hover:bg-muted text-foreground/80 transition-colors flex-1 sm:flex-initial"
               >
                 <Globe className="h-3.5 w-3.5" /> Website
               </a>
@@ -829,15 +829,15 @@ export default function OrganizationProfilePage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Tabs defaultValue="general">
-          <TabsList className="grid grid-cols-4 sm:grid-cols-8 w-full gap-1 p-1 bg-muted/60 rounded-xl">
-            <TabsTrigger value="general" className="text-xs">Overview</TabsTrigger>
-            <TabsTrigger value="about" className="text-xs">About & Story</TabsTrigger>
-            <TabsTrigger value="branding" className="text-xs">Brand Kit</TabsTrigger>
-            <TabsTrigger value="offerings" className="text-xs">Offerings</TabsTrigger>
-            <TabsTrigger value="projects" className="text-xs">Projects</TabsTrigger>
-            <TabsTrigger value="achievements" className="text-xs">Honors</TabsTrigger>
-            <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
-            <TabsTrigger value="contact" className="text-xs">Contact</TabsTrigger>
+          <TabsList className="flex items-center overflow-x-auto no-scrollbar w-full gap-1 p-1 bg-muted/60 rounded-xl justify-start">
+            <TabsTrigger value="general" className="text-xs shrink-0 whitespace-nowrap">Overview</TabsTrigger>
+            <TabsTrigger value="about" className="text-xs shrink-0 whitespace-nowrap">About & Story</TabsTrigger>
+            <TabsTrigger value="branding" className="text-xs shrink-0 whitespace-nowrap">Brand Kit</TabsTrigger>
+            <TabsTrigger value="offerings" className="text-xs shrink-0 whitespace-nowrap">Offerings</TabsTrigger>
+            <TabsTrigger value="projects" className="text-xs shrink-0 whitespace-nowrap">Projects</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-xs shrink-0 whitespace-nowrap">Honors</TabsTrigger>
+            <TabsTrigger value="media" className="text-xs shrink-0 whitespace-nowrap">Media</TabsTrigger>
+            <TabsTrigger value="contact" className="text-xs shrink-0 whitespace-nowrap">Contact</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: General & Overview Stats */}

@@ -436,123 +436,167 @@ export default function OrganizationMembersPage() {
                   )}
                 </div>
               ) : (
-                members.map((member: any) => (
-                  <div
-                    key={member.id}
-                    className="p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1 w-full">
-                      <div className="relative shrink-0">
-                        <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
-                          {member.avatarUrl ? (
-                            <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
-                          ) : (
-                            member.displayName?.[0] || 'U'
-                          )}
-                        </div>
-                        {member.isExecutive && (
-                          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs border-2 border-background" title="Executive Leader">
-                            <Crown className="h-2.5 w-2.5" />
-                          </div>
-                        )}
-                      </div>
+                members.map((member: any) => {
+                  const memberUsername = member.username || member.user?.username || (member as any).user?.slug;
+                  const profilePath = memberUsername ? `/u/${memberUsername}` : (member.userId ? `/u/${member.userId}` : null);
 
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="font-bold text-sm text-foreground">{member.displayName}</span>
-
-                          {/* Executive Badge */}
-                          {member.isExecutive && (
-                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs">
-                              <Crown className="h-3 w-3 text-amber-500" />
-                              <span>{member.executivePosition?.replace(/_/g, ' ') || 'Executive'}</span>
-                            </Badge>
-                          )}
-
-                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
-                            {member.role}
-                          </Badge>
-
-                          {/* Department Badge */}
-                          {member.department ? (
-                            <Badge
-                              variant="secondary"
-                              className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
-                            >
-                              <Network className="h-3 w-3 mr-1 shrink-0" />
-                              {member.department.name} {member.department.code ? `[${member.department.code}]` : ''}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-[10px] text-muted-foreground/70">
-                              Unassigned
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-                          <span className="font-medium text-foreground/80 shrink-0">{member.jobTitle || 'Team Member'}</span>
-                          <span className="shrink-0">•</span>
-                          <span className="break-all">{member.email}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-                      {/* Automated Profile Completion Score */}
-                      <div className="hidden md:flex flex-col items-end gap-1 min-w-[90px]">
-                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-                          <span>{member.profileCompletionScore ?? 0}%</span>
-                          <span className="text-[10px] text-muted-foreground">Profile</span>
-                        </div>
-                        <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all duration-300"
-                            style={{ width: `${member.profileCompletionScore ?? 0}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {canEditMember ? (
-                        <div className="flex items-center gap-1.5">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenEdit(member)}
-                            className="h-8 text-xs font-semibold gap-1.5"
-                            title="Edit Member / Appoint Executive Position"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                            <span>Edit & Appoint</span>
-                          </Button>
-
-                          {canRemoveMember && member.role !== 'OWNER' && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveMember(member.id)}
-                              className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
-                              title="Remove member"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        (member.user?.username || (member as any).username) && (
+                  return (
+                    <div
+                      key={member.id}
+                      className="p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1 w-full">
+                        {profilePath ? (
                           <a
-                            href={`/u/${member.user?.username || (member as any).username}`}
+                            href={profilePath}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold hover:border-primary/50 hover:text-primary transition-colors bg-card shadow-2xs"
+                            className="relative shrink-0 block group/avatar"
+                            title={`View ${member.displayName}'s profile`}
                           >
-                            <span>Profile</span>
-                            <ExternalLink className="h-3 w-3" />
+                            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm overflow-hidden shadow-2xs group-hover/avatar:border-primary/60 transition-colors">
+                              {member.avatarUrl ? (
+                                <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
+                              ) : (
+                                member.displayName?.[0] || 'U'
+                              )}
+                            </div>
+                            {member.isExecutive && (
+                              <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs border-2 border-background" title="Executive Leader">
+                                <Crown className="h-2.5 w-2.5" />
+                              </div>
+                            )}
                           </a>
-                        )
-                      )}
+                        ) : (
+                          <div className="relative shrink-0">
+                            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm overflow-hidden shadow-2xs">
+                              {member.avatarUrl ? (
+                                <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
+                              ) : (
+                                member.displayName?.[0] || 'U'
+                              )}
+                            </div>
+                            {member.isExecutive && (
+                              <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs border-2 border-background" title="Executive Leader">
+                                <Crown className="h-2.5 w-2.5" />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            {profilePath ? (
+                              <a
+                                href={profilePath}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold text-sm text-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group/name"
+                                title={`View ${member.displayName}'s profile`}
+                              >
+                                <span className="hover:underline">{member.displayName}</span>
+                                <ExternalLink className="h-3 w-3 opacity-0 group-hover/name:opacity-70 transition-opacity" />
+                              </a>
+                            ) : (
+                              <span className="font-bold text-sm text-foreground">{member.displayName}</span>
+                            )}
+
+                            {/* Executive Badge */}
+                            {member.isExecutive && (
+                              <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                                <Crown className="h-3 w-3 text-amber-500" />
+                                <span>{member.executivePosition?.replace(/_/g, ' ') || 'Executive'}</span>
+                              </Badge>
+                            )}
+
+                            <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">
+                              {member.role}
+                            </Badge>
+
+                            {/* Department Badge */}
+                            {member.department ? (
+                              <Badge
+                                variant="secondary"
+                                className="text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                              >
+                                <Network className="h-3 w-3 mr-1 shrink-0" />
+                                {member.department.name} {member.department.code ? `[${member.department.code}]` : ''}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] text-muted-foreground/70">
+                                Unassigned
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground/80 shrink-0">{member.jobTitle || 'Team Member'}</span>
+                            <span className="shrink-0">•</span>
+                            <span className="break-all">{member.email}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+                        {/* Automated Profile Completion Score */}
+                        <div className="hidden md:flex flex-col items-end gap-1 min-w-[90px]">
+                          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+                            <span>{member.profileCompletionScore ?? 0}%</span>
+                            <span className="text-[10px] text-muted-foreground">Profile</span>
+                          </div>
+                          <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-primary rounded-full transition-all duration-300"
+                              style={{ width: `${member.profileCompletionScore ?? 0}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {profilePath && (
+                            <a
+                              href={profilePath}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border text-xs font-semibold hover:border-primary/50 hover:bg-muted text-foreground transition-all shadow-2xs h-8"
+                              title={`View ${member.displayName}'s profile`}
+                            >
+                              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>View Profile</span>
+                            </a>
+                          )}
+
+                          {canEditMember && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenEdit(member)}
+                                className="h-8 text-xs font-semibold gap-1.5"
+                                title="Edit Member / Appoint Executive Position"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                                <span>Edit & Appoint</span>
+                              </Button>
+
+                              {canRemoveMember && member.role !== 'OWNER' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleRemoveMember(member.id)}
+                                  className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                                  title="Remove member"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </Card>
