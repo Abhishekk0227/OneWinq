@@ -486,6 +486,11 @@ export default function DiscoveryPage() {
                         <span className="text-xs font-medium text-muted-foreground truncate">
                           @{person.username}
                         </span>
+                        {person.connectionState === 'CONNECTED' && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-md shrink-0">
+                            Connected
+                          </span>
+                        )}
                         {person.hasActiveCard && (
                           <span
                             className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md shrink-0"
@@ -497,18 +502,24 @@ export default function DiscoveryPage() {
                         )}
                       </div>
                       {(() => {
-                        const displayHeadline =
+                        const rawHeadline =
                           person.headline?.trim() ||
                           person.primaryProfession?.trim() ||
-                          person.templateName?.trim() ||
                           (person as any).professionTitle?.trim() ||
-                          person.identities?.[0]?.customTitle?.trim() ||
-                          'Basic Universal Template';
+                          person.identities?.[0]?.customTitle?.trim()
+                        
+                        const displayHeadline =
+                          rawHeadline && !rawHeadline.toLowerCase().includes('template')
+                            ? rawHeadline
+                            : null
+
+                        if (!displayHeadline) return null
+
                         return (
                           <p className="text-xs text-primary font-medium line-clamp-1 mt-0.5">
                             {displayHeadline}
                           </p>
-                        );
+                        )
                       })()}
                     </div>
                   </div>
@@ -518,7 +529,6 @@ export default function DiscoveryPage() {
                     const headlineLower = (
                       person.headline?.trim() ||
                       person.primaryProfession?.trim() ||
-                      person.templateName?.trim() ||
                       (person as any).professionTitle?.trim() ||
                       person.identities?.[0]?.customTitle?.trim() ||
                       ''
@@ -586,71 +596,48 @@ export default function DiscoveryPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2 pt-2.5 border-t border-border/60">
-                  <Link to={`/u/${person.username}`} className="flex-1 min-w-[95px]">
-                    <Button variant="outline" size="sm" className="w-full text-xs h-7.5">
+                <div className="grid grid-cols-2 gap-2 pt-2.5 border-t border-border/60 mt-auto">
+                  <Link to={`/u/${person.username}`} className="w-full">
+                    <Button variant="outline" size="sm" className="w-full text-xs h-8 font-medium border-border/80 hover:bg-muted text-foreground/90">
                       View Profile
                     </Button>
                   </Link>
 
                   {person.connectionState === 'CONNECTED' ? (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 transition-all font-semibold h-7.5 px-2.5"
-                        isLoading={startingChatUserId === targetId}
-                        onClick={() => handleStartMessage(targetId)}
-                        leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
-                      >
-                        Message
-                      </Button>
-                      <Badge variant="success" className="py-0.5 px-2 text-[10px] font-medium whitespace-nowrap">
-                        Connected
-                      </Badge>
-                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full text-xs bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/25 transition-all font-semibold h-8"
+                      isLoading={startingChatUserId === targetId}
+                      onClick={() => handleStartMessage(targetId)}
+                      leftIcon={<MessageSquare className="h-3.5 w-3.5" />}
+                    >
+                      Message
+                    </Button>
                   ) : person.connectionState === 'PENDING_SENT' ? (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Badge variant="subtle" className="py-0.5 px-2 text-[10px]">
-                        Requested
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs text-muted-foreground hover:text-destructive h-7.5 px-2"
-                        isLoading={withdrawMutation.isPending && withdrawMutation.variables === (person.connectionId || targetId)}
-                        onClick={() => withdrawMutation.mutate(person.connectionId || targetId)}
-                        title="Cancel sent request"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-xs text-muted-foreground hover:text-destructive h-8 border border-dashed border-border"
+                      isLoading={withdrawMutation.isPending && withdrawMutation.variables === (person.connectionId || targetId)}
+                      onClick={() => withdrawMutation.mutate(person.connectionId || targetId)}
+                      title="Cancel sent request"
+                    >
+                      Requested · Cancel
+                    </Button>
                   ) : person.connectionState === 'PENDING_RECEIVED' ? (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Button
-                        size="sm"
-                        className="text-xs h-7.5 px-2.5"
-                        isLoading={acceptMutation.isPending && acceptMutation.variables === (person.connectionId || targetId)}
-                        onClick={() => acceptMutation.mutate(person.connectionId || targetId)}
-                        leftIcon={<UserCheck className="h-3.5 w-3.5" />}
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-7.5 px-2 text-muted-foreground hover:text-destructive"
-                        isLoading={rejectMutation.isPending && rejectMutation.variables === (person.connectionId || targetId)}
-                        onClick={() => rejectMutation.mutate(person.connectionId || targetId)}
-                        title="Decline connection request"
-                      >
-                        Ignore
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full text-xs h-8 font-semibold"
+                      isLoading={acceptMutation.isPending && acceptMutation.variables === (person.connectionId || targetId)}
+                      onClick={() => acceptMutation.mutate(person.connectionId || targetId)}
+                      leftIcon={<UserCheck className="h-3.5 w-3.5" />}
+                    >
+                      Accept
+                    </Button>
                   ) : (
                     <Button
                       size="sm"
-                      className="text-xs h-7.5 px-3"
+                      className="w-full text-xs h-8 font-semibold"
                       isLoading={sendRequestMutation.isPending && sendRequestMutation.variables === targetId}
                       onClick={() => sendRequestMutation.mutate(targetId)}
                       leftIcon={<UserPlus className="h-3.5 w-3.5" />}

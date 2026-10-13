@@ -144,19 +144,18 @@ export default function OrganizationPostsPage() {
       {isLoading ? (
         <LoadingScreen message={`Loading ${activeContext.name}'s published posts...`} />
       ) : filteredPosts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-10 text-center bg-card/50">
-          <EmptyState
-            icon={<Building2 className="h-8 w-8 text-primary" />}
-            title={searchQuery ? 'No matching posts found' : 'No organization posts published yet'}
-            description={
-              searchQuery
-                ? `No posts matched "${searchQuery}". Try modifying your search keywords.`
-                : `Share news, updates, or announcements from ${activeContext.name} to engage with your followers and network!`
-            }
-            actionLabel="Publish First Post"
-            onAction={() => openModal('CREATE_POST')}
-          />
-        </div>
+        <EmptyState
+          icon={<Building2 className="h-6 w-6 text-primary" />}
+          title={searchQuery ? 'No matching posts found' : 'No organization posts yet'}
+          description={
+            searchQuery
+              ? `No posts matched "${searchQuery}".`
+              : 'Share updates and announcements with your followers.'
+          }
+          actionLabel="Publish First Post"
+          onAction={() => openModal('CREATE_POST')}
+          className="p-8 sm:p-10"
+        />
       ) : (
         <div className="space-y-4">
           {filteredPosts.map((post) => (

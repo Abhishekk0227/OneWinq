@@ -439,11 +439,11 @@ export default function OrganizationMembersPage() {
                 members.map((member: any) => (
                   <div
                     key={member.id}
-                    className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-muted/20 transition-colors"
+                    className="p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                      <div className="relative">
-                        <div className="h-11 w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1 w-full">
+                      <div className="relative shrink-0">
+                        <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
                           {member.avatarUrl ? (
                             <img src={member.avatarUrl} alt={member.displayName} className="h-full w-full object-cover" />
                           ) : (
@@ -457,9 +457,9 @@ export default function OrganizationMembersPage() {
                         )}
                       </div>
 
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-bold text-sm truncate text-foreground">{member.displayName}</span>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <span className="font-bold text-sm text-foreground">{member.displayName}</span>
 
                           {/* Executive Badge */}
                           {member.isExecutive && (
@@ -489,13 +489,15 @@ export default function OrganizationMembersPage() {
                           )}
                         </div>
 
-                        <p className="text-xs text-muted-foreground truncate">
-                          <span className="font-medium text-foreground/80">{member.jobTitle || 'Team Member'}</span> • {member.email}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground/80 shrink-0">{member.jobTitle || 'Team Member'}</span>
+                          <span className="shrink-0">•</span>
+                          <span className="break-all">{member.email}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 self-end sm:self-auto">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
                       {/* Automated Profile Completion Score */}
                       <div className="hidden md:flex flex-col items-end gap-1 min-w-[90px]">
                         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">

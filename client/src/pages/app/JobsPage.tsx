@@ -19,6 +19,7 @@ import {
   FileText,
   CheckCircle,
   Trash2,
+  ChevronDown,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -177,42 +178,48 @@ export default function JobsPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-2.5 p-2.5 sm:p-3 rounded-2xl border border-border/80 bg-card shadow-xs">
         <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search title, skills, keywords..."
-            className="pl-9 h-9 text-xs"
+            className="pl-9 h-8.5 text-xs rounded-xl"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
           {/* Employment Type */}
-          <select
-            value={selectedEmployment}
-            onChange={(e) => setSelectedEmployment(e.target.value)}
-            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
-          >
-            <option value="ALL">All Employment Types</option>
-            <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
-            <option value={EMPLOYMENT_TYPE.PART_TIME}>Part Time</option>
-            <option value={EMPLOYMENT_TYPE.CONTRACT}>Contract</option>
-            <option value={EMPLOYMENT_TYPE.INTERNSHIP}>Internship</option>
-          </select>
+          <div className="relative min-w-0">
+            <select
+              value={selectedEmployment}
+              onChange={(e) => setSelectedEmployment(e.target.value)}
+              className="w-full md:w-44 h-8.5 pl-3 pr-7 rounded-xl border border-border/70 bg-background hover:bg-muted/30 text-[11px] sm:text-xs font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary/40 truncate transition-colors shadow-2xs"
+            >
+              <option value="ALL">All Employment Types</option>
+              <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
+              <option value={EMPLOYMENT_TYPE.PART_TIME}>Part Time</option>
+              <option value={EMPLOYMENT_TYPE.CONTRACT}>Contract</option>
+              <option value={EMPLOYMENT_TYPE.INTERNSHIP}>Internship</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          </div>
 
           {/* Workplace Type */}
-          <select
-            value={selectedWorkplace}
-            onChange={(e) => setSelectedWorkplace(e.target.value)}
-            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
-          >
-            <option value="ALL">All Workplaces</option>
-            <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
-            <option value={WORKPLACE_TYPE.HYBRID}>Hybrid</option>
-            <option value={WORKPLACE_TYPE.ON_SITE}>On-Site</option>
-          </select>
+          <div className="relative min-w-0">
+            <select
+              value={selectedWorkplace}
+              onChange={(e) => setSelectedWorkplace(e.target.value)}
+              className="w-full md:w-40 h-8.5 pl-3 pr-7 rounded-xl border border-border/70 bg-background hover:bg-muted/30 text-[11px] sm:text-xs font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-primary/40 truncate transition-colors shadow-2xs"
+            >
+              <option value="ALL">All Workplaces</option>
+              <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
+              <option value={WORKPLACE_TYPE.HYBRID}>Hybrid</option>
+              <option value={WORKPLACE_TYPE.ON_SITE}>On-Site</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          </div>
         </div>
       </div>
 
