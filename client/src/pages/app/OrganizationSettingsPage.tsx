@@ -68,8 +68,8 @@ export default function OrganizationSettingsPage() {
         <p className="text-sm text-muted-foreground mt-1 mb-6">
           Organization governance and privacy settings are managed exclusively by organization administrators.
         </p>
-        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
-          Return to Dashboard
+        <Button onClick={() => navigate('/app/org/analytics')} variant="outline">
+          Return to Analytics
         </Button>
       </div>
     );

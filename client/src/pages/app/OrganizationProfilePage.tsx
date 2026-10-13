@@ -667,8 +667,8 @@ export default function OrganizationProfilePage() {
           <Button onClick={() => window.open(`/c/${org?.slug || activeContext.slug}`, '_blank')} variant="outline">
             <ExternalLink className="h-4 w-4 mr-2" /> View Public Showcase
           </Button>
-          <Button onClick={() => navigate('/app/org/dashboard')}>
-            Return to Dashboard
+          <Button onClick={() => navigate('/app/org/analytics')}>
+            Return to Analytics
           </Button>
         </div>
       </div>
