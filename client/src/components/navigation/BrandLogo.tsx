@@ -53,7 +53,7 @@ export function BrandLogo({
         <img
           src="/favicon.png"
           alt="OneWinq"
-          className="h-8 w-8 rounded-xl object-contain shadow-xs"
+          className={cn('h-7 w-7 rounded-xl object-contain shadow-xs', imgClassName)}
         />
       </Link>
     )
