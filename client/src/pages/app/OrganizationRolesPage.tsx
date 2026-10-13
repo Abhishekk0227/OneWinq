@@ -76,14 +76,6 @@ const PERMISSION_GROUPS = [
     ],
   },
   {
-    name: 'Profile Approvals & Governance',
-    icon: FileCheck,
-    permissions: [
-      { key: ORGANIZATION_PERMISSION.APPROVALS_VIEW, label: 'View Pending Profile Edits' },
-      { key: ORGANIZATION_PERMISSION.APPROVALS_MANAGE, label: 'Approve or Reject Profile Changes' },
-    ],
-  },
-  {
     name: 'Digital ID Cards & Badges',
     icon: CreditCard,
     permissions: [

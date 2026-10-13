@@ -51,7 +51,6 @@ const OrganizationAuditPage = lazyWithRetry(() => import('@/pages/app/Organizati
 const OrganizationSettingsPage = lazyWithRetry(() => import('@/pages/app/OrganizationSettingsPage'))
 const JobsPage = lazyWithRetry(() => import('@/pages/app/JobsPage'))
 const MyApplicationsPage = lazyWithRetry(() => import('@/pages/app/MyApplicationsPage'))
-const OrganizationApprovalsPage = lazyWithRetry(() => import('@/pages/app/OrganizationApprovalsPage'))
 const OrganizationEventsPage = lazyWithRetry(() => import('@/pages/app/OrganizationEventsPage'))
 const OrganizationRolesPage = lazyWithRetry(() => import('@/pages/app/OrganizationRolesPage'))
 const OrganizationPostsPage = lazyWithRetry(() => import('@/pages/app/OrganizationPostsPage'))
@@ -440,11 +439,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'org/approvals',
-                element: (
-                  <Suspended>
-                    <OrganizationApprovalsPage />
-                  </Suspended>
-                ),
+                element: <Navigate to="/app/org/members" replace />,
               },
               {
                 path: 'org/events',

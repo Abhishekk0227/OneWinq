@@ -119,16 +119,7 @@ export function AppSidebar() {
     icon: Users,
   })
 
-  // 4. Profile Approvals (Managers, HR, Admins)
-  if (isOrgManager || hasPerm('approvals:view') || hasPerm('approvals:manage')) {
-    orgNavItems.push({
-      label: 'Profile Approvals',
-      to: '/app/org/approvals',
-      icon: FileCheck,
-    })
-  }
-
-  // 5. Departments (Managers, HR, Admins)
+  // 4. Departments (Managers, HR, Admins)
   if (isOrgManager || hasPerm('departments:manage')) {
     orgNavItems.push({
       label: 'Departments',

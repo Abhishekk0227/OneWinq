@@ -816,7 +816,7 @@ export default function OrganizationMembersPage() {
                     >
                       <option value={ORGANIZATION_ROLE.MEMBER}>Member (Standard Employee Access)</option>
                       <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager (Team Oversight)</option>
-                      <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (Recruitment & Approvals)</option>
+                      <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (People & Recruitment)</option>
                       <option value={ORGANIZATION_ROLE.ADMIN}>Administrator (Full Operational Control)</option>
                     </select>
                   </div>
@@ -908,7 +908,7 @@ export default function OrganizationMembersPage() {
                 >
                   <option value={ORGANIZATION_ROLE.OWNER}>Owner (Complete Governance & Billing)</option>
                   <option value={ORGANIZATION_ROLE.ADMIN}>Administrator (Full Operational Control)</option>
-                  <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (Recruitment & Approvals)</option>
+                  <option value={ORGANIZATION_ROLE.HR_MANAGER}>HR Manager (People & Recruitment)</option>
                   <option value={ORGANIZATION_ROLE.MANAGER}>Department Manager (Team Oversight)</option>
                   <option value={ORGANIZATION_ROLE.MEMBER}>Member (Standard Employee Access)</option>
                 </select>

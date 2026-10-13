@@ -210,20 +210,6 @@ export default function OrganizationSettingsPage() {
             <label className="flex items-start gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
               <input
                 type="checkbox"
-                {...register('requireApprovalForProfileChanges')}
-                className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
-              />
-              <div>
-                <span className="text-sm font-semibold">Enforce Profile Change Moderation Workflow</span>
-                <p className="text-xs text-muted-foreground">
-                  When enabled, employee/member profile edits are saved in a draft sandbox and require administrator sign-off before being published live.
-                </p>
-              </div>
-            </label>
-
-            <label className="flex items-start gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
-              <input
-                type="checkbox"
                 {...register('allowCustomThemes')}
                 className="h-4 w-4 mt-0.5 rounded border-border text-primary focus:ring-primary/20"
               />
