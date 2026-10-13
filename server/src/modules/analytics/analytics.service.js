@@ -73,7 +73,8 @@ export const analyticsService = {
    */
   async recordEvent({
     eventType,
-    targetUserId,
+    targetUserId = null,
+    organizationId = null,
     actorUserId = null,
     cardUid = null,
     ip = null,
@@ -86,7 +87,8 @@ export const analyticsService = {
       // 1. Record raw event
       await RawEvent.create({
         eventType,
-        targetUserId,
+        targetUserId: targetUserId || null,
+        organizationId: organizationId || null,
         actorUserId,
         cardUid: cardUid ? cardUid.toUpperCase() : null,
         ip,
@@ -472,6 +474,231 @@ export const analyticsService = {
         taps: m.tapCount,
         scans: m.scanCount,
       })),
+    };
+  },
+
+  /**
+   * Get organization analytics overview and telemetry strictly scoped to this organization.
+   */
+  async getOrganizationAnalytics(organizationId, { period = '30d' } = {}) {
+    const sinceDate = getPeriodStartDate(period);
+    const orgObjId = mongoose.Types.ObjectId.isValid(organizationId)
+      ? new mongoose.Types.ObjectId(organizationId)
+      : organizationId;
+
+    // 1. Fetch cards assigned to this organization
+    const orgCards = await Card.find({ organizationId: orgObjId }).select('tapCount qrScanCount cardUid').lean();
+    const cardUids = orgCards.map((c) => c.cardUid).filter(Boolean);
+
+    // 2. Query filter strictly for this organization
+    const orgEventFilter = {
+      $or: [
+        { organizationId: orgObjId },
+        ...(cardUids.length > 0 ? [{ cardUid: { $in: cardUids } }] : []),
+      ],
+      timestamp: { $gte: sinceDate },
+    };
+
+    const [rawStats, uniqueVisitorsAgg, deviceStats, linkClicksAgg, dailyEventsAgg] = await Promise.all([
+      RawEvent.aggregate([
+        { $match: orgEventFilter },
+        {
+          $group: {
+            _id: null,
+            totalViews: {
+              $sum: {
+                $cond: [{ $in: ['$eventType', ['organization.viewed', 'profile.viewed']] }, 1, 0],
+              },
+            },
+            nfcTaps: {
+              $sum: { $cond: [{ $eq: ['$eventType', 'card.tapped'] }, 1, 0] },
+            },
+            qrScans: {
+              $sum: { $cond: [{ $eq: ['$eventType', 'qr.scanned'] }, 1, 0] },
+            },
+            linkClicks: {
+              $sum: { $cond: [{ $eq: ['$eventType', 'link.clicked'] }, 1, 0] },
+            },
+            identifiableViews: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $in: ['$eventType', ['organization.viewed', 'profile.viewed']] },
+                      { $ne: ['$actorUserId', null] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            anonymousViews: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $in: ['$eventType', ['organization.viewed', 'profile.viewed']] },
+                      { $eq: ['$actorUserId', null] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      ]),
+      RawEvent.aggregate([
+        {
+          $match: {
+            ...orgEventFilter,
+            eventType: { $in: ['organization.viewed', 'profile.viewed'] },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $cond: [
+                { $ne: ['$actorUserId', null] },
+                { $concat: ['user:', { $toString: '$actorUserId' }] },
+                { $concat: ['ip:', { $ifNull: ['$ip', 'unknown'] }] },
+              ],
+            },
+          },
+        },
+        { $count: 'count' },
+      ]),
+      RawEvent.aggregate([
+        {
+          $match: {
+            ...orgEventFilter,
+            eventType: { $in: ['organization.viewed', 'profile.viewed'] },
+          },
+        },
+        {
+          $group: {
+            _id: '$device.deviceType',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      RawEvent.aggregate([
+        {
+          $match: {
+            ...orgEventFilter,
+            eventType: 'link.clicked',
+          },
+        },
+        {
+          $group: {
+            _id: {
+              url: '$metadata.linkUrl',
+              label: '$metadata.label',
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      RawEvent.aggregate([
+        { $match: orgEventFilter },
+        {
+          $group: {
+            _id: {
+              date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+              eventType: '$eventType',
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    // Calculate lifetime taps/scans from orgCards
+    let lifetimeTaps = 0;
+    let lifetimeScans = 0;
+    orgCards.forEach((c) => {
+      lifetimeTaps += c.tapCount || 0;
+      lifetimeScans += c.qrScanCount || 0;
+    });
+
+    const stat = rawStats[0] || {};
+    const totalProfileViews = stat.totalViews || 0;
+    const nfcTaps = Math.max(stat.nfcTaps || 0, lifetimeTaps);
+    const qrScans = Math.max(stat.qrScans || 0, lifetimeScans);
+    const linkClicks = stat.linkClicks || 0;
+    const identifiableViews = stat.identifiableViews || 0;
+    const anonymousViews = stat.anonymousViews || (totalProfileViews > 0 ? totalProfileViews - identifiableViews : 0);
+    const uniqueViewers = uniqueVisitorsAgg[0]?.count || (totalProfileViews > 0 ? 1 : 0);
+
+    // Parse daily timeline
+    const dailyMap = new Map();
+    dailyEventsAgg.forEach((item) => {
+      const d = item._id.date;
+      const type = item._id.eventType;
+      if (!dailyMap.has(d)) {
+        dailyMap.set(d, { views: 0, nfcTaps: 0, qrScans: 0, linkClicks: 0 });
+      }
+      const dayData = dailyMap.get(d);
+      if (type === 'organization.viewed' || type === 'profile.viewed') {
+        dayData.views += item.count;
+      } else if (type === 'card.tapped') {
+        dayData.nfcTaps += item.count;
+      } else if (type === 'qr.scanned') {
+        dayData.qrScans += item.count;
+      } else if (type === 'link.clicked') {
+        dayData.linkClicks += item.count;
+      }
+    });
+
+    const timeSeries = [];
+    const endDate = new Date();
+    const cur = new Date(sinceDate);
+    while (cur <= endDate) {
+      const dStr = cur.toISOString().split('T')[0];
+      const dayData = dailyMap.get(dStr) || { views: 0, nfcTaps: 0, qrScans: 0, linkClicks: 0 };
+      timeSeries.push({
+        date: dStr,
+        views: dayData.views,
+        nfcTaps: dayData.nfcTaps,
+        qrScans: dayData.qrScans,
+        clicks: dayData.linkClicks,
+      });
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+
+    // Parse device breakdown
+    const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
+    deviceStats.forEach((d) => {
+      if (d._id === 'mobile') deviceBreakdown.mobile = d.count;
+      else if (d._id === 'tablet') deviceBreakdown.tablet = d.count;
+      else if (d._id === 'desktop') deviceBreakdown.desktop = d.count;
+    });
+
+    // Parse top links
+    const topLinks = linkClicksAgg.map((l) => ({
+      url: l._id.url || '',
+      label: l._id.label || l._id.url || 'Link',
+      count: l.count,
+    }));
+
+    return {
+      period,
+      overview: {
+        totalProfileViews,
+        uniqueViewers,
+        identifiableViews,
+        anonymousViews,
+        qrScans,
+        nfcTaps,
+        linkClicks,
+      },
+      timeSeries,
+      deviceBreakdown,
+      topLinks,
     };
   },
 };

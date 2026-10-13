@@ -34,14 +34,15 @@ export function initAnalyticsListeners() {
   // 2. Card Tapped
   eventBus.subscribe(APP_EVENT.CARD_TAPPED, async (payload) => {
     try {
-      const { cardUid, userId, ip, userAgent } = payload;
-      if (!userId) {
+      const { cardUid, userId, organizationId, ip, userAgent } = payload;
+      if (!userId && !organizationId) {
         return;
       }
 
       await analyticsService.recordEvent({
         eventType: 'card.tapped',
-        targetUserId: userId,
+        targetUserId: userId || null,
+        organizationId: organizationId || null,
         cardUid,
         ip,
         userAgent,
@@ -54,14 +55,15 @@ export function initAnalyticsListeners() {
   // 3. QR Scanned
   eventBus.subscribe(APP_EVENT.QR_SCANNED, async (payload) => {
     try {
-      const { cardUid, userId, ip, userAgent } = payload;
-      if (!userId) {
+      const { cardUid, userId, organizationId, ip, userAgent } = payload;
+      if (!userId && !organizationId) {
         return;
       }
 
       await analyticsService.recordEvent({
         eventType: 'qr.scanned',
-        targetUserId: userId,
+        targetUserId: userId || null,
+        organizationId: organizationId || null,
         cardUid,
         ip,
         userAgent,

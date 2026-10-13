@@ -13,7 +13,13 @@ const rawEventSchema = new Schema(
     targetUserId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      default: null,
+      index: true,
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      default: null,
       index: true,
     },
     actorUserId: {
@@ -68,6 +74,8 @@ const rawEventSchema = new Schema(
 // High-throughput query indexes
 rawEventSchema.index({ targetUserId: 1, timestamp: -1 });
 rawEventSchema.index({ targetUserId: 1, eventType: 1, timestamp: -1 });
+rawEventSchema.index({ organizationId: 1, timestamp: -1 });
+rawEventSchema.index({ organizationId: 1, eventType: 1, timestamp: -1 });
 rawEventSchema.index({ cardUid: 1, timestamp: -1 });
 
 export const RawEvent = mongoose.model('RawEvent', rawEventSchema);

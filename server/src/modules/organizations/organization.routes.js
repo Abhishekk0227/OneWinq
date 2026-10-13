@@ -86,6 +86,13 @@ router.get(
   organizationController.getById,
 );
 
+router.get(
+  '/:organizationId/analytics',
+  authenticate,
+  resolveOrgContext,
+  organizationController.getAnalytics,
+);
+
 router.patch(
   '/:organizationId',
   authenticate,

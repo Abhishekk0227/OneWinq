@@ -1,5 +1,6 @@
 import * as organizationService from './organization.service.js';
 import * as followService from './organizationFollow.service.js';
+import { analyticsService } from '../analytics/analytics.service.js';
 import { sendSuccess } from '../../shared/response.js';
 import { HTTP } from '../../config/constants.js';
 
@@ -42,6 +43,15 @@ export const organizationController = {
   async getBySlug(req, res, next) {
     try {
       const organization = await organizationService.getOrganizationBySlug(req.params.slug);
+      if (organization) {
+        analyticsService.recordEvent({
+          eventType: 'organization.viewed',
+          organizationId: organization._id || organization.id,
+          actorUserId: req.user?.id || null,
+          ip: req.ip,
+          userAgent: req.headers['user-agent'],
+        }).catch(() => {});
+      }
       return sendSuccess(res, {
         statusCode: HTTP.OK,
         message: 'Organization retrieved successfully',
@@ -152,6 +162,26 @@ export const organizationController = {
         statusCode: HTTP.OK,
         message: 'Followed organizations retrieved successfully',
         data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /**
+   * Get organization analytics telemetry.
+   */
+  async getAnalytics(req, res, next) {
+    try {
+      const period = req.query.period || req.query.range || '30d';
+      const data = await analyticsService.getOrganizationAnalytics(
+        req.params.organizationId,
+        { period },
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Organization analytics retrieved successfully',
+        data,
       });
     } catch (err) {
       next(err);

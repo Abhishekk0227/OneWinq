@@ -156,7 +156,8 @@ export const cardService = {
     eventBus.publish(APP_EVENT.CARD_TAPPED, {
       cardCode: card.cardCode || card.cardUid,
       cardUid: card.cardUid,
-      userId: card.assignedUser.toString(),
+      userId: card.assignedUser ? card.assignedUser.toString() : null,
+      organizationId: card.organizationId ? card.organizationId.toString() : null,
       ip,
       userAgent,
       timestamp: new Date(),
@@ -233,7 +234,8 @@ export const cardService = {
     eventBus.publish(APP_EVENT.QR_SCANNED, {
       cardCode: card.cardCode || card.cardUid,
       cardUid: card.cardUid,
-      userId: card.assignedUser.toString(),
+      userId: card.assignedUser ? card.assignedUser.toString() : null,
+      organizationId: card.organizationId ? card.organizationId.toString() : null,
       ip,
       userAgent,
       timestamp: new Date(),
