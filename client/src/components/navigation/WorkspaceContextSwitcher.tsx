@@ -81,31 +81,36 @@ export function WorkspaceContextSwitcher({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-border/70 bg-card/80 hover:bg-card text-foreground transition-all duration-150 shadow-2xs cursor-pointer select-none min-w-0 shrink',
+          'flex items-center gap-1.5 sm:gap-2.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-border/70 bg-card/80 hover:bg-card text-foreground transition-all duration-150 shadow-2xs cursor-pointer select-none min-w-0 shrink h-8 sm:h-9 max-h-9 overflow-hidden',
           isOpen && 'ring-2 ring-primary/20 border-primary/50'
         )}
         title="Switch active workspace"
         aria-label="Workspace context switcher"
       >
-        <div className="flex items-center justify-center h-5.5 w-5.5 sm:h-6 sm:w-6 rounded-lg bg-muted/60 border border-border/50 text-primary shrink-0 overflow-hidden p-0.5">
+        <div
+          className="flex items-center justify-center w-6 h-6 min-w-6 min-h-6 max-w-6 max-h-6 rounded-lg bg-muted/60 border border-border/50 text-primary shrink-0 overflow-hidden p-0.5 aspect-square isolate"
+          style={{ width: 24, height: 24, minWidth: 24, minHeight: 24, maxWidth: 24, maxHeight: 24 }}
+        >
           {isPersonal ? (
             user?.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.displayName}
-                className="h-full w-full max-h-full max-w-full object-cover rounded-md block shrink-0"
+                className="w-full h-full max-w-full max-h-full object-cover rounded-md block shrink-0 aspect-square"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              <User className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+              <User className="h-3.5 w-3.5" />
             )
           ) : activeContext.logoUrl ? (
             <img
               src={activeContext.logoUrl}
               alt={activeContext.name}
-              className="h-full w-full max-h-full max-w-full object-contain block shrink-0"
+              className="w-full h-full max-w-full max-h-full object-contain block shrink-0"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
           ) : (
-            <Building2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+            <Building2 className="h-3.5 w-3.5" />
           )}
         </div>
 
