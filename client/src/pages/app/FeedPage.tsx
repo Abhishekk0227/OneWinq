@@ -10,7 +10,6 @@ import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PostCard } from '@/components/posts/PostCard'
 import {
-  Sparkles,
   Flame,
   Globe,
   Building2,
@@ -64,14 +63,13 @@ export default function FeedPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex-1 text-left px-4 py-2.5 rounded-full border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer flex items-center justify-between group shadow-xs"
+            className="flex-1 text-left px-4 py-2.5 rounded-full border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer shadow-xs"
           >
             <span className="truncate">
               {isOrgMode
                 ? `Share an official update as ${activeContext.name}...`
                 : `Start a post, ${user?.displayName?.split(' ')[0] || 'there'}...`}
             </span>
-            <Sparkles className="h-4 w-4 text-primary opacity-60 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
           </button>
         </div>
       </div>

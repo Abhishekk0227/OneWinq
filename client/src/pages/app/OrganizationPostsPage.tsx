@@ -2,17 +2,10 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
-  FileText,
   Plus,
-  Sparkles,
   Building2,
   ExternalLink,
-  MessageSquare,
-  Heart,
-  Share2,
-  TrendingUp,
   Search,
-  CheckCircle2,
 } from 'lucide-react'
 import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useUIStore } from '@/stores/uiStore'
@@ -38,7 +31,6 @@ export default function OrganizationPostsPage() {
     data: feedData,
     isLoading,
     refetch,
-    isRefetching,
   } = useQuery({
     queryKey: ['org-posts', orgId],
     queryFn: () => postsApi.getFeed({ organizationId: orgId }),
@@ -62,22 +54,13 @@ export default function OrganizationPostsPage() {
     })
   }, [posts, filterState, searchQuery])
 
-  // Aggregate engagement stats
-  const stats = React.useMemo(() => {
-    const totalPosts = posts.length
-    const totalLikes = posts.reduce((sum, p) => sum + (p.likesCount || 0), 0)
-    const totalComments = posts.reduce((sum, p) => sum + (p.commentsCount || 0), 0)
-    const totalShares = posts.reduce((sum, p) => sum + (p.sharesCount || 0), 0)
-    return { totalPosts, totalLikes, totalComments, totalShares }
-  }, [posts])
-
   if (!isOrgMode) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
         <EmptyState
           icon={<Building2 className="h-8 w-8 text-primary" />}
           title="Organization Workspace Required"
-          description="Please switch to an organization profile from the header workspace selector to manage company posts."
+          description="Please switch to an organization profile from the header workspace selector to manage organization posts."
         />
       </div>
     )
@@ -89,9 +72,8 @@ export default function OrganizationPostsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight flex items-center gap-2.5">
-              <FileText className="h-7 w-7 text-primary shrink-0" />
-              <span>Company Posts</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+              Organization Posts
             </h1>
             <Badge variant="subtle" className="text-xs font-semibold px-2.5 py-0.5">
               Official Hub
@@ -127,60 +109,7 @@ export default function OrganizationPostsPage() {
         </div>
       </div>
 
-      {/* Engagement Overview Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Published Posts</span>
-            <FileText className="h-4 w-4 text-primary shrink-0" />
-          </div>
-          <div className="text-2xl font-extrabold text-foreground tracking-tight">
-            {stats.totalPosts}
-          </div>
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-            <span>Active on company feed</span>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Total Reactions</span>
-            <Heart className="h-4 w-4 text-rose-500 shrink-0" />
-          </div>
-          <div className="text-2xl font-extrabold text-foreground tracking-tight">
-            {stats.totalLikes}
-          </div>
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="h-3 w-3 text-primary" />
-            <span>Audience engagement</span>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Total Comments</span>
-            <MessageSquare className="h-4 w-4 text-blue-500 shrink-0" />
-          </div>
-          <div className="text-2xl font-extrabold text-foreground tracking-tight">
-            {stats.totalComments}
-          </div>
-          <div className="text-[11px] text-muted-foreground">Community discussions</div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-            <span>Total Shares</span>
-            <Share2 className="h-4 w-4 text-amber-500 shrink-0" />
-          </div>
-          <div className="text-2xl font-extrabold text-foreground tracking-tight">
-            {stats.totalShares}
-          </div>
-          <div className="text-[11px] text-muted-foreground">Network reach</div>
-        </div>
-      </div>
-
-      {/* Official Company Post Composer Box */}
+      {/* Official Organization Post Composer Box */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-xs space-y-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl border border-primary/25 bg-white dark:bg-card flex items-center justify-center overflow-hidden shrink-0 shadow-2xs p-1">
@@ -198,12 +127,11 @@ export default function OrganizationPostsPage() {
           <button
             type="button"
             onClick={() => openModal('CREATE_POST')}
-            className="flex-1 text-left px-4 py-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer flex items-center justify-between group shadow-xs"
+            className="flex-1 text-left px-4 py-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground text-sm font-medium transition-all cursor-pointer shadow-xs"
           >
             <span className="truncate">
               Share an official update as {activeContext.name}...
             </span>
-            <Sparkles className="h-4 w-4 text-primary opacity-60 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
           </button>
         </div>
       </div>
@@ -252,7 +180,7 @@ export default function OrganizationPostsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search company posts..."
+            placeholder="Search organization posts..."
             className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-border bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-primary shadow-2xs"
           />
         </div>
@@ -264,8 +192,8 @@ export default function OrganizationPostsPage() {
       ) : filteredPosts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-10 text-center bg-card/50">
           <EmptyState
-            icon={<FileText className="h-8 w-8 text-primary" />}
-            title={searchQuery ? 'No matching posts found' : 'No company posts published yet'}
+            icon={<Building2 className="h-8 w-8 text-primary" />}
+            title={searchQuery ? 'No matching posts found' : 'No organization posts published yet'}
             description={
               searchQuery
                 ? `No posts matched "${searchQuery}". Try modifying your search keywords.`

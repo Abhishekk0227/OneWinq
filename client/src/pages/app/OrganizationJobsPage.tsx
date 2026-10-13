@@ -577,7 +577,7 @@ export default function OrganizationJobsPage() {
                 <div className="space-y-0.5">
                   <span className="text-xs font-bold text-foreground block">Custom Application Form</span>
                   <span className="text-[11px] text-muted-foreground block leading-tight">
-                    Direct applicants to your Google Form, Typeform, or company careers portal.
+                    Direct applicants to your Google Form, Typeform, or organization careers portal.
                   </span>
                 </div>
               </label>
@@ -590,7 +590,7 @@ export default function OrganizationJobsPage() {
                 </label>
                 <Input
                   {...register('externalApplyUrl')}
-                  placeholder="https://forms.gle/... or https://company.com/apply"
+                  placeholder="https://forms.gle/... or https://org.com/apply"
                 />
                 <p className="text-[11px] text-muted-foreground">
                   When applicants click Apply, they will be directed directly to this form in a new tab.

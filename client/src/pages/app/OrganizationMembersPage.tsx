@@ -931,7 +931,7 @@ export default function OrganizationMembersPage() {
                     <div>
                       <p className="text-xs font-bold text-foreground">Executive Leadership Appointment</p>
                       <p className="text-[11px] text-muted-foreground">
-                        Showcase on company leadership board and highlight with C-Suite honors.
+                        Showcase on organization leadership board and highlight with C-Suite honors.
                       </p>
                     </div>
                   </div>

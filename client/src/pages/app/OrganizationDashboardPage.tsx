@@ -9,11 +9,12 @@ import {
   Plus,
   ArrowRight,
   TrendingUp,
-  CreditCard,
-  ShieldAlert,
-  ExternalLink,
+  FileText,
+  Heart,
+  MessageSquare,
+  Share2,
+  CheckCircle2,
   PenSquare,
-  Sparkles,
 } from 'lucide-react';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -87,15 +88,24 @@ export default function OrganizationDashboardPage() {
   const applications = (appsData as any)?.data?.applications || [];
   const applicationsCount = (appsData as any)?.data?.pagination?.total ?? 0;
 
-  // Fetch recent company posts
+  // Fetch organization posts
   const { data: postsData, refetch: refetchPosts } = useQuery({
     queryKey: ['org', orgId, 'posts'],
     queryFn: () => postsApi.getFeed({ organizationId: orgId }),
   });
   const orgPosts = (postsData as any)?.data?.posts || [];
 
+  // Aggregate post engagement stats (moved from Organization Posts)
+  const postStats = React.useMemo(() => {
+    const totalPosts = orgPosts.length;
+    const totalLikes = orgPosts.reduce((sum: number, p: any) => sum + (p.likesCount || 0), 0);
+    const totalComments = orgPosts.reduce((sum: number, p: any) => sum + (p.commentsCount || 0), 0);
+    const totalShares = orgPosts.reduce((sum: number, p: any) => sum + (p.sharesCount || 0), 0);
+    return { totalPosts, totalLikes, totalComments, totalShares };
+  }, [orgPosts]);
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
       {/* Organization Header Banner */}
       <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
@@ -116,7 +126,7 @@ export default function OrganizationDashboardPage() {
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {org.tagline || `${org.type || 'Company'} Workspace`}
+              {org.tagline || `${org.type || 'Organization'} Workspace`}
             </p>
           </div>
         </div>
@@ -142,7 +152,7 @@ export default function OrganizationDashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Metrics Row: Workspace Operations */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="hover:border-primary/40 transition-colors">
           <CardContent className="p-5 flex items-center justify-between">
@@ -203,6 +213,59 @@ export default function OrganizationDashboardPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Post Engagement Stats (Moved from Organization Posts Page) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+            <span>Published Posts</span>
+            <FileText className="h-4 w-4 text-primary shrink-0" />
+          </div>
+          <div className="text-2xl font-extrabold text-foreground tracking-tight">
+            {postStats.totalPosts}
+          </div>
+          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+            <span>Active on organization feed</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+            <span>Total Reactions</span>
+            <Heart className="h-4 w-4 text-rose-500 shrink-0" />
+          </div>
+          <div className="text-2xl font-extrabold text-foreground tracking-tight">
+            {postStats.totalLikes}
+          </div>
+          <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+            <TrendingUp className="h-3 w-3 text-primary" />
+            <span>Audience engagement</span>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+            <span>Total Comments</span>
+            <MessageSquare className="h-4 w-4 text-blue-500 shrink-0" />
+          </div>
+          <div className="text-2xl font-extrabold text-foreground tracking-tight">
+            {postStats.totalComments}
+          </div>
+          <div className="text-[11px] text-muted-foreground">Community discussions</div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-4 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+            <span>Total Shares</span>
+            <Share2 className="h-4 w-4 text-amber-500 shrink-0" />
+          </div>
+          <div className="text-2xl font-extrabold text-foreground tracking-tight">
+            {postStats.totalShares}
+          </div>
+          <div className="text-[11px] text-muted-foreground">Network reach</div>
+        </div>
       </div>
 
       {/* Two Column Layout: Recent Postings & Recent Applicants */}
@@ -283,15 +346,15 @@ export default function OrganizationDashboardPage() {
         </Card>
       </div>
 
-      {/* Company Updates & Broadcasts (LinkedIn Style) */}
+      {/* Organization Updates & Broadcasts */}
       <Card padding="md" className="space-y-4">
         <CardHeader className="flex flex-row items-center justify-between pb-1">
           <div>
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> Company Updates & Broadcasts
+            <CardTitle className="text-base font-bold">
+              Organization Updates & Broadcasts
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Official company updates, announcements, and articles published by {org.name}.
+              Official organization updates, announcements, and articles published by {org.name}.
             </p>
           </div>
           <Button size="sm" variant="outline" onClick={() => openModal('CREATE_POST')} className="text-xs">
@@ -301,7 +364,7 @@ export default function OrganizationDashboardPage() {
         <CardContent>
           {orgPosts.length === 0 ? (
             <div className="p-8 text-center rounded-2xl bg-muted/20 border border-dashed border-border text-xs text-muted-foreground space-y-3">
-              <p>No company updates published yet. Broadcast milestones, news, or insights to engage your followers!</p>
+              <p>No organization updates published yet. Broadcast milestones, news, or insights to engage your followers!</p>
               <Button size="sm" onClick={() => openModal('CREATE_POST')}>
                 Share First Post
               </Button>
