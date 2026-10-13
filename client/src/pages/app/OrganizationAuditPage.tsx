@@ -48,8 +48,8 @@ export default function OrganizationAuditPage() {
         <p className="text-sm text-muted-foreground mt-1 mb-6">
           Compliance and audit logs are visible exclusively to organization owners and authorized administrators.
         </p>
-        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
-          Return to Dashboard
+        <Button onClick={() => navigate('/app/org/analytics')} variant="outline">
+          Return to Analytics
         </Button>
       </div>
     );

@@ -96,11 +96,11 @@ export function AppSidebar() {
     icon: FileText,
   })
 
-  // 2. Dashboard / Hub (Adapts label based on role)
+  // 2. Organization Analytics
   orgNavItems.push({
-    label: isOrgAdmin ? 'Overview & Stats' : isOrgHR ? 'HR Workspace' : 'Member Hub',
-    to: '/app/org/dashboard',
-    icon: LayoutDashboard,
+    label: 'Analytics',
+    to: '/app/org/analytics',
+    icon: BarChart3,
   })
 
   // 2. Organization Profile Studio (Only for Owner/Admin or permitted editors)

@@ -155,8 +155,8 @@ export default function OrganizationRolesPage() {
         <p className="text-sm text-muted-foreground mt-1 mb-6">
           Custom roles and permission matrices are managed exclusively by organization administrators.
         </p>
-        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
-          Return to Dashboard
+        <Button onClick={() => navigate('/app/org/analytics')} variant="outline">
+          Return to Analytics
         </Button>
       </div>
     );

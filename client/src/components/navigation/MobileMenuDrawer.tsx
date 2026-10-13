@@ -133,10 +133,9 @@ export function MobileMenuDrawer() {
       title: 'Organization Workspace',
       items: [
         {
-          label: isOrgAdmin ? 'Overview & Stats' : isOrgHR ? 'HR Workspace' : 'Member Hub',
-          to: '/app/org/dashboard',
-          icon: LayoutDashboard,
-          end: true,
+          label: 'Analytics',
+          to: '/app/org/analytics',
+          icon: BarChart3,
         },
         {
           label: 'Organization Posts',

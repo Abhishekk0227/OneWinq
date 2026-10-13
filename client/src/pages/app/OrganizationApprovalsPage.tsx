@@ -111,8 +111,8 @@ export default function OrganizationApprovalsPage() {
         <p className="text-sm text-muted-foreground mt-1 mb-6">
           Profile approvals and identity moderation are restricted to organization managers and administrators.
         </p>
-        <Button onClick={() => navigate('/app/org/dashboard')} variant="outline">
-          Return to Dashboard
+        <Button onClick={() => navigate('/app/org/analytics')} variant="outline">
+          Return to Analytics
         </Button>
       </div>
     );
