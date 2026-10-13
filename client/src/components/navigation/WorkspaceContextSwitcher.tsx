@@ -87,13 +87,13 @@ export function WorkspaceContextSwitcher({
         title="Switch active workspace"
         aria-label="Workspace context switcher"
       >
-        <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-lg bg-primary/10 text-primary shrink-0 overflow-hidden">
+        <div className="flex items-center justify-center h-5.5 w-5.5 sm:h-6 sm:w-6 rounded-lg bg-muted/60 border border-border/50 text-primary shrink-0 overflow-hidden p-0.5">
           {isPersonal ? (
             user?.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.displayName}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover rounded-md"
               />
             ) : (
               <User className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
@@ -102,25 +102,25 @@ export function WorkspaceContextSwitcher({
             <img
               src={activeContext.logoUrl}
               alt={activeContext.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           ) : (
             <Building2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
           )}
         </div>
 
-        <div className="flex flex-col items-start text-left min-w-0 max-w-[85px] xs:max-w-[130px] sm:max-w-[200px]">
-          <span className="text-xs font-semibold truncate leading-none w-full">
+        <div className="flex flex-col items-start text-left min-w-0 max-w-[80px] sm:max-w-[160px]">
+          <span className="text-xs font-semibold truncate leading-tight w-full">
             {isPersonal ? user?.displayName || 'Personal' : activeContext.name}
           </span>
-          <span className="text-[10px] text-muted-foreground mt-0.5 leading-none truncate w-full hidden xs:block">
+          <span className="text-[10px] text-muted-foreground mt-0.5 leading-none truncate w-full hidden sm:block">
             {isPersonal ? 'Personal' : activeContext.role}
           </span>
         </div>
 
         <ChevronDown
           className={cn(
-            'h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground transition-transform duration-200 shrink-0',
+            'h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground transition-transform duration-200 shrink-0 ml-0.5',
             isOpen && 'rotate-180 text-foreground'
           )}
         />
