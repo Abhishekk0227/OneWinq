@@ -173,6 +173,32 @@ export default function MessagesPage() {
     })
   }, [messages])
 
+  // Mark active conversation as read when selected or when viewing new messages
+  React.useEffect(() => {
+    if (!activeConversationId) return
+
+    // Optimistically zero out unreadCount for the active conversation in conversations cache
+    queryClient.setQueryData(
+      queryKeys.conversations.list(),
+      (old: any) => {
+        if (!old?.data?.conversations) return old
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            conversations: old.data.conversations.map((c: any) =>
+              (c._id || c.id) === activeConversationId ? { ...c, unreadCount: 0 } : c
+            ),
+          },
+        }
+      }
+    )
+
+    messagingApi.markAsRead(activeConversationId).catch(() => {
+      // Ignore background markAsRead error
+    })
+  }, [activeConversationId, queryClient, messages.length])
+
   // Socket room joining and listeners
   React.useEffect(() => {
     if (!activeConversationId) {return}
@@ -625,7 +651,7 @@ export default function MessagesPage() {
                             </span>
                           )}
                         </div>
-                        {conv.unreadCount > 0 && (
+                        {conv.unreadCount > 0 && !isSelected && (
                           <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center shrink-0">
                             {conv.unreadCount}
                           </span>

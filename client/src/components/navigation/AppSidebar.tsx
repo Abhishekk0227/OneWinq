@@ -89,9 +89,9 @@ export function AppSidebar() {
 
   const orgNavItems: Array<{ label: string; to: string; icon: any; end?: boolean }> = []
 
-  // 1. Company Posts (Dedicated Company Posts Hub)
+  // 1. Organization Posts (Dedicated Organization Posts Hub)
   orgNavItems.push({
-    label: 'Company Posts',
+    label: 'Organization Posts',
     to: '/app/org/posts',
     icon: FileText,
   })
@@ -103,10 +103,10 @@ export function AppSidebar() {
     icon: LayoutDashboard,
   })
 
-  // 2. Company Profile Studio (Only for Owner/Admin or permitted editors)
+  // 2. Organization Profile Studio (Only for Owner/Admin or permitted editors)
   if (isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')) {
     orgNavItems.push({
-      label: 'Company Profile',
+      label: 'Organization Profile',
       to: '/app/org/profile',
       icon: Building2,
     })
@@ -153,9 +153,9 @@ export function AppSidebar() {
     })
   }
 
-  // 8. Company Events (Visible to all members of the organization)
+  // 8. Organization Events (Visible to all members of the organization)
   orgNavItems.push({
-    label: 'Company Events',
+    label: 'Organization Events',
     to: '/app/org/events',
     icon: Calendar,
   })
@@ -223,8 +223,8 @@ export function AppSidebar() {
                   'bg-gradient-to-r from-primary via-primary-600 to-primary-700 text-white shadow-primary/20 hover:brightness-105',
                   isSidebarCollapsed ? 'h-9 w-9 mx-auto' : 'py-2 px-2 text-xs'
                 )}
-                title="Create Company Post"
-                aria-label="Create Company Post"
+                title="Create Organization Post"
+                aria-label="Create Organization Post"
               >
                 <Plus className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
                 {!isSidebarCollapsed && <span className="truncate">Post</span>}

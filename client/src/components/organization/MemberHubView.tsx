@@ -275,7 +275,7 @@ export const MemberHubView: React.FC<MemberHubViewProps> = ({ org, membership })
             <CardHeader className="flex flex-row items-center justify-between pb-1">
               <div>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-primary" /> Upcoming Company Events
+                  <Calendar className="h-4 w-4 text-primary" /> Upcoming Organization Events
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Workshops, town halls, and gatherings

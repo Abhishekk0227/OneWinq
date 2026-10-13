@@ -139,12 +139,12 @@ export function MobileMenuDrawer() {
           end: true,
         },
         {
-          label: 'Company Posts',
+          label: 'Organization Posts',
           to: '/app/org/posts',
           icon: FileText,
         },
         ...(isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')
-          ? [{ label: 'Company Profile', to: '/app/org/profile', icon: Building2 }]
+          ? [{ label: 'Organization Profile', to: '/app/org/profile', icon: Building2 }]
           : []),
         {
           label: isOrgHR || hasPerm('members:invite') ? 'Team Members' : 'Colleague Directory',
@@ -170,7 +170,7 @@ export function MobileMenuDrawer() {
     {
       title: 'Operations & Management',
       items: [
-        { label: 'Company Events', to: '/app/org/events', icon: Calendar },
+        { label: 'Organization Events', to: '/app/org/events', icon: Calendar },
         ...(isOrgManager || hasPerm('approvals:view') || hasPerm('approvals:manage')
           ? [{ label: 'Profile Approvals', to: '/app/org/approvals', icon: FileCheck }]
           : []),

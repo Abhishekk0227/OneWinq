@@ -158,7 +158,7 @@ export default function OrganizationSettingsPage() {
           <CardHeader>
             <CardTitle>Vanity Web Address & Slug</CardTitle>
             <CardDescription>
-              Your public workspace URL for sharing company profiles and job vacancies.
+              Your public workspace URL for sharing organization profiles and job vacancies.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -176,7 +176,7 @@ export default function OrganizationSettingsPage() {
                   onClick={() => {
                     const url = `${window.location.origin}/c/${org?.slug}`;
                     navigator.clipboard.writeText(url);
-                    toast.success('Company profile link copied to clipboard');
+                    toast.success('Organization profile link copied to clipboard');
                   }}
                   className="h-10 px-3"
                 >

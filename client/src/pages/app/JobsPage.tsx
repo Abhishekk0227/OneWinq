@@ -15,7 +15,6 @@ import {
   Loader2,
   ArrowRight,
   ExternalLink,
-  Sparkles,
   UploadCloud,
   FileText,
   CheckCircle,
@@ -168,18 +167,19 @@ export default function JobsPage() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Hero Header */}
-      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div className="max-w-2xl space-y-2">
-          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 mb-2">
-            <Sparkles className="h-3 w-3 mr-1" /> Verified Talent Marketplace
+      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="max-w-xl space-y-1">
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[11px] py-0.5 px-2 font-medium mb-1">
+            Verified Talent Marketplace
           </Badge>
-          <h1 className="text-3xl font-extrabold tracking-tight">Explore Careers & Opportunities</h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Explore Careers & Opportunities</h1>
+          <p className="text-xs text-muted-foreground leading-normal">
             Discover roles from high-growth startups, colleges, and verified enterprises within the OneWinq ecosystem.
           </p>
         </div>
 
         <Button
+          size="sm"
           onClick={() => {
             if (activeContext.type === 'ORGANIZATION') {
               navigate('/app/org/jobs?action=create');
@@ -195,9 +195,9 @@ export default function JobsPage() {
               navigate('/app/organizations/create');
             }
           }}
-          className="shrink-0 bg-primary hover:bg-primary-600 text-white shadow-md font-semibold cursor-pointer"
+          className="shrink-0 bg-primary hover:bg-primary-600 text-white shadow-xs font-semibold cursor-pointer text-xs h-9 px-3.5"
         >
-          <Briefcase className="h-4 w-4 mr-2" />
+          <Briefcase className="h-3.5 w-3.5 mr-1.5" />
           Post a Job Opening
         </Button>
       </div>

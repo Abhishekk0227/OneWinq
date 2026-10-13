@@ -181,7 +181,7 @@ export default function OrganizationEventsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Enterprise Events & Smart Passes</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Participate in company town halls, team offsites, webinars, and manage access ticketing passes.
+            Participate in organization town halls, team offsites, webinars, and manage access ticketing passes.
           </p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="shadow-xs">
@@ -225,7 +225,7 @@ export default function OrganizationEventsPage() {
               <Calendar className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
               <h3 className="text-base font-semibold">No upcoming events scheduled</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-6">
-                Plan town halls, team workshops, or company offsites.
+                Plan town halls, team workshops, or organization offsites.
               </p>
               <Button onClick={() => setIsCreateOpen(true)} variant="outline">
                 <Plus className="h-4 w-4 mr-2" /> Host First Event
