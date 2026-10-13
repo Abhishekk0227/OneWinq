@@ -86,7 +86,7 @@ export function AppHeader() {
         <BrandLogo to="/app" collapsed className="sm:hidden shrink-0" />
 
         {/* Workspace Context Switcher (Dynamic Personal vs Org mode) */}
-        <WorkspaceContextSwitcher className="min-w-0" />
+        <WorkspaceContextSwitcher className="min-w-0 shrink max-h-9" />
 
         <div className="hidden md:inline-flex items-center shrink-0">
           {isStaff ? (
