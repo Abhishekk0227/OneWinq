@@ -96,13 +96,6 @@ export function AppSidebar() {
     icon: FileText,
   })
 
-  // 2. Organization Analytics
-  orgNavItems.push({
-    label: 'Analytics',
-    to: '/app/org/analytics',
-    icon: BarChart3,
-  })
-
   // 2. Organization Profile Studio (Only for Owner/Admin or permitted editors)
   if (isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')) {
     orgNavItems.push({
@@ -119,23 +112,14 @@ export function AppSidebar() {
     icon: Users,
   })
 
-  // 4. Departments (Managers, HR, Admins)
-  if (isOrgManager || hasPerm('departments:manage')) {
-    orgNavItems.push({
-      label: 'Departments',
-      to: '/app/org/departments',
-      icon: Network,
-    })
-  }
-
-  // 6. Job Postings & Recruitment (Always available in organization workspace)
+  // 4. Job Postings & Recruitment (Always available in organization workspace)
   orgNavItems.push({
     label: 'Job Postings',
     to: '/app/org/jobs',
     icon: Briefcase,
   })
 
-  // 7. Applicants (HR, Admins)
+  // 5. Applicants (HR, Admins)
   if (isOrgHR || hasPerm('applications:view') || hasPerm('applications:manage')) {
     orgNavItems.push({
       label: 'Applicants',
@@ -144,12 +128,28 @@ export function AppSidebar() {
     })
   }
 
-  // 8. Organization Events (Visible to all members of the organization)
+  // 6. Organization Operations: Analytics
+  orgNavItems.push({
+    label: 'Analytics',
+    to: '/app/org/analytics',
+    icon: BarChart3,
+  })
+
+  // 7. Organization Events (Visible to all members of the organization)
   orgNavItems.push({
     label: 'Organization Events',
     to: '/app/org/events',
     icon: Calendar,
   })
+
+  // 8. Departments (Managers, HR, Admins)
+  if (isOrgManager || hasPerm('departments:manage')) {
+    orgNavItems.push({
+      label: 'Departments',
+      to: '/app/org/departments',
+      icon: Network,
+    })
+  }
 
   // 9. Roles & Access (Strictly Owner/Admin or roles:manage)
   if (isOrgAdmin || hasPerm('roles:manage')) {

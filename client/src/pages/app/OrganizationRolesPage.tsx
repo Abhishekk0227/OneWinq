@@ -274,17 +274,17 @@ export default function OrganizationRolesPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <KeyRound className="h-6 w-6 text-primary" /> Roles & Permission Matrix
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-primary shrink-0" /> Roles & Permission Matrix
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Configure custom organizational roles (e.g. Dean, Medical Lead, HR Coordinator) with granular permissions.
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Configure custom organizational roles with granular permissions.
           </p>
         </div>
-        <Button onClick={handleOpenCreate} className="font-semibold shadow-xs">
-          <Plus className="h-4 w-4 mr-2" /> Create Custom Role
+        <Button onClick={handleOpenCreate} size="sm" className="font-semibold shadow-xs h-8 text-xs shrink-0">
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Custom Role
         </Button>
       </div>
 

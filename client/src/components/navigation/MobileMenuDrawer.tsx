@@ -133,11 +133,6 @@ export function MobileMenuDrawer() {
       title: 'Organization Workspace',
       items: [
         {
-          label: 'Analytics',
-          to: '/app/org/analytics',
-          icon: BarChart3,
-        },
-        {
           label: 'Organization Posts',
           to: '/app/org/posts',
           icon: FileText,
@@ -169,6 +164,7 @@ export function MobileMenuDrawer() {
     {
       title: 'Operations & Management',
       items: [
+        { label: 'Analytics', to: '/app/org/analytics', icon: BarChart3 },
         { label: 'Organization Events', to: '/app/org/events', icon: Calendar },
         ...(isOrgManager || hasPerm('departments:manage')
           ? [{ label: 'Departments', to: '/app/org/departments', icon: Network }]
