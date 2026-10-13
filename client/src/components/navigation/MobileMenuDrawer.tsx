@@ -170,9 +170,6 @@ export function MobileMenuDrawer() {
       title: 'Operations & Management',
       items: [
         { label: 'Organization Events', to: '/app/org/events', icon: Calendar },
-        ...(isOrgManager || hasPerm('approvals:view') || hasPerm('approvals:manage')
-          ? [{ label: 'Profile Approvals', to: '/app/org/approvals', icon: FileCheck }]
-          : []),
         ...(isOrgManager || hasPerm('departments:manage')
           ? [{ label: 'Departments', to: '/app/org/departments', icon: Network }]
           : []),
