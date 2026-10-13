@@ -165,45 +165,9 @@ export default function JobsPage() {
   const { activeContext, memberships, switchToOrganization } = useOrganizationContextStore();
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      {/* Hero Header */}
-      <div className="rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="max-w-xl space-y-1">
-          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-[11px] py-0.5 px-2 font-medium mb-1">
-            Verified Talent Marketplace
-          </Badge>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Explore Careers & Opportunities</h1>
-          <p className="text-xs text-muted-foreground leading-normal">
-            Discover roles from high-growth startups, colleges, and verified enterprises within the OneWinq ecosystem.
-          </p>
-        </div>
-
-        <Button
-          size="sm"
-          onClick={() => {
-            if (activeContext.type === 'ORGANIZATION') {
-              navigate('/app/org/jobs?action=create');
-            } else if (memberships.length > 0) {
-              const orgId = memberships[0].organization?.id || (memberships[0].organization as any)?._id;
-              if (orgId) {
-                switchToOrganization(orgId);
-                navigate('/app/org/jobs?action=create');
-              } else {
-                navigate('/app/organizations/create');
-              }
-            } else {
-              navigate('/app/organizations/create');
-            }
-          }}
-          className="shrink-0 bg-primary hover:bg-primary-600 text-white shadow-xs font-semibold cursor-pointer text-xs h-9 px-3.5"
-        >
-          <Briefcase className="h-3.5 w-3.5 mr-1.5" />
-          Post a Job Opening
-        </Button>
-      </div>
-
+    <div className="space-y-4 max-w-5xl mx-auto pb-12">
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl border border-border/80 bg-card shadow-xs">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs">
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -214,12 +178,12 @@ export default function JobsPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           {/* Employment Type */}
           <select
             value={selectedEmployment}
             onChange={(e) => setSelectedEmployment(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
+            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
           >
             <option value="ALL">All Employment Types</option>
             <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
@@ -232,7 +196,7 @@ export default function JobsPage() {
           <select
             value={selectedWorkplace}
             onChange={(e) => setSelectedWorkplace(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
+            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
           >
             <option value="ALL">All Workplaces</option>
             <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
@@ -256,41 +220,41 @@ export default function JobsPage() {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-2.5">
           {jobs.map((job) => {
             const org = job.organization;
             return (
               <Card
                 key={job.id}
-                className="hover:border-primary/40 transition-all duration-200 overflow-hidden"
+                className="hover:border-primary/40 transition-all duration-200 overflow-hidden shadow-xs"
               >
-                <div className="p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0">
+                <div className="p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
+                    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-muted/40 border border-border/80 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 p-1">
                       {org?.logoUrl ? (
-                        <img src={org.logoUrl} alt={org.name} className="h-full w-full object-cover" />
+                        <img src={org.logoUrl} alt={org.name} className="h-full w-full object-contain" />
                       ) : (
-                        <Building2 className="h-7 w-7 text-primary/80" />
+                        <Building2 className="h-5 w-5 text-primary/80" />
                       )}
                     </div>
 
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-bold tracking-tight text-foreground">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground">
                           {job.title}
                         </h3>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 font-medium">
                           {job.employmentType.replace('_', ' ')}
                         </Badge>
-                        <Badge variant="outline" className="text-xs bg-primary/5 text-primary">
+                        <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 bg-primary/5 text-primary font-medium">
                           {job.workplaceType.replace('_', ' ')}
                         </Badge>
                         {job.applicationMethod === 'EXTERNAL' ? (
-                          <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/20 flex items-center gap-1 font-medium">
-                            <ExternalLink className="h-3 w-3" /> External Form
+                          <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 bg-purple-500/10 text-purple-600 border-purple-500/20 flex items-center gap-1 font-medium">
+                            <ExternalLink className="h-2.5 w-2.5" /> External Form
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-xs bg-sky-500/10 text-sky-600 border-sky-500/20 font-medium">
+                          <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 bg-sky-500/10 text-sky-600 border-sky-500/20 font-medium">
                             Easy Apply
                           </Badge>
                         )}
@@ -299,7 +263,7 @@ export default function JobsPage() {
                       <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
                         <span className="text-foreground font-semibold">{org?.name}</span>
                         {org?.isVerified && (
-                          <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 text-[10px] py-0">
+                          <Badge variant="default" className="bg-primary/20 text-primary border-primary/30 text-[9px] py-0 px-1.5">
                             Verified
                           </Badge>
                         )}
@@ -309,29 +273,28 @@ export default function JobsPage() {
                             {job.location.city}
                           </span>
                         )}
-                      </div>
-
-                      {job.salary && job.salary.min && job.salary.isDisclosed && (
-                        <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5 pt-0.5">
-                          <Banknote className="h-3.5 w-3.5" />
-                          <span>
+                        {job.salary && job.salary.min && job.salary.isDisclosed && (
+                          <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                            • <Banknote className="h-3 w-3" />
                             {getCurrencySymbol(job.salary.currency)} {job.salary.min.toLocaleString()}
                             {job.salary.max ? ` - ${job.salary.max.toLocaleString()}` : '+'} /{' '}
                             {job.salary.period?.toLowerCase()}
                           </span>
+                        )}
+                      </div>
+
+                      {job.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
+                          {job.description}
                         </p>
                       )}
 
-                      <p className="text-xs text-muted-foreground line-clamp-2 pt-1 leading-relaxed">
-                        {job.description}
-                      </p>
-
                       {job.skills && job.skills.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-2">
+                        <div className="flex flex-wrap gap-1 pt-0.5">
                           {job.skills.map((skill) => (
                             <span
                               key={skill}
-                              className="px-2 py-0.5 rounded-md bg-muted text-[11px] font-medium text-muted-foreground"
+                              className="px-2 py-0.5 rounded-md bg-muted/70 text-[10px] sm:text-[11px] font-medium text-muted-foreground"
                             >
                               {skill}
                             </span>
@@ -346,16 +309,16 @@ export default function JobsPage() {
                       <Button
                         disabled
                         variant="outline"
-                        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 cursor-default font-semibold shadow-none gap-1.5 h-10 px-4 select-none opacity-90"
+                        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 cursor-default font-semibold shadow-none gap-1.5 h-8.5 px-3.5 text-xs select-none opacity-90"
                       >
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> Applied
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Applied
                       </Button>
                     ) : job.applicationMethod === 'EXTERNAL' && job.externalApplyUrl ? (
                       <Button
                         onClick={() => window.open(job.externalApplyUrl!, '_blank', 'noopener,noreferrer')}
-                        className="shadow-sm bg-purple-600 hover:bg-purple-700 text-white gap-1.5 h-10 px-4"
+                        className="shadow-xs bg-purple-600 hover:bg-purple-700 text-white gap-1.5 h-8.5 px-3.5 text-xs font-semibold"
                       >
-                        Apply via Form <ExternalLink className="h-4 w-4" />
+                        Apply via Form <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                     ) : (
                       <Button
@@ -364,9 +327,9 @@ export default function JobsPage() {
                           setUploadedResume(null);
                           reset();
                         }}
-                        className="shadow-sm h-10 px-4"
+                        className="shadow-xs h-8.5 px-3.5 text-xs font-semibold"
                       >
-                        Quick Apply <ArrowRight className="h-4 w-4 ml-1.5" />
+                        Quick Apply <ArrowRight className="h-3.5 w-3.5 ml-1" />
                       </Button>
                     )}
                   </div>
