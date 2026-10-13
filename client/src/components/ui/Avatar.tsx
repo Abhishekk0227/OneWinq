@@ -10,11 +10,11 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeClasses = {
-  sm: 'h-8 w-8 text-xs',
-  md: 'h-10 w-10 text-sm',
-  lg: 'h-14 w-14 text-base',
-  xl: 'h-20 w-20 text-xl font-bold',
-  '2xl': 'h-28 w-28 text-3xl font-extrabold',
+  sm: 'h-8 w-8 min-h-8 min-w-8 max-h-8 max-w-8 text-xs',
+  md: 'h-10 w-10 min-h-10 min-w-10 max-h-10 max-w-10 text-sm',
+  lg: 'h-14 w-14 min-h-14 min-w-14 max-h-14 max-w-14 text-base',
+  xl: 'h-20 w-20 min-h-20 min-w-20 max-h-20 max-w-20 text-xl font-bold',
+  '2xl': 'h-28 w-28 min-h-28 min-w-28 max-h-28 max-w-28 text-3xl font-extrabold',
 }
 
 const statusSizes = {
@@ -32,6 +32,7 @@ export function Avatar({
   size = 'md',
   status,
   className,
+  style,
   ...props
 }: AvatarProps) {
   const [hasError, setHasError] = React.useState(!src)
@@ -55,17 +56,21 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'relative inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-medium overflow-hidden border border-border/80 shadow-sm select-none',
+        'relative inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-medium overflow-hidden border border-border/80 shadow-sm select-none aspect-square isolate',
         sizeClasses[size],
         className
       )}
+      style={{
+        WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+        ...style,
+      }}
       {...props}
     >
       {!hasError && src ? (
         <img
           src={src}
           alt={alt}
-          className="h-full w-full object-cover"
+          className="h-full w-full max-h-full max-w-full object-cover rounded-full aspect-square block shrink-0 pointer-events-none"
           onError={() => setHasError(true)}
         />
       ) : (

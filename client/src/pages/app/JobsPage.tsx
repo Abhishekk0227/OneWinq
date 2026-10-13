@@ -166,6 +166,16 @@ export default function JobsPage() {
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto pb-12">
+      {/* Section Header */}
+      <div className="space-y-0.5 text-left">
+        <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+          Jobs & Opportunities
+        </h1>
+        <p className="text-xs text-muted-foreground">
+          Explore and apply to verified career opportunities and internships across the network.
+        </p>
+      </div>
+
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs">
         <div className="relative w-full md:w-80">
@@ -183,7 +193,7 @@ export default function JobsPage() {
           <select
             value={selectedEmployment}
             onChange={(e) => setSelectedEmployment(e.target.value)}
-            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
+            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
           >
             <option value="ALL">All Employment Types</option>
             <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
@@ -196,7 +206,7 @@ export default function JobsPage() {
           <select
             value={selectedWorkplace}
             onChange={(e) => setSelectedWorkplace(e.target.value)}
-            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20"
+            className="h-8.5 px-3 rounded-xl border border-border bg-background text-xs font-medium focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
           >
             <option value="ALL">All Workplaces</option>
             <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
@@ -232,7 +242,7 @@ export default function JobsPage() {
                   <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
                     <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-muted/40 border border-border/80 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 p-1">
                       {org?.logoUrl ? (
-                        <img src={org.logoUrl} alt={org.name} className="h-full w-full object-contain" />
+                        <img src={org.logoUrl} alt={org.name} className="h-full w-full object-contain max-h-full max-w-full block" />
                       ) : (
                         <Building2 className="h-5 w-5 text-primary/80" />
                       )}
