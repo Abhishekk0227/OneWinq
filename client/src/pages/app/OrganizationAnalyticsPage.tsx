@@ -32,7 +32,6 @@ import { analyticsApi } from '@/features/analytics/api/analytics.api'
 import { organizationsApi } from '@/features/organizations/api/organizations.api'
 import { jobsApi } from '@/features/jobs/api/jobs.api'
 import { postsApi } from '@/features/posts/api/posts.api'
-import { queryKeys } from '@/lib/query/queryKeys'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
@@ -47,17 +46,11 @@ export default function OrganizationAnalyticsPage() {
 
   const [timeRange, setTimeRange] = React.useState<'7d' | '30d' | '90d'>('30d')
 
-  // Telemetry overview & timeline queries
-  const { data: overviewData, isLoading: isOverviewLoading } = useQuery({
-    queryKey: ['analytics', 'overview', timeRange, orgId],
-    queryFn: () => analyticsApi.getOverview(timeRange),
-    enabled: Boolean(isOrgMode),
-  })
-
-  const { data: profileAnalyticsData, isLoading: isProfileLoading } = useQuery({
-    queryKey: queryKeys.analytics.profile(timeRange),
-    queryFn: () => analyticsApi.getProfileAnalytics(timeRange),
-    enabled: Boolean(isOrgMode),
+  // Organization-scoped telemetry & impressions query strictly for this organization
+  const { data: orgAnalyticsData, isLoading: isAnalyticsLoading } = useQuery({
+    queryKey: ['analytics', 'organization', orgId, timeRange],
+    queryFn: () => analyticsApi.getOrganizationAnalytics(orgId, timeRange),
+    enabled: Boolean(isOrgMode && orgId),
   })
 
   // Organization operational metrics queries
@@ -100,7 +93,8 @@ export default function OrganizationAnalyticsPage() {
     return { totalPosts, totalLikes, totalComments, totalShares }
   }, [orgPosts])
 
-  const overview = overviewData?.data?.overview || {
+  const orgAnalytics = orgAnalyticsData?.data
+  const overview = orgAnalytics?.overview || {
     totalProfileViews: 0,
     uniqueViewers: 0,
     identifiableViews: 0,
@@ -110,10 +104,9 @@ export default function OrganizationAnalyticsPage() {
     linkClicks: 0,
   }
 
-  const profileAnalytics = profileAnalyticsData?.data?.analytics || (profileAnalyticsData?.data as any)
-  const timeSeries = profileAnalytics?.timeSeries || (profileAnalytics as any)?.timeline || []
-  const topLinks = profileAnalytics?.topLinks || []
-  const deviceBreakdown = profileAnalytics?.deviceBreakdown || { mobile: 0, desktop: 0, tablet: 0 }
+  const timeSeries = orgAnalytics?.timeSeries || []
+  const topLinks = orgAnalytics?.topLinks || []
+  const deviceBreakdown = orgAnalytics?.deviceBreakdown || { mobile: 0, desktop: 0, tablet: 0 }
 
   const totalDeviceVisits =
     (deviceBreakdown.mobile || 0) + (deviceBreakdown.desktop || 0) + (deviceBreakdown.tablet || 0)
@@ -142,7 +135,7 @@ export default function OrganizationAnalyticsPage() {
     )
   }
 
-  if (isOverviewLoading || isProfileLoading) {
+  if (isAnalyticsLoading) {
     return <LoadingScreen message={`Loading ${activeContext.name}'s analytics telemetry...`} />
   }
 

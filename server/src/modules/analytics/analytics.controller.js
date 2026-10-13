@@ -65,6 +65,7 @@ export const analyticsController = {
       await analyticsService.recordEvent({
         eventType: 'link.clicked',
         targetUserId: validated.targetUserId,
+        organizationId: validated.organizationId,
         actorUserId: req.user?.id || null,
         ip: req.ip,
         userAgent: req.headers['user-agent'],
@@ -76,6 +77,24 @@ export const analyticsController = {
 
       return res.status(200).json(
         successResponse({ tracked: true }, 'Link click tracked successfully.'),
+      );
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  /**
+   * GET /api/v1/analytics/organization/:organizationId
+   */
+  async getOrganizationAnalytics(req, res, next) {
+    try {
+      const validated = validate(timeRangeQuerySchema, req.query);
+      const data = await analyticsService.getOrganizationAnalytics(
+        req.params.organizationId,
+        validated,
+      );
+      return res.status(200).json(
+        successResponse(data, 'Organization analytics retrieved successfully.'),
       );
     } catch (err) {
       return next(err);

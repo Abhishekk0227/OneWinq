@@ -11,3 +11,4 @@ analyticsRoutes.post('/events/link-click', analyticsController.trackLinkClick);
 analyticsRoutes.get('/overview', authenticate, analyticsController.getOverview);
 analyticsRoutes.get('/profile', authenticate, analyticsController.getProfileAnalytics);
 analyticsRoutes.get('/cards/:cardUid', authenticate, analyticsController.getCardAnalytics);
+analyticsRoutes.get('/organization/:organizationId', authenticate, analyticsController.getOrganizationAnalytics);

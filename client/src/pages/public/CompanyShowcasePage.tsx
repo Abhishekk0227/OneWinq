@@ -33,6 +33,7 @@ import {
   UserCheck,
   Banknote,
 } from 'lucide-react';
+import { analyticsApi } from '@/features/analytics/api/analytics.api';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
 import { postsApi } from '@/features/posts/api/posts.api';
@@ -262,6 +263,20 @@ export default function CompanyShowcasePage() {
   const workingHours = org.contact?.workingHours;
   const directionsUrl = org.contact?.directionsUrl;
 
+  const handleTrackLink = (url?: string, label?: string) => {
+    if (!url || (!org?.id && !org?._id)) return;
+    const orgId = org.id || org._id;
+    analyticsApi
+      .trackLinkClick({
+        organizationId: orgId,
+        linkUrl: url,
+        label: label || 'External Link',
+      })
+      .catch(() => {
+        // Non-blocking telemetry
+      });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-20 selection:bg-primary/20">
       {/* 1. Hero Header Banner */}
@@ -367,6 +382,7 @@ export default function CompanyShowcasePage() {
                   href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => handleTrackLink(org.website, 'Official Website')}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border/80 hover:bg-muted text-xs font-semibold shadow-xs transition-colors"
                 >
                   <Globe className="h-3.5 w-3.5" /> Visit Website <ExternalLink className="h-3 w-3 opacity-60" />
@@ -377,6 +393,7 @@ export default function CompanyShowcasePage() {
                   href={directionsUrl}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => handleTrackLink(directionsUrl, 'Office Directions')}
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/80 hover:bg-muted text-xs font-semibold shadow-xs transition-colors"
                 >
                   <Navigation className="h-3.5 w-3.5 text-primary" /> Directions
@@ -582,6 +599,7 @@ export default function CompanyShowcasePage() {
                         href={prod.linkUrl || prod.ctaUrl}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() => handleTrackLink(prod.linkUrl || prod.ctaUrl, prod.name || 'Offering')}
                         className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline"
                       >
                         Learn More <ExternalLink className="h-3 w-3" />
@@ -634,6 +652,7 @@ export default function CompanyShowcasePage() {
                       href={proj.linkUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project Case Study')}
                       className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
                     >
                       View Case Study <ExternalLink className="h-3 w-3" />
@@ -851,6 +870,7 @@ export default function CompanyShowcasePage() {
                     href={directionsUrl}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => handleTrackLink(directionsUrl, 'Office Directions')}
                     className="inline-flex items-center gap-1 text-primary hover:underline font-semibold mt-1"
                   >
                     <Navigation className="h-3 w-3" /> Get Directions
@@ -898,6 +918,7 @@ export default function CompanyShowcasePage() {
                   href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => handleTrackLink(org.website, 'Official Website')}
                   className="text-primary hover:underline inline-flex items-center gap-1"
                 >
                   {org.website} <ExternalLink className="h-3 w-3" />
