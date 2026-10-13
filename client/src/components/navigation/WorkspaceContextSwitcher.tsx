@@ -93,7 +93,7 @@ export function WorkspaceContextSwitcher({
               <img
                 src={user.avatarUrl}
                 alt={user.displayName}
-                className="h-full w-full object-cover rounded-md"
+                className="h-full w-full max-h-full max-w-full object-cover rounded-md block shrink-0"
               />
             ) : (
               <User className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
@@ -102,7 +102,7 @@ export function WorkspaceContextSwitcher({
             <img
               src={activeContext.logoUrl}
               alt={activeContext.name}
-              className="h-full w-full object-contain"
+              className="h-full w-full max-h-full max-w-full object-contain block shrink-0"
             />
           ) : (
             <Building2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
@@ -148,7 +148,7 @@ export function WorkspaceContextSwitcher({
                   <img
                     src={user.avatarUrl}
                     alt={user.displayName}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full max-h-full max-w-full object-cover block shrink-0"
                   />
                 ) : (
                   <User className="h-4 w-4" />
@@ -196,7 +196,7 @@ export function WorkspaceContextSwitcher({
                           <img
                             src={org.logoUrl}
                             alt={org.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full max-h-full max-w-full object-cover block shrink-0"
                           />
                         ) : (
                           <Building2 className="h-4 w-4" />

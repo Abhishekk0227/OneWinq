@@ -179,16 +179,18 @@ export function AppHeader() {
         </Link>
 
         {/* User Avatar Menu Dropdown */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-2 rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all p-0.5 focus:outline-none"
+            className="flex items-center justify-center rounded-full ring-2 ring-transparent hover:ring-primary/20 transition-all p-0.5 focus:outline-none shrink-0 overflow-hidden"
+            aria-label="User profile menu"
           >
             <Avatar
               size="sm"
               src={user?.avatarUrl}
               fallback={user?.displayName || user?.username}
               alt={user?.displayName}
+              className="shrink-0"
             />
           </button>
 
@@ -198,7 +200,7 @@ export function AppHeader() {
                 className="fixed inset-0 z-40"
                 onClick={() => setIsUserMenuOpen(false)}
               />
-              <div className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in-0 zoom-in-95">
+              <div className="absolute right-0 top-12 z-50 w-60 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in-0 zoom-in-95 overflow-hidden">
                 <div className="px-3 py-2.5 border-b border-border mb-1 flex items-center gap-3">
                   <Avatar
                     size="sm"
