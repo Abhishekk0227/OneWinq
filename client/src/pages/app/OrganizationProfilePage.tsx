@@ -68,9 +68,9 @@ export interface SectorTaxonomy {
   achievementSingular: string;
   mediaTitle: string;
   mediaDescription: string;
-  teamMetricLabel: string;
-  customerMetricLabel: string;
-  clientFieldLabel: string;
+  teamMetricLabel?: string;
+  customerMetricLabel?: string;
+  clientFieldLabel?: string;
 }
 
 export function getSectorTaxonomy(type: string): SectorTaxonomy {
@@ -80,94 +80,83 @@ export function getSectorTaxonomy(type: string): SectorTaxonomy {
       return {
         sectorLabel: 'Higher Education & Academia',
         offeringsTitle: 'Academic Programs & Degrees',
-        offeringsDescription: 'Featured courses, departments, faculties, and curricula.',
+        offeringsDescription: 'Featured courses, departments, and curricula.',
         offeringSingular: 'Program / Course',
-        projectsTitle: 'Research Initiatives & Labs',
-        projectsDescription: 'Breakthrough research, publications, and grant projects.',
-        projectSingular: 'Research Project',
-        achievementsTitle: 'Accreditations & Global Ranks',
-        achievementsDescription: 'NAAC, NBA, NIRF, QS rankings, and academic awards.',
-        achievementSingular: 'Accreditation / Ranking',
+        projectsTitle: 'Research & Projects',
+        projectsDescription: 'Academic research and notable campus projects.',
+        projectSingular: 'Project',
+        achievementsTitle: 'Accreditations & Honors',
+        achievementsDescription: 'Official accreditations, rankings, and academic awards.',
+        achievementSingular: 'Accreditation / Award',
         mediaTitle: 'Campus Life & Events',
-        mediaDescription: 'Campus galleries, conferences, convocations, and student life.',
+        mediaDescription: 'Campus galleries, conferences, and student life.',
         teamMetricLabel: 'Faculty & Researchers',
         customerMetricLabel: 'Enrolled Students',
-        clientFieldLabel: 'Funding Agency / Partner',
+        clientFieldLabel: 'Partner / Institution (Optional)',
       };
     case 'HOSPITAL':
       return {
-        sectorLabel: 'Healthcare & Medical Sciences',
-        offeringsTitle: 'Specialties & Clinical Departments',
-        offeringsDescription: 'Medical wings, centers of excellence, and specialized treatments.',
-        offeringSingular: 'Specialty / Department',
-        projectsTitle: 'Clinical Innovations & Facilities',
-        projectsDescription: 'Healthcare technology, clinical trials, and medical outreach.',
-        projectSingular: 'Clinical Program',
+        sectorLabel: 'Healthcare & Medical Center',
+        offeringsTitle: 'Medical Services & Departments',
+        offeringsDescription: 'Specialties, treatments, and clinical care services.',
+        offeringSingular: 'Medical Service',
+        projectsTitle: 'Clinical Initiatives & Research',
+        projectsDescription: 'Medical programs, clinical trials, and healthcare outreach.',
+        projectSingular: 'Clinical Initiative',
         achievementsTitle: 'Accreditations & Certifications',
-        achievementsDescription: 'JCI, NABH, healthcare quality recognitions and excellence awards.',
-        achievementSingular: 'Certification / Award',
-        mediaTitle: 'Facilities & Care in Action',
-        mediaDescription: 'Operation suites, diagnostic labs, patient care, and camps.',
-        teamMetricLabel: 'Doctors & Care Staff',
-        customerMetricLabel: 'Patients Treated / Beds',
-        clientFieldLabel: 'Affiliated Body / Partner',
+        achievementsDescription: 'Healthcare certifications, quality standards, and awards.',
+        achievementSingular: 'Certification',
+        mediaTitle: 'Facilities & Care Media',
+        mediaDescription: 'Medical facilities, diagnostics, and patient care moments.',
+        teamMetricLabel: 'Medical Staff',
+        customerMetricLabel: 'Patients Treated',
+        clientFieldLabel: 'Partner / Affiliation (Optional)',
       };
     case 'NGO':
       return {
         sectorLabel: 'Non-Profit & Social Impact',
-        offeringsTitle: 'Active Causes & Initiatives',
-        offeringsDescription: 'Key missions, community drives, and social welfare programs.',
-        offeringSingular: 'Cause / Campaign',
-        projectsTitle: 'Field Programs & Relief Projects',
-        projectsDescription: 'On-ground execution, relief interventions, and humanitarian missions.',
-        projectSingular: 'Relief Project',
+        offeringsTitle: 'Programs & Causes',
+        offeringsDescription: 'Active social initiatives and community campaigns.',
+        offeringSingular: 'Program / Cause',
+        projectsTitle: 'Field Projects & Relief Work',
+        projectsDescription: 'Community interventions and humanitarian relief projects.',
+        projectSingular: 'Project',
         achievementsTitle: 'Milestones & Grants',
-        achievementsDescription: 'Government grants, UN recognitions, and impact certifications.',
-        achievementSingular: 'Impact Milestone',
+        achievementsDescription: 'Recognitions, government grants, and certifications.',
+        achievementSingular: 'Milestone / Grant',
         mediaTitle: 'Community & Field Work',
-        mediaDescription: 'Field photographs, volunteer drives, and real-world impact.',
-        teamMetricLabel: 'Active Volunteers & Staff',
+        mediaDescription: 'Photos and media from community drives and field work.',
+        teamMetricLabel: 'Volunteers & Staff',
         customerMetricLabel: 'Beneficiaries Empowered',
-        clientFieldLabel: 'Beneficiary Community / Donor',
+        clientFieldLabel: 'Partner / Donor (Optional)',
       };
     case 'STARTUP':
-      return {
-        sectorLabel: 'Venture & High-Growth Startup',
-        offeringsTitle: 'Core Products & Tech Stack',
-        offeringsDescription: 'Flagship apps, SaaS offerings, and disruptive solutions.',
-        offeringSingular: 'Product / SaaS Feature',
-        projectsTitle: 'Pilots & Customer Case Studies',
-        projectsDescription: 'Early adopter rollouts, pilot programs, and product traction.',
-        projectSingular: 'Pilot / Integration',
-        achievementsTitle: 'Milestones & Funding',
-        achievementsDescription: 'Accelerator cohorts, seed/Series rounds, and innovation awards.',
-        achievementSingular: 'Milestone / Grant',
-        mediaTitle: 'Demo Days & Culture',
-        mediaDescription: 'Product demos, hackathons, team culture, and media features.',
-        teamMetricLabel: 'Core Team Size',
-        customerMetricLabel: 'Active Users / ARR',
-        clientFieldLabel: 'Customer / Partner',
-      };
     case 'COMPANY':
     default:
       return {
-        sectorLabel: 'Corporate & Enterprise',
-        offeringsTitle: 'Products & Enterprise Solutions',
-        offeringsDescription: 'Core commercial products, client services, and solutions.',
+        sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
+        offeringsTitle: 'Products & Services',
+        offeringsDescription: 'Products, services, and solutions offered by your organization.',
         offeringSingular: 'Product / Service',
-        projectsTitle: 'Projects & Case Studies',
-        projectsDescription: 'High-impact enterprise deliveries and client transformations.',
-        projectSingular: 'Project / Case Study',
-        achievementsTitle: 'Honors & Industry Awards',
-        achievementsDescription: 'ISO certifications, patent grants, and industry accolades.',
-        achievementSingular: 'Award / Certification',
-        mediaTitle: 'Life at Enterprise & Gallery',
-        mediaDescription: 'Corporate summits, employee culture, and milestone celebrations.',
-        teamMetricLabel: 'Workforce Size',
-        customerMetricLabel: 'Active Clients Served',
-        clientFieldLabel: 'Client / Beneficiary',
+        projectsTitle: 'Projects & Portfolio',
+        projectsDescription: 'Featured client work, project deliveries, and key initiatives.',
+        projectSingular: 'Project',
+        achievementsTitle: 'Honors & Recognitions',
+        achievementsDescription: 'Certifications, patents, and industry recognitions.',
+        achievementSingular: 'Award / Honor',
+        mediaTitle: 'Media & Gallery',
+        mediaDescription: 'Photos and media of work culture, events, and milestones.',
+        teamMetricLabel: 'Team Size',
+        customerMetricLabel: 'Clients / Users',
+        clientFieldLabel: 'Client / Partner (Optional)',
       };
   }
+}
+
+export function countWords(text: string = ''): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).filter(Boolean).length;
 }
 
 const profileSchema = z.object({
@@ -204,11 +193,35 @@ const profileSchema = z.object({
   locationShort: z.string().trim().optional(),
   statsTeamSize: z.string().trim().optional(),
   statsCustomerBase: z.string().trim().optional(),
-  // About & Story
-  aboutCompany: z.string().trim().optional(),
-  mission: z.string().trim().optional(),
-  vision: z.string().trim().optional(),
-  story: z.string().trim().optional(),
+  // About & Story with standard word count limits
+  aboutCompany: z
+    .string()
+    .trim()
+    .refine((val) => !val || countWords(val) <= 300, {
+      message: 'About section exceeds the standard 300-word limit',
+    })
+    .optional(),
+  mission: z
+    .string()
+    .trim()
+    .refine((val) => !val || countWords(val) <= 100, {
+      message: 'Mission statement exceeds the standard 100-word limit',
+    })
+    .optional(),
+  vision: z
+    .string()
+    .trim()
+    .refine((val) => !val || countWords(val) <= 100, {
+      message: 'Vision statement exceeds the standard 100-word limit',
+    })
+    .optional(),
+  story: z
+    .string()
+    .trim()
+    .refine((val) => !val || countWords(val) <= 500, {
+      message: 'Story section exceeds the standard 500-word limit',
+    })
+    .optional(),
   // Branding
   primaryColor: z.string().trim().optional(),
   secondaryColor: z.string().trim().optional(),
@@ -830,24 +843,24 @@ export default function OrganizationProfilePage() {
             <TabsTrigger value="general" className="text-xs shrink-0 whitespace-nowrap">Overview</TabsTrigger>
             <TabsTrigger value="about" className="text-xs shrink-0 whitespace-nowrap">About & Story</TabsTrigger>
             <TabsTrigger value="branding" className="text-xs shrink-0 whitespace-nowrap">Brand Kit</TabsTrigger>
-            <TabsTrigger value="offerings" className="text-xs shrink-0 whitespace-nowrap">Offerings</TabsTrigger>
+            <TabsTrigger value="offerings" className="text-xs shrink-0 whitespace-nowrap">Products & Services</TabsTrigger>
             <TabsTrigger value="projects" className="text-xs shrink-0 whitespace-nowrap">Projects</TabsTrigger>
             <TabsTrigger value="achievements" className="text-xs shrink-0 whitespace-nowrap">Honors</TabsTrigger>
             <TabsTrigger value="media" className="text-xs shrink-0 whitespace-nowrap">Media</TabsTrigger>
             <TabsTrigger value="contact" className="text-xs shrink-0 whitespace-nowrap">Contact</TabsTrigger>
           </TabsList>
 
-          {/* TAB 1: General & Overview Stats */}
+          {/* TAB 1: General & Overview */}
           <TabsContent value="general" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Organization Core Details</CardTitle>
                 <CardDescription>
-                  Fundamental taxonomy and identity settings for your organization.
+                  Fundamental identity and established year settings for your organization.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                       Organization Name *
@@ -873,136 +886,46 @@ export default function OrganizationProfilePage() {
                       <option value={ORGANIZATION_TYPE.OTHER}>Other Organization</option>
                     </select>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Tagline / One-liner
-                  </label>
-                  <Input {...register('tagline')} placeholder="Building the next generation of intelligence" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Industry / Domain
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1 flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary" /> Established Year
                     </label>
-                    <Input {...register('industry')} placeholder="Software & Cloud, Healthcare, etc." />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Team Scale / Size
-                    </label>
-                    <select
-                      {...register('size')}
-                      className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      <option value="1-10">1-10 Members</option>
-                      <option value="11-50">11-50 Members</option>
-                      <option value="51-200">51-200 Members</option>
-                      <option value="201-500">201-500 Members</option>
-                      <option value="500+">500+ Members</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Founded Year
-                    </label>
-                    <Input {...register('foundedYear')} type="number" placeholder="2022" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Overview Stats & Key Metrics */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Impact Metrics & Showcase Stats</CardTitle>
-                    <CardDescription>
-                      High-visibility counters and metrics rendered across public showcases and cards.
-                    </CardDescription>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {taxonomy.sectorLabel}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Short Location
-                    </label>
-                    <Input {...register('locationShort')} placeholder="e.g. San Francisco, CA" />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      {taxonomy.teamMetricLabel} Metric
-                    </label>
-                    <Input {...register('statsTeamSize')} placeholder="e.g. 150+ Full-Time Engineers" />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      {taxonomy.customerMetricLabel} Metric
-                    </label>
-                    <Input {...register('statsCustomerBase')} placeholder="e.g. 50,000+ Active Users" />
+                    <Input {...register('foundedYear')} type="number" placeholder="e.g. 2024" />
                   </div>
                 </div>
 
-                {/* Custom Dynamic Metrics */}
-                <div className="space-y-3 pt-2 border-t border-border/80">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                      Custom Statistical Highlights ({customMetrics.length})
-                    </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                      Tagline / One-liner
+                    </label>
+                    <Input {...register('tagline')} placeholder="Building the next generation of intelligence" />
                   </div>
 
-                  {customMetrics.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {customMetrics.map((met, idx) => (
-                        <div key={idx} className="p-3 rounded-xl border border-border bg-muted/30 flex items-center justify-between gap-2">
-                          <div>
-                            <span className="text-xs text-muted-foreground block">{met.label}</span>
-                            <span className="text-sm font-bold text-foreground">{met.value}</span>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveMetric(idx)}
-                            className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                        Industry / Domain
+                      </label>
+                      <Input {...register('industry')} placeholder="Software, Healthcare, etc." />
                     </div>
-                  )}
 
-                  <div className="p-3.5 rounded-xl border border-dashed border-border/80 bg-muted/20 flex flex-col sm:flex-row gap-2.5 items-end">
-                    <div className="flex-1 w-full">
-                      <Input
-                        placeholder="Metric Label (e.g. Placement Rate, Patent Grants, Beds)"
-                        value={newMetric.label}
-                        onChange={(e) => setNewMetric({ ...newMetric, label: e.target.value })}
-                      />
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                        Team Scale / Size
+                      </label>
+                      <select
+                        {...register('size')}
+                        className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option value="1-10">1-10 Members</option>
+                        <option value="11-50">11-50 Members</option>
+                        <option value="51-200">51-200 Members</option>
+                        <option value="201-500">201-500 Members</option>
+                        <option value="500+">500+ Members</option>
+                      </select>
                     </div>
-                    <div className="flex-1 w-full">
-                      <Input
-                        placeholder="Value (e.g. 98.4%, 42+, 650 Beds)"
-                        value={newMetric.value}
-                        onChange={(e) => setNewMetric({ ...newMetric, value: e.target.value })}
-                      />
-                    </div>
-                    <Button type="button" size="sm" variant="outline" onClick={handleAddMetric} className="text-xs shrink-0 h-10">
-                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Metric
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -1015,54 +938,86 @@ export default function OrganizationProfilePage() {
               <CardHeader>
                 <CardTitle>Mission, Vision & Heritage</CardTitle>
                 <CardDescription>
-                  Narrative statements that communicate your purpose to visitors, talent, and partners.
+                  Narrative statements that communicate your purpose with standard word limits.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                    About / Executive Summary
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                      About / Executive Summary
+                    </label>
+                    <span className={`text-[11px] font-mono ${countWords(watch('aboutCompany') || '') > 300 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                      {countWords(watch('aboutCompany') || '')} / 300 words
+                    </span>
+                  </div>
                   <Textarea
                     {...register('aboutCompany')}
                     rows={4}
                     placeholder="Comprehensive overview of what your organization does and who you serve..."
                   />
+                  {errors.aboutCompany && (
+                    <p className="text-xs text-destructive mt-1">{errors.aboutCompany.message}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1 flex items-center gap-1.5">
-                      <Target className="h-3.5 w-3.5 text-primary" /> Mission Statement
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block flex items-center gap-1.5">
+                        <Target className="h-3.5 w-3.5 text-primary" /> Mission Statement
+                      </label>
+                      <span className={`text-[11px] font-mono ${countWords(watch('mission') || '') > 100 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                        {countWords(watch('mission') || '')} / 100 words
+                      </span>
+                    </div>
                     <Textarea
                       {...register('mission')}
                       rows={3}
                       placeholder="Our mission is to accelerate the transition to sustainable..."
                     />
+                    {errors.mission && (
+                      <p className="text-xs text-destructive mt-1">{errors.mission.message}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1 flex items-center gap-1.5">
-                      <Lightbulb className="h-3.5 w-3.5 text-primary" /> Vision Statement
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block flex items-center gap-1.5">
+                        <Lightbulb className="h-3.5 w-3.5 text-primary" /> Vision Statement
+                      </label>
+                      <span className={`text-[11px] font-mono ${countWords(watch('vision') || '') > 100 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                        {countWords(watch('vision') || '')} / 100 words
+                      </span>
+                    </div>
                     <Textarea
                       {...register('vision')}
                       rows={3}
                       placeholder="We envision a world where digital identity empowers every..."
                     />
+                    {errors.vision && (
+                      <p className="text-xs text-destructive mt-1">{errors.vision.message}</p>
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Founding Story & Milestones Narrative
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                      Founding Story & Milestones Narrative
+                    </label>
+                    <span className={`text-[11px] font-mono ${countWords(watch('story') || '') > 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                      {countWords(watch('story') || '')} / 500 words
+                    </span>
+                  </div>
                   <Textarea
                     {...register('story')}
-                    rows={3}
+                    rows={4}
                     placeholder="Founded in 2021 by a team of researchers and engineers..."
                   />
+                  {errors.story && (
+                    <p className="text-xs text-destructive mt-1">{errors.story.message}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1395,7 +1350,7 @@ export default function OrganizationProfilePage() {
             </Card>
           </TabsContent>
 
-          {/* TAB 4: Offerings / Products / Programs */}
+          {/* TAB 4: Products & Services */}
           <TabsContent value="offerings" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
@@ -1420,7 +1375,6 @@ export default function OrganizationProfilePage() {
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-sm truncate">{prod.name}</span>
-                            {prod.tag && <Badge variant="outline" className="text-[10px] py-0">{prod.tag}</Badge>}
                             {prod.category && <Badge variant="secondary" className="text-[10px] py-0">{prod.category}</Badge>}
                           </div>
                           {prod.description && <p className="text-xs text-muted-foreground line-clamp-2">{prod.description}</p>}
@@ -1449,31 +1403,26 @@ export default function OrganizationProfilePage() {
                   <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <Plus className="h-3.5 w-3.5 text-primary" /> Add {taxonomy.offeringSingular}
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
                       placeholder={`${taxonomy.offeringSingular} Name *`}
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                     />
                     <Input
-                      placeholder="Tag (e.g. B.Tech, Cardiology, SaaS)"
-                      value={newProduct.tag}
-                      onChange={(e) => setNewProduct({ ...newProduct, tag: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Category / Department"
+                      placeholder="Category (e.g. Software, Healthcare, Consulting)"
                       value={newProduct.category}
                       onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
-                      placeholder="Short description or curriculum details..."
+                      placeholder="Short description of what it is and what it offers..."
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     />
                     <Input
-                      placeholder="Direct URL or Brochure link"
+                      placeholder="Website or Product Link (Optional)"
                       value={newProduct.linkUrl}
                       onChange={(e) => setNewProduct({ ...newProduct, linkUrl: e.target.value })}
                     />
@@ -1488,7 +1437,7 @@ export default function OrganizationProfilePage() {
             </Card>
           </TabsContent>
 
-          {/* TAB 5: Projects / Research / Relief */}
+          {/* TAB 5: Projects & Portfolio */}
           <TabsContent value="projects" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
@@ -1515,11 +1464,10 @@ export default function OrganizationProfilePage() {
                             <span className="font-semibold text-sm truncate">{proj.title}</span>
                             {proj.client && <Badge variant="secondary" className="text-[10px] py-0">{proj.client}</Badge>}
                           </div>
-                          {proj.metrics && <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{proj.metrics}</p>}
                           {proj.description && <p className="text-xs text-muted-foreground line-clamp-2">{proj.description}</p>}
                           {proj.linkUrl && (
                             <a href={proj.linkUrl} target="_blank" rel="noreferrer" className="text-[11px] text-primary hover:underline inline-flex items-center gap-1">
-                              Case Details <ExternalLink className="h-2.5 w-2.5" />
+                              View Project <ExternalLink className="h-2.5 w-2.5" />
                             </a>
                           )}
                         </div>
@@ -1542,31 +1490,26 @@ export default function OrganizationProfilePage() {
                   <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <Plus className="h-3.5 w-3.5 text-primary" /> Add {taxonomy.projectSingular}
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
                       placeholder={`${taxonomy.projectSingular} Title *`}
                       value={newProject.title}
                       onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                     />
                     <Input
-                      placeholder={taxonomy.clientFieldLabel}
+                      placeholder={taxonomy.clientFieldLabel || 'Client / Partner Name (Optional)'}
                       value={newProject.client}
                       onChange={(e) => setNewProject({ ...newProject, client: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Impact Metric (e.g. +300% ROI, 99% Recovery)"
-                      value={newProject.metrics}
-                      onChange={(e) => setNewProject({ ...newProject, metrics: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
-                      placeholder="Brief description of the work and impact achieved..."
+                      placeholder="Brief description of the work delivered..."
                       value={newProject.description}
                       onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                     />
                     <Input
-                      placeholder="Documentation / Publication URL"
+                      placeholder="Project Link or Website (Optional)"
                       value={newProject.linkUrl}
                       onChange={(e) => setNewProject({ ...newProject, linkUrl: e.target.value })}
                     />
