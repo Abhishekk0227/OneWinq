@@ -748,18 +748,17 @@ export default function OrganizationProfilePage() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 pt-0 relative flex flex-col md:flex-row items-start md:items-end justify-between gap-4 -mt-10 sm:-mt-14">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3.5 sm:gap-4 min-w-0 flex-1 w-full">
-            {/* Interactive Logo Avatar with Quick Upload Overlay */}
+        <div className="p-4 sm:p-6 pt-0 relative flex flex-col md:flex-row items-center md:items-end justify-between gap-4 -mt-12 sm:-mt-16">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3.5 sm:gap-4 min-w-0 flex-1 w-full text-center sm:text-left">
+            {/* Interactive Circular Logo Avatar with Quick Upload Overlay */}
             <div className="relative group/logo shrink-0">
               <div
-                className="h-20 w-20 sm:h-28 sm:w-28 rounded-2xl bg-white dark:bg-card border-4 border-card shadow-lg flex items-center justify-center overflow-hidden shrink-0 p-1.5 sm:p-2"
-                style={{ borderColor: previewPrimary }}
+                className="h-24 w-24 sm:h-28 sm:w-28 rounded-full bg-white dark:bg-card ring-4 ring-card shadow-xl flex items-center justify-center overflow-hidden shrink-0 p-1.5 sm:p-2 border border-border/40"
               >
                 {previewLogo ? (
-                  <img src={previewLogo} alt="Logo" className="w-full h-full object-contain" />
+                  <img src={previewLogo} alt="Logo" className="w-full h-full object-contain rounded-full" />
                 ) : (
-                  <Building2 className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/60" />
+                  <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
                 )}
               </div>
 
@@ -768,7 +767,7 @@ export default function OrganizationProfilePage() {
                 type="button"
                 disabled={uploadingLogo}
                 onClick={() => logoFileInputRef.current?.click()}
-                className="absolute inset-0 rounded-2xl bg-black/60 backdrop-blur-2xs opacity-0 group-hover/logo:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold cursor-pointer m-1"
+                className="absolute inset-0 rounded-full bg-black/60 backdrop-blur-2xs opacity-0 group-hover/logo:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold cursor-pointer m-0.5"
                 title="Upload new logo image"
               >
                 {uploadingLogo ? (
@@ -782,8 +781,8 @@ export default function OrganizationProfilePage() {
               </button>
             </div>
 
-            <div className="mb-1 sm:mb-2 space-y-1 min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <div className="mb-1 sm:mb-2 space-y-1.5 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground truncate max-w-full">{previewName}</h1>
                 <Badge variant="outline" className="text-[10px] sm:text-xs uppercase border-primary/40 font-semibold shrink-0">
                   {watchedType}
@@ -794,13 +793,13 @@ export default function OrganizationProfilePage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <p className="text-xs text-muted-foreground flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5">
                 <span>Sector: <strong className="text-foreground">{taxonomy.sectorLabel}</strong></span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end mb-2 pt-2 md:pt-0 border-t md:border-t-0 border-border/40">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-center md:justify-end mb-2 pt-2 md:pt-0 border-t md:border-t-0 border-border/40">
             {org?.slug && (
               <a
                 href={`/c/${org.slug}`}
