@@ -1359,10 +1359,10 @@ export default function ProfileEditPage() {
                     <img
                       src={avatarUrl}
                       alt="Avatar Preview"
-                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20 shadow-sm shrink-0"
+                      className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/20 shadow-sm shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0">
                       <Camera className="h-6 w-6" />
                     </div>
                   )}
@@ -1434,10 +1434,14 @@ export default function ProfileEditPage() {
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-20 rounded-xl border border-dashed border-border flex items-center justify-center text-muted-foreground bg-muted/30">
-                      <span className="text-xs flex items-center gap-1.5 text-muted-foreground">
-                        <ImageIcon className="h-4 w-4" /> No cover banner set
-                      </span>
+                    <div className="w-full h-20 rounded-xl border border-border flex items-center justify-center bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative overflow-hidden select-none">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                      <img
+                        src="/logo-white.png"
+                        alt="OneWinq Default Banner"
+                        className="h-6 w-auto object-contain relative z-10 opacity-90 drop-shadow-sm"
+                      />
+                      <span className="absolute bottom-1 right-2 text-[9px] text-white/50 font-medium">Default OneWinq Banner</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between gap-2">

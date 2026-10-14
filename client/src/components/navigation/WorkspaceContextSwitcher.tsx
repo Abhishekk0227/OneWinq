@@ -63,7 +63,7 @@ export function WorkspaceContextSwitcher({
   const handleSelectOrg = (orgId: string) => {
     switchToOrganization(orgId);
     setIsOpen(false);
-    navigate('/app/org/posts');
+    navigate('/app/org/profile');
   };
 
   const handleCreateOrg = () => {

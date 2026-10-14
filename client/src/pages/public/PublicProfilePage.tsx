@@ -608,54 +608,44 @@ export default function PublicProfilePage() {
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (
               <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
-                {profile.coverUrl ? (
-                  <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
+                {/* Cover Banner: Custom or Default OneWinq Branded Banner */}
+                <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
+                  {profile.coverUrl ? (
                     <img
                       src={profile.coverUrl}
                       alt="Cover Banner"
                       className="w-full h-full object-cover object-center"
                     />
-                  </div>
-                ) : null}
-
-                <div className="p-6 sm:p-10 space-y-6">
-                  {profile.coverUrl ? (
-                    <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
-                      <Avatar
-                        src={profile.avatarUrl || profileUser?.avatarUrl}
-                        fallback={profileUser.displayName}
-                        alt={profileUser.displayName}
-                        size="2xl"
-                        className="rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-muted-foreground">
-                          @{profileUser.username}
-                        </span>
-                      </div>
-                    </div>
                   ) : (
-                    <div className="flex items-center justify-between pb-4 border-b border-border">
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Identity Presentation
-                      </div>
-                      <div className="text-xs font-mono text-muted-foreground">
-                        @{profileUser.username}
-                      </div>
+                    <div className="w-full h-full bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative flex items-center justify-center overflow-hidden border-b border-border/40 select-none">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                      <img
+                        src="/logo-white.png"
+                        alt="OneWinq"
+                        className="h-10 sm:h-14 w-auto object-contain relative z-10 opacity-90 drop-shadow-md"
+                      />
                     </div>
                   )}
+                </div>
 
-                  <div className={profile.coverUrl ? "space-y-3" : "flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"}>
-                    {!profile.coverUrl && (
-                      <Avatar
-                        src={profile.avatarUrl || profileUser?.avatarUrl}
-                        fallback={profileUser.displayName}
-                        alt={profileUser.displayName}
-                        size="2xl"
-                        className="rounded-3xl ring-4 ring-primary/10 shadow-md"
-                      />
-                    )}
+                <div className="p-6 sm:p-10 space-y-6">
+                  <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
+                    <Avatar
+                      src={profile.avatarUrl || profileUser?.avatarUrl}
+                      fallback={profileUser.displayName}
+                      alt={profileUser.displayName}
+                      size="2xl"
+                      className="rounded-full ring-4 ring-card shadow-xl bg-card shrink-0"
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-muted-foreground">
+                        @{profileUser.username}
+                      </span>
+                    </div>
+                  </div>
 
+                  <div className="space-y-3">
                     <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
                       <div className="min-w-0 max-w-full">
                         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">

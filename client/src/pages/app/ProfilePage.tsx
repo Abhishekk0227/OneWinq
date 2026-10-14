@@ -413,17 +413,25 @@ export default function ProfilePage() {
           {activeTab === 'home' && (
             <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
               {/* Cover Banner */}
-              {profile.coverUrl ? (
-                <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
+              <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
+                {profile.coverUrl ? (
                   <img
                     src={profile.coverUrl}
                     alt="Cover Banner"
                     className="w-full h-full object-cover object-center"
                   />
-                </div>
-              ) : (
-                <div className="w-full h-28 sm:h-32 bg-gradient-to-r from-primary/10 via-primary/5 to-muted border-b border-border" />
-              )}
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative flex items-center justify-center overflow-hidden border-b border-border/40 select-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                    <img
+                      src="/logo-white.png"
+                      alt="OneWinq"
+                      className="h-10 sm:h-14 w-auto object-contain relative z-10 opacity-90 drop-shadow-md"
+                    />
+                  </div>
+                )}
+              </div>
 
               <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
                 {/* Avatar and Top Actions Bar */}
@@ -433,7 +441,7 @@ export default function ProfilePage() {
                     fallback={user?.displayName}
                     alt={user?.displayName}
                     size="2xl"
-                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-full ring-4 ring-card shadow-xl bg-card shrink-0"
                   />
 
                   {/* Canvas Actions Bar */}

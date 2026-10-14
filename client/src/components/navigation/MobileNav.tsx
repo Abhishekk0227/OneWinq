@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { BarChart3, UserCircle, Home, Compass, Plus, FileText } from 'lucide-react'
+import { BarChart3, UserCircle, Home, Compass, Plus, Building2 } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { cn } from '@/lib/utils/cn'
@@ -11,9 +11,9 @@ export function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-16 items-center justify-around border-t border-border/60 bg-background/95 px-3 backdrop-blur-md lg:hidden">
-      {/* Home / Feed or Company Posts */}
+      {/* Home / Feed or Org Profile */}
       <NavLink
-        to={isOrgMode ? '/app/org/posts' : '/app'}
+        to={isOrgMode ? '/app/org/profile' : '/app'}
         end
         className={({ isActive }) =>
           cn(
@@ -24,8 +24,8 @@ export function MobileNav() {
           )
         }
       >
-        {isOrgMode ? <FileText className="h-5 w-5 mb-0.5" /> : <Home className="h-5 w-5 mb-0.5" />}
-        <span>{isOrgMode ? 'Posts' : 'Home'}</span>
+        {isOrgMode ? <Building2 className="h-5 w-5 mb-0.5" /> : <Home className="h-5 w-5 mb-0.5" />}
+        <span>{isOrgMode ? 'Org Profile' : 'Home'}</span>
       </NavLink>
 
       {/* Network / Discover */}

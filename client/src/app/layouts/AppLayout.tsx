@@ -21,7 +21,7 @@ export function AppLayout() {
     if (location.pathname.startsWith('/app/org') && activeContext.type === 'PERSONAL') {
       navigate('/app', { replace: true })
     } else if ((location.pathname === '/app' || location.pathname === '/app/') && activeContext.type === 'ORGANIZATION') {
-      navigate('/app/org/posts', { replace: true })
+      navigate('/app/org/profile', { replace: true })
     }
   }, [location.pathname, activeContext.type, navigate])
 
