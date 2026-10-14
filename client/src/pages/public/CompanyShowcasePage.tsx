@@ -151,12 +151,12 @@ function getShowcaseTaxonomy(type: string) {
 }
 
 export default function CompanyShowcasePage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, cardUid } = useParams<{ slug?: string; cardUid?: string }>();
   const navigate = useNavigate();
   const { resolvedTheme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = React.useState('all');
 
-  const cleanSlug = (slug || '').trim().replace(/^@+/, '');
+  const cleanSlug = (slug || cardUid || '').trim().replace(/^@+/, '');
   const isCardUid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanSlug);
   const effectiveSlug = isCardUid ? cleanSlug : cleanSlug.toLowerCase();
 
@@ -167,7 +167,7 @@ export default function CompanyShowcasePage() {
     error: orgError,
   } = useQuery({
     queryKey: ['publicOrgShowcase', effectiveSlug],
-    queryFn: () => organizationsApi.getPublicShowcase(effectiveSlug),
+    queryFn: () => organizationsApi.getBySlug(effectiveSlug),
     enabled: !!effectiveSlug,
     retry: false,
   });
