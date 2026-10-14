@@ -11,6 +11,9 @@ import {
   Loader2,
   Copy,
   ExternalLink,
+  Crown,
+  Clock,
+  Send,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +25,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
 
 const settingsSchema = z.object({
   slug: z
@@ -128,6 +132,52 @@ export default function OrganizationSettingsPage() {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || 'Failed to update settings');
+    },
+  });
+
+  // Ownership Transfer State & Queries
+  const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false);
+  const [selectedMemberId, setSelectedMemberId] = React.useState('');
+  const [customIdentifier, setCustomIdentifier] = React.useState('');
+
+  const { data: membersData } = useQuery({
+    queryKey: ['orgMembersForTransfer', orgId],
+    queryFn: () => organizationsApi.listMembers(orgId, { limit: 100 }),
+    enabled: !!orgId && userRole === 'OWNER',
+  });
+  const members = membersData?.data?.members || [];
+  const eligibleMembers = members.filter((m: any) => m.role !== 'OWNER');
+
+  const { data: activeTransferData, refetch: refetchActiveTransfer } = useQuery({
+    queryKey: ['activeOrgTransfer', orgId],
+    queryFn: () => organizationsApi.getActiveOwnershipTransfer(orgId),
+    enabled: !!orgId && userRole === 'OWNER',
+  });
+  const activeTransfer = activeTransferData?.data?.transferRequest;
+
+  const initiateTransferMutation = useMutation({
+    mutationFn: (data: { toUserId?: string; toUserIdentifier?: string }) =>
+      organizationsApi.initiateOwnershipTransfer(orgId, data),
+    onSuccess: (res) => {
+      toast.success(res.data?.message || 'Transfer request initiated! The recipient has been notified via app and email.');
+      setIsTransferModalOpen(false);
+      setSelectedMemberId('');
+      setCustomIdentifier('');
+      refetchActiveTransfer();
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to initiate ownership transfer');
+    },
+  });
+
+  const cancelTransferMutation = useMutation({
+    mutationFn: () => organizationsApi.cancelOwnershipTransfer(orgId),
+    onSuccess: (res) => {
+      toast.default(res.data?.message || 'Ownership transfer request cancelled.');
+      refetchActiveTransfer();
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to cancel ownership transfer');
     },
   });
 
@@ -297,38 +347,215 @@ export default function OrganizationSettingsPage() {
         </div>
       </form>
 
-      {/* Danger Zone */}
-      <Card className="border-rose-500/30 bg-rose-500/5">
-        <CardHeader>
-          <div className="flex items-center gap-2 text-rose-600">
-            <AlertTriangle className="h-5 w-5" />
-            <CardTitle className="text-rose-600">Danger Zone</CardTitle>
-          </div>
-          <CardDescription>
-            Switch workspace or leave this organization.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-rose-500/20 bg-card">
-            <div>
-              <h4 className="font-bold text-sm text-foreground">Switch to Personal Workspace</h4>
-              <p className="text-xs text-muted-foreground">
-                Leave the corporate management context and return to your individual OneWinq profile.
-              </p>
+        {/* Ownership Transfer Section (OWNER ONLY) */}
+        {userRole === 'OWNER' && (
+          <Card className="border-amber-500/30 bg-amber-500/5">
+            <CardHeader>
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                <Crown className="h-5 w-5" />
+                <CardTitle className="text-amber-600 dark:text-amber-400">Transfer Organization Ownership</CardTitle>
+              </div>
+              <CardDescription>
+                Transfer primary ownership and administrative authority of {org?.name || 'this organization'}.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {activeTransfer ? (
+                <div className="p-4 rounded-xl border border-amber-500/30 bg-card space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                          Transfer Request Pending
+                        </div>
+                        <div className="text-sm font-bold text-foreground">
+                          Sent to {activeTransfer.toUser?.displayName || 'Recipient'} (@{activeTransfer.toUser?.username || 'user'})
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {activeTransfer.toUser?.email} • Expires {new Date(activeTransfer.expiresAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => cancelTransferMutation.mutate()}
+                      disabled={cancelTransferMutation.isPending}
+                      className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive border-border"
+                    >
+                      {cancelTransferMutation.isPending ? 'Cancelling...' : 'Cancel Request'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed pt-1 border-t border-border/60">
+                    An in-app notification and email invitation were dispatched to the recipient. Ownership will transfer automatically once accepted. Upon completion, you will become a standard member of this organization.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-amber-500/20 bg-card">
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground">Initiate Ownership Transfer</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Select an existing member or specify a OneWinq user. The recipient will receive an in-app notification and email to review and accept. Once accepted, you will become a member of the organization.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsTransferModalOpen(true)}
+                    className="border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10 shrink-0 font-bold"
+                  >
+                    <Crown className="h-3.5 w-3.5 mr-1.5" /> Transfer Ownership
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Danger Zone */}
+        <Card className="border-rose-500/30 bg-rose-500/5">
+          <CardHeader>
+            <div className="flex items-center gap-2 text-rose-600">
+              <AlertTriangle className="h-5 w-5" />
+              <CardTitle className="text-rose-600">Danger Zone</CardTitle>
             </div>
+            <CardDescription>
+              Switch workspace or leave this organization.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-rose-500/20 bg-card">
+              <div>
+                <h4 className="font-bold text-sm text-foreground">Switch to Personal Workspace</h4>
+                <p className="text-xs text-muted-foreground">
+                  Leave the corporate management context and return to your individual OneWinq profile.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  switchToPersonal();
+                  navigate('/app');
+                }}
+              >
+                Exit to Personal
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Transfer Ownership Modal Dialog */}
+      <Dialog open={isTransferModalOpen} onOpenChange={setIsTransferModalOpen}>
+        <div className="space-y-4 text-left">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <Crown className="h-5 w-5" />
+              <DialogTitle>Transfer Organization Ownership</DialogTitle>
+            </div>
+            <DialogDescription>
+              Initiate a formal ownership transfer request for <strong>{org?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-1.5">
+            <div className="font-bold flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> Important Governance Notice:
+            </div>
+            <ul className="list-disc list-inside space-y-0.5 opacity-90">
+              <li>This is <strong>not a direct instant transfer</strong>. The recipient will receive an in-app notification and email.</li>
+              <li>Ownership is only transferred after the recipient formally <strong>accepts</strong>.</li>
+              <li>Once accepted, the new owner assumes complete control, and <strong>you will become a member of the organization</strong>.</li>
+            </ul>
+          </div>
+
+          <div className="space-y-3 pt-1">
+            {eligibleMembers.length > 0 && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground">
+                  Select an Existing Member:
+                </label>
+                <select
+                  value={selectedMemberId}
+                  onChange={(e) => {
+                    setSelectedMemberId(e.target.value);
+                    if (e.target.value) setCustomIdentifier('');
+                  }}
+                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">-- Choose from current members --</option>
+                  {eligibleMembers.map((m: any) => (
+                    <option key={m.id || m._id} value={m.userId || m.user?.id || m.user?._id}>
+                      {m.user?.displayName || m.user?.username} ({m.user?.email || m.jobTitle || m.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-border" />
+              <span className="flex-shrink mx-2 text-[10px] text-muted-foreground uppercase font-mono">OR</span>
+              <div className="flex-grow border-t border-border" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-foreground">
+                Enter Recipient Username or Email:
+              </label>
+              <Input
+                placeholder="e.g. username or colleague@company.com"
+                value={customIdentifier}
+                onChange={(e) => {
+                  setCustomIdentifier(e.target.value);
+                  if (e.target.value) setSelectedMemberId('');
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                switchToPersonal();
-                navigate('/app');
+                setIsTransferModalOpen(false);
+                setSelectedMemberId('');
+                setCustomIdentifier('');
               }}
             >
-              Exit to Personal
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={
+                (!selectedMemberId && !customIdentifier.trim()) ||
+                initiateTransferMutation.isPending
+              }
+              onClick={() => {
+                initiateTransferMutation.mutate({
+                  toUserId: selectedMemberId || undefined,
+                  toUserIdentifier: customIdentifier.trim() || undefined,
+                });
+              }}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+            >
+              {initiateTransferMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending Request...
+                </>
+              ) : (
+                <>
+                  <Send className="h-3.5 w-3.5 mr-1.5" /> Send Transfer Request
+                </>
+              )}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Dialog>
     </div>
   );
 }

@@ -117,7 +117,17 @@ function SocialBrandIcon({ platform, url, className = 'h-4 w-4' }: { platform?: 
     );
   }
 
-  if (name.includes('twitter') || name.includes('x.com') || name.includes(' x ')) {
+  if (
+    name === 'x' ||
+    name === 'twitter' ||
+    name.includes('twitter') ||
+    name.includes('x.com') ||
+    name.startsWith('x ') ||
+    name.endsWith(' x') ||
+    name.includes(' x ') ||
+    name.includes('x/') ||
+    name.includes('/x')
+  ) {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -458,7 +468,7 @@ export default function CompanyShowcasePage() {
   const profileTabs = [
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
     ...(aboutText || missionText || visionText || storyText || coreValues.length > 0
-      ? [{ id: 'about', label: 'About & Story', icon: <Sparkles className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
+      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
       : []),
     ...(products.length > 0
       ? [{ id: 'offerings', label: taxonomy.offeringsTitle ? 'Offerings' : 'Products', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
@@ -923,7 +933,7 @@ export default function CompanyShowcasePage() {
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-3">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <Sparkles className="h-4 w-4 text-primary" />
+                        <Building2 className="h-4 w-4 text-primary" />
                         <span>About {org.name}</span>
                       </div>
                       <button
@@ -1011,7 +1021,7 @@ export default function CompanyShowcasePage() {
                   <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-4">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Sparkles className="h-4 w-4" />
+                        <Building2 className="h-4 w-4" />
                       </div>
                       <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                         About {org.name}
@@ -1067,7 +1077,7 @@ export default function CompanyShowcasePage() {
                       {coreValues.map((val, idx) => (
                         <div key={idx} className="p-4 rounded-2xl border border-border/70 bg-muted/20 space-y-1.5 shadow-2xs">
                           <div className="flex items-center gap-2">
-                            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
                             <h4 className="font-bold text-sm text-foreground">{val.title}</h4>
                           </div>
                           {val.description && (
@@ -1400,7 +1410,7 @@ export default function CompanyShowcasePage() {
                 <div>
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Sparkles className="h-4 w-4" />
+                      <Bell className="h-4 w-4" />
                     </div>
                     <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                       Official Announcements & Updates

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { organizationController } from './organization.controller.js';
 import { organizationMemberController } from './organizationMember.controller.js';
+import { organizationTransferController } from './organizationTransfer.controller.js';
 import { departmentController } from '../departments/department.controller.js';
 import { authenticate, optionalAuthenticate } from '../../middleware/authenticate.js';
 import { resolveOrgContext } from '../../middleware/resolveOrgContext.js';
@@ -59,6 +60,12 @@ router.post('/invitations/accept', authenticate, organizationMemberController.ac
 // Public: Register new account and accept invitation in one step
 router.post('/invitations/accept-register', organizationMemberController.acceptInviteWithRegistration);
 
+// Public / Authenticated: Verify ownership transfer request by token
+router.get('/ownership-transfer/verify/:token', optionalAuthenticate, organizationTransferController.verifyByToken);
+
+// Authenticated: Accept or Decline ownership transfer request
+router.post('/ownership-transfer/respond', authenticate, organizationTransferController.respond);
+
 // Public: Resolve organization by public vanity slug
 router.get('/slug/:slug', organizationController.getBySlug);
 
@@ -100,6 +107,29 @@ router.patch(
   requireOrgPermission(ORGANIZATION_PERMISSION.ORG_EDIT),
   validateBody(updateOrganizationSchema),
   organizationController.update,
+);
+
+// ---- Ownership Transfer Management -----------------------------------------
+
+router.post(
+  '/:organizationId/ownership-transfer/initiate',
+  authenticate,
+  resolveOrgContext,
+  organizationTransferController.initiate,
+);
+
+router.get(
+  '/:organizationId/ownership-transfer',
+  authenticate,
+  resolveOrgContext,
+  organizationTransferController.getActive,
+);
+
+router.post(
+  '/:organizationId/ownership-transfer/cancel',
+  authenticate,
+  resolveOrgContext,
+  organizationTransferController.cancel,
 );
 
 // ---- Members & Invitations -------------------------------------------------
