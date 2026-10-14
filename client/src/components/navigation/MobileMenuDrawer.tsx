@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   X,
@@ -116,12 +116,16 @@ export function MobileMenuDrawer() {
     }
   }
 
+  const location = useLocation()
   const { activeContext, switchToPersonal } = useOrganizationContextStore()
-  const isOrgMode = activeContext.type === 'ORGANIZATION'
+  const isOrgRoute =
+    location.pathname.startsWith('/app/org') ||
+    location.pathname.startsWith('/app/organizations')
+  const isOrgMode = activeContext.type === 'ORGANIZATION' || isOrgRoute
 
   // Role & Permission Checks for Organization Mode
-  const orgRole = isOrgMode ? (activeContext.role || 'MEMBER').toUpperCase() : ''
-  const orgPermissions = isOrgMode ? (activeContext.permissions || []) : []
+  const orgRole = activeContext.type === 'ORGANIZATION' ? (activeContext.role || 'MEMBER').toUpperCase() : ''
+  const orgPermissions = activeContext.type === 'ORGANIZATION' ? (activeContext.permissions || []) : []
   const isOrgOwner = orgRole === 'OWNER'
   const isOrgAdmin = isOrgOwner || orgRole === 'ADMIN'
   const isOrgHR = isOrgAdmin || orgRole === 'HR_MANAGER'
@@ -258,7 +262,7 @@ export function MobileMenuDrawer() {
         </div>
 
         {/* User Profile / Organization Header */}
-        {isOrgMode ? (
+        {isOrgMode && activeContext.type === 'ORGANIZATION' ? (
           <div className="p-4 border-b border-border bg-gradient-to-r from-muted/30 to-primary/5">
             <div className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-xl bg-card border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 shadow-2xs">
