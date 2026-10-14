@@ -68,15 +68,26 @@ import type {
 
 const BIO_LIMIT = 280;
 
-function ExpandableAboutText({ text }: { text: string }) {
+function ExpandableAboutText({
+  text,
+  limit = 200,
+  className,
+  textClassName,
+}: {
+  text: string;
+  limit?: number;
+  className?: string;
+  textClassName?: string;
+}) {
   const [expanded, setExpanded] = React.useState(false);
-  const isLong = text.length > 220;
+  const isLong = text.length > limit;
   return (
-    <div className="space-y-2">
+    <div className={cn('space-y-1.5', className)}>
       <div
         className={cn(
           'leading-relaxed text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap break-words [overflow-wrap:anywhere] transition-all',
-          isLong && !expanded && 'line-clamp-4 max-h-[115px] overflow-hidden'
+          textClassName,
+          isLong && !expanded && 'line-clamp-3 max-h-[95px] overflow-hidden'
         )}
       >
         {text}
@@ -85,7 +96,7 @@ function ExpandableAboutText({ text }: { text: string }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer pt-1"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer pt-0.5"
         >
           {expanded ? (
             <>
@@ -444,6 +455,94 @@ export default function CompanyShowcasePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const taxonomy = getShowcaseTaxonomy(org?.type || 'COMPANY');
+
+  const products: OrganizationProduct[] = org?.products?.filter((p) => p.isVisible !== false) || [];
+  const projects: OrganizationProject[] = org?.projects?.filter((p) => p.isVisible !== false) || [];
+  const achievements: OrganizationAchievement[] = org?.achievements?.filter((a) => a.isVisible !== false) || [];
+  const mediaGallery: OrganizationMediaItem[] = org?.mediaGallery?.filter((m) => m.isVisible !== false) || [];
+
+  const bannerImage = org?.branding?.coverUrl || org?.bannerUrl;
+  const logoImage = org?.branding?.logoUrl || org?.logoUrl;
+
+  const customMetrics = org?.overviewStats?.customMetrics || [];
+  const coreValues = org?.about?.values || [];
+  const aboutText = org?.about?.aboutCompany || org?.description;
+  const missionText = org?.about?.mission;
+  const visionText = org?.about?.vision;
+  const storyText = org?.about?.story;
+
+  const contactEmail = org?.contact?.email || org?.contactEmail;
+  const contactPhone = org?.contact?.phone || org?.contactPhone;
+  const supportEmail = org?.contact?.supportEmail;
+  const workingHours = org?.contact?.workingHours;
+  const directionsUrl = org?.contact?.directionsUrl;
+
+  const handleTrackLink = (url?: string, label?: string) => {
+    if (!url || (!org?.id && !org?._id)) return;
+    const currentOrgId = org.id || org._id;
+    analyticsApi
+      .trackLinkClick({
+        organizationId: currentOrgId,
+        linkUrl: url,
+        label: label || 'External Link',
+      })
+      .catch(() => {
+        // Non-blocking telemetry
+      });
+  };
+
+  const hasAboutData = Boolean(
+    aboutText || missionText || visionText || storyText || (coreValues && coreValues.length > 0)
+  );
+  const hasContactData = Boolean(
+    org?.location?.address ||
+      workingHours ||
+      contactEmail ||
+      contactPhone ||
+      supportEmail ||
+      org?.website
+  );
+
+  const profileTabs = [
+    { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
+    ...(hasAboutData
+      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
+      : []),
+    ...(products.length > 0
+      ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, description: taxonomy.offeringsDescription }]
+      : []),
+    ...(projects.length > 0
+      ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, description: taxonomy.projectsDescription }]
+      : []),
+    ...(achievements.length > 0
+      ? [{ id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, description: taxonomy.achievementsDescription }]
+      : []),
+    ...(mediaGallery.length > 0
+      ? [{ id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, description: taxonomy.mediaDescription }]
+      : []),
+    ...(org?.executives && org.executives.length > 0
+      ? [{ id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" />, description: 'Executive board and leadership team' }]
+      : []),
+    ...(companyPosts.length > 0
+      ? [{ id: 'posts', label: 'Updates', icon: <Bell className="h-4 w-4" />, description: 'Official announcements and updates' }]
+      : []),
+    ...(jobs.length > 0
+      ? [{ id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, description: 'Open career vacancies & hiring' }]
+      : []),
+    ...(hasContactData
+      ? [{ id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' }]
+      : []),
+  ];
+
+  // If current activeTab is not present in dynamic profileTabs, gracefully fallback to 'home'
+  React.useEffect(() => {
+    if (!org) return;
+    if (!profileTabs.some((t) => t.id === activeTab)) {
+      setActiveTab('home');
+    }
+  }, [org, profileTabs, activeTab]);
+
   if (isOrgLoading || (isCardLoading && !org)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -466,93 +565,6 @@ export default function CompanyShowcasePage() {
       </div>
     );
   }
-
-  const taxonomy = getShowcaseTaxonomy(org.type || 'COMPANY');
-
-  const products: OrganizationProduct[] = org.products?.filter((p) => p.isVisible !== false) || [];
-  const projects: OrganizationProject[] = org.projects?.filter((p) => p.isVisible !== false) || [];
-  const achievements: OrganizationAchievement[] = org.achievements?.filter((a) => a.isVisible !== false) || [];
-  const mediaGallery: OrganizationMediaItem[] = org.mediaGallery?.filter((m) => m.isVisible !== false) || [];
-
-  const bannerImage = org.branding?.coverUrl || org.bannerUrl;
-  const logoImage = org.branding?.logoUrl || org.logoUrl;
-
-  const customMetrics = org.overviewStats?.customMetrics || [];
-  const coreValues = org.about?.values || [];
-  const aboutText = org.about?.aboutCompany || org.description;
-  const missionText = org.about?.mission;
-  const visionText = org.about?.vision;
-  const storyText = org.about?.story;
-
-  const contactEmail = org.contact?.email || org.contactEmail;
-  const contactPhone = org.contact?.phone || org.contactPhone;
-  const supportEmail = org.contact?.supportEmail;
-  const workingHours = org.contact?.workingHours;
-  const directionsUrl = org.contact?.directionsUrl;
-
-  const handleTrackLink = (url?: string, label?: string) => {
-    if (!url || (!org?.id && !org?._id)) return;
-    const currentOrgId = org.id || org._id;
-    analyticsApi
-      .trackLinkClick({
-        organizationId: currentOrgId,
-        linkUrl: url,
-        label: label || 'External Link',
-      })
-      .catch(() => {
-        // Non-blocking telemetry
-      });
-  };
-
-  const hasAboutData = Boolean(
-    aboutText || missionText || visionText || storyText || (coreValues && coreValues.length > 0)
-  );
-  const hasContactData = Boolean(
-    org.location?.address ||
-      workingHours ||
-      contactEmail ||
-      contactPhone ||
-      supportEmail ||
-      org.website
-  );
-
-  const profileTabs = [
-    { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
-    ...(hasAboutData
-      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
-      : []),
-    ...(products.length > 0
-      ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, description: taxonomy.offeringsDescription }]
-      : []),
-    ...(projects.length > 0
-      ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, description: taxonomy.projectsDescription }]
-      : []),
-    ...(achievements.length > 0
-      ? [{ id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, description: taxonomy.achievementsDescription }]
-      : []),
-    ...(mediaGallery.length > 0
-      ? [{ id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, description: taxonomy.mediaDescription }]
-      : []),
-    ...(org.executives && org.executives.length > 0
-      ? [{ id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" />, description: 'Executive board and leadership team' }]
-      : []),
-    ...(companyPosts.length > 0
-      ? [{ id: 'posts', label: 'Updates', icon: <Bell className="h-4 w-4" />, description: 'Official announcements and updates' }]
-      : []),
-    ...(jobs.length > 0
-      ? [{ id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, description: 'Open career vacancies & hiring' }]
-      : []),
-    ...(hasContactData
-      ? [{ id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' }]
-      : []),
-  ];
-
-  // If current activeTab is not present in dynamic profileTabs, gracefully fallback to 'home'
-  React.useEffect(() => {
-    if (!profileTabs.some((t) => t.id === activeTab)) {
-      setActiveTab('home');
-    }
-  }, [profileTabs, activeTab]);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-24 selection:bg-primary/20">
@@ -1048,7 +1060,7 @@ export default function CompanyShowcasePage() {
                         About {org.name}
                       </h2>
                     </div>
-                    <ExpandableAboutText text={aboutText} />
+                    <ExpandableAboutText text={aboutText} limit={240} />
                   </section>
                 )}
 
@@ -1059,9 +1071,11 @@ export default function CompanyShowcasePage() {
                         <div className="flex items-center gap-2 text-primary font-bold text-sm">
                           <Target className="h-4 w-4" /> Our Mission
                         </div>
-                        <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                          {missionText}
-                        </p>
+                        <ExpandableAboutText
+                          text={missionText}
+                          limit={180}
+                          textClassName="text-foreground/90"
+                        />
                       </div>
                     )}
 
@@ -1070,9 +1084,11 @@ export default function CompanyShowcasePage() {
                         <div className="flex items-center gap-2 text-primary font-bold text-sm">
                           <Lightbulb className="h-4 w-4" /> Our Vision
                         </div>
-                        <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                          {visionText}
-                        </p>
+                        <ExpandableAboutText
+                          text={visionText}
+                          limit={180}
+                          textClassName="text-foreground/90"
+                        />
                       </div>
                     )}
                   </div>
@@ -1081,9 +1097,11 @@ export default function CompanyShowcasePage() {
                 {storyText && (
                   <div className="rounded-3xl border border-border bg-card shadow-card p-6 space-y-2">
                     <h3 className="font-bold text-sm text-foreground">Our Story & Heritage</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                      {storyText}
-                    </p>
+                    <ExpandableAboutText
+                      text={storyText}
+                      limit={240}
+                      textClassName="text-muted-foreground"
+                    />
                   </div>
                 )}
 
@@ -1100,9 +1118,11 @@ export default function CompanyShowcasePage() {
                             <h4 className="font-bold text-sm text-foreground">{val.title}</h4>
                           </div>
                           {val.description && (
-                            <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
-                              {val.description}
-                            </p>
+                            <ExpandableAboutText
+                              text={val.description}
+                              limit={120}
+                              textClassName="text-xs text-muted-foreground"
+                            />
                           )}
                         </div>
                       ))}
