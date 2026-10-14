@@ -1086,7 +1086,7 @@ export default function OrganizationProfilePage() {
                       <div key={idx} className="p-4 rounded-xl border border-border bg-card flex items-start justify-between gap-3 shadow-2xs">
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
                             <h4 className="font-bold text-sm text-foreground truncate">{val.title}</h4>
                           </div>
                           {val.description && (

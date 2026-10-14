@@ -29,6 +29,8 @@ function mapTypeToPrefKey(type) {
     case NOTIFICATION_TYPE.SECURITY_ALERT:
     case NOTIFICATION_TYPE.CARD_TRANSFER_REQUEST:
     case NOTIFICATION_TYPE.CARD_TRANSFER_RESULT:
+    case NOTIFICATION_TYPE.ORGANIZATION_TRANSFER_REQUEST:
+    case NOTIFICATION_TYPE.ORGANIZATION_TRANSFER_RESULT:
       return 'security';
     case NOTIFICATION_TYPE.SYSTEM_ANNOUNCEMENT:
     default:
@@ -65,6 +67,10 @@ function resolveNotificationLink(n) {
       return '/app/settings';
     case 'ORGANIZATION_INVITATION':
       return n.linkUrl || (n.metadata?.token ? `/invitation?token=${n.metadata.token}` : '/app');
+    case 'ORGANIZATION_TRANSFER_REQUEST':
+      return n.linkUrl || (n.metadata?.token ? `/app/organizations/transfer?token=${n.metadata.token}` : '/app/notifications');
+    case 'ORGANIZATION_TRANSFER_RESULT':
+      return n.linkUrl || (n.metadata?.orgSlug ? `/c/${n.metadata.orgSlug}` : '/app');
     case 'APPLICATION_STATUS_UPDATE':
       return '/app/my-applications';
     default:

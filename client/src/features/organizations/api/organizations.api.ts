@@ -234,4 +234,40 @@ export const organizationsApi = {
       '/organizations/my/following',
       { params }
     ),
+
+  // Ownership Transfer Workflow
+  initiateOwnershipTransfer: (organizationId: string, data: { toUserId?: string; toUserIdentifier?: string }) =>
+    apiClient.post<never, ApiResponse<{ message: string; transferRequest: any }>>(
+      `/organizations/${organizationId}/ownership-transfer/initiate`,
+      data
+    ),
+
+  getActiveOwnershipTransfer: (organizationId: string) =>
+    apiClient.get<never, ApiResponse<{ transferRequest: any }>>(
+      `/organizations/${organizationId}/ownership-transfer`
+    ),
+
+  cancelOwnershipTransfer: (organizationId: string) =>
+    apiClient.post<never, ApiResponse<{ success: boolean; message: string }>>(
+      `/organizations/${organizationId}/ownership-transfer/cancel`
+    ),
+
+  verifyTransferToken: (token: string) =>
+    apiClient.get<never, ApiResponse<{
+      id: string;
+      token: string;
+      status: string;
+      expiresAt: string;
+      organization: Organization;
+      fromUser: any;
+      toUser: any;
+      isRecipient: boolean;
+      isInitiator: boolean;
+    }>>(`/organizations/ownership-transfer/verify/${token}`),
+
+  respondOwnershipTransfer: (data: { token: string; action: 'ACCEPT' | 'REJECT' }) =>
+    apiClient.post<never, ApiResponse<{ success: boolean; status: string; organizationSlug?: string; message: string }>>(
+      '/organizations/ownership-transfer/respond',
+      data
+    ),
 };

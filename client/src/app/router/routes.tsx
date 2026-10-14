@@ -57,6 +57,7 @@ const OrganizationPostsPage = lazyWithRetry(() => import('@/pages/app/Organizati
 const OrganizationAnalyticsPage = lazyWithRetry(() => import('@/pages/app/OrganizationAnalyticsPage'))
 const CompanyShowcasePage = lazyWithRetry(() => import('@/pages/public/CompanyShowcasePage'))
 const AcceptInvitationPage = lazyWithRetry(() => import('@/pages/public/AcceptInvitationPage'))
+const OrganizationTransferAcceptPage = lazyWithRetry(() => import('@/pages/app/OrganizationTransferAcceptPage'))
 
 // Admin pages
 const AdminDashboardPage = lazyWithRetry(() => import('@/pages/admin/AdminDashboardPage'))
@@ -127,6 +128,24 @@ export const router = createBrowserRouter([
         element: (
           <Suspended>
             <AcceptInvitationPage />
+          </Suspended>
+        ),
+      },
+
+      // Organization Ownership Transfer Acceptance
+      {
+        path: 'organizations/transfer',
+        element: (
+          <Suspended>
+            <OrganizationTransferAcceptPage />
+          </Suspended>
+        ),
+      },
+      {
+        path: 'app/organizations/transfer',
+        element: (
+          <Suspended>
+            <OrganizationTransferAcceptPage />
           </Suspended>
         ),
       },
