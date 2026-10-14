@@ -504,22 +504,55 @@ export default function CompanyShowcasePage() {
       });
   };
 
+  const hasAboutData = Boolean(
+    aboutText || missionText || visionText || storyText || (coreValues && coreValues.length > 0)
+  );
+  const hasContactData = Boolean(
+    org.location?.address ||
+      workingHours ||
+      contactEmail ||
+      contactPhone ||
+      supportEmail ||
+      org.website
+  );
+
   const profileTabs = [
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
-    { id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' },
-    { id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription },
-    { id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length, description: taxonomy.projectsDescription },
-    { id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, count: achievements.length, description: taxonomy.achievementsDescription },
-    { id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, count: mediaGallery.length, description: taxonomy.mediaDescription },
+    ...(hasAboutData
+      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
+      : []),
+    ...(products.length > 0
+      ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, description: taxonomy.offeringsDescription }]
+      : []),
+    ...(projects.length > 0
+      ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, description: taxonomy.projectsDescription }]
+      : []),
+    ...(achievements.length > 0
+      ? [{ id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, description: taxonomy.achievementsDescription }]
+      : []),
+    ...(mediaGallery.length > 0
+      ? [{ id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, description: taxonomy.mediaDescription }]
+      : []),
     ...(org.executives && org.executives.length > 0
-      ? [{ id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" />, count: org.executives.length, description: 'Executive board and leadership team' }]
+      ? [{ id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" />, description: 'Executive board and leadership team' }]
       : []),
     ...(companyPosts.length > 0
-      ? [{ id: 'posts', label: 'Updates', icon: <Bell className="h-4 w-4" />, count: companyPosts.length, description: 'Official announcements and updates' }]
+      ? [{ id: 'posts', label: 'Updates', icon: <Bell className="h-4 w-4" />, description: 'Official announcements and updates' }]
       : []),
-    { id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, count: jobs.length, description: 'Open career vacancies & hiring' },
-    { id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' },
+    ...(jobs.length > 0
+      ? [{ id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, description: 'Open career vacancies & hiring' }]
+      : []),
+    ...(hasContactData
+      ? [{ id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' }]
+      : []),
   ];
+
+  // If current activeTab is not present in dynamic profileTabs, gracefully fallback to 'home'
+  React.useEffect(() => {
+    if (!profileTabs.some((t) => t.id === activeTab)) {
+      setActiveTab('home');
+    }
+  }, [profileTabs, activeTab]);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-24 selection:bg-primary/20">
@@ -640,15 +673,6 @@ export default function CompanyShowcasePage() {
                         {tab.icon}
                         <span className="truncate">{tab.label}</span>
                       </div>
-                      {tab.count !== undefined && (
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {tab.count}
-                        </span>
-                      )}
                     </button>
                   );
                 })}
@@ -908,7 +932,7 @@ export default function CompanyShowcasePage() {
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                         <Package className="h-4 w-4 text-primary" />
-                        <span>Featured Services ({products.length})</span>
+                        <span>Featured Services</span>
                       </div>
                       <button
                         type="button"
@@ -947,7 +971,7 @@ export default function CompanyShowcasePage() {
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                         <Layers className="h-4 w-4 text-primary" />
-                        <span>Featured Projects ({projects.length})</span>
+                        <span>Featured Projects</span>
                       </div>
                       <button
                         type="button"
@@ -1620,7 +1644,7 @@ export default function CompanyShowcasePage() {
             <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
               <Menu className="h-4 w-4" />
             </div>
-            <span className="truncate max-w-full">All ({profileTabs.length})</span>
+            <span className="truncate max-w-full">All Sections</span>
           </button>
         </div>
       )}
