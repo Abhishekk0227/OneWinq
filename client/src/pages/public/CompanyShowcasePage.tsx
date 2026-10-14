@@ -169,103 +169,105 @@ function getShowcaseTaxonomy(type: string) {
       return {
         sectorLabel: 'Higher Education & Academia',
         teamLabel: 'Faculty & Scholars',
-        customerLabel: 'Alumni Network',
-        offeringSingular: 'Degree / Program',
-        offeringsTitle: 'Academic Degree Programs & Courses',
-        offeringsDescription: 'Accredited faculties, undergraduate curricula, and graduate research opportunities.',
-        projectSingular: 'Research Project',
-        projectsTitle: 'Academic Research & Scientific Publications',
-        projectsDescription: 'Breakthrough studies and laboratory discoveries lead by institutional researchers.',
-        achievementSingular: 'Honor / Accreditation',
-        achievementsTitle: 'Accreditations, Rankings & Global Honors',
-        achievementsDescription: 'Official government certifications, global university rankings, and academic medals.',
-        mediaTitle: 'Campus Gallery & Academic Life',
-        mediaDescription: 'Visual moments across university libraries, auditoriums, and campus spaces.',
+        customerLabel: 'Students & Alumni',
+        offeringSingular: 'Program / Course',
+        offeringsTitle: 'Academic Programs & Degrees',
+        offeringsDescription: 'Featured degree programs, courses, and curricula.',
+        projectSingular: 'Project',
+        projectsTitle: 'Research & Projects',
+        projectsDescription: 'Academic research and institutional initiatives.',
+        achievementSingular: 'Accreditation / Award',
+        achievementsTitle: 'Accreditations & Honors',
+        achievementsDescription: 'Official government certifications, rankings, and academic medals.',
+        mediaTitle: 'Campus Gallery & Events',
+        mediaDescription: 'Visual moments across university campus life and events.',
       };
     case 'HOSPITAL':
       return {
-        sectorLabel: 'Healthcare & Medical Systems',
+        sectorLabel: 'Healthcare & Medical Center',
         teamLabel: 'Medical Staff & Specialists',
         customerLabel: 'Patients Treated',
-        offeringSingular: 'Medical Department',
-        offeringsTitle: 'Clinical Specialties & Patient Services',
-        offeringsDescription: 'Inpatient and outpatient healthcare services provided by certified departments.',
-        projectSingular: 'Clinical Trial / Study',
-        projectsTitle: 'Medical Breakthroughs & Clinical Initiatives',
-        projectsDescription: 'Healthcare research, surgical milestones, and community health initiatives.',
-        achievementSingular: 'Clinical Certification',
-        achievementsTitle: 'Medical Accreditations & Quality Standards',
-        achievementsDescription: 'Healthcare compliance certifications, safety accreditations, and hospital awards.',
-        mediaTitle: 'Facility & Clinical Diagnostics',
-        mediaDescription: 'Modern operating theatres, diagnostic wings, and patient care centers.',
+        offeringSingular: 'Medical Service',
+        offeringsTitle: 'Medical Services & Specialties',
+        offeringsDescription: 'Healthcare specialties, clinical departments, and patient care services.',
+        projectSingular: 'Clinical Initiative',
+        projectsTitle: 'Clinical Initiatives & Research',
+        projectsDescription: 'Healthcare programs, medical research, and health outreach.',
+        achievementSingular: 'Certification',
+        achievementsTitle: 'Medical Accreditations & Standards',
+        achievementsDescription: 'Healthcare compliance certifications and safety accreditations.',
+        mediaTitle: 'Facilities & Care Media',
+        mediaDescription: 'Diagnostic suites, operating theaters, and patient care facilities.',
       };
     case 'NGO':
       return {
         sectorLabel: 'Non-Profit & Social Impact',
-        teamLabel: 'Volunteers & Core Team',
+        teamLabel: 'Volunteers & Staff',
         customerLabel: 'Lives Impacted',
-        offeringSingular: 'Outreach Program',
-        offeringsTitle: 'Social Impact Campaigns & Programs',
-        offeringsDescription: 'Targeted humanitarian relief, sustainability, and grassroots social drives.',
-        projectSingular: 'Impact Mission',
-        projectsTitle: 'Community Field Projects & Outcomes',
-        projectsDescription: 'On-the-ground interventions delivering tangible social transformation.',
-        achievementSingular: 'Humanitarian Award',
-        achievementsTitle: 'Impact Honors & Transparency Audits',
-        achievementsDescription: 'Charity governance ratings, civic honors, and philanthropy recognitions.',
-        mediaTitle: 'Field Stories & Humanitarian Media',
-        mediaDescription: 'Authentic captures from our grassroots community activities and field initiatives.',
+        offeringSingular: 'Program / Cause',
+        offeringsTitle: 'Programs & Causes',
+        offeringsDescription: 'Key humanitarian programs and social welfare drives.',
+        projectSingular: 'Project',
+        projectsTitle: 'Field Projects & Relief Work',
+        projectsDescription: 'On-the-ground interventions delivering tangible social support.',
+        achievementSingular: 'Milestone / Grant',
+        achievementsTitle: 'Impact Honors & Recognitions',
+        achievementsDescription: 'Civic honors, government grants, and charity recognitions.',
+        mediaTitle: 'Field Photos & Media',
+        mediaDescription: 'Photos and media from community activities and field initiatives.',
       };
     case 'COMMUNITY':
       return {
-        sectorLabel: 'Professional Community & Network',
+        sectorLabel: 'Community & Network',
         teamLabel: 'Community Organizers',
         customerLabel: 'Active Members',
-        offeringSingular: 'Membership Track',
-        offeringsTitle: 'Chapters, Circles & Member Benefits',
-        offeringsDescription: 'Mentorship pods, mastermind groups, and community meetups.',
-        projectSingular: 'Community Hackathon / Initiative',
-        projectsTitle: 'Collaborative Projects & Open Sourcing',
-        projectsDescription: 'Member-driven initiatives, open innovation, and community hackathons.',
-        achievementSingular: 'Community Milestone',
-        achievementsTitle: 'Community Milestones & Recognition',
-        achievementsDescription: 'Member milestones, ecosystem impact badges, and collective achievements.',
-        mediaTitle: 'Meetups & Community Gatherings',
-        mediaDescription: 'Highlights from offline meetups, online AMAs, and annual summits.',
+        offeringSingular: 'Program',
+        offeringsTitle: 'Programs & Member Benefits',
+        offeringsDescription: 'Community chapters, meetups, and member benefits.',
+        projectSingular: 'Initiative',
+        projectsTitle: 'Projects & Initiatives',
+        projectsDescription: 'Member-driven initiatives and community projects.',
+        achievementSingular: 'Milestone',
+        achievementsTitle: 'Community Milestones',
+        achievementsDescription: 'Community impact recognitions and badges.',
+        mediaTitle: 'Meetups & Gatherings',
+        mediaDescription: 'Highlights from meetups, AMAs, and summits.',
       };
     case 'GOVERNMENT':
       return {
         sectorLabel: 'Public Sector & Governance',
-        teamLabel: 'Public Officials & Civil Officers',
+        teamLabel: 'Officials & Staff',
         customerLabel: 'Citizens Served',
         offeringSingular: 'Public Service',
-        offeringsTitle: 'Public Services & Citizen Portals',
-        offeringsDescription: 'Official citizen services, regulatory forms, and administrative assistance.',
+        offeringsTitle: 'Public Services & Portals',
+        offeringsDescription: 'Citizen services, assistance, and public portals.',
         projectSingular: 'Civic Project',
-        projectsTitle: 'Infrastructure & Civic Developments',
-        projectsDescription: 'Public infrastructure, digital governance systems, and citizen welfare works.',
-        achievementSingular: 'Civic Governance Award',
-        achievementsTitle: 'Administrative Audits & Civic Distinctions',
-        achievementsDescription: 'Compliance certifications, transparency awards, and public service citations.',
-        mediaTitle: 'Civic Activities & Public Briefings',
-        mediaDescription: 'Press briefings, civic ceremonies, and government outreach sessions.',
+        projectsTitle: 'Projects & Developments',
+        projectsDescription: 'Public infrastructure and digital governance systems.',
+        achievementSingular: 'Award',
+        achievementsTitle: 'Public Service Recognitions',
+        achievementsDescription: 'Administrative certifications and public awards.',
+        mediaTitle: 'Public Briefings & Media',
+        mediaDescription: 'Ceremonies, briefings, and outreach sessions.',
       };
+    case 'STARTUP':
+    case 'COMPANY':
     default:
       return {
-        sectorLabel: 'Commercial Enterprise & Services',
-        teamLabel: 'Enterprise Team',
-        customerLabel: 'Global Clients',
-        offeringSingular: 'Product / Solution',
-        offeringsTitle: 'Products, Solutions & Services',
-        offeringsDescription: 'Cutting-edge products, enterprise software, and client-tailored solutions.',
-        projectSingular: 'Client Project / Case Study',
-        projectsTitle: 'Case Studies & Featured Deliverables',
-        projectsDescription: 'Proven project engagements, business impact studies, and enterprise transformations.',
-        achievementSingular: 'Industry Honor',
-        achievementsTitle: 'Industry Awards & Certifications',
-        achievementsDescription: 'Official recognitions, patent grants, and industry excellence accolades.',
-        mediaTitle: 'Corporate Gallery & Media',
-        mediaDescription: 'Moments from corporate summits, team offsites, and key achievements.',
+        sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
+        teamLabel: 'Team Members',
+        customerLabel: 'Clients / Users',
+        offeringSingular: 'Product / Service',
+        offeringsTitle: 'Products & Services',
+        offeringsDescription: 'Products, services, and solutions offered by our team.',
+        projectSingular: 'Project',
+        projectsTitle: 'Projects & Portfolio',
+        projectsDescription: 'Featured client work, project deliveries, and key initiatives.',
+        achievementSingular: 'Award / Honor',
+        achievementsTitle: 'Awards & Honors',
+        achievementsDescription: 'Official recognitions, certifications, and industry accolades.',
+        mediaTitle: 'Media & Gallery',
+        mediaDescription: 'Moments from summits, team offsites, and key milestones.',
       };
   }
 }
@@ -471,7 +473,7 @@ export default function CompanyShowcasePage() {
       ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
       : []),
     ...(products.length > 0
-      ? [{ id: 'offerings', label: taxonomy.offeringsTitle ? 'Offerings' : 'Products', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
+      ? [{ id: 'offerings', label: 'Products & Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
       : []),
     ...(projects.length > 0
       ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length, description: taxonomy.projectsDescription }]
@@ -710,6 +712,11 @@ export default function CompanyShowcasePage() {
                             <Badge variant="outline" className="text-xs uppercase font-mono px-2.5 py-0.5">
                               {org.type}
                             </Badge>
+                            {(org.foundedYear || org.overviewStats?.foundedYear) && (
+                              <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                <Calendar className="h-3 w-3 mr-1" /> Est. {org.foundedYear || org.overviewStats?.foundedYear}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm sm:text-base font-medium text-primary mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
                             {taxonomy.sectorLabel}
@@ -718,6 +725,13 @@ export default function CompanyShowcasePage() {
 
                         {/* Taxonomy & Metadata Badges */}
                         <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
+                          {(org.foundedYear || org.overviewStats?.foundedYear) && (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shadow-2xs">
+                              <Calendar className="h-3.5 w-3.5 shrink-0" />
+                              <span>Established {org.foundedYear || org.overviewStats?.foundedYear}</span>
+                            </span>
+                          )}
+
                           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs">
                             <Building2 className="h-3.5 w-3.5 shrink-0" />
                             <span>{taxonomy.sectorLabel}</span>
@@ -851,82 +865,8 @@ export default function CompanyShowcasePage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* 4 Overview Impact Stat Cards */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 pt-3 border-t border-border/60">
-                      <div className="p-3.5 sm:p-4 rounded-2xl border border-border/70 bg-muted/20 hover:bg-muted/40 transition-colors shadow-2xs">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <Calendar className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider truncate">
-                            Established
-                          </span>
-                        </div>
-                        <div className="text-base sm:text-lg font-black text-foreground truncate">
-                          {org.foundedYear || org.overviewStats?.foundedYear || 'Active'}
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 sm:p-4 rounded-2xl border border-border/70 bg-muted/20 hover:bg-muted/40 transition-colors shadow-2xs">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <Users className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider truncate">
-                            {taxonomy.teamLabel}
-                          </span>
-                        </div>
-                        <div className="text-base sm:text-lg font-black text-foreground truncate">
-                          {org.overviewStats?.teamSize || org.size || '10+'}
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 sm:p-4 rounded-2xl border border-border/70 bg-muted/20 hover:bg-muted/40 transition-colors shadow-2xs">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <TrendingUp className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider truncate">
-                            {taxonomy.customerLabel}
-                          </span>
-                        </div>
-                        <div className="text-base sm:text-lg font-black text-foreground truncate">
-                          {org.overviewStats?.customerBase || 'Verified'}
-                        </div>
-                      </div>
-
-                      <div className="p-3.5 sm:p-4 rounded-2xl border border-border/70 bg-muted/20 hover:bg-muted/40 transition-colors shadow-2xs">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <MapPin className="h-3.5 w-3.5" />
-                          </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground uppercase tracking-wider truncate">
-                            Base Location
-                          </span>
-                        </div>
-                        <div className="text-base sm:text-lg font-black text-foreground truncate">
-                          {org.overviewStats?.locationShort || org.location?.city || 'Global'}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
-
-                {/* Custom Statistical Highlights if configured */}
-                {customMetrics.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {customMetrics.map((met, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-2xl border border-primary/20 bg-primary/5 flex flex-col justify-between shadow-2xs"
-                      >
-                        <span className="text-xs text-muted-foreground font-medium">{met.label}</span>
-                        <span className="text-xl sm:text-2xl font-black text-primary mt-1">{met.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {/* Overview Highlight: About & Story Preview */}
                 {aboutText && (
@@ -950,13 +890,13 @@ export default function CompanyShowcasePage() {
                   </div>
                 )}
 
-                {/* Overview Highlight: Featured Offerings Preview */}
+                {/* Overview Highlight: Featured Products & Services Preview */}
                 {products.length > 0 && (
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                         <Package className="h-4 w-4 text-primary" />
-                        <span>Featured {taxonomy.offeringsTitle ? 'Offerings' : 'Products'} ({products.length})</span>
+                        <span>Featured Products & Services ({products.length})</span>
                       </div>
                       <button
                         type="button"
@@ -1185,11 +1125,6 @@ export default function CompanyShowcasePage() {
                             <span className="text-xs text-primary font-medium">For {proj.client}</span>
                           )}
                         </div>
-                        {proj.metrics && (
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs font-bold shrink-0">
-                            {proj.metrics}
-                          </Badge>
-                        )}
                       </div>
 
                       {proj.description && (
@@ -1203,10 +1138,10 @@ export default function CompanyShowcasePage() {
                           href={proj.linkUrl}
                           target="_blank"
                           rel="noreferrer"
-                          onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project Case Study')}
+                          onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
                           className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
                         >
-                          View Case Study <ExternalLink className="h-3 w-3" />
+                          View Project <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
                     </div>
