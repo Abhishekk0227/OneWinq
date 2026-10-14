@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
   Menu,
@@ -12,9 +12,11 @@ import {
   HelpCircle,
   Sun,
   Moon,
+  Building2,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { useUIStore } from '@/stores/uiStore'
+import { useOrganizationContextStore } from '@/stores/organizationContextStore'
 import { useTheme } from '@/app/providers/ThemeProvider'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
@@ -29,10 +31,17 @@ import { WorkspaceContextSwitcher } from './WorkspaceContextSwitcher'
 
 export function AppHeader() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, logout } = useAuthStore()
+  const { activeContext } = useOrganizationContextStore()
   const { toggleSidebar, setMobileMenuOpen } = useUIStore()
   const { theme, resolvedTheme, toggleTheme } = useTheme()
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
+
+  const isOrgRoute =
+    location.pathname.startsWith('/app/org') ||
+    location.pathname.startsWith('/app/organizations')
+  const isOrgMode = activeContext.type === 'ORGANIZATION' || isOrgRoute
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
   const { data: unreadData } = useQuery({
     queryKey: queryKeys.notifications.unreadCount,
@@ -134,8 +143,18 @@ export function AppHeader() {
           </Link>
         )}
 
-        {/* Quick view public profile */}
-        {user?.username && (
+        {/* Quick view public profile / showcase */}
+        {isOrgMode && activeContext.type === 'ORGANIZATION' && activeContext.slug ? (
+          <a
+            href={`/c/${activeContext.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors shrink-0"
+          >
+            <span>Public Showcase</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        ) : user?.username ? (
           <a
             href={`/u/${user.username}`}
             target="_blank"
@@ -145,7 +164,7 @@ export function AppHeader() {
             <span>View Profile</span>
             <ExternalLink className="h-3 w-3" />
           </a>
-        )}
+        ) : null}
 
 
 
@@ -218,14 +237,35 @@ export function AppHeader() {
                   </div>
                 </div>
 
-                <Link
-                  to="/app/profile"
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors"
-                >
-                  <UserCircle className="h-4 w-4" />
-                  <span>My Profile</span>
-                </Link>
+                {isOrgMode ? (
+                  <>
+                    <Link
+                      to="/app/org/profile"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      <span>Org Profile</span>
+                    </Link>
+                    <Link
+                      to="/app/profile"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors"
+                    >
+                      <UserCircle className="h-4 w-4" />
+                      <span>Personal Profile</span>
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="/app/profile"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors"
+                  >
+                    <UserCircle className="h-4 w-4" />
+                    <span>My Profile</span>
+                  </Link>
+                )}
 
                 <button
                   type="button"
