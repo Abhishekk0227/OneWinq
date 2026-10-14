@@ -505,33 +505,19 @@ export default function CompanyShowcasePage() {
 
   const profileTabs = [
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
-    ...(aboutText || missionText || visionText || storyText || coreValues.length > 0
-      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
-      : []),
-    ...(products.length > 0
-      ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
-      : []),
-    ...(projects.length > 0
-      ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length, description: taxonomy.projectsDescription }]
-      : []),
-    ...(achievements.length > 0
-      ? [{ id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, count: achievements.length, description: taxonomy.achievementsDescription }]
-      : []),
-    ...(mediaGallery.length > 0
-      ? [{ id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, count: mediaGallery.length, description: taxonomy.mediaDescription }]
-      : []),
+    { id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' },
+    { id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription },
+    { id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length, description: taxonomy.projectsDescription },
+    { id: 'achievements', label: 'Honors', icon: <Award className="h-4 w-4" />, count: achievements.length, description: taxonomy.achievementsDescription },
+    { id: 'media', label: 'Media', icon: <ImageIcon className="h-4 w-4" />, count: mediaGallery.length, description: taxonomy.mediaDescription },
     ...(org.executives && org.executives.length > 0
       ? [{ id: 'leadership', label: 'Leadership', icon: <Users className="h-4 w-4" />, count: org.executives.length, description: 'Executive board and leadership team' }]
       : []),
     ...(companyPosts.length > 0
       ? [{ id: 'posts', label: 'Updates', icon: <Bell className="h-4 w-4" />, count: companyPosts.length, description: 'Official announcements and updates' }]
       : []),
-    ...(jobs.length > 0
-      ? [{ id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, count: jobs.length, description: 'Open career vacancies & hiring' }]
-      : []),
-    ...(contactEmail || contactPhone || org.location?.address || org.website
-      ? [{ id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' }]
-      : []),
+    { id: 'careers', label: 'Careers', icon: <Briefcase className="h-4 w-4" />, count: jobs.length, description: 'Open career vacancies & hiring' },
+    { id: 'contact', label: 'Contact', icon: <MapPin className="h-4 w-4" />, description: 'Headquarters, inquiry channels & location' },
   ];
 
   return (
@@ -1102,7 +1088,7 @@ export default function CompanyShowcasePage() {
             )}
 
             {/* SECTION: Services */}
-            {(activeTab === 'services' || activeTab === 'offerings') && products.length > 0 && (
+            {(activeTab === 'services' || activeTab === 'offerings') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1118,56 +1104,73 @@ export default function CompanyShowcasePage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {products.map((prod, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 flex flex-col justify-between hover:border-primary/40 transition-all shadow-xs">
-                      <div className="space-y-2.5">
-                        {prod.imageUrl && (
-                          <div className="h-36 w-full rounded-xl overflow-hidden bg-muted mb-2">
-                            <img src={prod.imageUrl} alt={prod.name} className="w-full h-full object-cover" />
+                {products.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-3">
+                    <Package className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                    <h3 className="font-bold text-sm text-foreground">No Services Listed Yet</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                      Services and solutions offered by {org.name} will appear here once published.
+                    </p>
+                    {isOwnerOrAdmin && (
+                      <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="inline-block pt-1">
+                        <Button size="sm" className="text-xs font-semibold">
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Add Services in Org Studio
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {products.map((prod, idx) => (
+                      <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 flex flex-col justify-between hover:border-primary/40 transition-all shadow-xs">
+                        <div className="space-y-2.5">
+                          {prod.imageUrl && (
+                            <div className="h-36 w-full rounded-xl overflow-hidden bg-muted mb-2">
+                              <img src={prod.imageUrl} alt={prod.name} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{prod.name}</h3>
+                            {prod.tag && (
+                              <Badge variant="outline" className="text-[10px] uppercase font-mono shrink-0">
+                                {prod.tag}
+                              </Badge>
+                            )}
                           </div>
-                        )}
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{prod.name}</h3>
-                          {prod.tag && (
-                            <Badge variant="outline" className="text-[10px] uppercase font-mono shrink-0">
-                              {prod.tag}
-                            </Badge>
+                          {prod.category && (
+                            <span className="text-[11px] font-semibold text-primary block">
+                              {prod.category}
+                            </span>
+                          )}
+                          {prod.description && (
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 break-words [overflow-wrap:anywhere]">
+                              {prod.description}
+                            </p>
                           )}
                         </div>
-                        {prod.category && (
-                          <span className="text-[11px] font-semibold text-primary block">
-                            {prod.category}
-                          </span>
-                        )}
-                        {prod.description && (
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 break-words [overflow-wrap:anywhere]">
-                            {prod.description}
-                          </p>
+
+                        {(prod.linkUrl || prod.ctaUrl) && (
+                          <div className="pt-3 mt-3 border-t border-border/60">
+                            <a
+                              href={prod.linkUrl || prod.ctaUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => handleTrackLink(prod.linkUrl || prod.ctaUrl, prod.name || 'Offering')}
+                              className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline"
+                            >
+                              Learn More <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
                         )}
                       </div>
-
-                      {(prod.linkUrl || prod.ctaUrl) && (
-                        <div className="pt-3 mt-3 border-t border-border/60">
-                          <a
-                            href={prod.linkUrl || prod.ctaUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={() => handleTrackLink(prod.linkUrl || prod.ctaUrl, prod.name || 'Offering')}
-                            className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline"
-                          >
-                            Learn More <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
             {/* SECTION: Projects / Case Studies */}
-            {activeTab === 'projects' && projects.length > 0 && (
+            {activeTab === 'projects' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1183,43 +1186,60 @@ export default function CompanyShowcasePage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {projects.map((proj, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-3 hover:border-primary/40 transition-all shadow-xs">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{proj.title}</h3>
-                          {proj.client && (
-                            <span className="text-xs text-primary font-medium">For {proj.client}</span>
-                          )}
+                {projects.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-3">
+                    <Layers className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                    <h3 className="font-bold text-sm text-foreground">No Projects Showcased Yet</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                      Key deliveries, client work, and case studies will be listed here.
+                    </p>
+                    {isOwnerOrAdmin && (
+                      <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="inline-block pt-1">
+                        <Button size="sm" className="text-xs font-semibold">
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Add Projects in Org Studio
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {projects.map((proj, idx) => (
+                      <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-3 hover:border-primary/40 transition-all shadow-xs">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{proj.title}</h3>
+                            {proj.client && (
+                              <span className="text-xs text-primary font-medium">For {proj.client}</span>
+                            )}
+                          </div>
                         </div>
+
+                        {proj.description && (
+                          <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
+                            {proj.description}
+                          </p>
+                        )}
+
+                        {proj.linkUrl && (
+                          <a
+                            href={proj.linkUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
+                            className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
+                          >
+                            View Project <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
                       </div>
-
-                      {proj.description && (
-                        <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
-                          {proj.description}
-                        </p>
-                      )}
-
-                      {proj.linkUrl && (
-                        <a
-                          href={proj.linkUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
-                          className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
-                        >
-                          View Project <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
             {/* SECTION: Honors & Achievements */}
-            {activeTab === 'achievements' && achievements.length > 0 && (
+            {activeTab === 'achievements' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1235,36 +1255,46 @@ export default function CompanyShowcasePage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {achievements.map((ach, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-2 hover:border-primary/40 transition-all shadow-xs">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Award className="h-5 w-5 shrink-0" />
-                        <span className="font-bold text-sm text-foreground break-words [overflow-wrap:anywhere]">{ach.title}</span>
+                {achievements.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-2">
+                    <Award className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                    <h3 className="font-bold text-sm text-foreground">No Honors or Awards Listed Yet</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                      Official recognitions and industry accolades will be featured here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {achievements.map((ach, idx) => (
+                      <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-2 hover:border-primary/40 transition-all shadow-xs">
+                        <div className="flex items-center gap-2 text-primary">
+                          <Award className="h-5 w-5 shrink-0" />
+                          <span className="font-bold text-sm text-foreground break-words [overflow-wrap:anywhere]">{ach.title}</span>
+                        </div>
+                        {ach.issuer && (
+                          <p className="text-xs text-muted-foreground font-medium">
+                            Conferred by {ach.issuer} {ach.year ? `(${ach.year})` : ''}
+                          </p>
+                        )}
+                        {ach.metric && (
+                          <Badge variant="outline" className="text-xs font-bold text-primary">
+                            {ach.metric}
+                          </Badge>
+                        )}
+                        {ach.description && (
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 break-words [overflow-wrap:anywhere]">
+                            {ach.description}
+                          </p>
+                        )}
                       </div>
-                      {ach.issuer && (
-                        <p className="text-xs text-muted-foreground font-medium">
-                          Conferred by {ach.issuer} {ach.year ? `(${ach.year})` : ''}
-                        </p>
-                      )}
-                      {ach.metric && (
-                        <Badge variant="outline" className="text-xs font-bold text-primary">
-                          {ach.metric}
-                        </Badge>
-                      )}
-                      {ach.description && (
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 break-words [overflow-wrap:anywhere]">
-                          {ach.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
             {/* SECTION: Media Gallery */}
-            {activeTab === 'media' && mediaGallery.length > 0 && (
+            {activeTab === 'media' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1280,26 +1310,36 @@ export default function CompanyShowcasePage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {mediaGallery.map((med, idx) => (
-                    <div
-                      key={idx}
-                      className="group relative h-40 rounded-2xl overflow-hidden bg-muted border border-border shadow-xs"
-                    >
-                      <img
-                        src={med.url}
-                        alt={med.caption || med.title || 'Media asset'}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {(med.caption || med.title) && (
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 text-white">
-                          {med.title && <span className="font-bold text-xs truncate">{med.title}</span>}
-                          {med.caption && <span className="text-[11px] opacity-90 line-clamp-1">{med.caption}</span>}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {mediaGallery.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-2">
+                    <ImageIcon className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                    <h3 className="font-bold text-sm text-foreground">No Media Gallery Assets Published Yet</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                      Photos and media moments from events, products, and milestones will be showcased here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {mediaGallery.map((med, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative h-40 rounded-2xl overflow-hidden bg-muted border border-border shadow-xs"
+                      >
+                        <img
+                          src={med.url}
+                          alt={med.caption || med.title || 'Media asset'}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {(med.caption || med.title) && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 text-white">
+                            {med.title && <span className="font-bold text-xs truncate">{med.title}</span>}
+                            {med.caption && <span className="text-[11px] opacity-90 line-clamp-1">{med.caption}</span>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 

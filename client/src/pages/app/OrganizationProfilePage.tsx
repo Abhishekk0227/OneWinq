@@ -384,9 +384,11 @@ export default function OrganizationProfilePage() {
       toast.error('Service name is required');
       return;
     }
-    setProducts((prev) => [...prev, { ...newProduct, isVisible: true, order: prev.length }]);
+    const updated = [...products, { ...newProduct, isVisible: true, order: products.length }];
+    setProducts(updated);
     setNewProduct({ name: '', description: '', linkUrl: '', tag: '', category: '', badge: '' });
     setShowcaseDirty(true);
+    toast.success('Service added to list! Click "Save Services" to publish it.');
   };
 
   const handleRemoveProduct = (index: number) => {
@@ -400,9 +402,11 @@ export default function OrganizationProfilePage() {
       toast.error(`${taxonomy.projectSingular} title is required`);
       return;
     }
-    setProjects((prev) => [...prev, { ...newProject, isVisible: true, order: prev.length }]);
+    const updated = [...projects, { ...newProject, isVisible: true, order: projects.length }];
+    setProjects(updated);
     setNewProject({ title: '', description: '', client: '', linkUrl: '', metrics: '', status: 'completed' });
     setShowcaseDirty(true);
+    toast.success('Project added to list! Click "Save Projects" to publish it.');
   };
 
   const handleRemoveProject = (index: number) => {
@@ -665,6 +669,14 @@ export default function OrganizationProfilePage() {
     updateMutation.mutate(values);
   };
 
+  const onFormError = (formErrors: any) => {
+    console.error('[OrganizationProfileValidationErrors]', formErrors);
+    const firstKey = Object.keys(formErrors)[0];
+    const err = formErrors[firstKey];
+    const msg = err?.message || `Please check the ${firstKey} field`;
+    toast.error(msg);
+  };
+
   const previewLogo = watch('logoUrl');
   const previewBanner = watch('bannerUrl');
   const previewName = watch('name') || org?.name || 'Organization';
@@ -854,7 +866,7 @@ export default function OrganizationProfilePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-6">
         <Tabs defaultValue="general">
           <TabsList className="flex items-center overflow-x-auto no-scrollbar w-full gap-1 p-1 bg-muted/60 rounded-xl justify-start">
             <TabsTrigger value="general" className="text-xs shrink-0 whitespace-nowrap">Overview</TabsTrigger>
@@ -1256,7 +1268,7 @@ export default function OrganizationProfilePage() {
                       type="button"
                       size="sm"
                       disabled={updateMutation.isPending}
-                      onClick={handleSubmit(onSubmit)}
+                      onClick={handleSubmit(onSubmit, onFormError)}
                       className="text-xs font-semibold h-8"
                     >
                       <Save className="h-3.5 w-3.5 mr-1" /> Save Services
@@ -1354,7 +1366,7 @@ export default function OrganizationProfilePage() {
                       type="button"
                       size="sm"
                       disabled={updateMutation.isPending}
-                      onClick={handleSubmit(onSubmit)}
+                      onClick={handleSubmit(onSubmit, onFormError)}
                       className="text-xs font-semibold h-8"
                     >
                       <Save className="h-3.5 w-3.5 mr-1" /> Save Projects
@@ -1836,7 +1848,7 @@ export default function OrganizationProfilePage() {
           </p>
           <Button
             type="submit"
-            disabled={updateMutation.isPending || (!isDirty && !showcaseDirty)}
+            disabled={updateMutation.isPending}
             className="px-6 py-2.5 font-semibold"
           >
             {updateMutation.isPending ? (
