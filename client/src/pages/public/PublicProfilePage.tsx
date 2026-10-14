@@ -368,7 +368,6 @@ export default function PublicProfilePage() {
               </button>
             )}
             <BrandLogo to="/" className="hidden sm:inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
-            <BrandLogo to="/" collapsed className="sm:hidden shrink-0" imgClassName="h-6 w-6" />
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
@@ -441,7 +440,7 @@ export default function PublicProfilePage() {
                     >
                       Message
                     </Button>
-                    <Badge variant="success" className="py-0.5 px-2 text-[10px] sm:text-xs whitespace-nowrap">
+                    <Badge variant="success" className="py-0.5 px-2 text-[10px] sm:text-xs whitespace-nowrap hidden sm:inline-flex">
                       Connected
                     </Badge>
                   </div>
