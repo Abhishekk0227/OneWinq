@@ -32,6 +32,7 @@ import {
   Users,
   Eye,
   Check,
+  Share2,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -136,9 +137,9 @@ export function getSectorTaxonomy(type: string): SectorTaxonomy {
     default:
       return {
         sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
-        offeringsTitle: 'Products & Services',
-        offeringsDescription: 'Products, services, and solutions offered by your organization.',
-        offeringSingular: 'Product / Service',
+        offeringsTitle: 'Services',
+        offeringsDescription: 'Services and solutions offered by your organization.',
+        offeringSingular: 'Service',
         projectsTitle: 'Projects & Portfolio',
         projectsDescription: 'Featured client work, project deliveries, and key initiatives.',
         projectSingular: 'Project',
@@ -265,6 +266,7 @@ export default function OrganizationProfilePage() {
   const [mediaGallery, setMediaGallery] = React.useState<OrganizationMediaItem[]>([]);
   const [customMetrics, setCustomMetrics] = React.useState<OrganizationCustomMetric[]>([]);
   const [values, setValues] = React.useState<OrganizationValueItem[]>([]);
+  const [socialLinks, setSocialLinks] = React.useState<{ platform: string; url: string }[]>([]);
 
   const [showcaseDirty, setShowcaseDirty] = React.useState(false);
 
@@ -371,14 +373,15 @@ export default function OrganizationProfilePage() {
       setMediaGallery(org.mediaGallery || []);
       setCustomMetrics(org.overviewStats?.customMetrics || []);
       setValues(org.about?.values || []);
+      setSocialLinks(org.socialLinks || []);
       setShowcaseDirty(false);
     }
   }, [org, reset]);
 
-  // Product Handlers
+  // Product/Service Handlers
   const handleAddProduct = () => {
     if (!newProduct.name.trim()) {
-      toast.error(`${taxonomy.offeringSingular} name is required`);
+      toast.error('Service name is required');
       return;
     }
     setProducts((prev) => [...prev, { ...newProduct, isVisible: true, order: prev.length }]);
@@ -431,6 +434,12 @@ export default function OrganizationProfilePage() {
 
   const handleRemoveAchievement = (index: number) => {
     setAchievements((prev) => prev.filter((_, i) => i !== index));
+    setShowcaseDirty(true);
+  };
+
+  // Social Links Handler
+  const handleAddSocialLink = () => {
+    setSocialLinks((prev) => [...prev, { platform: 'LinkedIn', url: '' }]);
     setShowcaseDirty(true);
   };
 
@@ -624,6 +633,12 @@ export default function OrganizationProfilePage() {
         projects,
         achievements,
         mediaGallery,
+        socialLinks: socialLinks
+          .filter((s) => s.url && s.url.trim())
+          .map((s) => ({
+            platform: s.platform || 'Website',
+            url: s.url.trim().startsWith('http') ? s.url.trim() : `https://${s.url.trim()}`,
+          })),
         settings: {
           allowMemberJobPosting: data.allowMemberJobPosting,
           requireApprovalForCards: data.requireApprovalForCards,
@@ -637,6 +652,7 @@ export default function OrganizationProfilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['publicOrgShowcase'] });
       setShowcaseDirty(false);
       toast.success('Organization profile & showcase updated successfully');
     },
@@ -844,7 +860,7 @@ export default function OrganizationProfilePage() {
             <TabsTrigger value="general" className="text-xs shrink-0 whitespace-nowrap">Overview</TabsTrigger>
             <TabsTrigger value="about" className="text-xs shrink-0 whitespace-nowrap">About & Story</TabsTrigger>
             <TabsTrigger value="branding" className="text-xs shrink-0 whitespace-nowrap">Brand Kit</TabsTrigger>
-            <TabsTrigger value="offerings" className="text-xs shrink-0 whitespace-nowrap">Products & Services</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs shrink-0 whitespace-nowrap">Services</TabsTrigger>
             <TabsTrigger value="projects" className="text-xs shrink-0 whitespace-nowrap">Projects</TabsTrigger>
             <TabsTrigger value="achievements" className="text-xs shrink-0 whitespace-nowrap">Honors</TabsTrigger>
             <TabsTrigger value="media" className="text-xs shrink-0 whitespace-nowrap">Media</TabsTrigger>
@@ -1221,151 +1237,34 @@ export default function OrganizationProfilePage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Brand Colors & Theme Tokens */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Brand Color Tokens & Theme Styling</CardTitle>
-                <CardDescription>
-                  Customize signature brand colors applied to employee cards, public showcase, and badges.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-2 p-3.5 rounded-xl border border-border bg-card">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
-                      Primary Brand Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watch('primaryColor') || '#7c3aed'}
-                        onChange={(e) => setValue('primaryColor', e.target.value, { shouldDirty: true })}
-                        className="h-9 w-9 rounded-lg cursor-pointer border border-border p-0.5"
-                      />
-                      <Input {...register('primaryColor')} placeholder="#7c3aed" className="font-mono text-xs uppercase" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 p-3.5 rounded-xl border border-border bg-card">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
-                      Secondary Accent Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watch('secondaryColor') || '#6366f1'}
-                        onChange={(e) => setValue('secondaryColor', e.target.value, { shouldDirty: true })}
-                        className="h-9 w-9 rounded-lg cursor-pointer border border-border p-0.5"
-                      />
-                      <Input {...register('secondaryColor')} placeholder="#6366f1" className="font-mono text-xs uppercase" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 p-3.5 rounded-xl border border-border bg-card">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
-                      Highlight Accent Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={watch('accentColor') || '#06b6d4'}
-                        onChange={(e) => setValue('accentColor', e.target.value, { shouldDirty: true })}
-                        className="h-9 w-9 rounded-lg cursor-pointer border border-border p-0.5"
-                      />
-                      <Input {...register('accentColor')} placeholder="#06b6d4" className="font-mono text-xs uppercase" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Heading Typography Font
-                    </label>
-                    <select
-                      {...register('fontHeading')}
-                      className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      <option value="Inter">Inter</option>
-                      <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                      <option value="Outfit">Outfit</option>
-                      <option value="Poppins">Poppins</option>
-                      <option value="Roboto">Roboto</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Body Typography Font
-                    </label>
-                    <select
-                      {...register('fontBody')}
-                      className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      <option value="Inter">Inter</option>
-                      <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                      <option value="Roboto">Roboto</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Theme Mode
-                    </label>
-                    <select
-                      {...register('themeMode')}
-                      className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      <option value="system">Auto / System Adapt</option>
-                      <option value="dark">Always Dark</option>
-                      <option value="light">Always Light</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Live Brand Palette Preview Box */}
-                <div
-                  className="p-5 rounded-2xl border text-white relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${watch('primaryColor') || '#7c3aed'}, ${watch('secondaryColor') || '#6366f1'})`,
-                  }}
-                >
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] tracking-widest font-mono uppercase bg-white/20 px-2 py-0.5 rounded-md">
-                        LIVE PALETTE PREVIEW
-                      </span>
-                      <h3 className="text-lg font-bold mt-1">{previewName}</h3>
-                      <p className="text-xs opacity-90">Preview of your brand gradient token.</p>
-                    </div>
-                    <div
-                      className="h-10 w-10 rounded-xl flex items-center justify-center font-bold text-xs"
-                      style={{ backgroundColor: watch('accentColor') || '#06b6d4', color: '#000' }}
-                    >
-                      ACC
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
-          {/* TAB 4: Products & Services */}
-          <TabsContent value="offerings" className="mt-6 space-y-6">
+          {/* TAB 4: Services */}
+          <TabsContent value="services" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Package className="h-5 w-5 text-primary" />
                     <div>
-                      <CardTitle className="text-base">{taxonomy.offeringsTitle} ({products.length})</CardTitle>
-                      <CardDescription>{taxonomy.offeringsDescription}</CardDescription>
+                      <CardTitle className="text-base">Services ({products.length})</CardTitle>
+                      <CardDescription>Add the professional services and solutions provided by your organization.</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {taxonomy.offeringSingular}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      onClick={handleSubmit(onSubmit)}
+                      className="text-xs font-semibold h-8"
+                    >
+                      <Save className="h-3.5 w-3.5 mr-1" /> Save Services
+                    </Button>
+                    <Badge variant="outline" className="text-xs">
+                      Service
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1399,14 +1298,14 @@ export default function OrganizationProfilePage() {
                   </div>
                 )}
 
-                {/* Add product form */}
+                {/* Add service form */}
                 <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3">
                   <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Plus className="h-3.5 w-3.5 text-primary" /> Add {taxonomy.offeringSingular}
+                    <Plus className="h-3.5 w-3.5 text-primary" /> Add Service
                   </span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
-                      placeholder={`${taxonomy.offeringSingular} Name *`}
+                      placeholder="Service Name *"
                       value={newProduct.name}
                       onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                     />
@@ -1418,19 +1317,19 @@ export default function OrganizationProfilePage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <Input
-                      placeholder="Short description of what it is and what it offers..."
+                      placeholder="Short description of the service and deliverables..."
                       value={newProduct.description}
                       onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     />
                     <Input
-                      placeholder="Website or Product Link (Optional)"
+                      placeholder="Service or Booking Link (Optional)"
                       value={newProduct.linkUrl}
                       onChange={(e) => setNewProduct({ ...newProduct, linkUrl: e.target.value })}
                     />
                   </div>
                   <div className="flex justify-end">
                     <Button type="button" size="sm" variant="outline" onClick={handleAddProduct} className="text-xs">
-                      <Plus className="h-3.5 w-3.5 mr-1" /> Add {taxonomy.offeringSingular}
+                      <Plus className="h-3.5 w-3.5 mr-1" /> Add Service
                     </Button>
                   </div>
                 </div>
@@ -1450,9 +1349,20 @@ export default function OrganizationProfilePage() {
                       <CardDescription>{taxonomy.projectsDescription}</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {taxonomy.projectSingular}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={updateMutation.isPending}
+                      onClick={handleSubmit(onSubmit)}
+                      className="text-xs font-semibold h-8"
+                    >
+                      <Save className="h-3.5 w-3.5 mr-1" /> Save Projects
+                    </Button>
+                    <Badge variant="outline" className="text-xs">
+                      {taxonomy.projectSingular}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1830,6 +1740,90 @@ export default function OrganizationProfilePage() {
                     </div>
                   </label>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Media Links Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Share2 className="h-4 w-4 text-primary" />
+                      Social Media Links
+                    </CardTitle>
+                    <CardDescription>
+                      Connect your organization&apos;s social profiles and channels (LinkedIn, X, Instagram, GitHub, etc.).
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddSocialLink}
+                    className="text-xs font-semibold"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Add Social Link
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {socialLinks.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic py-2">
+                    No social media links added yet. Click &quot;Add Social Link&quot; above to connect your official channels.
+                  </p>
+                ) : (
+                  socialLinks.map((link, idx) => (
+                    <div key={idx} className="flex flex-col sm:flex-row items-center gap-2.5 p-3 rounded-xl border border-border bg-card shadow-2xs">
+                      <select
+                        value={link.platform}
+                        onChange={(e) => {
+                          const updated = [...socialLinks];
+                          updated[idx].platform = e.target.value;
+                          setSocialLinks(updated);
+                          setShowcaseDirty(true);
+                        }}
+                        className="rounded-xl border border-input bg-background px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-44"
+                      >
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="GitHub">GitHub</option>
+                        <option value="X">X (Twitter)</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Discord">Discord</option>
+                        <option value="Dribbble">Dribbble</option>
+                        <option value="Website">Website</option>
+                        <option value="Other">Other</option>
+                      </select>
+
+                      <Input
+                        value={link.url}
+                        onChange={(e) => {
+                          const updated = [...socialLinks];
+                          updated[idx].url = e.target.value;
+                          setSocialLinks(updated);
+                          setShowcaseDirty(true);
+                        }}
+                        placeholder="https://..."
+                        className="text-xs flex-1"
+                      />
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSocialLinks((prev) => prev.filter((_, i) => i !== idx));
+                          setShowcaseDirty(true);
+                        }}
+                        className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 shrink-0 self-end sm:self-auto"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -35,11 +35,13 @@ import {
   Share2,
   Sun,
   Moon,
-  Copy,
-  Check,
   Home,
   Menu,
+  ChevronDown,
+  ChevronUp,
+  Settings,
 } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 import { analyticsApi } from '@/features/analytics/api/analytics.api';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
@@ -64,6 +66,40 @@ import type {
 } from '@/types/organization.types';
 
 const BIO_LIMIT = 280;
+
+function ExpandableAboutText({ text }: { text: string }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const isLong = text.length > 220;
+  return (
+    <div className="space-y-2">
+      <div
+        className={cn(
+          'leading-relaxed text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap break-words [overflow-wrap:anywhere] transition-all',
+          isLong && !expanded && 'line-clamp-4 max-h-[115px] overflow-hidden'
+        )}
+      >
+        {text}
+      </div>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer pt-1"
+        >
+          {expanded ? (
+            <>
+              View Less <ChevronUp className="h-3.5 w-3.5" />
+            </>
+          ) : (
+            <>
+              View More <ChevronDown className="h-3.5 w-3.5" />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function BioText({ text }: { text: string }) {
   const [expanded, setExpanded] = React.useState(false);
@@ -257,9 +293,9 @@ function getShowcaseTaxonomy(type: string) {
         sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
         teamLabel: 'Team Members',
         customerLabel: 'Clients / Users',
-        offeringSingular: 'Product / Service',
-        offeringsTitle: 'Products & Services',
-        offeringsDescription: 'Products, services, and solutions offered by our team.',
+        offeringSingular: 'Service',
+        offeringsTitle: 'Services',
+        offeringsDescription: 'Services and solutions offered by our team.',
         projectSingular: 'Project',
         projectsTitle: 'Projects & Portfolio',
         projectsDescription: 'Featured client work, project deliveries, and key initiatives.',
@@ -473,7 +509,7 @@ export default function CompanyShowcasePage() {
       ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
       : []),
     ...(products.length > 0
-      ? [{ id: 'offerings', label: 'Products & Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
+      ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, count: products.length, description: taxonomy.offeringsDescription }]
       : []),
     ...(projects.length > 0
       ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length, description: taxonomy.projectsDescription }]
@@ -503,7 +539,7 @@ export default function CompanyShowcasePage() {
       {/* 1. Floating Top Header / Navigation (Matching User Public Profile Header) */}
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
         <div className="container mx-auto flex max-w-6xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {profileTabs.length > 1 && (
               <button
                 type="button"
@@ -518,7 +554,7 @@ export default function CompanyShowcasePage() {
             <BrandLogo to="/" className="inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Theme Switcher: Light / Dark */}
             <button
               type="button"
@@ -562,25 +598,26 @@ export default function CompanyShowcasePage() {
                 followMutation.mutate();
               }}
               disabled={followMutation.isPending}
-              className="h-7 sm:h-8 text-[11px] sm:text-xs px-2.5 sm:px-3 font-semibold shadow-xs shrink-0"
+              className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 font-semibold shadow-xs shrink-0"
             >
               {followState.isFollowing ? (
                 <>
-                  <UserCheck className="h-3.5 w-3.5 mr-1 text-primary shrink-0" />
+                  <UserCheck className="h-3.5 w-3.5 sm:mr-1 text-primary shrink-0" />
                   <span className="hidden sm:inline">Following</span>
                 </>
               ) : (
                 <>
-                  <Bell className="h-3.5 w-3.5 mr-1 shrink-0" />
-                  <span>Follow</span>
+                  <Bell className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Follow</span>
                 </>
               )}
             </Button>
 
             {isOwnerOrAdmin && (
               <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="shrink-0">
-                <Button size="sm" variant="subtle" className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 whitespace-nowrap">
-                  Manage Org
+                <Button size="sm" variant="subtle" className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-2.5 whitespace-nowrap">
+                  <Settings className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
+                  <span className="hidden sm:inline">Manage Org</span>
                 </Button>
               </Link>
             )}
@@ -723,20 +760,8 @@ export default function CompanyShowcasePage() {
                           </p>
                         </div>
 
-                        {/* Taxonomy & Metadata Badges */}
+                        {/* Taxonomy & Metadata Badges - Clean & Uncluttered */}
                         <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
-                          {(org.foundedYear || org.overviewStats?.foundedYear) && (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shadow-2xs">
-                              <Calendar className="h-3.5 w-3.5 shrink-0" />
-                              <span>Established {org.foundedYear || org.overviewStats?.foundedYear}</span>
-                            </span>
-                          )}
-
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs">
-                            <Building2 className="h-3.5 w-3.5 shrink-0" />
-                            <span>{taxonomy.sectorLabel}</span>
-                          </span>
-
                           {org.industry && (
                             <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-muted/60 text-foreground/80 border border-border/70 shadow-2xs">
                               <Briefcase className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -890,17 +915,17 @@ export default function CompanyShowcasePage() {
                   </div>
                 )}
 
-                {/* Overview Highlight: Featured Products & Services Preview */}
+                {/* Overview Highlight: Featured Services Preview */}
                 {products.length > 0 && (
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                         <Package className="h-4 w-4 text-primary" />
-                        <span>Featured Products & Services ({products.length})</span>
+                        <span>Featured Services ({products.length})</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleSelectTab('offerings')}
+                        onClick={() => handleSelectTab('services')}
                         className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         View All <ChevronRight className="h-3.5 w-3.5" />
@@ -923,6 +948,51 @@ export default function CompanyShowcasePage() {
                               <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{prod.description}</p>
                             )}
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Overview Highlight: Featured Projects Preview */}
+                {projects.length > 0 && (
+                  <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
+                      <div className="flex items-center gap-2 text-foreground font-bold text-sm">
+                        <Layers className="h-4 w-4 text-primary" />
+                        <span>Featured Projects ({projects.length})</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('projects')}
+                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        View All <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {projects.slice(0, 3).map((proj, idx) => (
+                        <div key={idx} className="p-3.5 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-2">
+                          <div>
+                            <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{proj.title}</h4>
+                            {proj.client && (
+                              <span className="text-[10px] text-primary font-semibold block mt-0.5">For {proj.client}</span>
+                            )}
+                            {proj.description && (
+                              <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{proj.description}</p>
+                            )}
+                          </div>
+                          {proj.linkUrl && (
+                            <a
+                              href={proj.linkUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
+                              className="text-[11px] text-primary hover:underline inline-flex items-center gap-1 font-semibold pt-1"
+                            >
+                              View Project <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -967,9 +1037,7 @@ export default function CompanyShowcasePage() {
                         About {org.name}
                       </h2>
                     </div>
-                    <div className="leading-relaxed text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                      {aboutText}
-                    </div>
+                    <ExpandableAboutText text={aboutText} />
                   </section>
                 )}
 
@@ -1033,8 +1101,8 @@ export default function CompanyShowcasePage() {
               </div>
             )}
 
-            {/* SECTION: Offerings / Products */}
-            {activeTab === 'offerings' && products.length > 0 && (
+            {/* SECTION: Services */}
+            {(activeTab === 'services' || activeTab === 'offerings') && products.length > 0 && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
