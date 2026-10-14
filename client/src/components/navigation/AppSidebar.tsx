@@ -89,14 +89,7 @@ export function AppSidebar() {
 
   const orgNavItems: Array<{ label: string; to: string; icon: any; end?: boolean }> = []
 
-  // 1. Organization Posts (Dedicated Organization Posts Hub)
-  orgNavItems.push({
-    label: 'Organization Posts',
-    to: '/app/org/posts',
-    icon: FileText,
-  })
-
-  // 2. Organization Profile Studio (Only for Owner/Admin or permitted editors)
+  // 1. Organization Profile Studio (Only for Owner/Admin or permitted editors)
   if (isOrgAdmin || hasPerm('org:edit') || hasPerm('showcase:manage')) {
     orgNavItems.push({
       label: 'Organization Profile',
@@ -104,6 +97,13 @@ export function AppSidebar() {
       icon: Building2,
     })
   }
+
+  // 2. Organization Posts (Dedicated Organization Posts Hub)
+  orgNavItems.push({
+    label: 'Organization Posts',
+    to: '/app/org/posts',
+    icon: FileText,
+  })
 
   // 3. Team Members / Directory (Roster management for admins/HR, Colleague Directory for members)
   orgNavItems.push({

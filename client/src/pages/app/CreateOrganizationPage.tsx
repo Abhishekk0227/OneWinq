@@ -66,7 +66,7 @@ export default function CreateOrganizationPage() {
 
       if (createdOrg?.id) {
         switchToOrganization(createdOrg.id);
-        navigate('/app/org/posts');
+        navigate('/app/org/profile');
       } else {
         navigate('/app');
       }
