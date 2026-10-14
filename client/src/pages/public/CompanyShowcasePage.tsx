@@ -40,6 +40,7 @@ import {
   ChevronDown,
   ChevronUp,
   Settings,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { analyticsApi } from '@/features/analytics/api/analytics.api';
@@ -600,7 +601,7 @@ export default function CompanyShowcasePage() {
             </Button>
 
             {isOwnerOrAdmin && (
-              <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="shrink-0">
+              <Link to="/app/org/profile" className="shrink-0">
                 <Button size="sm" variant="subtle" className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-2.5 whitespace-nowrap">
                   <Settings className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
                   <span className="hidden sm:inline">Manage Org</span>
@@ -1112,7 +1113,7 @@ export default function CompanyShowcasePage() {
                       Services and solutions offered by {org.name} will appear here once published.
                     </p>
                     {isOwnerOrAdmin && (
-                      <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="inline-block pt-1">
+                      <Link to="/app/org/profile" className="inline-block pt-1">
                         <Button size="sm" className="text-xs font-semibold">
                           <Plus className="h-3.5 w-3.5 mr-1" /> Add Services in Org Studio
                         </Button>
@@ -1194,7 +1195,7 @@ export default function CompanyShowcasePage() {
                       Key deliveries, client work, and case studies will be listed here.
                     </p>
                     {isOwnerOrAdmin && (
-                      <Link to={`/app/organizations/${org.slug || org.id}/settings`} className="inline-block pt-1">
+                      <Link to="/app/org/profile" className="inline-block pt-1">
                         <Button size="sm" className="text-xs font-semibold">
                           <Plus className="h-3.5 w-3.5 mr-1" /> Add Projects in Org Studio
                         </Button>
@@ -1239,7 +1240,7 @@ export default function CompanyShowcasePage() {
             )}
 
             {/* SECTION: Honors & Achievements */}
-            {activeTab === 'achievements' && (
+            {(activeTab === 'achievements' || activeTab === 'honors') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1256,12 +1257,19 @@ export default function CompanyShowcasePage() {
                 </div>
 
                 {achievements.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-2">
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-3">
                     <Award className="h-10 w-10 text-muted-foreground/40 mx-auto" />
                     <h3 className="font-bold text-sm text-foreground">No Honors or Awards Listed Yet</h3>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                       Official recognitions and industry accolades will be featured here.
                     </p>
+                    {isOwnerOrAdmin && (
+                      <Link to="/app/org/profile" className="inline-block pt-1">
+                        <Button size="sm" className="text-xs font-semibold">
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Add Honors in Org Studio
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1311,12 +1319,19 @@ export default function CompanyShowcasePage() {
                 </div>
 
                 {mediaGallery.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-2">
+                  <div className="rounded-2xl border border-dashed border-border/80 bg-muted/10 p-10 text-center space-y-3">
                     <ImageIcon className="h-10 w-10 text-muted-foreground/40 mx-auto" />
                     <h3 className="font-bold text-sm text-foreground">No Media Gallery Assets Published Yet</h3>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                       Photos and media moments from events, products, and milestones will be showcased here.
                     </p>
+                    {isOwnerOrAdmin && (
+                      <Link to="/app/org/profile" className="inline-block pt-1">
+                        <Button size="sm" className="text-xs font-semibold">
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Add Media in Org Studio
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -1395,7 +1410,7 @@ export default function CompanyShowcasePage() {
             )}
 
             {/* SECTION: Careers & Open Positions */}
-            {activeTab === 'careers' && (
+            {(activeTab === 'careers' || activeTab === 'jobs') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
                   <div className="flex items-center gap-2.5">
@@ -1412,8 +1427,16 @@ export default function CompanyShowcasePage() {
                 </div>
 
                 {jobs.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-muted-foreground rounded-2xl border border-border/60 bg-muted/10">
-                    No active job vacancies currently open. Check back soon!
+                  <div className="p-8 text-center text-xs text-muted-foreground rounded-2xl border border-dashed border-border/80 bg-muted/10 space-y-3">
+                    <Briefcase className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+                    <p>No active job vacancies currently open. Check back soon!</p>
+                    {isOwnerOrAdmin && (
+                      <Link to="/app/org/jobs" className="inline-block pt-1">
+                        <Button size="sm" className="text-xs font-semibold">
+                          <Plus className="h-3.5 w-3.5 mr-1" /> Post Jobs in Org Studio
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1616,7 +1639,7 @@ export default function CompanyShowcasePage() {
           headline: org.tagline || taxonomy.sectorLabel,
         }}
         isSelf={isOwnerOrAdmin}
-        editProfileUrl={`/app/organizations/${org.slug || org.id}/settings`}
+        editProfileUrl="/app/org/profile"
         onShareClick={handleShare}
       />
     </div>
