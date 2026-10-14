@@ -557,27 +557,18 @@ export default function ProfilePage() {
                     </h2>
                     <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
 
-                    {activeUserCard ? (
-                      <a
-                        href={`/u/${user?.username}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
-                      >
-                        <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-semibold flex items-center gap-1">
-                          <Wifi className="h-2.5 w-2.5" />
-                          <span>NFC Active</span>
-                        </Badge>
-                        <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground">
-                          /u/{user?.username}
-                        </span>
-                        <ExternalLink className="h-3 w-3 shrink-0" />
-                      </a>
-                    ) : (
-                      <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-semibold flex items-center gap-1 ml-auto">
-                        <span>Card Activation Pending</span>
-                      </Badge>
-                    )}
+                    <a
+                      href={`/u/${user?.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
+                      title="View your public profile"
+                    >
+                      <span className="font-mono text-[11px] text-muted-foreground hover:text-primary">
+                        /u/{user?.username}
+                      </span>
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
                   </div>
 
                   {profile.headline ? (

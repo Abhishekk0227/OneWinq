@@ -491,15 +491,6 @@ export default function DiscoveryPage() {
                             Connected
                           </span>
                         )}
-                        {person.hasActiveCard && (
-                          <span
-                            className="inline-flex items-center gap-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md shrink-0"
-                            title="Active NFC Smart Card"
-                          >
-                            <Wifi className="h-2.5 w-2.5 rotate-90" />
-                            <span>NFC</span>
-                          </span>
-                        )}
                       </div>
                       {(() => {
                         const rawHeadline =

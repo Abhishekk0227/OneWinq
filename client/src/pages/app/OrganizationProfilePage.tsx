@@ -796,8 +796,6 @@ export default function OrganizationProfilePage() {
               </div>
               <p className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>Sector: <strong className="text-foreground">{taxonomy.sectorLabel}</strong></span>
-                <span className="hidden sm:inline">•</span>
-                <span>slug: <span className="font-mono text-xs font-semibold text-foreground">/{org?.slug}</span></span>
               </p>
             </div>
           </div>
