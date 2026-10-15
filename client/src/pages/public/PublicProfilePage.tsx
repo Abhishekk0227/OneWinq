@@ -648,7 +648,7 @@ export default function PublicProfilePage() {
                         <Link
                           to={`/c/${primaryOrg.organizationSlug}`}
                           className="inline-flex items-center gap-2 sm:gap-2.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 backdrop-blur-md shadow-xl text-white transition-all duration-200 group active:scale-95"
-                          title={`View ${primaryOrg.organizationName} Showcase`}
+                          title={`Verified ${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}`}
                         >
                           {primaryOrg.organizationLogoUrl ? (
                             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl overflow-hidden bg-white/10 p-0.5 border border-white/20 shrink-0 flex items-center justify-center">
@@ -664,18 +664,15 @@ export default function PublicProfilePage() {
                             </div>
                           )}
 
-                          <div className="text-left min-w-0 max-w-[120px] sm:max-w-[180px]">
+                          <div className="text-left min-w-0 max-w-[130px] sm:max-w-[200px]">
                             <div className="flex items-center gap-1 min-w-0">
                               <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-primary-300 transition-colors">
-                                {primaryOrg.organizationName}
+                                {primaryOrg.position || primaryOrg.roleLabel}
                               </span>
                               {primaryOrg.isVerifiedOrg && (
                                 <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-400 shrink-0" />
                               )}
                             </div>
-                            <span className="text-[10px] sm:text-[11px] text-white/80 font-medium truncate block">
-                              {primaryOrg.position || primaryOrg.roleLabel}
-                            </span>
                           </div>
 
                           <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
