@@ -54,9 +54,11 @@ import {
   Layers,
   Home,
   ChevronRight,
+  ChevronDown,
   Menu,
   Code,
 } from 'lucide-react'
+import { cn } from '@/lib/utils/cn'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
@@ -187,6 +189,7 @@ export default function PublicProfilePage() {
   const [isStartingChat, setIsStartingChat] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<string>('home')
   const [isSectionsDrawerOpen, setIsSectionsDrawerOpen] = React.useState(false)
+  const [isOtherOrgsOpen, setIsOtherOrgsOpen] = React.useState(false)
 
   // Global Theme integration (Light / Dark)
   const { resolvedTheme, toggleTheme } = useTheme()
@@ -301,6 +304,8 @@ export default function PublicProfilePage() {
 
   const { profile, user: profileUser, activeMode, connectionState, isCardGated, hasActiveCard, activeCard } = data.data
   const organizationAffiliations = data.data.organizationAffiliations || []
+  const primaryOrg = organizationAffiliations[0]
+  const otherOrgs = organizationAffiliations.slice(1)
   const isSelf = Boolean(
     currentUser &&
       (currentUser.username === profileUser?.username ||
@@ -614,23 +619,135 @@ export default function PublicProfilePage() {
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (
               <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
-                {/* Cover Banner: Custom or Default OneWinq Branded Banner */}
-                <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
-                  {profile.coverUrl ? (
-                    <img
-                      src={profile.coverUrl}
-                      alt="Cover Banner"
-                      className="w-full h-full object-cover object-center"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative flex items-center justify-center overflow-hidden border-b border-border/40 select-none">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
-                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                {/* Cover Banner: Custom or Default OneWinq Branded Banner with Highlighted Organization Card */}
+                <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative flex items-center justify-center">
+                  <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+                    {profile.coverUrl ? (
                       <img
-                        src="/logo-white.png"
-                        alt="OneWinq"
-                        className="h-10 sm:h-14 w-auto object-contain relative z-10 opacity-90 drop-shadow-md"
+                        src={profile.coverUrl}
+                        alt="Cover Banner"
+                        className="w-full h-full object-cover object-center"
                       />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative flex items-center justify-center overflow-hidden border-b border-border/40 select-none">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                        <img
+                          src="/logo-white.png"
+                          alt="OneWinq"
+                          className="h-10 sm:h-14 w-auto object-contain relative z-10 opacity-90 drop-shadow-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Highlight Organization Badge on Banner (Option A: Floating Glassmorphic Card) */}
+                  {primaryOrg && (
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex flex-col items-end">
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          to={`/c/${primaryOrg.organizationSlug}`}
+                          className="inline-flex items-center gap-2 sm:gap-2.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 backdrop-blur-md shadow-xl text-white transition-all duration-200 group active:scale-95"
+                          title={`View ${primaryOrg.organizationName} Showcase`}
+                        >
+                          {primaryOrg.organizationLogoUrl ? (
+                            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl overflow-hidden bg-white/10 p-0.5 border border-white/20 shrink-0 flex items-center justify-center">
+                              <img
+                                src={primaryOrg.organizationLogoUrl}
+                                alt={primaryOrg.organizationName}
+                                className="h-full w-full object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                              <Building2 className="h-4 w-4 text-white" />
+                            </div>
+                          )}
+
+                          <div className="text-left min-w-0 max-w-[120px] sm:max-w-[180px]">
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-primary-300 transition-colors">
+                                {primaryOrg.organizationName}
+                              </span>
+                              {primaryOrg.isVerifiedOrg && (
+                                <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-400 shrink-0" />
+                              )}
+                            </div>
+                            <span className="text-[10px] sm:text-[11px] text-white/80 font-medium truncate block">
+                              {primaryOrg.position || primaryOrg.roleLabel}
+                            </span>
+                          </div>
+
+                          <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
+                        </Link>
+
+                        {/* If user belongs to more than 1 organization */}
+                        {otherOrgs.length > 0 && (
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsOtherOrgsOpen(!isOtherOrgsOpen);
+                              }}
+                              className="px-2 py-1.5 sm:px-2.5 sm:py-2 rounded-2xl bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 backdrop-blur-md shadow-xl text-white text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                              title={`${otherOrgs.length} more organization${otherOrgs.length > 1 ? 's' : ''}`}
+                            >
+                              <span>+{otherOrgs.length}</span>
+                              <ChevronDown className={cn("h-3 w-3 transition-transform", isOtherOrgsOpen && "rotate-180")} />
+                            </button>
+
+                            {isOtherOrgsOpen && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-30"
+                                  onClick={() => setIsOtherOrgsOpen(false)}
+                                />
+                                <div className="absolute right-0 top-full mt-1.5 z-40 w-56 max-w-[85vw] rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md p-1.5 shadow-2xl animate-in fade-in-0 zoom-in-95">
+                                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 mb-1">
+                                    Other Organizations
+                                  </div>
+                                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                                    {otherOrgs.map((org: any) => (
+                                      <Link
+                                        key={org.organizationId}
+                                        to={`/c/${org.organizationSlug}`}
+                                        onClick={() => setIsOtherOrgsOpen(false)}
+                                        className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-muted text-foreground transition-colors group text-left"
+                                      >
+                                        {org.organizationLogoUrl ? (
+                                          <img
+                                            src={org.organizationLogoUrl}
+                                            alt={org.organizationName}
+                                            className="h-6 w-6 rounded-lg object-contain bg-muted p-0.5 shrink-0"
+                                          />
+                                        ) : (
+                                          <div className="h-6 w-6 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                          </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                          <div className="flex items-center gap-1">
+                                            <span className="text-xs font-bold truncate group-hover:text-primary transition-colors">
+                                              {org.organizationName}
+                                            </span>
+                                            {org.isVerifiedOrg && (
+                                              <CheckCircle2 className="h-2.5 w-2.5 text-blue-500 shrink-0" />
+                                            )}
+                                          </div>
+                                          <span className="text-[10px] text-muted-foreground truncate block">
+                                            {org.position || org.roleLabel}
+                                          </span>
+                                        </div>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
