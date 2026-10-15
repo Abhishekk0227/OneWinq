@@ -648,7 +648,7 @@ export default function PublicProfilePage() {
                         <Link
                           to={`/c/${primaryOrg.organizationSlug}`}
                           className="inline-flex items-center gap-2 sm:gap-2.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-black/60 hover:bg-black/80 border border-white/20 hover:border-white/40 backdrop-blur-md shadow-xl text-white transition-all duration-200 group active:scale-95"
-                          title={`Verified ${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}`}
+                          title={`View ${primaryOrg.organizationName} Showcase`}
                         >
                           {primaryOrg.organizationLogoUrl ? (
                             <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl overflow-hidden bg-white/10 p-0.5 border border-white/20 shrink-0 flex items-center justify-center">
@@ -664,15 +664,18 @@ export default function PublicProfilePage() {
                             </div>
                           )}
 
-                          <div className="text-left min-w-0 max-w-[130px] sm:max-w-[200px]">
+                          <div className="text-left min-w-0 max-w-[120px] sm:max-w-[180px]">
                             <div className="flex items-center gap-1 min-w-0">
                               <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-primary-300 transition-colors">
-                                {primaryOrg.position || primaryOrg.roleLabel}
+                                {primaryOrg.organizationName}
                               </span>
                               {primaryOrg.isVerifiedOrg && (
                                 <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-400 shrink-0" />
                               )}
                             </div>
+                            <span className="text-[10px] sm:text-[11px] text-white/80 font-medium truncate block">
+                              {primaryOrg.position || primaryOrg.roleLabel}
+                            </span>
                           </div>
 
                           <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -792,51 +795,7 @@ export default function PublicProfilePage() {
                         </div>
                       )}
 
-                      {/* Verified Organization & HR Affiliation Badges */}
-                      {organizationAffiliations && organizationAffiliations.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
-                          {organizationAffiliations.map((affil: any) => {
-                            const isHrBadge = affil.isHR
-                            return (
-                              <Link
-                                key={affil.organizationId}
-                                to={`/c/${affil.organizationSlug}`}
-                                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all hover:scale-[1.02] shadow-2xs ${
-                                  isHrBadge
-                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
-                                    : 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20'
-                                }`}
-                                title={`Verified ${affil.position || affil.roleLabel} at ${affil.organizationName}`}
-                              >
-                                {affil.organizationLogoUrl ? (
-                                  <img
-                                    src={affil.organizationLogoUrl}
-                                    alt={affil.organizationName}
-                                    className="h-4 w-4 rounded-md object-cover"
-                                  />
-                                ) : (
-                                  <Building2 className="h-3.5 w-3.5 shrink-0" />
-                                )}
-                                <span className="font-bold flex items-center gap-1.5 flex-wrap">
-                                  {isHrBadge ? (
-                                    <span className="inline-flex items-center gap-1">
-                                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                      <span>{affil.position || 'HR Manager'}</span>
-                                    </span>
-                                  ) : (
-                                    <span>{affil.position || affil.roleLabel}</span>
-                                  )}
-                                  <span className="text-muted-foreground font-normal">at</span>
-                                  <span className="underline decoration-dotted underline-offset-2">{affil.organizationName}</span>
-                                </span>
-                                {affil.isVerifiedOrg && (
-                                  <CheckCircle2 className="h-3 w-3 text-blue-500 shrink-0" />
-                                )}
-                              </Link>
-                            )
-                          })}
-                        </div>
-                      )}
+
 
                       {/* Bio — compact with expand toggle */}
                       {profile.bio && (
