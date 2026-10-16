@@ -426,6 +426,7 @@ export const updateProfileSchema = z.object({
   avatarVisibility: z.union([z.string(), z.array(z.string())]).optional(),
   sectionVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
   fieldVisibility: z.record(z.union([z.string(), z.array(z.string())])).optional(),
+  themePreference: z.enum(['system', 'light', 'dark']).optional(),
 });
 
 export const updateVisibilitySchema = z.object({

@@ -152,6 +152,7 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
   filteredData.templateName = templateName;
   filteredData.personaName = profile.personaName || 'Profile';
   filteredData.professionTitle = activeTitle;
+  filteredData.themePreference = profile.themePreference || filteredData.themePreference || 'system';
 
   // Check relationship relative to viewer
   let connectionState = 'NONE';
@@ -176,7 +177,7 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
       userId: user._id,
       status: 'ACTIVE',
     })
-      .populate('organizationId', 'name slug logoUrl isVerified industry')
+      .populate('organizationId', 'name slug logoUrl isVerified industry branding')
       .lean();
 
     organizationAffiliations = (memberships || [])
@@ -196,12 +197,14 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
             : 'Team Member';
         const position = m.jobTitle || roleLabel;
         const isHR = role === 'HR_MANAGER' || Boolean(m.jobTitle && /hr|human resources|recruiter|talent/i.test(m.jobTitle));
+        const brandColor = org.branding?.primaryColor || null;
         return {
           organizationId: org._id?.toString(),
           organizationName: org.name,
           organizationSlug: org.slug,
           organizationLogoUrl: org.logoUrl || null,
           isVerifiedOrg: Boolean(org.isVerified),
+          brandColor,
           role,
           roleLabel,
           position,

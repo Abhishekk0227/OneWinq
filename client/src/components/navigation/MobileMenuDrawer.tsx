@@ -454,8 +454,8 @@ export function MobileMenuDrawer() {
             </div>
           ))}
 
-          {/* Admin / Staff Console Section if user is Staff */}
-          {isStaff && (
+          {/* Admin / Staff Console Section if user is Staff (only in personal mode) */}
+          {!isOrgMode && isStaff && (
             <div className="space-y-1 pt-2 border-t border-border">
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
                 Administration

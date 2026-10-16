@@ -206,6 +206,35 @@ export default function PublicProfilePage() {
     retry: 1,
   })
 
+  // Apply profile owner's custom theme preference for visitors if configured ('dark' | 'light')
+  React.useEffect(() => {
+    const pref = data?.data?.profile?.themePreference
+    if (pref === 'dark' || pref === 'light') {
+      const prevTheme = resolvedTheme
+      const root = document.documentElement
+      if (pref === 'dark') {
+        root.classList.add('dark')
+        root.classList.remove('light')
+        root.style.colorScheme = 'dark'
+      } else {
+        root.classList.remove('dark')
+        root.classList.add('light')
+        root.style.colorScheme = 'light'
+      }
+      return () => {
+        if (prevTheme === 'dark') {
+          root.classList.add('dark')
+          root.classList.remove('light')
+          root.style.colorScheme = 'dark'
+        } else {
+          root.classList.remove('dark')
+          root.classList.add('light')
+          root.style.colorScheme = 'light'
+        }
+      }
+    }
+  }, [data?.data?.profile?.themePreference])
+
   // User community posts query (declared unconditionally with other hooks)
   const { data: userPostsData } = useQuery({
     queryKey: ['posts', 'user', username || ''],
@@ -579,7 +608,6 @@ export default function PublicProfilePage() {
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
-                        {tab.icon}
                         <span className="truncate">{tab.label}</span>
                       </div>
                       {tab.count !== undefined && (
@@ -759,7 +787,9 @@ export default function PublicProfilePage() {
                       fallback={profileUser.displayName}
                       alt={profileUser.displayName}
                       size="2xl"
-                      className="rounded-full ring-4 ring-card shadow-xl bg-card shrink-0"
+                      shape="square"
+                      className="rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                      style={primaryOrg?.brandColor ? { borderColor: primaryOrg.brandColor, boxShadow: `0 0 0 4px ${primaryOrg.brandColor}50` } : undefined}
                     />
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground">
@@ -781,21 +811,31 @@ export default function PublicProfilePage() {
                         )}
                       </div>
 
-                      {/* Active Profession Title Badge */}
-                      {profile.professionTitle &&
-                        profile.professionTitle !== 'Basic Universal Template' &&
-                        profile.professionTitle !== 'Universal Profile' &&
-                        profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase() &&
-                        (!profile.headline || !profile.headline.trim().toLowerCase().split(/\s*\|\s*|\s*•\s*/).map((s: string) => s.trim()).includes(profile.professionTitle.trim().toLowerCase())) && (
-                        <div className="flex flex-wrap gap-2 pt-1 max-w-full">
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-xs max-w-full break-words [overflow-wrap:anywhere]">
-                            <Briefcase className="h-3.5 w-3.5 shrink-0" />
-                            <span className="break-words [overflow-wrap:anywhere] min-w-0">{profile.professionTitle}</span>
-                          </span>
-                        </div>
-                      )}
+                      {/* Clean Details Line — Dot-separated, like img3, no pill tags */}
+                      {(() => {
+                        const locText = typeof profile.location === 'string'
+                          ? profile.location.trim()
+                          : [profile.location?.city, profile.location?.state, profile.location?.country].filter(Boolean).join(', ')
+                        const details = [
+                          profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
+                            ? profile.professionTitle
+                            : null,
+                          locText || null,
+                          primaryOrg ? `${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}` : null,
+                        ].filter(Boolean)
 
-
+                        if (details.length === 0) return null
+                        return (
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground pt-0.5">
+                            {details.map((d, i) => (
+                              <React.Fragment key={i}>
+                                {i > 0 && <span className="text-muted-foreground/40 select-none">•</span>}
+                                <span>{d}</span>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )
+                      })()}
 
                       {/* Bio — compact with expand toggle */}
                       {profile.bio && (
@@ -835,22 +875,6 @@ export default function PublicProfilePage() {
                             <Phone className="h-4 w-4" />
                           </a>
                         )}
-
-                        {profile.location && (() => {
-                          const locText = typeof profile.location === 'string'
-                            ? profile.location.trim()
-                            : [profile.location.city, profile.location.state, profile.location.country].filter(Boolean).join(', ')
-                          if (!locText) return null
-                          return (
-                            <div
-                              title={`Location: ${locText}`}
-                              className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
-                            >
-                              <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate max-w-[130px]">{locText}</span>
-                            </div>
-                          )
-                        })()}
 
                         {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
                           <a

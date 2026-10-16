@@ -33,6 +33,8 @@ import {
   Eye,
   Check,
   Share2,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -1245,6 +1247,91 @@ export default function OrganizationProfilePage() {
                         className="text-xs h-8 flex-1"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Primary Brand Color & Member Border Color */}
+                <div className="p-5 rounded-2xl border border-border/80 bg-muted/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                        <Palette className="h-4 w-4 text-primary" />
+                        <span>Primary Brand Color</span>
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Custom brand color used for accents and applied as the custom border around your members' profile pictures.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-7 w-7 rounded-lg border border-border shadow-xs"
+                        style={{ backgroundColor: previewPrimary }}
+                      />
+                      <input
+                        type="color"
+                        value={previewPrimary}
+                        onChange={(e) => setValue('primaryColor', e.target.value, { shouldDirty: true })}
+                        className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Preset quick colors */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['#7c3aed', '#2563eb', '#059669', '#d97706', '#dc2626', '#db2777', '#0891b2', '#18181b'].map((col) => (
+                      <button
+                        key={col}
+                        type="button"
+                        onClick={() => setValue('primaryColor', col, { shouldDirty: true })}
+                        className={`h-7 w-7 rounded-xl border-2 transition-all ${
+                          previewPrimary.toLowerCase() === col.toLowerCase()
+                            ? 'border-foreground scale-110 shadow-sm'
+                            : 'border-transparent hover:scale-105'
+                        }`}
+                        style={{ backgroundColor: col }}
+                        title={col}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Showcase Theme Preference */}
+                <div className="p-5 rounded-2xl border border-border/80 bg-muted/20 space-y-3">
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                      <Sun className="h-4 w-4 text-amber-500" />
+                      <span>Showcase Theme Mode</span>
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Controls whether visitors view your public company showcase (/c/:slug) in Dark or Light mode by default.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    {[
+                      { id: 'system', label: 'System Default', icon: Sparkles },
+                      { id: 'light', label: 'Always Light', icon: Sun },
+                      { id: 'dark', label: 'Always Dark', icon: Moon },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const currentMode = watch('themeMode') || 'system';
+                      const isSelected = currentMode === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setValue('themeMode', item.id as any, { shouldDirty: true })}
+                          className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                            isSelected
+                              ? 'border-primary bg-primary text-white shadow-xs'
+                              : 'border-border bg-card hover:bg-muted text-foreground'
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5 shrink-0" />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </CardContent>
