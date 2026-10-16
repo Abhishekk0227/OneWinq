@@ -147,13 +147,6 @@ export function ProfileSectionsSidebar({
           </button>
         </div>
 
-        {/* Section Heading Bar */}
-        <div className="px-4 sm:px-5 py-2.5 flex items-center justify-between border-b border-border/60 bg-muted/30">
-          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            <span>Profile Sections</span>
-          </div>
-        </div>
-
         {/* Navigation Tabs List — No icons, no descriptions, no borders, no counts, no arrows */}
         <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 space-y-1 custom-scrollbar">
           {tabs.map((tab) => {
