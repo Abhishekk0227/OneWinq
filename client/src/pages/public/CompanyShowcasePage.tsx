@@ -66,7 +66,7 @@ import type {
   OrganizationMediaItem,
 } from '@/types/organization.types';
 
-const BIO_LIMIT = 280;
+const BIO_LIMIT = 140;
 
 function ExpandableAboutText({
   text,
@@ -521,8 +521,8 @@ export default function CompanyShowcasePage() {
       });
   };
 
-  const hasAboutData = Boolean(
-    aboutText || missionText || visionText || storyText || (coreValues && coreValues.length > 0)
+  const hasStoryData = Boolean(
+    missionText || visionText || storyText || (coreValues && coreValues.length > 0)
   );
   const hasContactData = Boolean(
     org?.location?.address ||
@@ -535,8 +535,8 @@ export default function CompanyShowcasePage() {
 
   const profileTabs = [
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" />, description: 'Organization identity, overview & stats' },
-    ...(hasAboutData
-      ? [{ id: 'about', label: 'About & Story', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
+    ...(hasStoryData
+      ? [{ id: 'about', label: 'Story & Heritage', icon: <Building2 className="h-4 w-4" />, description: 'Mission, vision, core values & story' }]
       : []),
     ...(products.length > 0
       ? [{ id: 'services', label: 'Services', icon: <Package className="h-4 w-4" />, description: taxonomy.offeringsDescription }]
@@ -787,7 +787,7 @@ export default function CompanyShowcasePage() {
 
                     <div className="space-y-3">
                       <div className="flex-1 space-y-2 min-w-0 max-w-full overflow-hidden">
-                        <div className="min-w-0 max-w-full">
+                        <div className="min-w-0 max-w-full space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                               {org.name}
@@ -798,10 +798,10 @@ export default function CompanyShowcasePage() {
                               </Badge>
                             )}
                           </div>
-                          {org.tagline && (
-                            <p className="text-sm sm:text-base font-medium text-foreground/85 mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
-                              {org.tagline}
-                            </p>
+
+                          {/* Short Intro / About — placed just below org name */}
+                          {aboutText && (
+                            <BioText text={aboutText} />
                           )}
                         </div>
 
@@ -831,11 +831,6 @@ export default function CompanyShowcasePage() {
                           );
                         })()}
 
-                        {/* Short Intro / About — like user profile bio with expand toggle */}
-                        {aboutText && (
-                          <BioText text={aboutText} />
-                        )}
-
                         {/* Action & Contact Buttons Row */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
                           {/* Follow Button */}
@@ -863,18 +858,17 @@ export default function CompanyShowcasePage() {
                             )}
                           </Button>
 
-                          {/* Website Button */}
+                          {/* Website Button — Globe only */}
                           {org.website && (
                             <a
                               href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
                               target="_blank"
                               rel="noreferrer"
                               onClick={() => handleTrackLink(org.website, 'Official Website')}
-                              className="p-2 sm:px-3 sm:py-2 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold"
+                              title="Official Website"
+                              className="p-2 sm:p-2.5 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105 active:scale-95 shadow-2xs cursor-pointer inline-flex items-center justify-center"
                             >
                               <Globe className="h-4 w-4 shrink-0" />
-                              <span className="hidden sm:inline">Website</span>
-                              <ExternalLink className="h-3 w-3 opacity-60" />
                             </a>
                           )}
 
@@ -933,26 +927,7 @@ export default function CompanyShowcasePage() {
                   </div>
                 </div>
 
-                {/* Overview Highlight: About & Story Preview */}
-                {aboutText && (
-                  <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-3">
-                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
-                      <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <span>About {org.name}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTab('about')}
-                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        Full Story <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed line-clamp-3 whitespace-pre-wrap">
-                      {aboutText}
-                    </p>
-                  </div>
-                )}
+
 
                 {/* Overview Highlight: Featured Services Preview */}
                 {products.length > 0 && (
@@ -1060,19 +1035,9 @@ export default function CompanyShowcasePage() {
               </>
             )}
 
-            {/* SECTION: About & Story */}
+            {/* SECTION: Story & Heritage */}
             {activeTab === 'about' && (
               <div className="space-y-5">
-                {aboutText && (
-                  <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-4">
-                    <div className="flex items-center gap-2.5">
-                      <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                        About {org.name}
-                      </h2>
-                    </div>
-                    <ExpandableAboutText text={aboutText} limit={240} />
-                  </section>
-                )}
 
                 {(missionText || visionText) && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
