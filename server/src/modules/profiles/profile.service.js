@@ -335,6 +335,7 @@ export async function updateProfileDraft(userId, data, personaId = null) {
   if (data.avatarVisibility !== undefined) { updates.avatarVisibility = data.avatarVisibility; }
   if (data.sectionVisibility !== undefined) { updates.sectionVisibility = data.sectionVisibility; }
   if (data.fieldVisibility !== undefined) { updates.fieldVisibility = data.fieldVisibility; }
+  if (data.themePreference !== undefined) { updates.themePreference = data.themePreference; }
   if (data.sectionOrder !== undefined) {
     updates.sectionOrder = data.sectionOrder;
   }
@@ -424,6 +425,7 @@ export function buildSnapshotFromProfile(profile) {
       'contact',
     ],
     activeMode: profile.activeMode || 'PUBLIC',
+    themePreference: profile.themePreference || 'system',
     temporaryMode: toObj(profile.temporaryMode) || null,
     modeData: toObj(profile.modeData) || {},
   };

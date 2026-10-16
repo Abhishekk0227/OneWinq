@@ -7,6 +7,7 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   fallback?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   status?: 'online' | 'offline' | 'busy'
+  shape?: 'circle' | 'square'
 }
 
 const sizeClasses = {
@@ -31,6 +32,7 @@ export function Avatar({
   fallback,
   size = 'md',
   status,
+  shape = 'circle',
   className,
   style,
   ...props
@@ -53,10 +55,14 @@ export function Avatar({
     return '1W'
   }, [fallback, alt])
 
+  const isSquare = shape === 'square' || className?.includes('rounded-2xl') || className?.includes('rounded-3xl') || className?.includes('rounded-xl')
+  const shapeClass = isSquare ? 'rounded-2xl' : 'rounded-full'
+
   return (
     <div
       className={cn(
-        'relative inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary font-medium overflow-hidden border border-border/80 shadow-sm select-none aspect-square isolate',
+        'relative inline-flex shrink-0 items-center justify-center bg-primary-soft text-primary font-medium overflow-hidden border border-border/80 shadow-sm select-none aspect-square isolate',
+        shapeClass,
         sizeClasses[size],
         className
       )}
@@ -70,7 +76,10 @@ export function Avatar({
         <img
           src={src}
           alt={alt}
-          className="h-full w-full max-h-full max-w-full object-cover rounded-full aspect-square block shrink-0 pointer-events-none"
+          className={cn(
+            'h-full w-full max-h-full max-w-full object-cover aspect-square block shrink-0 pointer-events-none',
+            shapeClass
+          )}
           onError={() => setHasError(true)}
         />
       ) : (

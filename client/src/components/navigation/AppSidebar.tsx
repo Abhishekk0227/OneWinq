@@ -326,7 +326,7 @@ export function AppSidebar() {
           )
         })}
 
-        {isStaff && (
+        {!isOrgMode && isStaff && (
           <div className="pt-4 mt-4 border-t border-border">
             <div className={cn('px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1', isSidebarCollapsed && 'hidden')}>
               Administration
@@ -363,8 +363,8 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* User public link quick action — card-first identity */}
-      {!isSidebarCollapsed && (
+      {/* User public link quick action — card-first identity (only in personal mode) */}
+      {!isSidebarCollapsed && !isOrgMode && (
         <div className="p-4 border-t border-border">
           {activeCardCode ? (
             <a

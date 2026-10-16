@@ -291,6 +291,11 @@ const profileSchema = new Schema(
       enum: Object.values(VISIBILITY_MODE),
       default: VISIBILITY_MODE.PUBLIC,
     },
+    themePreference: {
+      type: String,
+      enum: ['system', 'light', 'dark'],
+      default: 'system',
+    },
     temporaryMode: {
       type: temporaryModeSchema,
       default: () => ({ mode: null, expiresAt: null, fallbackMode: VISIBILITY_MODE.PUBLIC }),

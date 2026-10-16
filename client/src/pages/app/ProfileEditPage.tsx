@@ -114,6 +114,7 @@ export default function ProfileEditPage() {
   const [phone, setPhone] = React.useState('')
   const [emailContact, setEmailContact] = React.useState('')
   const [addressContact, setAddressContact] = React.useState('')
+  const [themePreference, setThemePreference] = React.useState<'system' | 'light' | 'dark'>('system')
   const [uploadingAvatar, setUploadingAvatar] = React.useState(false)
   const [uploadingCover, setUploadingCover] = React.useState(false)
 
@@ -476,6 +477,7 @@ export default function ProfileEditPage() {
         setPhone(p.contact?.phone || '')
         setEmailContact(p.contact?.email || '')
         setAddressContact(p.contact?.address || '')
+        setThemePreference((p as any).themePreference || 'system')
 
         const rawIdentities = (profileData.data as any)?.identities || (p as any)?.identities || []
         setIdentities(rawIdentities)
@@ -836,6 +838,7 @@ export default function ProfileEditPage() {
       avatarVisibility,
       sectionVisibility,
       fieldVisibility,
+      themePreference,
       location: { city, country },
       contact: { website: website?.trim() || '', phone, email: emailContact, address: addressContact },
       socialLinks: cleanedSocialLinks,
@@ -1764,6 +1767,45 @@ export default function ProfileEditPage() {
                     onChange={(e) => handleCountryChange(e.target.value)}
                     placeholder="India, USA, Germany..."
                   />
+                </div>
+              </div>
+
+              {/* Profile Presentation Theme Default */}
+              <div className="p-4 rounded-2xl border border-border/80 bg-muted/20 space-y-2.5">
+                <div>
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Sun className="h-3.5 w-3.5 text-amber-500" />
+                    <span>Profile Presentation Theme</span>
+                  </label>
+                  <p className="text-[11px] text-muted-foreground">
+                    Controls whether visitors view your public digital profile (/u/:username) in Dark or Light mode by default.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {[
+                    { id: 'system', label: 'System Default', icon: Sparkles },
+                    { id: 'light', label: 'Always Light', icon: Sun },
+                    { id: 'dark', label: 'Always Dark', icon: Moon },
+                  ].map((item) => {
+                    const Icon = item.icon
+                    const isSelected = themePreference === item.id
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setThemePreference(item.id as any)}
+                        className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-primary bg-primary text-white shadow-xs'
+                            : 'border-border bg-card hover:bg-muted text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                        <span>{item.label}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>

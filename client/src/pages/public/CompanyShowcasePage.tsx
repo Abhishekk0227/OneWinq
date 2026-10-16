@@ -364,6 +364,35 @@ export default function CompanyShowcasePage() {
     }
   }, [cardData, navigate]);
 
+  // Apply organization's custom theme preference for visitors if configured ('dark' | 'light')
+  React.useEffect(() => {
+    const pref = org?.branding?.themeMode;
+    if (pref === 'dark' || pref === 'light') {
+      const prevTheme = resolvedTheme;
+      const root = document.documentElement;
+      if (pref === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+        root.style.colorScheme = 'dark';
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        root.style.colorScheme = 'light';
+      }
+      return () => {
+        if (prevTheme === 'dark') {
+          root.classList.add('dark');
+          root.classList.remove('light');
+          root.style.colorScheme = 'dark';
+        } else {
+          root.classList.remove('dark');
+          root.classList.add('light');
+          root.style.colorScheme = 'light';
+        }
+      };
+    }
+  }, [org?.branding?.themeMode]);
+
   // Fetch live jobs for this company
   const { data: jobsData } = useQuery({
     queryKey: ['publicOrgJobs', org?.id],
@@ -682,7 +711,6 @@ export default function CompanyShowcasePage() {
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
-                        {tab.icon}
                         <span className="truncate">{tab.label}</span>
                       </div>
                     </button>
@@ -739,12 +767,12 @@ export default function CompanyShowcasePage() {
                   <div className="p-6 sm:p-10 space-y-6">
                     {/* Top Row: Circular Avatar overlapping banner + Handle on Right */}
                     <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
-                      <div className="h-28 w-28 sm:h-36 sm:w-36 rounded-full ring-4 ring-card shadow-xl bg-card shrink-0 overflow-hidden flex items-center justify-center p-2 border border-border/40">
+                      <div className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0 overflow-hidden flex items-center justify-center p-2 border border-border/40">
                         {logoImage ? (
                           <img
                             src={logoImage}
                             alt={org.name}
-                            className="w-full h-full object-contain rounded-full"
+                            className="w-full h-full object-contain rounded-2xl"
                           />
                         ) : (
                           <Building2 className="h-12 w-12 text-primary" />
@@ -758,7 +786,7 @@ export default function CompanyShowcasePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
+                      <div className="flex-1 space-y-2 min-w-0 max-w-full overflow-hidden">
                         <div className="min-w-0 max-w-full">
                           <div className="flex flex-wrap items-center gap-2">
                             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
@@ -769,55 +797,39 @@ export default function CompanyShowcasePage() {
                                 <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
                               </Badge>
                             )}
-                            <Badge variant="outline" className="text-xs uppercase font-mono px-2.5 py-0.5">
-                              {org.type}
-                            </Badge>
-                            {(org.foundedYear || org.overviewStats?.foundedYear) && (
-                              <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                                <Calendar className="h-3 w-3 mr-1" /> Est. {org.foundedYear || org.overviewStats?.foundedYear}
-                              </Badge>
-                            )}
                           </div>
-                          <p className="text-sm sm:text-base font-medium text-primary mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
-                            {taxonomy.sectorLabel}
-                          </p>
                         </div>
 
-                        {/* Taxonomy & Metadata Badges - Clean & Uncluttered */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
-                          {org.industry && (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-muted/60 text-foreground/80 border border-border/70 shadow-2xs">
-                              <Briefcase className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                              <span>{org.industry}</span>
-                            </span>
-                          )}
-
-                          {(org.size || org.overviewStats?.teamSize) && (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-muted/60 text-foreground/80 border border-border/70 shadow-2xs">
-                              <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                              <span>{org.size || org.overviewStats?.teamSize} Scale</span>
-                            </span>
-                          )}
-
-                          {org.location?.city && (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-2xs">
-                              <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              <span>{org.location.city}{org.location.country ? `, ${org.location.country}` : ''}</span>
-                            </span>
-                          )}
-
-                          {org.location?.isRemoteFriendly && (
-                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-2xs">
-                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                              <span>Remote-Friendly</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Tagline / Bio Text with Expand Toggle */}
+                        {/* Tagline / Bio Text with Expand Toggle (matching img3) */}
                         {org.tagline && (
                           <BioText text={org.tagline} />
                         )}
+
+                        {/* Metadata Details in Dot-Separated Format (matching img3 - no badge tags) */}
+                        {(() => {
+                          const metaItems = [
+                            org.industry || taxonomy.sectorLabel,
+                            org.location?.city ? `${org.location.city}${org.location.country ? `, ${org.location.country}` : ''}` : null,
+                            `${followState.followersCount || 0} followers`,
+                            (org.size || org.overviewStats?.teamSize) ? `${org.size || org.overviewStats?.teamSize} employees` : null,
+                            org.type ? org.type : null,
+                            (org.foundedYear || org.overviewStats?.foundedYear) ? `Est. ${org.foundedYear || org.overviewStats?.foundedYear}` : null,
+                            org.location?.isRemoteFriendly ? 'Remote-friendly' : null,
+                          ].filter(Boolean);
+
+                          if (metaItems.length === 0) return null;
+
+                          return (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-0.5">
+                              {metaItems.map((item, idx) => (
+                                <React.Fragment key={idx}>
+                                  {idx > 0 && <span className="opacity-60 select-none">•</span>}
+                                  <span className="font-medium text-foreground/80">{item}</span>
+                                </React.Fragment>
+                              ))}
+                            </div>
+                          );
+                        })()}
 
                         {/* Action & Contact Buttons Row */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
@@ -837,11 +849,11 @@ export default function CompanyShowcasePage() {
                           >
                             {followState.isFollowing ? (
                               <>
-                                <UserCheck className="h-3.5 w-3.5 mr-1.5 text-primary" /> Following ({followState.followersCount})
+                                <UserCheck className="h-3.5 w-3.5 mr-1.5 text-primary" /> Following
                               </>
                             ) : (
                               <>
-                                <Bell className="h-3.5 w-3.5 mr-1.5" /> Follow {followState.followersCount > 0 ? `(${followState.followersCount})` : ''}
+                                <Bell className="h-3.5 w-3.5 mr-1.5" /> Follow
                               </>
                             )}
                           </Button>
@@ -943,7 +955,6 @@ export default function CompanyShowcasePage() {
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <Package className="h-4 w-4 text-primary" />
                         <span>Featured Services</span>
                       </div>
                       <button
@@ -982,7 +993,6 @@ export default function CompanyShowcasePage() {
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <Layers className="h-4 w-4 text-primary" />
                         <span>Featured Projects</span>
                       </div>
                       <button
@@ -1027,7 +1037,6 @@ export default function CompanyShowcasePage() {
                   <div className="rounded-3xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="space-y-1 text-center sm:text-left">
                       <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold text-sm">
-                        <Briefcase className="h-4 w-4" />
                         <span>We're Hiring!</span>
                         <Badge className="bg-primary text-white text-[10px]">{jobs.length} Open Roles</Badge>
                       </div>
@@ -1053,9 +1062,6 @@ export default function CompanyShowcasePage() {
                 {aboutText && (
                   <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-4">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Building2 className="h-4 w-4" />
-                      </div>
                       <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                         About {org.name}
                       </h2>
@@ -1136,15 +1142,10 @@ export default function CompanyShowcasePage() {
             {(activeTab === 'services' || activeTab === 'offerings') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Package className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      {taxonomy.offeringsTitle}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    {taxonomy.offeringsTitle}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {taxonomy.offeringsDescription}
                   </p>
                 </div>
@@ -1218,15 +1219,10 @@ export default function CompanyShowcasePage() {
             {activeTab === 'projects' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Layers className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      {taxonomy.projectsTitle}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    {taxonomy.projectsTitle}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {taxonomy.projectsDescription}
                   </p>
                 </div>
@@ -1287,15 +1283,10 @@ export default function CompanyShowcasePage() {
             {(activeTab === 'achievements' || activeTab === 'honors') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Award className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      {taxonomy.achievementsTitle}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    {taxonomy.achievementsTitle}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {taxonomy.achievementsDescription}
                   </p>
                 </div>
@@ -1349,15 +1340,10 @@ export default function CompanyShowcasePage() {
             {activeTab === 'media' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <ImageIcon className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      {taxonomy.mediaTitle}
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    {taxonomy.mediaTitle}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {taxonomy.mediaDescription}
                   </p>
                 </div>
@@ -1406,15 +1392,10 @@ export default function CompanyShowcasePage() {
             {activeTab === 'leadership' && org.executives && org.executives.length > 0 && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                      <Crown className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      Executive Leadership & Board
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    Executive Leadership & Board
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Meet the leadership team and directors steering {org.name}.
                   </p>
                 </div>
@@ -1457,15 +1438,10 @@ export default function CompanyShowcasePage() {
             {(activeTab === 'careers' || activeTab === 'jobs') && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Briefcase className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      Careers & Open Vacancies
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    Careers & Open Vacancies
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Join our team at {org.name}.
                   </p>
                 </div>
@@ -1518,15 +1494,10 @@ export default function CompanyShowcasePage() {
             {activeTab === 'posts' && companyPosts.length > 0 && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <Bell className="h-4 w-4" />
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
-                      Official Announcements & Updates
-                    </h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 ml-10.5">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+                    Official Announcements & Updates
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Official news, insights, and media shared by {org.name}.
                   </p>
                 </div>
@@ -1543,9 +1514,6 @@ export default function CompanyShowcasePage() {
             {activeTab === 'contact' && (
               <section className="rounded-3xl border border-border bg-card shadow-card p-5 sm:p-8 space-y-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <Building2 className="h-4 w-4" />
-                  </div>
                   <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
                     Headquarters & Inquiries
                   </h2>

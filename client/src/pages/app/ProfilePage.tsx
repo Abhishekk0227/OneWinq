@@ -265,6 +265,7 @@ export default function ProfilePage() {
 
   const profile = data?.data?.profile
   const organizationAffiliations = (data?.data as any)?.organizationAffiliations || []
+  const primaryOrg = organizationAffiliations[0]
   const identities: any[] = (data?.data as any)?.identities || profile?.identities || []
   const rawMode = selectedMode || profile?.activeMode || VISIBILITY_MODE.PUBLIC
   const currentMode: VisibilityMode =
@@ -378,7 +379,6 @@ export default function ProfilePage() {
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">
-                      {tab.icon}
                       <span className="truncate">{tab.label}</span>
                     </div>
                     {tab.count !== undefined && (
@@ -447,7 +447,9 @@ export default function ProfilePage() {
                     fallback={user?.displayName}
                     alt={user?.displayName}
                     size="2xl"
-                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-full ring-4 ring-card shadow-xl bg-card shrink-0"
+                    shape="square"
+                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                    style={primaryOrg?.brandColor ? { borderColor: primaryOrg.brandColor, boxShadow: `0 0 0 4px ${primaryOrg.brandColor}50` } : undefined}
                   />
 
                   {/* Canvas Actions Bar */}
@@ -699,6 +701,32 @@ export default function ProfilePage() {
                       })}
                     </div>
                   )}
+                  {/* Clean Details Line — Dot-separated, like img3, no pill tags */}
+                  {(() => {
+                    const locText = typeof profile.location === 'string'
+                      ? profile.location.trim()
+                      : [profile.location?.city, profile.location?.state, profile.location?.country].filter(Boolean).join(', ')
+                    const details = [
+                      profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
+                        ? profile.professionTitle
+                        : null,
+                      locText || null,
+                      primaryOrg ? `${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}` : null,
+                    ].filter(Boolean)
+
+                    if (details.length === 0) return null
+                    return (
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground pt-1">
+                        {details.map((d, i) => (
+                          <React.Fragment key={i}>
+                            {i > 0 && <span className="text-muted-foreground/40 select-none">•</span>}
+                            <span>{d}</span>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )
+                  })()}
+
                   {profile.bio && (
                     <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
                       {profile.bio}
@@ -739,22 +767,6 @@ export default function ProfilePage() {
                         <Phone className="h-4 w-4" />
                       </a>
                     )}
-
-                    {profile.location && (() => {
-                      const locText = typeof profile.location === 'string'
-                        ? profile.location.trim()
-                        : [profile.location.city, profile.location.state, profile.location.country].filter(Boolean).join(', ')
-                      if (!locText) return null
-                      return (
-                        <div
-                          title={`Location: ${locText}`}
-                          className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-semibold"
-                        >
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
-                          <span className="truncate max-w-[130px]">{locText}</span>
-                        </div>
-                      )
-                    })()}
 
                     {profile.socialLinks && profile.socialLinks.map((s: any, idx: number) => (
                       <a
