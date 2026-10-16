@@ -266,6 +266,9 @@ export default function ProfilePage() {
   const profile = data?.data?.profile
   const organizationAffiliations = (data?.data as any)?.organizationAffiliations || []
   const primaryOrg = organizationAffiliations[0]
+  const effectiveCoverUrl = primaryOrg
+    ? (primaryOrg.bannerUrl || primaryOrg.organizationBannerUrl || null)
+    : profile?.coverUrl
   const identities: any[] = (data?.data as any)?.identities || profile?.identities || []
   const rawMode = selectedMode || profile?.activeMode || VISIBILITY_MODE.PUBLIC
   const currentMode: VisibilityMode =
@@ -418,11 +421,11 @@ export default function ProfilePage() {
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
             <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden">
-              {/* Cover Banner */}
+              {/* Cover Banner: Org Banner (if in org) or Personal Banner / Default */}
               <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-56 md:h-64 bg-muted relative overflow-hidden flex items-center justify-center">
-                {profile.coverUrl ? (
+                {effectiveCoverUrl ? (
                   <img
-                    src={profile.coverUrl}
+                    src={effectiveCoverUrl}
                     alt="Cover Banner"
                     className="w-full h-full object-cover object-center"
                   />
@@ -435,6 +438,18 @@ export default function ProfilePage() {
                       alt="OneWinq"
                       className="h-10 sm:h-14 w-auto object-contain relative z-10 opacity-90 drop-shadow-md"
                     />
+                  </div>
+                )}
+
+                {/* Position in Org: Display only position name at top right of the banner */}
+                {primaryOrg && (primaryOrg.position || primaryOrg.roleLabel) && (
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20">
+                    <div
+                      className="inline-flex items-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-black/60 backdrop-blur-md border border-white/20 shadow-xl text-white font-bold text-xs sm:text-sm tracking-wide select-none"
+                      style={primaryOrg.brandColor ? { borderColor: `${primaryOrg.brandColor}70` } : undefined}
+                    >
+                      <span>{primaryOrg.position || primaryOrg.roleLabel}</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1621,9 +1636,9 @@ export default function ProfilePage() {
             <div className="space-y-3">
               {/* Mini Profile Card Preview */}
               <div className="rounded-2xl border border-border bg-card overflow-hidden text-left shadow-sm">
-                {profile.coverUrl ? (
+                {effectiveCoverUrl ? (
                   <div className="w-full h-20 bg-muted overflow-hidden">
-                    <img src={profile.coverUrl} alt="Banner" className="w-full h-full object-cover" />
+                    <img src={effectiveCoverUrl} alt="Banner" className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-full h-14 bg-gradient-to-r from-primary/20 via-primary/10 to-muted" />
