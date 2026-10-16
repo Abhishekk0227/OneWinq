@@ -322,6 +322,9 @@ export interface OrganizationAffiliation {
   organizationName: string
   organizationSlug: string
   organizationLogoUrl?: string | null
+  organizationBannerUrl?: string | null
+  bannerUrl?: string | null
+  brandColor?: string | null
   isVerifiedOrg: boolean
   role: string
   roleLabel: string

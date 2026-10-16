@@ -177,7 +177,7 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
       userId: user._id,
       status: 'ACTIVE',
     })
-      .populate('organizationId', 'name slug logoUrl isVerified industry branding')
+      .populate('organizationId', 'name slug logoUrl bannerUrl isVerified industry branding')
       .lean();
 
     organizationAffiliations = (memberships || [])
@@ -198,11 +198,14 @@ export async function resolvePublicProfile(rawUsername, context = {}) {
         const position = m.jobTitle || roleLabel;
         const isHR = role === 'HR_MANAGER' || Boolean(m.jobTitle && /hr|human resources|recruiter|talent/i.test(m.jobTitle));
         const brandColor = org.branding?.primaryColor || null;
+        const bannerUrl = org.branding?.coverUrl || org.bannerUrl || null;
         return {
           organizationId: org._id?.toString(),
           organizationName: org.name,
           organizationSlug: org.slug,
           organizationLogoUrl: org.logoUrl || null,
+          organizationBannerUrl: bannerUrl,
+          bannerUrl,
           isVerifiedOrg: Boolean(org.isVerified),
           brandColor,
           role,

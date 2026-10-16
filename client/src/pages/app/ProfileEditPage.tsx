@@ -100,6 +100,10 @@ export default function ProfileEditPage() {
   const userCards = (userCardsData?.data as any)?.cards || []
   const activeUserCard = userCards.find((c: any) => c.state === 'ACTIVE' || c.status === 'ACTIVE')
 
+  const organizationAffiliations = (profileData?.data as any)?.organizationAffiliations || []
+  const primaryOrg = organizationAffiliations[0]
+  const isMemberOfOrg = Boolean(primaryOrg)
+
   // Basic Info State
   const [personaName, setPersonaName] = React.useState('')
   const [professionTitle, setProfessionTitle] = React.useState('')
@@ -886,6 +890,11 @@ export default function ProfileEditPage() {
   }
 
   const handleCoverFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isMemberOfOrg) {
+      toast.error('Banner is managed by your organization.')
+      if (coverInputRef.current) coverInputRef.current.value = ''
+      return
+    }
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 10 * 1024 * 1024) {
@@ -1421,74 +1430,118 @@ export default function ProfileEditPage() {
               <div className="p-4 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-foreground">Cover Banner Image</span>
-                  {coverUrl && (
+                  {isMemberOfOrg ? (
+                    <Badge variant="outline" className="text-[10px] text-primary border-primary/20 bg-primary/10 font-semibold">
+                      Managed by Organization
+                    </Badge>
+                  ) : coverUrl ? (
                     <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20">
                       Uploaded
                     </Badge>
-                  )}
+                  ) : null}
                 </div>
                 <div className="space-y-3">
-                  {coverUrl ? (
-                    <div className="relative group rounded-xl overflow-hidden border border-border">
-                      <img
-                        src={coverUrl}
-                        alt="Cover Preview"
-                        className="w-full h-20 object-cover"
-                      />
-                    </div>
+                  {isMemberOfOrg ? (
+                    <>
+                      <div className="relative group rounded-xl overflow-hidden border border-border">
+                        {primaryOrg.bannerUrl || primaryOrg.organizationBannerUrl ? (
+                          <img
+                            src={primaryOrg.bannerUrl || primaryOrg.organizationBannerUrl || ''}
+                            alt={`${primaryOrg.organizationName} Banner`}
+                            className="w-full h-20 object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-20 rounded-xl border border-border flex items-center justify-center bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative overflow-hidden select-none">
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                            <img
+                              src="/logo-white.png"
+                              alt="Default Banner"
+                              className="h-6 w-auto object-contain relative z-10 opacity-90 drop-shadow-sm"
+                            />
+                            <span className="absolute bottom-1 right-2 text-[9px] text-white/50 font-medium">Organization Default Banner</span>
+                          </div>
+                        )}
+                        {/* Position badge at top right */}
+                        {(primaryOrg.position || primaryOrg.roleLabel) && (
+                          <div className="absolute top-2 right-2 z-10">
+                            <span className="px-2.5 py-0.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold">
+                              {primaryOrg.position || primaryOrg.roleLabel}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 text-xs text-muted-foreground flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-primary shrink-0" />
+                        <span>
+                          Your profile banner is automatically managed by <strong>{primaryOrg.organizationName}</strong>. Personal banner customization is disabled while affiliated with an organization.
+                        </span>
+                      </div>
+                    </>
                   ) : (
-                    <div className="w-full h-20 rounded-xl border border-border flex items-center justify-center bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative overflow-hidden select-none">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
-                      <img
-                        src="/logo-white.png"
-                        alt="OneWinq Default Banner"
-                        className="h-6 w-auto object-contain relative z-10 opacity-90 drop-shadow-sm"
-                      />
-                      <span className="absolute bottom-1 right-2 text-[9px] text-white/50 font-medium">Default OneWinq Banner</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between gap-2">
-                    <input
-                      ref={coverInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleCoverFile}
-                    />
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        isLoading={uploadingCover}
-                        onClick={() => coverInputRef.current?.click()}
-                        leftIcon={<ImageIcon className="h-3.5 w-3.5" />}
-                        className="text-xs h-8"
-                      >
-                        {coverUrl ? 'Change Banner' : 'Upload Banner'}
-                      </Button>
-                      {coverUrl && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-muted-foreground hover:text-destructive text-xs h-8"
-                          onClick={async () => {
-                            setCoverUrl('')
-                            await profileApi.updateDraft({ coverUrl: null })
-                            queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
-                            toast.success('Cover banner removed')
-                          }}
-                          leftIcon={<Trash2 className="h-3.5 w-3.5" />}
-                        >
-                          Remove
-                        </Button>
+                    <>
+                      {coverUrl ? (
+                        <div className="relative group rounded-xl overflow-hidden border border-border">
+                          <img
+                            src={coverUrl}
+                            alt="Cover Preview"
+                            className="w-full h-20 object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-20 rounded-xl border border-border flex items-center justify-center bg-gradient-to-r from-purple-950 via-zinc-900 to-black relative overflow-hidden select-none">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(121,50,217,0.35),transparent_70%)]" />
+                          <img
+                            src="/logo-white.png"
+                            alt="OneWinq Default Banner"
+                            className="h-6 w-auto object-contain relative z-10 opacity-90 drop-shadow-sm"
+                          />
+                          <span className="absolute bottom-1 right-2 text-[9px] text-white/50 font-medium">Default OneWinq Banner</span>
+                        </div>
                       )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground hidden sm:block">
-                      1200×400 recommended. Max 10MB.
-                    </p>
-                  </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <input
+                          ref={coverInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleCoverFile}
+                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            isLoading={uploadingCover}
+                            onClick={() => coverInputRef.current?.click()}
+                            leftIcon={<ImageIcon className="h-3.5 w-3.5" />}
+                            className="text-xs h-8"
+                          >
+                            {coverUrl ? 'Change Banner' : 'Upload Banner'}
+                          </Button>
+                          {coverUrl && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-muted-foreground hover:text-destructive text-xs h-8"
+                              onClick={async () => {
+                                setCoverUrl('')
+                                await profileApi.updateDraft({ coverUrl: null })
+                                queryClient.invalidateQueries({ queryKey: queryKeys.profile.me })
+                                toast.success('Cover banner removed')
+                              }}
+                              leftIcon={<Trash2 className="h-3.5 w-3.5" />}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground hidden sm:block">
+                          1200×400 recommended. Max 10MB.
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

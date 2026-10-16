@@ -792,18 +792,13 @@ export default function CompanyShowcasePage() {
                               </Badge>
                             )}
                           </div>
-
-                          {/* Short Intro / About — placed just below org name */}
-                          {aboutText && (
-                            <BioText text={aboutText} />
-                          )}
                         </div>
 
-                        {/* Metadata Details in Dot-Separated Format with smaller dots */}
+                        {/* Metadata Details in Dot-Separated Format with smaller dots (Location first) */}
                         {(() => {
                           const metaItems = [
-                            org.industry || taxonomy.sectorLabel,
                             org.location?.city ? `${org.location.city}${org.location.country ? `, ${org.location.country}` : ''}` : null,
+                            org.industry || taxonomy.sectorLabel,
                             `${followState.followersCount || 0} followers`,
                             (org.size || org.overviewStats?.teamSize) ? `${org.size || org.overviewStats?.teamSize} employees` : null,
                             (org.foundedYear || org.overviewStats?.foundedYear) ? `Est. ${org.foundedYear || org.overviewStats?.foundedYear}` : null,
@@ -822,6 +817,11 @@ export default function CompanyShowcasePage() {
                             </div>
                           );
                         })()}
+
+                        {/* Short Intro / About — placed below metadata details */}
+                        {aboutText && (
+                          <BioText text={aboutText} />
+                        )}
 
                         {/* Action & Contact Buttons Row */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
