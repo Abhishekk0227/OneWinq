@@ -152,12 +152,9 @@ export function ProfileSectionsSidebar({
           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             <span>Profile Sections</span>
           </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-            {tabs.length} tabs
-          </span>
         </div>
 
-        {/* Navigation Tabs List — No icons, no descriptions, no borders */}
+        {/* Navigation Tabs List — No icons, no descriptions, no borders, no counts, no arrows */}
         <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 space-y-1 custom-scrollbar">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
@@ -179,29 +176,6 @@ export function ProfileSectionsSidebar({
               >
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-bold truncate">{tab.label}</div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  {tab.count !== undefined && (
-                    <span
-                      className={cn(
-                        'text-[10px] px-2 py-0.5 rounded-full font-mono font-bold',
-                        isActive
-                          ? 'bg-white/25 text-white'
-                          : 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {tab.count}
-                    </span>
-                  )}
-                  <ChevronRight
-                    className={cn(
-                      'h-4 w-4 transition-transform',
-                      isActive
-                        ? 'text-white translate-x-0.5'
-                        : 'text-muted-foreground group-hover:text-foreground'
-                    )}
-                  />
                 </div>
               </button>
             )
