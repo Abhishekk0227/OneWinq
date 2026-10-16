@@ -1823,22 +1823,6 @@ export default function OrganizationProfilePage() {
                   </label>
                   <Input {...register('website')} placeholder="https://organization.com" />
                 </div>
-
-                <div className="pt-2">
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-border/80 bg-muted/20 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      {...register('isRemoteFriendly')}
-                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
-                    />
-                    <div>
-                      <span className="text-sm font-semibold">Remote-Friendly Workplace</span>
-                      <p className="text-xs text-muted-foreground">
-                        Showcase badge indicating distributed team operations and flexible work options.
-                      </p>
-                    </div>
-                  </label>
-                </div>
               </CardContent>
             </Card>
 

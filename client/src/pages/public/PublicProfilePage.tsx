@@ -589,10 +589,6 @@ export default function PublicProfilePage() {
           {/* Left Desktop Navigation Sidebar */}
           <div className="hidden md:block md:col-span-3 space-y-4">
             <div className="sticky top-20 rounded-3xl border border-border bg-card p-4 shadow-sm space-y-3">
-              <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
-                Profile Sections
-              </div>
-
               <div className="space-y-1">
                 {profileTabs.map((tab) => {
                   const isActive = activeTab === tab.id

@@ -692,10 +692,6 @@ export default function CompanyShowcasePage() {
           {/* Left Desktop Navigation Sidebar */}
           <div className="hidden md:block md:col-span-3 space-y-4">
             <div className="sticky top-20 rounded-3xl border border-border bg-card p-4 shadow-sm space-y-3">
-              <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground border-b border-border/60 pb-2">
-                Organization Sections
-              </div>
-
               <div className="space-y-1">
                 {profileTabs.map((tab) => {
                   const isActive = activeTab === tab.id;
@@ -737,11 +733,9 @@ export default function CompanyShowcasePage() {
 
           {/* Right Main Content Canvas */}
           <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-            {/* HOME TAB: Identity Hero Card + Overview Highlights */}
+            {/* HOME TAB: Identity Hero Card */}
             {activeTab === 'home' && (
-              <>
-                {/* Main Hero Card (Identical layout to User Public Profile Hero) */}
-                <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
+              <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
                   {/* Cover Banner: Custom or Default OneWinq Branded Banner */}
                   <div className="w-full aspect-[2.6/1] xs:aspect-[2.8/1] sm:aspect-auto sm:h-60 bg-muted relative overflow-hidden flex items-center justify-center">
                     {bannerImage ? (
@@ -812,9 +806,7 @@ export default function CompanyShowcasePage() {
                             org.location?.city ? `${org.location.city}${org.location.country ? `, ${org.location.country}` : ''}` : null,
                             `${followState.followersCount || 0} followers`,
                             (org.size || org.overviewStats?.teamSize) ? `${org.size || org.overviewStats?.teamSize} employees` : null,
-                            org.type ? org.type : null,
                             (org.foundedYear || org.overviewStats?.foundedYear) ? `Est. ${org.foundedYear || org.overviewStats?.foundedYear}` : null,
-                            org.location?.isRemoteFriendly ? 'Remote-friendly' : null,
                           ].filter(Boolean);
 
                           if (metaItems.length === 0) return null;
@@ -924,115 +916,8 @@ export default function CompanyShowcasePage() {
                         </div>
                       </div>
                     </div>
-                  </div>
                 </div>
-
-
-
-                {/* Overview Highlight: Featured Services Preview */}
-                {products.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
-                      <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <span>Featured Services</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTab('services')}
-                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        View All <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {products.slice(0, 3).map((prod, idx) => (
-                        <div key={idx} className="p-3.5 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-2">
-                          {prod.imageUrl && (
-                            <div className="h-28 w-full rounded-xl overflow-hidden bg-muted">
-                              <img src={prod.imageUrl} alt={prod.name} className="w-full h-full object-cover" />
-                            </div>
-                          )}
-                          <div>
-                            <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{prod.name}</h4>
-                            {prod.category && (
-                              <span className="text-[10px] text-primary font-semibold">{prod.category}</span>
-                            )}
-                            {prod.description && (
-                              <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{prod.description}</p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Overview Highlight: Featured Projects Preview */}
-                {projects.length > 0 && (
-                  <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
-                      <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <span>Featured Projects</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTab('projects')}
-                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        View All <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {projects.slice(0, 3).map((proj, idx) => (
-                        <div key={idx} className="p-3.5 rounded-2xl border border-border/80 bg-muted/20 flex flex-col justify-between space-y-2">
-                          <div>
-                            <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{proj.title}</h4>
-                            {proj.client && (
-                              <span className="text-[10px] text-primary font-semibold block mt-0.5">For {proj.client}</span>
-                            )}
-                            {proj.description && (
-                              <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1">{proj.description}</p>
-                            )}
-                          </div>
-                          {proj.linkUrl && (
-                            <a
-                              href={proj.linkUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
-                              className="text-[11px] text-primary hover:underline inline-flex items-center gap-1 font-semibold pt-1"
-                            >
-                              View Project <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Overview Highlight: Open Careers Banner */}
-                {jobs.length > 0 && (
-                  <div className="rounded-3xl border border-primary/20 bg-primary/5 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1 text-center sm:text-left">
-                      <div className="flex items-center justify-center sm:justify-start gap-2 text-primary font-bold text-sm">
-                        <span>We're Hiring!</span>
-                        <Badge className="bg-primary text-white text-[10px]">{jobs.length} Open Roles</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Explore open positions and join the team at {org.name}.
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleSelectTab('careers')}
-                      className="text-xs h-8 px-4 font-bold shrink-0"
-                    >
-                      Explore Careers <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </>
+              </div>
             )}
 
             {/* SECTION: Story & Heritage */}
