@@ -439,16 +439,16 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6">
+              <div className="px-4 sm:px-8 pb-6 sm:pb-8 pt-0 space-y-6 relative z-10">
                 {/* Avatar and Top Actions Bar */}
-                <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4 -mt-10 sm:-mt-16">
+                <div className="flex flex-wrap items-end justify-between gap-3 sm:gap-4 -mt-10 sm:-mt-16 relative z-20">
                   <Avatar
                     src={profile.avatarUrl}
                     fallback={user?.displayName}
                     alt={user?.displayName}
                     size="2xl"
                     shape="square"
-                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0 relative z-20"
                     style={primaryOrg?.brandColor ? { borderColor: primaryOrg.brandColor, boxShadow: `0 0 0 4px ${primaryOrg.brandColor}50` } : undefined}
                   />
 
@@ -716,10 +716,10 @@ export default function ProfilePage() {
 
                     if (details.length === 0) return null
                     return (
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground pt-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-1">
                         {details.map((d, i) => (
                           <React.Fragment key={i}>
-                            {i > 0 && <span className="text-muted-foreground/40 select-none">•</span>}
+                            {i > 0 && <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0 select-none" />}
                             <span>{d}</span>
                           </React.Fragment>
                         ))}

@@ -764,10 +764,10 @@ export default function CompanyShowcasePage() {
                   </div>
 
                   {/* Profile Header Details */}
-                  <div className="p-6 sm:p-10 space-y-6">
-                    {/* Top Row: Circular Avatar overlapping banner + Handle on Right */}
-                    <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
-                      <div className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0 overflow-hidden flex items-center justify-center p-2 border border-border/40">
+                  <div className="p-6 sm:p-10 space-y-6 relative z-10">
+                    {/* Top Row: Square Avatar overlapping banner + Handle on Right */}
+                    <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20 relative z-20">
+                      <div className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0 overflow-hidden flex items-center justify-center p-2 border border-border/40 relative z-20">
                         {logoImage ? (
                           <img
                             src={logoImage}
@@ -798,14 +798,14 @@ export default function CompanyShowcasePage() {
                               </Badge>
                             )}
                           </div>
+                          {org.tagline && (
+                            <p className="text-sm sm:text-base font-medium text-foreground/85 mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
+                              {org.tagline}
+                            </p>
+                          )}
                         </div>
 
-                        {/* Tagline / Bio Text with Expand Toggle (matching img3) */}
-                        {org.tagline && (
-                          <BioText text={org.tagline} />
-                        )}
-
-                        {/* Metadata Details in Dot-Separated Format (matching img3 - no badge tags) */}
+                        {/* Metadata Details in Dot-Separated Format with smaller dots */}
                         {(() => {
                           const metaItems = [
                             org.industry || taxonomy.sectorLabel,
@@ -823,13 +823,18 @@ export default function CompanyShowcasePage() {
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-0.5">
                               {metaItems.map((item, idx) => (
                                 <React.Fragment key={idx}>
-                                  {idx > 0 && <span className="opacity-60 select-none">•</span>}
+                                  {idx > 0 && <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0 select-none" />}
                                   <span className="font-medium text-foreground/80">{item}</span>
                                 </React.Fragment>
                               ))}
                             </div>
                           );
                         })()}
+
+                        {/* Short Intro / About — like user profile bio with expand toggle */}
+                        {aboutText && (
+                          <BioText text={aboutText} />
+                        )}
 
                         {/* Action & Contact Buttons Row */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
@@ -933,7 +938,6 @@ export default function CompanyShowcasePage() {
                   <div className="rounded-3xl border border-border bg-card p-5 sm:p-7 shadow-sm space-y-3">
                     <div className="flex items-center justify-between gap-2 pb-2 border-b border-border">
                       <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                        <Building2 className="h-4 w-4 text-primary" />
                         <span>About {org.name}</span>
                       </div>
                       <button
@@ -1074,8 +1078,8 @@ export default function CompanyShowcasePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {missionText && (
                       <div className="rounded-3xl border border-border bg-card shadow-card p-6 border-l-4 border-l-primary space-y-2">
-                        <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                          <Target className="h-4 w-4" /> Our Mission
+                        <div className="text-primary font-bold text-sm">
+                          Our Mission
                         </div>
                         <ExpandableAboutText
                           text={missionText}
@@ -1087,8 +1091,8 @@ export default function CompanyShowcasePage() {
 
                     {visionText && (
                       <div className="rounded-3xl border border-border bg-card shadow-card p-6 border-l-4 border-l-primary/60 space-y-2">
-                        <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                          <Lightbulb className="h-4 w-4" /> Our Vision
+                        <div className="text-primary font-bold text-sm">
+                          Our Vision
                         </div>
                         <ExpandableAboutText
                           text={visionText}
@@ -1113,14 +1117,13 @@ export default function CompanyShowcasePage() {
 
                 {coreValues.length > 0 && (
                   <div className="rounded-3xl border border-border bg-card shadow-card p-6 space-y-4">
-                    <div className="flex items-center gap-2 text-foreground font-bold text-sm">
-                      <Heart className="h-4 w-4 text-primary" /> Core Values & Principles
+                    <div className="text-foreground font-bold text-sm">
+                      Core Values & Principles
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {coreValues.map((val, idx) => (
                         <div key={idx} className="p-4 rounded-2xl border border-border/70 bg-muted/20 space-y-1.5 shadow-2xs">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <div>
                             <h4 className="font-bold text-sm text-foreground">{val.title}</h4>
                           </div>
                           {val.description && (

@@ -610,15 +610,6 @@ export default function PublicProfilePage() {
                       <div className="flex items-center gap-2.5 truncate">
                         <span className="truncate">{tab.label}</span>
                       </div>
-                      {tab.count !== undefined && (
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {tab.count}
-                        </span>
-                      )}
                     </button>
                   )
                 })}
@@ -780,15 +771,15 @@ export default function PublicProfilePage() {
                   )}
                 </div>
 
-                <div className="p-6 sm:p-10 space-y-6">
-                  <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20">
+                <div className="p-6 sm:p-10 space-y-6 relative z-10">
+                  <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20 relative z-20">
                     <Avatar
                       src={profile.avatarUrl || profileUser?.avatarUrl}
                       fallback={profileUser.displayName}
                       alt={profileUser.displayName}
                       size="2xl"
                       shape="square"
-                      className="rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0"
+                      className="rounded-2xl ring-4 ring-card shadow-xl bg-card shrink-0 relative z-20"
                       style={primaryOrg?.brandColor ? { borderColor: primaryOrg.brandColor, boxShadow: `0 0 0 4px ${primaryOrg.brandColor}50` } : undefined}
                     />
                     <div className="flex items-center gap-2">
@@ -826,10 +817,10 @@ export default function PublicProfilePage() {
 
                         if (details.length === 0) return null
                         return (
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground pt-0.5">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-0.5">
                             {details.map((d, i) => (
                               <React.Fragment key={i}>
-                                {i > 0 && <span className="text-muted-foreground/40 select-none">•</span>}
+                                {i > 0 && <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0 select-none" />}
                                 <span>{d}</span>
                               </React.Fragment>
                             ))}
