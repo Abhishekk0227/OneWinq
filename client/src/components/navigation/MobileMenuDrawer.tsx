@@ -406,7 +406,7 @@ export function MobileMenuDrawer() {
                 handleClose()
                 openModal('CREATE_POST')
               }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm bg-zinc-600 text-white hover:bg-zinc-700 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               <span>Create New Post</span>

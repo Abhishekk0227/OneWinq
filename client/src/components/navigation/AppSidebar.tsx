@@ -259,7 +259,7 @@ export function AppSidebar() {
             onClick={() => openModal('CREATE_POST')}
             className={cn(
               'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all shadow-sm active:scale-95 cursor-pointer',
-              'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100',
+              'bg-zinc-600 text-white hover:bg-zinc-700 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600',
               isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
             )}
             title="Create New Post"

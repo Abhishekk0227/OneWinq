@@ -65,6 +65,8 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog'
