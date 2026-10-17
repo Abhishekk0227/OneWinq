@@ -52,6 +52,30 @@ import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationB
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 
+const BIO_LIMIT = 300
+
+function BioText({ text }: { text: string }) {
+  const [expanded, setExpanded] = React.useState(false)
+  const isLong = text.length > BIO_LIMIT
+  const display = isLong && !expanded ? text.slice(0, BIO_LIMIT).trimEnd() + '…' : text
+  return (
+    <div className="max-w-2xl min-w-0">
+      <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
+        {display}
+      </p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="mt-0.5 text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+        >
+          {expanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: string; url?: string; className?: string }) {
   const name = (platform || url || '').toLowerCase()
 
@@ -615,110 +639,6 @@ export default function ProfilePage() {
                     </p>
                   )}
 
-                  {/* Professional Identities */}
-                  {identities && identities.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-2 pt-1 max-w-full">
-                      {identities
-                        .filter((id: any, idx: number, arr: any[]) => {
-                          if (!id.customTitle?.trim()) return false
-                          const norm = id.customTitle.trim().toLowerCase()
-                          if (profile?.headline && norm === profile.headline.trim().toLowerCase()) return false
-                          return arr.findIndex((other: any) => other.customTitle?.trim().toLowerCase() === norm) === idx
-                        })
-                        .map((id: any, idx: number) => (
-                        <span
-                          key={id._id || id.id || idx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-muted text-foreground/80 border border-border/60 max-w-full break-words [overflow-wrap:anywhere]"
-                        >
-                          {id.isPrimary ? (
-                            <Crown className="h-3 w-3 text-amber-300 shrink-0" />
-                          ) : (
-                            <Briefcase className="h-3 w-3 text-muted-foreground shrink-0" />
-                          )}
-                          <span className="break-words [overflow-wrap:anywhere] min-w-0">{id.customTitle}</span>
-                          {id.isPrimary && (
-                            <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
-                              Primary
-                            </span>
-                          )}
-                        </span>
-                      ))}
-                      <Link
-                        to="/app/profile/edit"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium ml-1 shrink-0"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="pt-1">
-                      <Link
-                        to={`/app/profile/edit?mode=${currentMode.toLowerCase()}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shadow-xs cursor-pointer"
-                      >
-                        {currentMode === VISIBILITY_MODE.PRIVATE ? (
-                          <Lock className="h-3 w-3 text-primary shrink-0" />
-                        ) : currentMode === VISIBILITY_MODE.PROFESSIONAL ? (
-                          <Briefcase className="h-3 w-3 text-primary shrink-0" />
-                        ) : (
-                          <Eye className="h-3 w-3 text-primary shrink-0" />
-                        )}
-                        <span>
-                          {currentMode === VISIBILITY_MODE.PRIVATE
-                            ? 'Set Up Private Profile'
-                            : currentMode === VISIBILITY_MODE.PROFESSIONAL
-                            ? 'Set Up Professional Profile'
-                            : 'Set Up Public Profile'}
-                        </span>
-                      </Link>
-                    </div>
-                  )}
-
-                  {/* Verified Organization & HR Affiliation Badges */}
-                  {organizationAffiliations && organizationAffiliations.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 pt-2 max-w-full">
-                      {organizationAffiliations.map((affil: any) => {
-                        const isHrBadge = affil.isHR
-                        return (
-                          <Link
-                            key={affil.organizationId}
-                            to={`/c/${affil.organizationSlug}`}
-                            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all hover:scale-[1.02] shadow-2xs ${
-                              isHrBadge
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
-                                : 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20'
-                            }`}
-                            title={`Verified ${affil.position || affil.roleLabel} at ${affil.organizationName}`}
-                          >
-                            {affil.organizationLogoUrl ? (
-                              <img
-                                src={affil.organizationLogoUrl}
-                                alt={affil.organizationName}
-                                className="h-4 w-4 rounded-md object-cover"
-                              />
-                            ) : (
-                              <Building2 className="h-3.5 w-3.5 shrink-0" />
-                            )}
-                            <span className="font-bold flex items-center gap-1.5 flex-wrap">
-                              {isHrBadge ? (
-                                <span className="inline-flex items-center gap-1">
-                                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                  <span>{affil.position || 'HR Manager'}</span>
-                                </span>
-                              ) : (
-                                <span>{affil.position || affil.roleLabel}</span>
-                              )}
-                              <span className="text-muted-foreground font-normal">at</span>
-                              <span className="underline decoration-dotted underline-offset-2">{affil.organizationName}</span>
-                            </span>
-                            {affil.isVerifiedOrg && (
-                              <CheckCircle2 className="h-3 w-3 text-blue-500 shrink-0" />
-                            )}
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  )}
                   {/* Clean Details Line — Dot-separated, like img3, no pill tags */}
                   {(() => {
                     const locText = typeof profile.location === 'string'
@@ -745,9 +665,7 @@ export default function ProfilePage() {
                   })()}
 
                   {profile.bio && (
-                    <p className="text-sm text-foreground/80 leading-relaxed pt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
-                      {profile.bio}
-                    </p>
+                    <BioText text={profile.bio} />
                   )}
 
                   {/* Location & Contact Details */}
@@ -799,34 +717,6 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Quick Metrics Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
-                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
-                    <div className="text-2xl font-extrabold text-foreground">
-                      {experiences.length}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Experiences</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
-                    <div className="text-2xl font-extrabold text-foreground">
-                      {projects.length}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Projects</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
-                    <div className="text-2xl font-extrabold text-foreground">
-                      {certifications.length}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Certifications</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-muted/30 text-center">
-                    <div className="text-2xl font-extrabold text-foreground">
-                      {skills.length}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Skills</div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -834,58 +724,6 @@ export default function ProfilePage() {
           {/* Overview Cards when on Home tab */}
           {activeTab === 'home' && (
             <div className="space-y-4">
-              {skills.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                      <span>Top Skills</span>
-                    </span>
-                    {hasMedia && (
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('media')}
-                        className="text-xs text-primary font-semibold hover:underline cursor-pointer"
-                      >
-                        View all &rarr;
-                      </button>
-                    )}
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {skills.slice(0, 8).map((skill: any, idx: number) => (
-                      <Badge key={skill.id || idx} variant="subtle" className="text-[11px] font-medium py-0.5 px-2.5">
-                        {skill.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {experiences.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center justify-between">
-                    <span className="flex items-center gap-2">
-                      <Briefcase className="h-3.5 w-3.5 text-primary" />
-                      <span>Recent Experience</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('experience')}
-                      className="text-xs text-primary font-semibold hover:underline cursor-pointer"
-                    >
-                      View all ({experiences.length}) &rarr;
-                    </button>
-                  </h3>
-                  <div className="space-y-2">
-                    {experiences.slice(0, 2).map((exp: any, idx: number) => (
-                      <div key={exp.id || idx} className="p-3 rounded-xl bg-muted/40 border border-border/60">
-                        <div className="font-semibold text-xs text-foreground">{exp.role}</div>
-                        <div className="text-[11px] text-primary font-medium">{exp.company}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {isPrivateMode && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-purple-500/25 bg-purple-500/5 shadow-sm space-y-3">
