@@ -46,6 +46,7 @@ export default function CreateOrganizationPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,22 +56,73 @@ export default function CreateOrganizationPage() {
     },
   });
 
+  const watchedName = watch('name') || '';
+  const watchedSlug = watch('slug') || '';
+  const autoSlug = React.useMemo(() => {
+    return watchedName
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }, [watchedName]);
+
+  const onFormError = (formErrors: any) => {
+    console.error('[CreateOrganizationValidationErrors]', formErrors);
+    const firstKey = Object.keys(formErrors)[0];
+    const err = formErrors[firstKey];
+    const msg = err?.message || `Please check the ${firstKey} field`;
+    toast.error(msg);
+  };
+
   const onSubmit = async (values: FormValues) => {
     try {
       setIsSubmitting(true);
-      const res = await organizationsApi.create(values as any);
-      const createdOrg = (res as any)?.data?.organization;
+
+      const payload: any = {
+        name: values.name.trim(),
+        type: values.type || ORGANIZATION_TYPE.COMPANY,
+        size: values.size || '1-10',
+      };
+
+      if (values.slug?.trim()) {
+        payload.slug = values.slug.trim().toLowerCase();
+      }
+
+      if (values.industry?.trim()) {
+        payload.industry = values.industry.trim();
+      }
+
+      if (values.website?.trim()) {
+        const raw = values.website.trim();
+        payload.website = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      }
+
+      if (values.tagline?.trim()) {
+        payload.tagline = values.tagline.trim();
+      }
+
+      if (values.description?.trim()) {
+        payload.description = values.description.trim();
+      }
+
+      const res = await organizationsApi.create(payload);
+      const createdOrg = (res as any)?.data?.organization || (res as any)?.organization;
+      const orgId = createdOrg?.id || createdOrg?._id;
 
       toast.success('Organization created successfully!');
+
+      // Fetch memberships in background and immediately switch active context to the new organization
       await fetchMemberships();
 
-      if (createdOrg?.id) {
-        switchToOrganization(createdOrg.id);
+      if (orgId) {
+        switchToOrganization(orgId, createdOrg);
         navigate('/app/org/profile');
       } else {
         navigate('/app');
       }
     } catch (err: any) {
+      console.error('[CreateOrgError]', err);
       toast.error(err.message || 'Failed to create organization');
     } finally {
       setIsSubmitting(false);
@@ -100,7 +152,7 @@ export default function CreateOrganizationPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-foreground mb-1 block">
                 Organization Name *
@@ -109,6 +161,22 @@ export default function CreateOrganizationPage() {
                 placeholder="e.g. Acme Technologies, Stanford University"
                 {...register('name')}
                 error={errors.name?.message}
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-foreground block">
+                  Organization Slug (Custom URL)
+                </label>
+                <span className="text-[10px] text-muted-foreground font-mono">
+                  onewinq.com/c/{watchedSlug || autoSlug || 'your-slug'}
+                </span>
+              </div>
+              <Input
+                placeholder={autoSlug || 'e.g. acme-technologies (optional)'}
+                {...register('slug')}
+                error={errors.slug?.message}
               />
             </div>
 
@@ -164,8 +232,9 @@ export default function CreateOrganizationPage() {
                   Official Website
                 </label>
                 <Input
-                  placeholder="https://example.com"
+                  placeholder="e.g. acme.com or https://acme.com"
                   {...register('website')}
+                  error={errors.website?.message}
                 />
               </div>
             </div>

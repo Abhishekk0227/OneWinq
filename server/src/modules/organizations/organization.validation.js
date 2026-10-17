@@ -12,16 +12,36 @@ export const createOrganizationSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .min(2, 'Slug must be at least 2 characters')
-    .max(80, 'Slug cannot exceed 80 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug may only contain lowercase letters, numbers, and hyphens')
-    .optional(),
+    .transform((val) => (val === '' ? undefined : val))
+    .optional()
+    .refine((val) => !val || (val.length >= 2 && val.length <= 80 && /^[a-z0-9-]+$/.test(val)), {
+      message: 'Slug must be 2-80 characters and contain only lowercase letters, numbers, and hyphens',
+    }),
   type: z.enum(Object.values(ORGANIZATION_TYPE)).default(ORGANIZATION_TYPE.COMPANY),
   tagline: z.string().trim().max(200, 'Tagline cannot exceed 200 characters').default(''),
   description: z.string().trim().max(5000, 'Description cannot exceed 5000 characters').default(''),
-  logoUrl: z.string().url().nullable().optional(),
-  bannerUrl: z.string().url().nullable().optional(),
-  website: z.string().url().or(z.literal('')).default(''),
+  logoUrl: z
+    .string()
+    .trim()
+    .transform((val) => (val === '' ? null : val))
+    .pipe(z.string().url().nullable())
+    .optional(),
+  bannerUrl: z
+    .string()
+    .trim()
+    .transform((val) => (val === '' ? null : val))
+    .pipe(z.string().url().nullable())
+    .optional(),
+  website: z
+    .string()
+    .trim()
+    .transform((val) => {
+      if (!val) return '';
+      if (!/^https?:\/\//i.test(val)) return `https://${val}`;
+      return val;
+    })
+    .pipe(z.string().url().or(z.literal('')))
+    .default(''),
   industry: z.string().trim().max(80).default(''),
   size: z.string().trim().default('1-10'),
   foundedYear: z.coerce.number().int().min(1800).max(2100).nullable().optional(),
@@ -34,7 +54,12 @@ export const createOrganizationSchema = z.object({
       isRemoteFriendly: z.boolean().default(false),
     })
     .default({}),
-  contactEmail: z.string().email().or(z.literal('')).default(''),
+  contactEmail: z
+    .string()
+    .trim()
+    .transform((val) => (val === '' ? '' : val))
+    .pipe(z.string().email().or(z.literal('')))
+    .default(''),
   contactPhone: z.string().trim().default(''),
   socialLinks: z
     .array(

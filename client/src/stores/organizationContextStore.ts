@@ -21,7 +21,7 @@ interface OrganizationContextState {
   isLoading: boolean;
   fetchMemberships: () => Promise<void>;
   switchToPersonal: () => void;
-  switchToOrganization: (organizationId: string) => void;
+  switchToOrganization: (organizationId: string, fallbackOrgData?: any) => void;
   clearContext: () => void;
 }
 
@@ -45,9 +45,9 @@ export const useOrganizationContextStore = create<OrganizationContextState>()(
             const found = memberships.find(
               (m: any) => (m.organization?.id || m.organization?._id) === current.organizationId
             );
-            if (!found) {
+            if (!found && memberships.length > 0) {
               set({ activeContext: { type: 'PERSONAL' } });
-            } else {
+            } else if (found) {
               const role = (found.role || 'MEMBER').toUpperCase();
               const basePermissions =
                 role === 'OWNER'
@@ -108,7 +108,7 @@ export const useOrganizationContextStore = create<OrganizationContextState>()(
         }
       },
 
-      switchToOrganization: (organizationId: string) => {
+      switchToOrganization: (organizationId: string, fallbackOrgData?: any) => {
         const found = get().memberships.find(
           (m) =>
             m.organization?.id === organizationId ||
@@ -160,6 +160,26 @@ export const useOrganizationContextStore = create<OrganizationContextState>()(
               logoUrl: org.logoUrl,
               role: found.role,
               permissions,
+            },
+          });
+        } else if (fallbackOrgData) {
+          const ownerPerms = [
+            'org:edit', 'org:delete', 'members:view', 'members:invite', 'members:edit',
+            'members:remove', 'departments:manage', 'jobs:view', 'jobs:create', 'jobs:edit',
+            'jobs:delete', 'applications:view', 'applications:manage', 'cards:manage',
+            'events:view', 'events:manage', 'approvals:view', 'approvals:manage', 'roles:view',
+            'roles:manage', 'settings:manage', 'showcase:manage', 'analytics:view', 'audit:view',
+            'posts:manage',
+          ];
+          set({
+            activeContext: {
+              type: 'ORGANIZATION',
+              organizationId: fallbackOrgData.id || fallbackOrgData._id || organizationId,
+              name: fallbackOrgData.name || 'Organization',
+              slug: fallbackOrgData.slug || '',
+              logoUrl: fallbackOrgData.logoUrl || null,
+              role: 'OWNER',
+              permissions: ownerPerms,
             },
           });
         }
