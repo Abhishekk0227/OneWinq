@@ -109,6 +109,14 @@ router.patch(
   organizationController.update,
 );
 
+// Owner-only: permanently delete the organization
+router.delete(
+  '/:organizationId',
+  authenticate,
+  resolveOrgContext,
+  organizationController.deleteOrganization,
+);
+
 // ---- Ownership Transfer Management -----------------------------------------
 
 router.post(

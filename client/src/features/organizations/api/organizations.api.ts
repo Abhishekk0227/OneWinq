@@ -270,4 +270,9 @@ export const organizationsApi = {
       '/organizations/ownership-transfer/respond',
       data
     ),
+
+  deleteOrganization: (organizationId: string) =>
+    apiClient.delete<never, ApiResponse<{ deleted: boolean }>>(
+      `/organizations/${organizationId}`
+    ),
 };

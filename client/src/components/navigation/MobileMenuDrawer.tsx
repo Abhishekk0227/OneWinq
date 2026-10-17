@@ -176,9 +176,6 @@ export function MobileMenuDrawer() {
         ...(isOrgAdmin || hasPerm('roles:manage')
           ? [{ label: 'Roles & Access', to: '/app/org/roles', icon: KeyRound }]
           : []),
-        ...(isOrgAdmin || hasPerm('audit:view')
-          ? [{ label: 'Audit Logs', to: '/app/org/audit', icon: ShieldAlert }]
-          : []),
         ...(isOrgAdmin || hasPerm('settings:manage')
           ? [{ label: 'Org Settings', to: '/app/org/settings', icon: Settings }]
           : []),

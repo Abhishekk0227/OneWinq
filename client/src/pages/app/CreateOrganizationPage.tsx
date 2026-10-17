@@ -2,41 +2,23 @@ import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { toast } from '@/stores/toastStore';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ORGANIZATION_TYPE } from '@/constants/app.constants';
 
-const formSchema = z.object({
-  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(120),
-  slug: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .regex(/^[a-z0-9-]*$/, 'Only lowercase letters, numbers, and hyphens')
-    .optional(),
-  type: z.enum([
-    ORGANIZATION_TYPE.COMPANY,
-    ORGANIZATION_TYPE.STARTUP,
-    ORGANIZATION_TYPE.COLLEGE,
-    ORGANIZATION_TYPE.UNIVERSITY,
-    ORGANIZATION_TYPE.HOSPITAL,
-    ORGANIZATION_TYPE.NGO,
-    ORGANIZATION_TYPE.OTHER,
-  ]),
-  industry: z.string().trim().max(80).optional(),
-  size: z.string().default('1-10'),
-  website: z.string().trim().optional(),
-  tagline: z.string().trim().max(200).optional(),
-  description: z.string().trim().max(5000).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = {
+  name: string;
+  slug: string;
+  type: string;
+  industry: string;
+  size: string;
+  website: string;
+  tagline: string;
+  description: string;
+};
 
 export default function CreateOrganizationPage() {
   const navigate = useNavigate();
@@ -48,11 +30,17 @@ export default function CreateOrganizationPage() {
     handleSubmit,
     watch,
     formState: { errors },
+    setError,
   } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
-      type: ORGANIZATION_TYPE.COMPANY,
+      name: '',
+      slug: '',
+      type: 'COMPANY',
+      industry: '',
       size: '1-10',
+      website: '',
+      tagline: '',
+      description: '',
     },
   });
 
@@ -67,21 +55,26 @@ export default function CreateOrganizationPage() {
       .replace(/^-+|-+$/g, '');
   }, [watchedName]);
 
-  const onFormError = (formErrors: any) => {
-    console.error('[CreateOrganizationValidationErrors]', formErrors);
-    const firstKey = Object.keys(formErrors)[0];
-    const err = formErrors[firstKey];
-    const msg = err?.message || `Please check the ${firstKey} field`;
-    toast.error(msg);
-  };
-
   const onSubmit = async (values: FormValues) => {
+    // Manual validation
+    if (!values.name?.trim() || values.name.trim().length < 2) {
+      setError('name', { message: 'Organization name must be at least 2 characters' });
+      toast.error('Organization name must be at least 2 characters');
+      return;
+    }
+
+    if (values.slug?.trim() && !/^[a-z0-9-]+$/.test(values.slug.trim())) {
+      setError('slug', { message: 'Slug may only contain lowercase letters, numbers, and hyphens' });
+      toast.error('Slug may only contain lowercase letters, numbers, and hyphens');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
       const payload: any = {
         name: values.name.trim(),
-        type: values.type || ORGANIZATION_TYPE.COMPANY,
+        type: values.type || 'COMPANY',
         size: values.size || '1-10',
       };
 
@@ -112,7 +105,7 @@ export default function CreateOrganizationPage() {
 
       toast.success('Organization created successfully!');
 
-      // Fetch memberships in background and immediately switch active context to the new organization
+      // Fetch memberships and immediately switch to the new org context
       await fetchMemberships();
 
       if (orgId) {
@@ -123,7 +116,8 @@ export default function CreateOrganizationPage() {
       }
     } catch (err: any) {
       console.error('[CreateOrgError]', err);
-      toast.error(err.message || 'Failed to create organization');
+      const msg = err?.response?.data?.message || err?.message || 'Failed to create organization';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -152,7 +146,13 @@ export default function CreateOrganizationPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-4"
+          >
             <div>
               <label className="text-xs font-semibold text-foreground mb-1 block">
                 Organization Name *
@@ -189,13 +189,13 @@ export default function CreateOrganizationPage() {
                   {...register('type')}
                   className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  <option value={ORGANIZATION_TYPE.COMPANY}>Company</option>
-                  <option value={ORGANIZATION_TYPE.STARTUP}>Startup</option>
-                  <option value={ORGANIZATION_TYPE.COLLEGE}>College</option>
-                  <option value={ORGANIZATION_TYPE.UNIVERSITY}>University</option>
-                  <option value={ORGANIZATION_TYPE.HOSPITAL}>Hospital</option>
-                  <option value={ORGANIZATION_TYPE.NGO}>NGO / Non-Profit</option>
-                  <option value={ORGANIZATION_TYPE.OTHER}>Other</option>
+                  <option value="COMPANY">Company</option>
+                  <option value="STARTUP">Startup</option>
+                  <option value="COLLEGE">College</option>
+                  <option value="UNIVERSITY">University</option>
+                  <option value="HOSPITAL">Hospital</option>
+                  <option value="NGO">NGO / Non-Profit</option>
+                  <option value="OTHER">Other</option>
                 </select>
               </div>
 

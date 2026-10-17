@@ -47,7 +47,6 @@ const OrganizationDepartmentsPage = lazyWithRetry(() => import('@/pages/app/Orga
 const OrganizationJobsPage = lazyWithRetry(() => import('@/pages/app/OrganizationJobsPage'))
 const OrganizationApplicationsPage = lazyWithRetry(() => import('@/pages/app/OrganizationApplicationsPage'))
 const OrganizationCardsPage = lazyWithRetry(() => import('@/pages/app/OrganizationCardsPage'))
-const OrganizationAuditPage = lazyWithRetry(() => import('@/pages/app/OrganizationAuditPage'))
 const OrganizationSettingsPage = lazyWithRetry(() => import('@/pages/app/OrganizationSettingsPage'))
 const JobsPage = lazyWithRetry(() => import('@/pages/app/JobsPage'))
 const MyApplicationsPage = lazyWithRetry(() => import('@/pages/app/MyApplicationsPage'))
@@ -505,14 +504,6 @@ export const router = createBrowserRouter([
                 element: (
                   <Suspended>
                     <OrganizationCardsPage />
-                  </Suspended>
-                ),
-              },
-              {
-                path: 'org/audit',
-                element: (
-                  <Suspended>
-                    <OrganizationAuditPage />
                   </Suspended>
                 ),
               },
