@@ -137,6 +137,7 @@ export const updateOrganizationSchema = z.object({
       fontHeading: z.string().default('Inter'),
       fontBody: z.string().default('Inter'),
       themeMode: z.enum(['light', 'dark', 'system']).default('system'),
+      badgeBgColor: z.string().nullable().optional(),
     })
     .optional(),
   contactEmail: z.string().email().or(z.literal('')).optional(),

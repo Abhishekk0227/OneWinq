@@ -51,6 +51,7 @@ import { PostCard } from '@/components/posts/PostCard'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
+import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 
 const BIO_LIMIT = 300
 
@@ -468,16 +469,12 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {/* Position in Org: Display only position name at top right of the banner */}
+                {/* Position in Org: Display only position name with sleek curved scoop at top right of the banner */}
                 {primaryOrg && (primaryOrg.position || primaryOrg.roleLabel) && (
-                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20">
-                    <div
-                      className="inline-flex items-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-black/60 backdrop-blur-md border border-white/20 shadow-xl text-white font-bold text-xs sm:text-sm tracking-wide select-none"
-                      style={primaryOrg.brandColor ? { borderColor: `${primaryOrg.brandColor}70` } : undefined}
-                    >
-                      <span>{primaryOrg.position || primaryOrg.roleLabel}</span>
-                    </div>
-                  </div>
+                  <OrgPositionCurvedBadge
+                    position={primaryOrg.position || primaryOrg.roleLabel}
+                    color={primaryOrg.badgeBgColor || primaryOrg.brandColor}
+                  />
                 )}
               </div>
 

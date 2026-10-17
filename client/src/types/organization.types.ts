@@ -66,6 +66,7 @@ export interface OrganizationBranding {
   fontHeading?: string;
   fontBody?: string;
   themeMode?: 'light' | 'dark' | 'system';
+  badgeBgColor?: string | null;
 }
 
 export interface OrganizationSocialLink {

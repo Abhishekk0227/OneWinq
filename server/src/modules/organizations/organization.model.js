@@ -76,6 +76,7 @@ const organizationBrandingSchema = new Schema(
     fontHeading: { type: String, default: 'Inter' },
     fontBody: { type: String, default: 'Inter' },
     themeMode: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
+    badgeBgColor: { type: String, default: null },
   },
   { _id: false },
 );
