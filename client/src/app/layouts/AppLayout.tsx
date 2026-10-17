@@ -13,12 +13,16 @@ export function AppLayout() {
   const { activeContext } = useOrganizationContextStore()
 
   // Guard:
-  // 1. If browsing an organization-specific route while in Personal workspace mode,
+  // 1. If browsing an organization-specific workspace route (/app/org/...) while in Personal workspace mode,
   //    redirect to personal app feed (/app).
+  //    (Do NOT match /app/organizations/create so personal users can create new organizations)
   // 2. If in Organization workspace mode and navigating to the general public feed (/app),
   //    redirect directly to Company Posts (/app/org/posts) so the company never sees the public feed.
   React.useEffect(() => {
-    if (location.pathname.startsWith('/app/org') && activeContext.type === 'PERSONAL') {
+    const isOrgWorkspaceRoute =
+      location.pathname.startsWith('/app/org/') || location.pathname === '/app/org'
+
+    if (isOrgWorkspaceRoute && activeContext.type === 'PERSONAL') {
       navigate('/app', { replace: true })
     } else if ((location.pathname === '/app' || location.pathname === '/app/') && activeContext.type === 'ORGANIZATION') {
       navigate('/app/org/profile', { replace: true })

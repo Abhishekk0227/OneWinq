@@ -119,8 +119,8 @@ export function MobileMenuDrawer() {
   const location = useLocation()
   const { activeContext, switchToPersonal } = useOrganizationContextStore()
   const isOrgRoute =
-    location.pathname.startsWith('/app/org') ||
-    location.pathname.startsWith('/app/organizations')
+    location.pathname.startsWith('/app/org/') ||
+    location.pathname === '/app/org'
   const isOrgMode = activeContext.type === 'ORGANIZATION' || isOrgRoute
 
   // Role & Permission Checks for Organization Mode
