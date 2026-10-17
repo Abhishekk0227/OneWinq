@@ -14,6 +14,7 @@ import {
   Crown,
   Clock,
   Send,
+  Trash2,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -178,6 +179,23 @@ export default function OrganizationSettingsPage() {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || err?.message || 'Failed to cancel ownership transfer');
+    },
+  });
+
+  // Delete org state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = React.useState('');
+
+  const deleteOrgMutation = useMutation({
+    mutationFn: () => organizationsApi.deleteOrganization(orgId),
+    onSuccess: () => {
+      toast.success('Organization permanently deleted.');
+      switchToPersonal();
+      fetchMemberships();
+      navigate('/app');
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to delete organization');
     },
   });
 
@@ -445,8 +463,83 @@ export default function OrganizationSettingsPage() {
                 Exit to Personal
               </Button>
             </div>
+
+            {userRole === 'OWNER' && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-rose-600/40 bg-rose-500/5">
+                <div>
+                  <h4 className="font-bold text-sm text-rose-600 dark:text-rose-400">Delete Organization</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Permanently delete <strong>{org?.name || 'this organization'}</strong> and all its data. This action is irreversible.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setDeleteConfirmText(''); setIsDeleteModalOpen(true); }}
+                  className="shrink-0 border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete Organization
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Delete Organization Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <div className="space-y-4 text-left">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-rose-600">
+              <Trash2 className="h-5 w-5" />
+              <DialogTitle>Delete Organization</DialogTitle>
+            </div>
+            <DialogDescription>
+              This will permanently delete <strong>{org?.name}</strong> and all members, jobs, departments, events, and data. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-900 dark:text-rose-200 space-y-1">
+            <div className="font-bold flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4 shrink-0" /> This action is permanent and irreversible.
+            </div>
+            <ul className="list-disc list-inside space-y-0.5 opacity-90">
+              <li>All members will be removed from the organization.</li>
+              <li>All jobs, applications, and department data will be lost.</li>
+              <li>The organization profile and slug will be permanently deleted.</li>
+            </ul>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-foreground">
+              Type <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-rose-600">{org?.name}</span> to confirm:
+            </label>
+            <Input
+              placeholder={org?.name || 'Organization name'}
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              className="border-rose-500/40 focus:ring-rose-500/20"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
+            <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={deleteConfirmText !== org?.name || deleteOrgMutation.isPending}
+              onClick={() => deleteOrgMutation.mutate()}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold"
+            >
+              {deleteOrgMutation.isPending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Deleting...</>
+              ) : (
+                <><Trash2 className="h-3.5 w-3.5 mr-1.5" />Permanently Delete</>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
         {/* Transfer Ownership Modal Dialog */}
       <Dialog open={isTransferModalOpen} onOpenChange={setIsTransferModalOpen}>

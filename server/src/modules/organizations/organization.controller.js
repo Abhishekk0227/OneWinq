@@ -187,5 +187,24 @@ export const organizationController = {
       next(err);
     }
   },
+
+  /**
+   * Permanently delete an organization. Only the OWNER may perform this action.
+   */
+  async deleteOrganization(req, res, next) {
+    try {
+      const result = await organizationService.deleteOrganization(
+        req.params.organizationId,
+        req.user.id,
+      );
+      return sendSuccess(res, {
+        statusCode: HTTP.OK,
+        message: 'Organization permanently deleted',
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 

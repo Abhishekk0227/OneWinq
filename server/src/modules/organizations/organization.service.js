@@ -311,3 +311,34 @@ export async function listPublicOrganizations({ page = 1, limit = 20, q, type, i
     },
   };
 }
+
+/**
+ * Permanently delete an organization and all related records.
+ * Only the OWNER of the organization can invoke this.
+ *
+ * @param {string} organizationId
+ * @param {string} requestingUserId
+ * @returns {Promise<{ deleted: boolean }>}
+ */
+export async function deleteOrganization(organizationId, requestingUserId) {
+  const org = await Organization.findById(organizationId);
+  if (!org) {
+    throw new NotFoundError('Organization not found', ERROR_CODE.ORGANIZATION_NOT_FOUND);
+  }
+  const ownerMembership = await OrganizationMember.findOne({
+    organizationId: org._id,
+    userId: requestingUserId,
+    role: ORGANIZATION_ROLE.OWNER,
+  });
+  if (!ownerMembership) {
+    throw new ForbiddenError(
+      'Only the organization owner can permanently delete the organization',
+      ERROR_CODE.ORGANIZATION_PERMISSION_DENIED,
+    );
+  }
+  await OrganizationMember.deleteMany({ organizationId: org._id });
+  await OrganizationFollow.deleteMany({ organizationId: org._id });
+  await Organization.deleteOne({ _id: org._id });
+    logger.info(`[Organization] Deleted org (${org.slug}) by owner ${requestingUserId}`);;
+  return { deleted: true };
+}

@@ -160,14 +160,6 @@ export function AppSidebar() {
     })
   }
 
-  // 10. Audit Logs (Strictly Owner/Admin or audit:view)
-  if (isOrgAdmin || hasPerm('audit:view')) {
-    orgNavItems.push({
-      label: 'Audit Logs',
-      to: '/app/org/audit',
-      icon: ShieldAlert,
-    })
-  }
 
   // 11. Org Settings (Strictly Owner/Admin or settings:manage)
   if (isOrgAdmin || hasPerm('settings:manage')) {
