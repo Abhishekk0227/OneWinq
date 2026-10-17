@@ -39,8 +39,8 @@ export function AppHeader() {
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false)
 
   const isOrgRoute =
-    location.pathname.startsWith('/app/org') ||
-    location.pathname.startsWith('/app/organizations')
+    location.pathname.startsWith('/app/org/') ||
+    location.pathname === '/app/org'
   const isOrgMode = activeContext.type === 'ORGANIZATION' || isOrgRoute
   const isStaff = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' || user?.role === 'SUPPORT'
   const { data: unreadData } = useQuery({

@@ -19,8 +19,8 @@ export function MobileNav() {
   const { activeContext } = useOrganizationContextStore()
 
   const isOrgRoute =
-    location.pathname.startsWith('/app/org') ||
-    location.pathname.startsWith('/app/organizations')
+    location.pathname.startsWith('/app/org/') ||
+    location.pathname === '/app/org'
   const isOrgMode = activeContext.type === 'ORGANIZATION' || isOrgRoute
 
   // 1. ORGANIZATION WORKSPACE MODE: strictly org-related tabs
