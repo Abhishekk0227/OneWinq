@@ -118,7 +118,7 @@ function BioText({ text }: { text: string }) {
   const isLong = text.length > BIO_LIMIT;
   const display = isLong && !expanded ? text.slice(0, BIO_LIMIT).trimEnd() + '…' : text;
   return (
-    <div className="pt-1 max-w-2xl min-w-0">
+    <div className="max-w-2xl min-w-0">
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
         {display}
       </p>
@@ -824,7 +824,7 @@ export default function CompanyShowcasePage() {
                         )}
 
                         {/* Action & Contact Buttons Row */}
-                        <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
+                        <div className="flex flex-wrap items-center gap-2 pt-1 min-w-0 max-w-full">
                           {/* Follow Button */}
                           <Button
                             size="sm"

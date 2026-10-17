@@ -269,6 +269,9 @@ export default function ProfilePage() {
   const effectiveCoverUrl = primaryOrg
     ? (primaryOrg.bannerUrl || primaryOrg.organizationBannerUrl || null)
     : profile?.coverUrl
+  const displayRole = primaryOrg
+    ? (primaryOrg.position || primaryOrg.roleLabel)
+    : (profile?.headline || profile?.professionTitle)
   const identities: any[] = (data?.data as any)?.identities || profile?.identities || []
   const rawMode = selectedMode || profile?.activeMode || VISIBILITY_MODE.PUBLIC
   const currentMode: VisibilityMode =
@@ -581,7 +584,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Header Info */}
-                <div id="section-overview" className="scroll-mt-28 space-y-3">
+                <div id="section-overview" className="scroll-mt-28 space-y-2">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                       {user?.displayName}
@@ -602,9 +605,9 @@ export default function ProfilePage() {
                     </a>
                   </div>
 
-                  {profile.headline ? (
+                  {displayRole ? (
                     <p className="text-base font-semibold text-primary break-words [overflow-wrap:anywhere] min-w-0">
-                      {profile.headline}
+                      {displayRole}
                     </p>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">
@@ -722,16 +725,15 @@ export default function ProfilePage() {
                       ? profile.location.trim()
                       : [profile.location?.city, profile.location?.state, profile.location?.country].filter(Boolean).join(', ')
                     const details = [
-                      profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
+                      !primaryOrg && profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
                         ? profile.professionTitle
                         : null,
                       locText || null,
-                      primaryOrg ? `${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}` : null,
                     ].filter(Boolean)
 
                     if (details.length === 0) return null
                     return (
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-1">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground pt-0.5">
                         {details.map((d, i) => (
                           <React.Fragment key={i}>
                             {i > 0 && <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0 select-none" />}
@@ -743,14 +745,14 @@ export default function ProfilePage() {
                   })()}
 
                   {profile.bio && (
-                    <p className="text-sm text-foreground/80 leading-relaxed pt-2 break-words [overflow-wrap:anywhere] min-w-0">
+                    <p className="text-sm text-foreground/80 leading-relaxed pt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
                       {profile.bio}
                     </p>
                   )}
 
                   {/* Location & Contact Details */}
                   {/* Sleek Contact & Social Icon Buttons */}
-                  <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
+                  <div className="flex flex-wrap items-center gap-2 pt-1 min-w-0 max-w-full">
                     {profile.contact?.website && (
                       <a
                         href={profile.contact.website.startsWith('http') ? profile.contact.website : `https://${profile.contact.website}`}
