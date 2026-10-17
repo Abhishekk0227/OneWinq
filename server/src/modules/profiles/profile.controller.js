@@ -32,6 +32,7 @@ async function getOrganizationAffiliations(userId) {
         const isHR = role === 'HR_MANAGER' || Boolean(m.jobTitle && /hr|human resources|recruiter|talent/i.test(m.jobTitle));
         const brandColor = org.branding?.primaryColor || null;
         const bannerUrl = org.branding?.coverUrl || org.bannerUrl || null;
+        const badgeBgColor = org.branding?.badgeBgColor || null;
         return {
           organizationId: org._id?.toString(),
           organizationName: org.name,
@@ -41,6 +42,7 @@ async function getOrganizationAffiliations(userId) {
           bannerUrl,
           isVerifiedOrg: Boolean(org.isVerified),
           brandColor,
+          badgeBgColor,
           role,
           roleLabel,
           position,

@@ -73,6 +73,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } fr
 import { MonthYearPicker } from '@/components/common/MonthYearPicker'
 import { TemplateCard } from '@/components/profile/TemplateCard'
 import { sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
+import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
@@ -1465,11 +1466,10 @@ export default function ProfileEditPage() {
                         )}
                         {/* Position badge at top right */}
                         {(primaryOrg.position || primaryOrg.roleLabel) && (
-                          <div className="absolute top-2 right-2 z-10">
-                            <span className="px-2.5 py-0.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold">
-                              {primaryOrg.position || primaryOrg.roleLabel}
-                            </span>
-                          </div>
+                          <OrgPositionCurvedBadge
+                            position={primaryOrg.position || primaryOrg.roleLabel}
+                            color={primaryOrg.badgeBgColor || primaryOrg.brandColor}
+                          />
                         )}
                       </div>
                       <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 text-xs text-muted-foreground flex items-center gap-2">

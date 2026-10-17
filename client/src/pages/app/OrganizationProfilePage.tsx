@@ -58,6 +58,7 @@ import type {
   OrganizationCustomMetric,
   OrganizationValueItem,
 } from '@/types/organization.types';
+import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge';
 
 export interface SectorTaxonomy {
   sectorLabel: string;
@@ -230,6 +231,7 @@ const profileSchema = z.object({
   primaryColor: z.string().trim().optional(),
   secondaryColor: z.string().trim().optional(),
   accentColor: z.string().trim().optional(),
+  badgeBgColor: z.string().trim().optional(),
   fontHeading: z.string().trim().optional(),
   fontBody: z.string().trim().optional(),
   themeMode: z.enum(['light', 'dark', 'system']).optional(),
@@ -309,6 +311,7 @@ export default function OrganizationProfilePage() {
       primaryColor: '#7c3aed',
       secondaryColor: '#6366f1',
       accentColor: '#06b6d4',
+      badgeBgColor: '#241b74',
       fontHeading: 'Inter',
       fontBody: 'Inter',
       themeMode: 'system',
@@ -358,6 +361,7 @@ export default function OrganizationProfilePage() {
         primaryColor: org.branding?.primaryColor || '#7c3aed',
         secondaryColor: org.branding?.secondaryColor || '#6366f1',
         accentColor: org.branding?.accentColor || '#06b6d4',
+        badgeBgColor: org.branding?.badgeBgColor || '#241b74',
         fontHeading: org.branding?.fontHeading || 'Inter',
         fontBody: org.branding?.fontBody || 'Inter',
         themeMode: org.branding?.themeMode || 'system',
@@ -631,6 +635,7 @@ export default function OrganizationProfilePage() {
           primaryColor: data.primaryColor || '#7c3aed',
           secondaryColor: data.secondaryColor || '#6366f1',
           accentColor: data.accentColor || '#06b6d4',
+          badgeBgColor: data.badgeBgColor || '#241b74',
           fontHeading: data.fontHeading || 'Inter',
           fontBody: data.fontBody || 'Inter',
           themeMode: data.themeMode || 'system',
@@ -684,6 +689,7 @@ export default function OrganizationProfilePage() {
   const previewName = watch('name') || org?.name || 'Organization';
   const previewPrimary = watch('primaryColor') || '#7c3aed';
   const previewSecondary = watch('secondaryColor') || '#6366f1';
+  const previewBadgeBg = watch('badgeBgColor') || '#241b74';
 
   if (!orgId) {
     return (
@@ -1292,6 +1298,61 @@ export default function OrganizationProfilePage() {
                         title={col}
                       />
                     ))}
+                  </div>
+                </div>
+
+                {/* Member Position / Role Badge Background Color */}
+                <div className="p-5 rounded-2xl border border-border/80 bg-muted/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                        <Palette className="h-4 w-4 text-primary" />
+                        <span>Member Role/Position Badge Color</span>
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Custom background color for the curved position badge (e.g. &ldquo;HR&rdquo;, &ldquo;Founder &amp; Owner&rdquo;) displayed at the top right of your members&apos; profile banners.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-7 w-7 rounded-lg border border-border shadow-xs"
+                        style={{ backgroundColor: previewBadgeBg }}
+                      />
+                      <input
+                        type="color"
+                        value={previewBadgeBg}
+                        onChange={(e) => setValue('badgeBgColor', e.target.value, { shouldDirty: true })}
+                        className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent p-0.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Preset quick colors and Live Mini Preview */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div className="flex flex-wrap gap-2">
+                      {['#241b74', '#1e1b4b', '#312e81', '#1d4ed8', '#0f766e', '#7c3aed', '#b91c1c', '#18181b'].map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => setValue('badgeBgColor', col, { shouldDirty: true })}
+                          className={`h-7 w-7 rounded-xl border-2 transition-all ${
+                            previewBadgeBg.toLowerCase() === col.toLowerCase()
+                              ? 'border-foreground scale-110 shadow-sm'
+                              : 'border-transparent hover:scale-105'
+                          }`}
+                          style={{ backgroundColor: col }}
+                          title={col}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Mini Live Preview of the curved badge */}
+                    <div className="flex items-center gap-2 bg-card p-2 px-3 rounded-xl border border-border/80 shadow-xs">
+                      <span className="text-[11px] text-muted-foreground font-medium">Badge Preview:</span>
+                      <div className="relative h-9 w-28 overflow-hidden rounded-xl bg-zinc-900 border border-white/10">
+                        <OrgPositionCurvedBadge position="HR" color={previewBadgeBg} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
