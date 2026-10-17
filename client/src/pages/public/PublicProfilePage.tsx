@@ -70,7 +70,7 @@ function BioText({ text }: { text: string }) {
   const isLong = text.length > BIO_LIMIT
   const display = isLong && !expanded ? text.slice(0, BIO_LIMIT).trimEnd() + '…' : text
   return (
-    <div className="pt-2 max-w-2xl min-w-0">
+    <div className="max-w-2xl min-w-0">
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed whitespace-pre-line break-words [overflow-wrap:anywhere] min-w-0">
         {display}
       </p>
@@ -338,6 +338,9 @@ export default function PublicProfilePage() {
   const effectiveCoverUrl = primaryOrg
     ? (primaryOrg.bannerUrl || primaryOrg.organizationBannerUrl || null)
     : profile?.coverUrl
+  const displayRole = primaryOrg
+    ? (primaryOrg.position || primaryOrg.roleLabel)
+    : (profile?.headline || profile?.professionTitle || (profile as any)?.templateName)
   const isSelf = Boolean(
     currentUser &&
       (currentUser.username === profileUser?.username ||
@@ -672,7 +675,7 @@ export default function PublicProfilePage() {
                   )}
                 </div>
 
-                <div className="p-6 sm:p-10 space-y-6 relative z-10">
+                <div className="p-6 sm:p-10 space-y-4 relative z-10">
                   <div className="flex flex-wrap items-end justify-between gap-4 -mt-16 sm:-mt-20 relative z-20">
                     <Avatar
                       src={profile.avatarUrl || profileUser?.avatarUrl}
@@ -690,15 +693,15 @@ export default function PublicProfilePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex-1 space-y-3 min-w-0 max-w-full overflow-hidden">
+                  <div className="space-y-2">
+                    <div className="flex-1 space-y-1.5 min-w-0 max-w-full overflow-hidden">
                       <div className="min-w-0 max-w-full">
                         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] min-w-0">
                           {profileUser.displayName}
                         </h1>
-                        {(profile.headline || profile.professionTitle || (profile as any).templateName) && (
+                        {displayRole && (
                           <p className="text-sm sm:text-base font-medium text-primary mt-0.5 break-words [overflow-wrap:anywhere] min-w-0">
-                            {profile.headline || profile.professionTitle || (profile as any).templateName}
+                            {displayRole}
                           </p>
                         )}
                       </div>
@@ -709,16 +712,15 @@ export default function PublicProfilePage() {
                           ? profile.location.trim()
                           : [profile.location?.city, profile.location?.state, profile.location?.country].filter(Boolean).join(', ')
                         const details = [
-                          profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
+                          !primaryOrg && profile.professionTitle && profile.professionTitle.trim().toLowerCase() !== (profile.headline || '').trim().toLowerCase()
                             ? profile.professionTitle
                             : null,
                           locText || null,
-                          primaryOrg ? `${primaryOrg.position || primaryOrg.roleLabel} at ${primaryOrg.organizationName}` : null,
                         ].filter(Boolean)
 
                         if (details.length === 0) return null
                         return (
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted-foreground pt-0.5">
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-muted-foreground">
                             {details.map((d, i) => (
                               <React.Fragment key={i}>
                                 {i > 0 && <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0 select-none" />}
@@ -735,7 +737,7 @@ export default function PublicProfilePage() {
                       )}
 
                       {/* Sleek Contact & Social Icon Buttons */}
-                      <div className="flex flex-wrap items-center gap-2 pt-2 min-w-0 max-w-full">
+                      <div className="flex flex-wrap items-center gap-2 pt-1 min-w-0 max-w-full">
                         {profile.contact?.website && (
                           <a
                             href={profile.contact.website.startsWith('http') ? profile.contact.website : `https://${profile.contact.website}`}
