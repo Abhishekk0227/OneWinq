@@ -139,7 +139,7 @@ export function getSectorTaxonomy(type: string): SectorTaxonomy {
     case 'COMPANY':
     default:
       return {
-        sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
+        sectorLabel: '',
         offeringsTitle: 'Services',
         offeringsDescription: 'Services and solutions offered by your organization.',
         offeringSingular: 'Service',
@@ -843,9 +843,11 @@ export default function OrganizationProfilePage() {
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5">
-                <span>Sector: <strong className="text-foreground">{taxonomy.sectorLabel}</strong></span>
-              </p>
+              {org?.industry && (
+                <p className="text-xs text-muted-foreground flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5">
+                  <span>Industry: <strong className="text-foreground">{org.industry}</strong></span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -908,18 +910,18 @@ export default function OrganizationProfilePage() {
 
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Sector & Organization Type *
+                      Organization Type *
                     </label>
                     <select
                       {...register('type')}
                       className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                      <option value={ORGANIZATION_TYPE.COMPANY}>Company / Corporation</option>
-                      <option value={ORGANIZATION_TYPE.STARTUP}>Startup / High-Growth Venture</option>
-                      <option value={ORGANIZATION_TYPE.COLLEGE}>College / Academy</option>
-                      <option value={ORGANIZATION_TYPE.UNIVERSITY}>University / Higher Institution</option>
-                      <option value={ORGANIZATION_TYPE.HOSPITAL}>Hospital / Medical Center</option>
-                      <option value={ORGANIZATION_TYPE.NGO}>NGO / Non-Profit Charity</option>
+                      <option value={ORGANIZATION_TYPE.COMPANY}>Company</option>
+                      <option value={ORGANIZATION_TYPE.STARTUP}>Startup</option>
+                      <option value={ORGANIZATION_TYPE.COLLEGE}>College</option>
+                      <option value={ORGANIZATION_TYPE.UNIVERSITY}>University</option>
+                      <option value={ORGANIZATION_TYPE.HOSPITAL}>Hospital</option>
+                      <option value={ORGANIZATION_TYPE.NGO}>NGO / Non-Profit</option>
                       <option value={ORGANIZATION_TYPE.OTHER}>Other Organization</option>
                     </select>
                   </div>

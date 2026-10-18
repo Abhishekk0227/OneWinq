@@ -302,7 +302,7 @@ function getShowcaseTaxonomy(type: string) {
     case 'COMPANY':
     default:
       return {
-        sectorLabel: type === 'STARTUP' ? 'Startup / High-Growth Venture' : 'Company / Enterprise',
+        sectorLabel: '',
         teamLabel: 'Team Members',
         customerLabel: 'Clients / Users',
         offeringSingular: 'Service',
@@ -798,7 +798,7 @@ export default function CompanyShowcasePage() {
                         {(() => {
                           const metaItems = [
                             org.location?.city ? `${org.location.city}${org.location.country ? `, ${org.location.country}` : ''}` : null,
-                            org.industry || taxonomy.sectorLabel,
+                            org.industry || null,
                             `${followState.followersCount || 0} followers`,
                             (org.size || org.overviewStats?.teamSize) ? `${org.size || org.overviewStats?.teamSize} employees` : null,
                             (org.foundedYear || org.overviewStats?.foundedYear) ? `Est. ${org.foundedYear || org.overviewStats?.foundedYear}` : null,
@@ -1501,7 +1501,7 @@ export default function CompanyShowcasePage() {
           displayName: org.name,
           username: org.slug,
           avatarUrl: logoImage || undefined,
-          headline: org.tagline || taxonomy.sectorLabel,
+          headline: org.tagline || org.industry || org.name,
         }}
         isSelf={isOwnerOrAdmin}
         editProfileUrl="/app/org/profile"
