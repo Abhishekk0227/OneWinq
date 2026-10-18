@@ -422,7 +422,6 @@ export default function DashboardPage() {
                 size="sm"
                 isLoading={publishMutation.isPending}
                 onClick={() => publishMutation.mutate()}
-                leftIcon={<Sparkles className="h-4 w-4 text-primary" />}
                 className="flex-1 sm:flex-none"
               >
                 Publish Live

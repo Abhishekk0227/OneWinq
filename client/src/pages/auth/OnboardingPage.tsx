@@ -696,7 +696,6 @@ export default function OnboardingPage() {
                 size="lg"
                 isLoading={isFinishing}
                 onClick={handleFinish}
-                rightIcon={<Sparkles className="h-4 w-4" />}
               >
                 Enter Profile Builder
               </Button>

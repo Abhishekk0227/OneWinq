@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Building2, ArrowLeft, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { Building2, ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { organizationsApi } from '@/features/organizations/api/organizations.api';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
@@ -38,13 +39,17 @@ export default function CreateOrganizationPage() {
     }, 600); // 600ms fade-out duration before route transition
   }, [isFadingOut, navigate]);
 
-  // Handle fade-in on mount
+  // Handle fade-in on mount & lock body scroll
   React.useEffect(() => {
     if (welcomeOrg) {
+      document.body.style.overflow = 'hidden';
       const timer = setTimeout(() => {
         setIsAnimationVisible(true);
       }, 50);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = '';
+      };
     }
   }, [welcomeOrg]);
 
@@ -316,10 +321,7 @@ export default function CreateOrganizationPage() {
                     Creating...
                   </>
                 ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Create Organization
-                  </>
+                  'Create Organization'
                 )}
               </Button>
             </div>
@@ -327,48 +329,52 @@ export default function CreateOrganizationPage() {
         </CardContent>
       </Card>
 
-      {/* Full-screen Welcome to Organization Screen */}
-      {welcomeOrg && (
-        <div
-          className={cn(
-            'fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-white dark:bg-background transition-all duration-500 ease-in-out select-none',
-            isAnimationVisible && !isFadingOut
-              ? 'opacity-100 scale-100'
-              : 'opacity-0 scale-[0.99] pointer-events-none'
-          )}
-        >
-          <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-6 sm:space-y-8">
-            {/* Top Subtitle */}
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-foreground/80">
-              ORGANIZATION WORKSPACE READY
-            </p>
+      {/* Full-screen Welcome to Organization Screen via document.body Portal */}
+      {welcomeOrg &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className={cn(
+              'fixed inset-0 z-[99999] w-screen h-screen min-h-screen min-w-full flex flex-col items-center justify-center p-6 bg-white dark:bg-background transition-all duration-500 ease-in-out select-none',
+              isAnimationVisible && !isFadingOut
+                ? 'opacity-100 scale-100'
+                : 'opacity-0 scale-[0.99] pointer-events-none'
+            )}
+            style={{ width: '100vw', height: '100vh', top: 0, left: 0, margin: 0 }}
+          >
+            <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-6 sm:space-y-8">
+              {/* Top Subtitle */}
+              <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-foreground/80">
+                ORGANIZATION WORKSPACE READY
+              </p>
 
-            {/* Main Welcome Heading */}
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-              Welcome to <span className="text-primary">{welcomeOrg.name}</span>
-            </h1>
+              {/* Main Welcome Heading */}
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
+                Welcome to <span className="text-primary">{welcomeOrg.name}</span>
+              </h1>
 
-            {/* Countdown / Opening Studio Info */}
-            <div className="pt-1">
-              <span className="text-xs sm:text-sm text-muted-foreground border-b border-muted-foreground/40 pb-0.5 inline-block font-normal">
-                Opening workspace studio in {Math.max(1, redirectCountdown)}s...
-              </span>
+              {/* Countdown / Opening Studio Info */}
+              <div className="pt-1">
+                <span className="text-xs sm:text-sm text-muted-foreground border-b border-muted-foreground/40 pb-0.5 inline-block font-normal">
+                  Opening workspace studio in {Math.max(1, redirectCountdown)}s...
+                </span>
+              </div>
+
+              {/* Pill Outline Button */}
+              <div className="pt-4 sm:pt-6">
+                <button
+                  type="button"
+                  onClick={handleProceed}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-primary text-primary px-8 py-3 text-sm font-medium transition-all duration-200 hover:bg-primary/5 active:scale-[0.98] cursor-pointer shadow-none"
+                >
+                  <span>Go to Organization Studio</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-
-            {/* Pill Outline Button */}
-            <div className="pt-4 sm:pt-6">
-              <button
-                type="button"
-                onClick={handleProceed}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-primary text-primary px-8 py-3 text-sm font-medium transition-all duration-200 hover:bg-primary/5 active:scale-[0.98] cursor-pointer shadow-none"
-              >
-                <span>Go to Organization Studio</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
