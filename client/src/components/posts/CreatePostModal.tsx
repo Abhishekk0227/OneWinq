@@ -16,7 +16,7 @@ import {
   X,
   Globe,
   Users,
-  Sparkles,
+  User,
   Send,
   Loader2,
   Building2,
@@ -237,7 +237,7 @@ export function CreatePostModal() {
         <DialogHeader className="pb-3 border-b border-border pr-8">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="h-8 w-8 rounded-xl bg-primary-soft flex items-center justify-center text-primary shrink-0">
-              {isPostingAsOrg ? <Building2 className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+              {isPostingAsOrg ? <Building2 className="h-4 w-4" /> : <User className="h-4 w-4" />}
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base sm:text-lg font-bold text-foreground truncate">

@@ -174,6 +174,7 @@ export async function listOrganizationJobs(organizationId, { page = 1, limit = 2
       applicationsCount: j.applicationsCount,
       viewsCount: j.viewsCount,
       publishedAt: j.publishedAt,
+      expiresAt: j.expiresAt,
       createdAt: j.createdAt,
     })),
     pagination: {
@@ -282,7 +283,9 @@ export async function listPublicJobs(
         externalApplyUrl: j.externalApplyUrl || null,
         hasApplied: !!appliedMap[jobIdStr],
         applicationStatus: appliedMap[jobIdStr] || null,
+        description: j.description,
         publishedAt: j.publishedAt,
+        expiresAt: j.expiresAt,
         createdAt: j.createdAt,
       };
     }),

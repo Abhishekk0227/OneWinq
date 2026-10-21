@@ -92,7 +92,6 @@ export function AppHeader() {
 
         {/* Mobile Brand Logo */}
         <BrandLogo to="/app" className="hidden sm:inline-flex lg:hidden shrink-0" imgClassName="h-6 sm:h-7" />
-        <BrandLogo to="/app" collapsed className="sm:hidden shrink-0" />
 
         {/* Workspace Context Switcher (Dynamic Personal vs Org mode) */}
         <WorkspaceContextSwitcher className="min-w-0 shrink max-h-9" />

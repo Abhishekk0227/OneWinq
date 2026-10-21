@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/Button'
 import type { ProfileTemplate } from '@/types/profile.types'
 import {
   CheckCircle2,
-  Sparkles,
   Layout,
   Briefcase,
   GraduationCap,
@@ -238,7 +237,7 @@ function ProfessionVisualPreview({ slug, category, name, previewImage }: Profess
               <span className="text-[10px] font-semibold text-rose-200">Creator Media Studio</span>
             </div>
             <span className="flex items-center gap-1 text-[9px] bg-rose-500/15 text-rose-300 border border-rose-500/30 px-1.5 py-0.5 rounded-full">
-              <Sparkles className="h-2.5 w-2.5 text-rose-400" />
+              <Video className="h-2.5 w-2.5 text-rose-400" />
               <span>4K Media</span>
             </span>
           </div>
@@ -516,9 +515,6 @@ export function TemplateCard({
                 <h4 className="font-bold text-foreground text-sm sm:text-base leading-tight">
                   {template.name}
                 </h4>
-                {!isLocked && template.isFeatured && (
-                  <Sparkles className="h-3 w-3 text-amber-500 fill-amber-500 shrink-0" />
-                )}
               </div>
               <span className="text-[11px] text-muted-foreground font-medium">
                 {template.category}

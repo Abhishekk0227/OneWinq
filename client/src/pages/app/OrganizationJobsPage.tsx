@@ -20,6 +20,7 @@ import {
   AlertCircle,
   ExternalLink,
   Link2,
+  Clock,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,6 +71,7 @@ const jobFormSchema = z.object({
   applicationMethod: z.enum(['INTERNAL', 'EXTERNAL']).default('INTERNAL'),
   externalApplyUrl: z.string().optional(),
   description: z.string().trim().min(20, 'Description must be at least 20 characters'),
+  expiresAt: z.string().optional(),
   status: z.enum([
     JOB_STATUS.DRAFT,
     JOB_STATUS.PUBLISHED,
@@ -155,6 +157,7 @@ export default function OrganizationJobsPage() {
       skills: '',
       experienceLevel: 'Mid-Level',
       description: '',
+      expiresAt: '',
       status: JOB_STATUS.PUBLISHED,
     });
     setIsModalOpen(true);
@@ -193,6 +196,7 @@ export default function OrganizationJobsPage() {
       skills: (job.skills || []).join(', '),
       experienceLevel: job.experienceLevel || '',
       description: job.description,
+      expiresAt: job.expiresAt ? new Date(job.expiresAt).toISOString().split('T')[0] : '',
       status: job.status,
     });
     setIsModalOpen(true);
@@ -227,6 +231,7 @@ export default function OrganizationJobsPage() {
         skills: skillsArray,
         experienceLevel: data.experienceLevel,
         description: data.description,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : null,
         status: data.status,
       };
 
@@ -428,6 +433,12 @@ export default function OrganizationJobsPage() {
                         <Calendar className="h-3.5 w-3.5" />
                         Posted {new Date(job.createdAt).toLocaleDateString()}
                       </span>
+                      {job.expiresAt && (
+                        <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                          <Clock className="h-3.5 w-3.5" />
+                          Deadline: {new Date(job.expiresAt).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
 
                     {job.skills && job.skills.length > 0 && (
@@ -725,18 +736,34 @@ export default function OrganizationJobsPage() {
             )}
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
-              Publishing Status
-            </label>
-            <select
-              {...register('status')}
-              className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value={JOB_STATUS.PUBLISHED}>Published (Live immediately)</option>
-              <option value={JOB_STATUS.DRAFT}>Draft (Save for later review)</option>
-              <option value={JOB_STATUS.CLOSED}>Closed</option>
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                Application Deadline / Expire Date
+              </label>
+              <Input
+                {...register('expiresAt')}
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
+              />
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Optional: Date when applications will close.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
+                Publishing Status
+              </label>
+              <select
+                {...register('status')}
+                className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value={JOB_STATUS.PUBLISHED}>Published (Live immediately)</option>
+                <option value={JOB_STATUS.DRAFT}>Draft (Save for later review)</option>
+                <option value={JOB_STATUS.CLOSED}>Closed</option>
+              </select>
+            </div>
           </div>
 
           <DialogFooter>

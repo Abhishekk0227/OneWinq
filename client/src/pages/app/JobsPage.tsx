@@ -320,6 +320,12 @@ export default function JobsPage() {
                             {job.salary.period?.toLowerCase()}
                           </span>
                         )}
+                        {job.expiresAt && (
+                          <span className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                            • <Clock className="h-3 w-3" />
+                            Deadline: {new Date(job.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
                       </div>
 
                       {job.description && (
