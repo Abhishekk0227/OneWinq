@@ -17,7 +17,8 @@ if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || wi
           if (installingWorker) {
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[PWA] New version available.');
+                console.log('[PWA] New version available. Reloading to apply update...');
+                window.location.reload();
               }
             };
           }

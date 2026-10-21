@@ -1,5 +1,5 @@
-// OneWinq Service Worker v3 - Force cache invalidation & brand asset refresh
-const CACHE_NAME = 'onewinq-v3';
+// OneWinq Service Worker v4 - Invalidate stale profile navigation caches
+const CACHE_NAME = 'onewinq-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
