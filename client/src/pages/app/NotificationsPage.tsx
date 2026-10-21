@@ -210,6 +210,9 @@ export default function NotificationsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = React.useState<FilterTab>('all')
+  const [notificationPermission, setNotificationPermission] = React.useState<string>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'denied'
+  )
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.notifications.list(),
@@ -315,6 +318,49 @@ export default function NotificationsPage() {
           </Button>
         )}
       </div>
+
+      {/* Phone / Device Push Notifications Banner */}
+      {typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default' && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2.5 rounded-xl bg-primary text-white shrink-0 shadow-sm shadow-primary/25">
+              <Bell className="h-4 w-4" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-foreground">Enable Phone Popup Alerts</h4>
+              <p className="text-[11px] text-muted-foreground">
+                Get instant popup notifications on your phone for new messages, network requests, and invites.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={async () => {
+              try {
+                const perm = await Notification.requestPermission()
+                setNotificationPermission(perm)
+                if (perm === 'granted') {
+                  toast.success('Phone popup alerts enabled!')
+                  if (navigator.serviceWorker?.ready) {
+                    const reg = await navigator.serviceWorker.ready
+                    reg.showNotification('OneWinq', {
+                      body: 'Notifications active! You will now receive instant phone alerts.',
+                      icon: '/icon-192.png',
+                    })
+                  }
+                } else {
+                  toast.info('Notifications were not enabled.')
+                }
+              } catch {
+                toast.error('Could not activate notifications.')
+              }
+            }}
+            className="text-xs h-8.5 px-4 font-semibold shrink-0 shadow-xs"
+          >
+            Turn On Alerts
+          </Button>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar border-b border-border text-sm font-medium">

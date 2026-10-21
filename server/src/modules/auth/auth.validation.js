@@ -11,6 +11,7 @@ import { USERNAME, PASSWORD } from '../../config/constants.js';
 const emailSchema = z
   .string({ required_error: 'Email is required' })
   .email('Invalid email address')
+  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Please enter a valid email address with a valid domain (e.g. user@example.com)')
   .max(254, 'Email address is too long')
   .transform((v) => v.toLowerCase().trim());
 

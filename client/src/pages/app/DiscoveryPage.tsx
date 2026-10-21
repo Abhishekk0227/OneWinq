@@ -387,9 +387,9 @@ export default function DiscoveryPage() {
                   </div>
 
                   {/* Actions: View Showcase + Follow Button */}
-                  <div className="flex items-center gap-2 pt-2.5 border-t border-border/60">
-                    <Link to={showcaseLink} className="flex-1 min-w-[95px]">
-                      <Button variant="outline" size="sm" className="w-full text-xs h-7.5">
+                  <div className="flex items-center gap-2 pt-3 border-t border-border/60">
+                    <Link to={showcaseLink} className="flex-1 min-w-0">
+                      <Button variant="outline" size="sm" className="w-full text-xs h-9 font-medium rounded-xl hover:bg-muted/60 transition-all border-border/80">
                         View Organization
                       </Button>
                     </Link>
@@ -398,7 +398,7 @@ export default function DiscoveryPage() {
                       size="sm"
                       variant={isFollowing ? 'secondary' : 'default'}
                       className={cn(
-                        'text-xs h-7.5 px-2.5 font-semibold shrink-0 transition-all',
+                        'text-xs h-9 px-3.5 font-semibold shrink-0 rounded-xl transition-all shadow-xs',
                         isFollowing && 'hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
                       )}
                       isLoading={

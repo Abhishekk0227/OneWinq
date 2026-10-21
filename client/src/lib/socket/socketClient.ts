@@ -60,6 +60,26 @@ export function connectSocket(token?: string): Socket | null {
       if (item?.title) {
         toast.info(item.message || item.body || 'You have a new notification', item.title)
       }
+
+      // Trigger phone/browser system popup notification if permission is granted
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        const title = item?.title || 'OneWinq Notification'
+        const body = item?.message || item?.body || 'You have a new notification'
+        if (navigator.serviceWorker?.ready) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification(title, {
+              body,
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+              data: { url: '/app/notifications' },
+            }).catch(() => {})
+          }).catch(() => {})
+        } else {
+          try {
+            new Notification(title, { body, icon: '/icon-192.png' })
+          } catch {}
+        }
+      }
     }
 
     socketInstance.on('notification_new', handleNotification)
