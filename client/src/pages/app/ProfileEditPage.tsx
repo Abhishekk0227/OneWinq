@@ -41,7 +41,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Check,
-  Sparkles,
+  Laptop,
   Award,
   Shield,
   Upload,
@@ -1600,7 +1600,7 @@ export default function ProfileEditPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <Layers className="h-3.5 w-3.5 text-primary" />
                       <span>Per-Profile Customization</span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">
@@ -1872,7 +1872,7 @@ export default function ProfileEditPage() {
 
                 <div className="grid grid-cols-3 gap-2 pt-1">
                   {[
-                    { id: 'system', label: 'System Default', icon: Sparkles },
+                    { id: 'system', label: 'System Default', icon: Laptop },
                     { id: 'light', label: 'Always Light', icon: Sun },
                     { id: 'dark', label: 'Always Dark', icon: Moon },
                   ].map((item) => {
