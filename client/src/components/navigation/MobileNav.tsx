@@ -156,9 +156,9 @@ export function MobileNav() {
         </div>
       </button>
 
-      {/* Personal Analytics */}
+      {/* Jobs & Careers */}
       <NavLink
-        to="/app/analytics"
+        to="/app/jobs"
         className={({ isActive }) =>
           cn(
             'flex flex-col items-center justify-center py-1 px-2 text-[11px] font-medium transition-colors',
@@ -168,8 +168,8 @@ export function MobileNav() {
           )
         }
       >
-        <BarChart3 className="h-5 w-5 mb-0.5" />
-        <span>Analytics</span>
+        <Briefcase className="h-5 w-5 mb-0.5" />
+        <span>Jobs</span>
       </NavLink>
 
       {/* Personal User Profile */}

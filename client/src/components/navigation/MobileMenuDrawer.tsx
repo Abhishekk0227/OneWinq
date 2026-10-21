@@ -253,11 +253,6 @@ export function MobileMenuDrawer() {
           </button>
         </div>
 
-        {/* Workspace Switcher */}
-        <div className="p-3 border-b border-border bg-muted/15">
-          <WorkspaceContextSwitcher />
-        </div>
-
         {/* User Profile / Organization Header */}
         {isOrgMode && activeContext.type === 'ORGANIZATION' ? (
           <div className="p-4 border-b border-border bg-gradient-to-r from-muted/30 to-primary/5">
