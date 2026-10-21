@@ -248,12 +248,9 @@ export default function OrganizationApplicationsPage() {
                   </div>
 
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-foreground text-sm sm:text-base">
-                        {app.applicant?.displayName || 'Applicant'}
-                      </h4>
-                      {getStatusBadge(app.status)}
-                    </div>
+                    <h4 className="font-bold text-foreground text-sm sm:text-base">
+                      {app.applicant?.displayName || 'Applicant'}
+                    </h4>
                     <p className="text-xs text-muted-foreground">
                       Applied for <span className="font-semibold text-foreground">{app.jobTitle}</span> •{' '}
                       {new Date(app.createdAt).toLocaleDateString()}
@@ -266,22 +263,9 @@ export default function OrganizationApplicationsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                  {(app.oneWinqProfileUrl || app.applicant?.username) && (
-                    <span className="flex items-center gap-1 text-xs text-primary font-medium px-2 py-1 rounded-md bg-primary/10">
-                      <User className="h-3.5 w-3.5" /> OneWinq Profile
-                    </span>
-                  )}
-                  {app.resumeUrl ? (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium px-2 py-1 rounded-md bg-muted">
-                      <FileText className="h-3.5 w-3.5" /> Resume attached
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground px-2 py-1 rounded-md bg-muted/60">
-                      Profile only
-                    </span>
-                  )}
-                  <Button variant="ghost" size="sm" className="gap-1 text-xs font-semibold">
+                <div className="flex items-center gap-3 self-end sm:self-auto shrink-0">
+                  {getStatusBadge(app.status)}
+                  <Button variant="ghost" size="sm" className="gap-1 text-xs font-semibold hover:bg-primary/10 hover:text-primary">
                     Review Candidate <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
