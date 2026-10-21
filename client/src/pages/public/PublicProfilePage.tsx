@@ -399,6 +399,49 @@ export default function PublicProfilePage() {
     ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
 
+  // Screen Touch Gesture: Swipe Left/Right to change profile sections
+  const touchStartX = React.useRef<number | null>(null)
+  const touchStartY = React.useRef<number | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement | null
+    if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {
+      return
+    }
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return
+    const touchEndX = e.changedTouches[0].clientX
+    const touchEndY = e.changedTouches[0].clientY
+    const deltaX = touchEndX - touchStartX.current
+    const deltaY = touchEndY - touchStartY.current
+
+    touchStartX.current = null
+    touchStartY.current = null
+
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      const currentIndex = profileTabs.findIndex((t) => t.id === activeTab)
+      if (currentIndex === -1) return
+
+      if (deltaX < 0) {
+        // Swipe Left -> Next Section
+        if (currentIndex < profileTabs.length - 1) {
+          setActiveTab(profileTabs[currentIndex + 1].id)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      } else {
+        // Swipe Right -> Previous Section
+        if (currentIndex > 0) {
+          setActiveTab(profileTabs[currentIndex - 1].id)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-24">
       {/* Floating Top Banner / Navigation (Responsive & Tight Layout) */}
@@ -637,43 +680,12 @@ export default function PublicProfilePage() {
             </div>
           </div>
 
-          {/* Right Main Content Canvas */}
-          <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-
-            {/* Horizontal Left-Right Scrollable Navigation Tab Bar (Mobile & Desktop Quick-Nav) */}
-            {profileTabs.length > 1 && (
-              <div className="sticky top-14 z-20 bg-background/95 backdrop-blur-md py-2 border-b border-border/80 -mx-1 px-1">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth px-1">
-                  {profileTabs.map((tab) => {
-                    const isActive = activeTab === tab.id
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                          isActive
-                            ? 'bg-primary text-white shadow-xs'
-                            : 'bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/70'
-                        }`}
-                      >
-                        {tab.icon}
-                        <span>{tab.label}</span>
-                        {tab.count !== undefined && tab.count > 0 && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
-                            }`}
-                          >
-                            {tab.count}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
+          {/* Right Main Content Canvas with Touch Swipe support */}
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="md:col-span-9 space-y-5 min-w-0 max-w-full touch-pan-y"
+          >
 
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (

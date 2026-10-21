@@ -86,6 +86,7 @@ export function InstallAppPrompt() {
         setIsVisible(false)
         setDeferredPrompt(null)
         localStorage.setItem(DISMISS_KEY, Date.now().toString())
+        localStorage.setItem('onewinq_pwa_installed', 'true')
       }
       window.addEventListener('appinstalled', handleAppInstalled)
 
@@ -112,6 +113,7 @@ export function InstallAppPrompt() {
         const choice = await deferredPrompt.userChoice
         if (choice.outcome === 'accepted') {
           setIsVisible(false)
+          localStorage.setItem('onewinq_pwa_installed', 'true')
         }
       } catch (err) {
         console.warn('[PWA] Prompt error:', err)

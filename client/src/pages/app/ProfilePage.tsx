@@ -336,6 +336,7 @@ export default function ProfilePage() {
     if (!profile) return []
     return [
       { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
+      { id: 'visibility', label: 'Profile Visibility', icon: <Eye className="h-4 w-4" /> },
       ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
       ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
       ...(projects.length > 0 ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length }] : []),
@@ -360,6 +361,49 @@ export default function ProfilePage() {
         onRetry={() => refetch()}
       />
     )
+  }
+
+  // Screen Touch Gesture: Swipe Left/Right to change profile sections
+  const touchStartX = React.useRef<number | null>(null)
+  const touchStartY = React.useRef<number | null>(null)
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement | null
+    if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {
+      return
+    }
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return
+    const touchEndX = e.changedTouches[0].clientX
+    const touchEndY = e.changedTouches[0].clientY
+    const deltaX = touchEndX - touchStartX.current
+    const deltaY = touchEndY - touchStartY.current
+
+    touchStartX.current = null
+    touchStartY.current = null
+
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      const currentIndex = profileTabs.findIndex((t) => t.id === activeTab)
+      if (currentIndex === -1) return
+
+      if (deltaX < 0) {
+        // Swipe Left -> Next Section
+        if (currentIndex < profileTabs.length - 1) {
+          setActiveTab(profileTabs[currentIndex + 1].id)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      } else {
+        // Swipe Right -> Previous Section
+        if (currentIndex > 0) {
+          setActiveTab(profileTabs[currentIndex - 1].id)
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }
+      }
+    }
   }
 
   return (
@@ -445,41 +489,12 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Right Main Content Canvas */}
-        <div className="md:col-span-9 space-y-4 min-w-0 max-w-full">
-
-          {/* Horizontal Left-Right Scrollable Navigation Tabs (Mobile & Quick Nav) */}
-          <div className="sticky top-14 z-20 bg-background/95 backdrop-blur-md py-2 border-b border-border/80 -mx-1 px-1">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-              {profileTabs.map((tab) => {
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/70'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                    {tab.count !== undefined && tab.count > 0 && (
-                      <span
-                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                          isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {tab.count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+        {/* Right Main Content Canvas with Touch Swipe support */}
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y"
+        >
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
@@ -671,106 +686,6 @@ export default function ProfilePage() {
           {/* Overview Cards when on Home tab */}
           {activeTab === 'home' && (
             <div className="space-y-4">
-              {/* Dedicated Profile Visibility Section */}
-              <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-primary" />
-                      <span>Profile Visibility</span>
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Switch which persona visitors see when accessing your link or tapping your NFC card.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {/* Presentation Mode Pills */}
-                    <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PUBLIC)
-                          setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PUBLIC
-                            ? 'bg-card text-foreground shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Visitors see your Public profile"
-                      >
-                        <Eye className="h-3 w-3 text-primary" />
-                        <span>Public</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
-                          setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PROFESSIONAL
-                            ? 'bg-card text-primary shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Visitors see your Professional profile"
-                      >
-                        <Briefcase className="h-3 w-3 text-primary" />
-                        <span>Professional</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PRIVATE)
-                          setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PRIVATE
-                            ? 'bg-card text-foreground shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Profile is hidden / private"
-                      >
-                        <Lock className="h-3 w-3 text-primary" />
-                        <span>Private</span>
-                      </button>
-                    </div>
-
-                    {/* Temporary Mode Trigger */}
-                    {profile.temporaryMode && profile.temporaryMode.mode ? (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
-                        <Clock className="h-3 w-3 shrink-0" />
-                        <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
-                        <button
-                          disabled={cancelTemporaryModeMutation.isPending}
-                          onClick={() => cancelTemporaryModeMutation.mutate()}
-                          className="text-destructive hover:underline ml-1 font-semibold"
-                          title="Cancel temporary mode"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsTempModalOpen(true)}
-                        className="text-xs h-8 px-2.5 text-muted-foreground hover:text-foreground border border-border/60"
-                        title="Set timed presentation mode"
-                      >
-                        <Clock className="h-3.5 w-3.5 mr-1" />
-                        <span>Timer</span>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
 
               {isPrivateMode && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-purple-500/25 bg-purple-500/5 shadow-sm space-y-3">
@@ -876,6 +791,155 @@ export default function ProfilePage() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Profile Visibility Section */}
+          {activeTab === 'visibility' && (
+            <div className="space-y-4">
+              <div className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-sm space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Eye className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-foreground">
+                        Profile Visibility
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Switch which persona visitors see when accessing your link or tapping your NFC card.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Temporary Mode Trigger */}
+                  {profile.temporaryMode && profile.temporaryMode.mode ? (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-semibold border border-primary/20 shrink-0">
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
+                      <button
+                        disabled={cancelTemporaryModeMutation.isPending}
+                        onClick={() => cancelTemporaryModeMutation.mutate()}
+                        className="text-destructive hover:underline ml-1 font-bold cursor-pointer"
+                        title="Cancel temporary mode"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsTempModalOpen(true)}
+                      className="text-xs h-9 px-3 gap-1.5 font-semibold shrink-0"
+                      title="Set timed presentation mode"
+                    >
+                      <Clock className="h-3.5 w-3.5 text-primary" />
+                      <span>Timer Mode</span>
+                    </Button>
+                  )}
+                </div>
+
+                {/* Presentation Mode Selection Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMode(VISIBILITY_MODE.PUBLIC)
+                      setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
+                    }}
+                    disabled={setModeMutation.isPending}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer space-y-2.5 ${
+                      currentMode === VISIBILITY_MODE.PUBLIC
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/25 shadow-xs'
+                        : 'border-border bg-card hover:bg-muted/30'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-xs sm:text-sm text-foreground">Public</span>
+                      </div>
+                      {currentMode === VISIBILITY_MODE.PUBLIC && (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Shows your verified name, profession, headline, and general public social links.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
+                      setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
+                    }}
+                    disabled={setModeMutation.isPending}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer space-y-2.5 ${
+                      currentMode === VISIBILITY_MODE.PROFESSIONAL
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/25 shadow-xs'
+                        : 'border-border bg-card hover:bg-muted/30'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-xs sm:text-sm text-primary">Professional</span>
+                      </div>
+                      {currentMode === VISIBILITY_MODE.PROFESSIONAL && (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Emphasizes career timeline, work experience, education, portfolio, and business contact.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMode(VISIBILITY_MODE.PRIVATE)
+                      setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
+                    }}
+                    disabled={setModeMutation.isPending}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer space-y-2.5 ${
+                      currentMode === VISIBILITY_MODE.PRIVATE
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/25 shadow-xs'
+                        : 'border-border bg-card hover:bg-muted/30'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-xs sm:text-sm text-foreground">Private</span>
+                      </div>
+                      {currentMode === VISIBILITY_MODE.PRIVATE && (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Minimal confidential view showing only selected private identity cards and direct contact.
+                    </p>
+                  </button>
+                </div>
+
+                {/* Additional controls and link to edit */}
+                <div className="p-4 rounded-2xl bg-muted/30 border border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-0.5">
+                    <div className="font-semibold text-foreground">Customize Visibility Rules</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Choose exactly which sections, documents, and cards appear in each persona mode.
+                    </div>
+                  </div>
+                  <Link to="/app/profile/edit?tab=visibility">
+                    <Button size="sm" variant="outline" className="text-xs">
+                      Configure Visibility
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 

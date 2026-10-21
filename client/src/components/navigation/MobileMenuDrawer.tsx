@@ -75,6 +75,42 @@ export function MobileMenuDrawer() {
 
   const unreadCount = unreadData?.data?.unreadCount ?? unreadData?.data?.count ?? 0
 
+  // Check if app is already installed or running in standalone/PWA mode
+  const [isAppInstalled, setIsAppInstalled] = React.useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    const isStandalone =
+      window.matchMedia?.('(display-mode: standalone)')?.matches ||
+      window.matchMedia?.('(display-mode: fullscreen)')?.matches ||
+      window.matchMedia?.('(display-mode: minimal-ui)')?.matches ||
+      (window.navigator as any)?.standalone === true ||
+      document.referrer?.includes('android-app://') ||
+      localStorage.getItem('onewinq_pwa_installed') === 'true'
+    return Boolean(isStandalone)
+  })
+
+  React.useEffect(() => {
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true)
+      localStorage.setItem('onewinq_pwa_installed', 'true')
+    }
+
+    const mediaQuery = window.matchMedia?.('(display-mode: standalone)')
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        setIsAppInstalled(true)
+        localStorage.setItem('onewinq_pwa_installed', 'true')
+      }
+    }
+
+    window.addEventListener('appinstalled', handleAppInstalled)
+    mediaQuery?.addEventListener?.('change', handleDisplayModeChange)
+
+    return () => {
+      window.removeEventListener('appinstalled', handleAppInstalled)
+      mediaQuery?.removeEventListener?.('change', handleDisplayModeChange)
+    }
+  }, [])
+
   // Close drawer on ESC key
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -410,32 +446,34 @@ export function MobileMenuDrawer() {
           )}
         </nav>
 
-        {/* Install App Shortcut Banner */}
-        <div className="px-3 py-2 border-t border-border bg-card/30">
-          <button
-            type="button"
-            onClick={() => {
-              handleClose()
-              setTimeout(() => {
-                triggerPWAInstall()
-              }, 120)
-            }}
-            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/25 text-primary text-xs font-semibold transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="p-1 rounded-lg bg-primary/20">
-                <Download className="h-3.5 w-3.5" />
+        {/* Install App Shortcut Banner (Only if not already installed or in standalone mode) */}
+        {!isAppInstalled && (
+          <div className="px-3 py-2 border-t border-border bg-card/30">
+            <button
+              type="button"
+              onClick={() => {
+                handleClose()
+                setTimeout(() => {
+                  triggerPWAInstall()
+                }, 120)
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 border border-primary/25 text-primary text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1 rounded-lg bg-primary/20">
+                  <Download className="h-3.5 w-3.5" />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold leading-tight">Install OneWinq App</div>
+                  <div className="text-[10px] text-muted-foreground font-normal">Fast, offline-ready home screen app</div>
+                </div>
               </div>
-              <div className="text-left">
-                <div className="font-bold leading-tight">Install OneWinq App</div>
-                <div className="text-[10px] text-muted-foreground font-normal">Fast, offline-ready home screen app</div>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary text-white">
-              Install
-            </span>
-          </button>
-        </div>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary text-white">
+                Install
+              </span>
+            </button>
+          </div>
+        )}
 
 
 
