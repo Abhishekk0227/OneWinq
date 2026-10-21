@@ -351,16 +351,16 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {/* Phone / Device Push Notifications Banner */}
+      {/* Phone / Device Push Notifications Banner (Shown only on mobile view) */}
       {typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default' && (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="md:hidden p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-purple-500/10 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2.5 rounded-xl bg-primary text-white shrink-0 shadow-sm shadow-primary/25">
               <Bell className="h-4 w-4" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h4 className="text-xs sm:text-sm font-bold text-foreground">Enable Phone Popup Alerts</h4>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Get instant popup notifications on your phone for new messages, network requests, and invites.
               </p>
             </div>
@@ -387,7 +387,7 @@ export default function NotificationsPage() {
                 toast.error('Could not activate notifications.')
               }
             }}
-            className="text-xs h-8.5 px-4 font-semibold shrink-0 shadow-xs"
+            className="text-xs font-bold h-9 px-4 whitespace-nowrap shrink-0 shadow-xs w-full sm:w-auto rounded-xl"
           >
             Turn On Alerts
           </Button>

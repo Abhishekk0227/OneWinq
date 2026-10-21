@@ -176,6 +176,10 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = React.useState<string>('home')
   const [isMenuDropdownOpen, setIsMenuDropdownOpen] = React.useState(false)
 
+  // Screen Touch Gesture: Swipe Left/Right to change profile sections
+  const touchStartX = React.useRef<number | null>(null)
+  const touchStartY = React.useRef<number | null>(null)
+
   // State for Temporary Mode Modal
   const [isTempModalOpen, setIsTempModalOpen] = React.useState(false)
   const [tempMode, setTempMode] = React.useState<VisibilityMode>(VISIBILITY_MODE.PROFESSIONAL)
@@ -363,10 +367,7 @@ export default function ProfilePage() {
     )
   }
 
-  // Screen Touch Gesture: Swipe Left/Right to change profile sections
-  const touchStartX = React.useRef<number | null>(null)
-  const touchStartY = React.useRef<number | null>(null)
-
+  // Screen Touch Gesture handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null
     if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {

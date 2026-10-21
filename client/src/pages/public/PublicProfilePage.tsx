@@ -192,6 +192,10 @@ export default function PublicProfilePage() {
   const [isSectionsDrawerOpen, setIsSectionsDrawerOpen] = React.useState(false)
   const [isOtherOrgsOpen, setIsOtherOrgsOpen] = React.useState(false)
 
+  // Screen Touch Gesture: Swipe Left/Right to change profile sections
+  const touchStartX = React.useRef<number | null>(null)
+  const touchStartY = React.useRef<number | null>(null)
+
   // Global Theme integration (Light / Dark)
   const { resolvedTheme, toggleTheme } = useTheme()
 
@@ -399,10 +403,7 @@ export default function PublicProfilePage() {
     ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
 
-  // Screen Touch Gesture: Swipe Left/Right to change profile sections
-  const touchStartX = React.useRef<number | null>(null)
-  const touchStartY = React.useRef<number | null>(null)
-
+  // Screen Touch Gesture handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null
     if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {
