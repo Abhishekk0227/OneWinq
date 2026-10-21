@@ -308,70 +308,11 @@ export function MobileMenuDrawer() {
               </button>
             </div>
           </div>
-        ) : (
-          <div className="p-4 border-b border-border bg-muted/20">
-            <div className="flex items-center gap-3">
-              <Avatar
-                size="md"
-                src={user?.avatarUrl}
-                fallback={user?.displayName || user?.username}
-                alt={user?.displayName}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-foreground text-sm truncate">
-                    {user?.displayName || user?.username}
-                  </span>
-                  {isStaff ? (
-                    <Badge
-                      variant={user?.role === 'SUPPORT' ? 'default' : 'destructive'}
-                      className={cn(
-                        'text-[10px] px-1.5 py-0 font-bold shrink-0',
-                        user?.role === 'SUPPORT' && 'bg-sky-500 text-white'
-                      )}
-                    >
-                      {user?.role === 'SUPER_ADMIN' ? 'SUPER ADMIN' : user?.role === 'SUPPORT' ? 'SUPPORT' : 'ADMIN'}
-                    </Badge>
-                  ) : (
-                    <Badge variant="subtle" className="text-[10px] px-1.5 py-0 font-medium shrink-0">
-                      PRO
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground truncate">
-                  @{user?.username}
-                </p>
-              </div>
-            </div>
+        ) : null}
 
-            {/* Quick profile actions */}
-            <div className="mt-3 flex items-center gap-2">
-              {user?.username && (
-                <a
-                  href={`/u/${user.username}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold text-primary bg-primary-soft hover:bg-primary-muted transition-colors truncate"
-                >
-                  <span className="truncate">View Profile</span>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                </a>
-              )}
-              <Link
-                to="/app/profile/edit"
-                onClick={handleClose}
-                className="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 transition-colors"
-              >
-                <Edit3 className="h-3 w-3" />
-                <span>Edit</span>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Prominent Action Button */}
-        <div className="px-4 pt-3 pb-1">
-          {isOrgMode ? (
+        {/* Prominent Action Button for Org Mode */}
+        {isOrgMode && (
+          <div className="px-4 pt-3 pb-1">
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -396,20 +337,8 @@ export function MobileMenuDrawer() {
                 <span className="truncate">Create Post</span>
               </button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                handleClose()
-                openModal('CREATE_POST')
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm bg-transparent border border-black text-black hover:bg-black/5 shadow-none transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <Plus className="h-4 w-4 stroke-[2.5]" />
-              <span>Create New Post</span>
-            </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Navigation Sections List */}
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 custom-scrollbar">

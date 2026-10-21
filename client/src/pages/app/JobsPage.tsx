@@ -432,7 +432,7 @@ export default function JobsPage() {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-foreground">Share OneWinq Profile</div>
-                        <div className="text-[10px] text-muted-foreground">Attach digital identity & showcase</div>
+                        <div className="text-[10px] text-muted-foreground">Attach public profile & experience</div>
                       </div>
                     </div>
                     <div className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${shareProfile ? 'border-primary bg-primary text-white' : 'border-border'}`}>
@@ -516,7 +516,7 @@ export default function JobsPage() {
                     </div>
                   )}
                   <p className="text-[11px] text-muted-foreground pt-1 border-t border-primary/15">
-                    Your digital identity, work history, verified skills, and showcase credentials will be shared with this employer.
+                    Your public OneWinq profile (work experience, education, and skills) will be shared with this employer.
                   </p>
                 </div>
               ) : (
