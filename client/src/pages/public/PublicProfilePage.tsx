@@ -448,18 +448,7 @@ export default function PublicProfilePage() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
         <div className="container mx-auto flex max-w-4xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            {profileTabs.length > 1 && (
-              <button
-                type="button"
-                onClick={() => setIsSectionsDrawerOpen(true)}
-                className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground transition-colors md:hidden shrink-0 cursor-pointer"
-                title="Open Profile Sections Sidebar"
-                aria-label="Open Profile Sections Sidebar"
-              >
-                <Menu className="h-4 w-4 text-primary" />
-              </button>
-            )}
-            <BrandLogo to="/" className="hidden sm:inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
+            <BrandLogo to="/" className="inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
@@ -686,33 +675,6 @@ export default function PublicProfilePage() {
             onTouchEnd={handleTouchEnd}
             className="md:col-span-9 space-y-5 min-w-0 max-w-full touch-pan-y"
           >
-            {/* Mobile Horizontal Tabs (Sticky / Scrollable matching Org Profile) */}
-            {profileTabs.length > 1 && (
-              <div className="md:hidden sticky top-14 z-30 -mx-3 px-3 py-2 bg-background/95 backdrop-blur-md border-b border-border/60">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-                  {profileTabs.map((tab) => {
-                    const isActive = activeTab === tab.id
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveTab(tab.id)
-                          window.scrollTo({ top: 0, behavior: 'smooth' })
-                        }}
-                        className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                          isActive
-                            ? 'bg-primary text-white shadow-xs font-bold'
-                            : 'bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        <span>{tab.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (
@@ -1557,6 +1519,46 @@ export default function PublicProfilePage() {
           </Button>
         </div>
       </Dialog>
+
+      {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}
+      {profileTabs.length > 1 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
+          {profileTabs.slice(0, 3).map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
+                  isActive
+                    ? 'text-primary font-extrabold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
+                  {tab.icon}
+                </div>
+                <span className="truncate max-w-full">{tab.label}</span>
+              </button>
+            )
+          })}
+
+          <button
+            type="button"
+            onClick={() => setIsSectionsDrawerOpen(true)}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
+          >
+            <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              <Menu className="h-4 w-4" />
+            </div>
+            <span className="truncate max-w-full">All Sections</span>
+          </button>
+        </div>
+      )}
 
       {/* All Profile Sections Sidebar Drawer */}
       <ProfileSectionsSidebar

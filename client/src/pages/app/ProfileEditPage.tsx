@@ -722,6 +722,7 @@ export default function ProfileEditPage() {
   const visibleTabs = React.useMemo(() => {
     return [
       { id: 'identity', label: 'Basic Profile', icon: User },
+      { id: 'personas', label: 'Per-Profile Customization', icon: Layers },
       { id: 'social', label: 'Social & Contact', icon: Globe },
       { id: 'ventures', label: 'Ventures', icon: Building2 },
       { id: 'career', label: 'Experience', icon: Briefcase },
@@ -1595,115 +1596,15 @@ export default function ProfileEditPage() {
                 />
               </div>
 
-              {/* Presentation Mode Context Selector for Per-Profile Customization */}
-              <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 space-y-2.5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                      <Layers className="h-3.5 w-3.5 text-primary" />
-                      <span>Per-Profile Customization</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">
-                      Customize separate headline & bio for Public, Professional, or Private modes, or edit the shared default.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 p-1 bg-background/80 rounded-xl border border-border shadow-2xs self-start sm:self-auto flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setActiveProfileMode('ALL')}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                        activeProfileMode === 'ALL'
-                          ? 'bg-primary text-white shadow-2xs'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Shared Default
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveProfileMode('PUBLIC')}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                        activeProfileMode === 'PUBLIC'
-                          ? 'bg-emerald-600 text-white shadow-2xs'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Public
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveProfileMode('PROFESSIONAL')}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                        activeProfileMode === 'PROFESSIONAL'
-                          ? 'bg-blue-600 text-white shadow-2xs'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Professional
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveProfileMode('PRIVATE')}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                        activeProfileMode === 'PRIVATE'
-                          ? 'bg-purple-600 text-white shadow-2xs'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      Private
-                    </button>
-                  </div>
-                </div>
-
-                {activeProfileMode !== 'ALL' && (
-                  <div className="flex items-center justify-between text-[11px] bg-background/60 px-3 py-1.5 rounded-xl border border-border/60">
-                    <span className="text-foreground/80">
-                      {modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline ? (
-                        <span className="text-primary font-medium">
-                          ✨ Custom {activeProfileMode.toLowerCase()} profile details active
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Currently showing shared details. Typing below creates a custom {activeProfileMode.toLowerCase()} version.
-                        </span>
-                      )}
-                    </span>
-                    {(modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setModeData((prev) => ({
-                            ...prev,
-                            [activeProfileMode]: {},
-                          }))
-                          toast.info(`Reset to shared details for ${activeProfileMode.toLowerCase()} profile`)
-                        }}
-                        className="text-xs text-muted-foreground hover:text-destructive font-medium underline"
-                      >
-                        Reset to Shared
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                  <span>
-                    Headline {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
-                  </span>
-                  {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.headline && (
-                    <span className="text-[10px] text-primary font-bold">Custom Override</span>
-                  )}
+                  <span>Headline</span>
+                  <span className="text-[10px] text-muted-foreground font-normal">Primary professional headline</span>
                 </label>
                 <Input
-                  value={currentHeadline}
-                  onChange={(e) => handleHeadlineChange(e.target.value)}
-                  placeholder={
-                    activeProfileMode !== 'ALL'
-                      ? `Specialized ${activeProfileMode.toLowerCase()} headline...`
-                      : "e.g. Principal Systems Architect • Building Distributed Identity"
-                  }
+                  value={headline}
+                  onChange={(e) => setHeadline(e.target.value)}
+                  placeholder="e.g. Principal Systems Architect • Building Distributed Identity"
                 />
               </div>
 
@@ -1800,27 +1701,18 @@ export default function ProfileEditPage() {
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <span>
-                      About / Bio {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Profile)` : '(Shared Default)'}
-                    </span>
-                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.bio && (
-                      <span className="text-[10px] text-primary font-bold">Custom Override</span>
-                    )}
+                  <label className="text-xs font-semibold text-foreground">
+                    About / Bio
                   </label>
-                  <span className={`text-[11px] font-mono ${currentBio.length > 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                    {currentBio.length} / 500
+                  <span className={`text-[11px] font-mono ${bio.length > 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                    {bio.length} / 500
                   </span>
                 </div>
                 <Textarea
-                  value={currentBio}
+                  value={bio}
                   maxLength={500}
-                  onChange={(e) => handleBioChange(e.target.value)}
-                  placeholder={
-                    activeProfileMode !== 'ALL'
-                      ? `Specialized ${activeProfileMode.toLowerCase()} bio for visitors in this mode...`
-                      : "Tell your story, background, and what drives your work..."
-                  }
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tell your story, background, and what drives your work..."
                   rows={4}
                   className="text-xs sm:text-sm leading-relaxed"
                 />
@@ -1832,27 +1724,21 @@ export default function ProfileEditPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                    <span>City {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
-                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.city && (
-                      <span className="text-[10px] text-primary font-bold">Custom</span>
-                    )}
+                    <span>City</span>
                   </label>
                   <Input
-                    value={currentCity}
-                    onChange={(e) => handleCityChange(e.target.value)}
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                     placeholder="Bangalore, San Francisco, etc."
                   />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                    <span>Country {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
-                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.country && (
-                      <span className="text-[10px] text-primary font-bold">Custom</span>
-                    )}
+                    <span>Country</span>
                   </label>
                   <Input
-                    value={currentCountry}
-                    onChange={(e) => handleCountryChange(e.target.value)}
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
                     placeholder="India, USA, Germany..."
                   />
                 </div>
@@ -1894,6 +1780,190 @@ export default function ProfileEditPage() {
                       </button>
                     )
                   })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ================= TAB 2: PER-PROFILE CUSTOMIZATION ================= */}
+        <TabsContent value="personas" className="space-y-6">
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  <span>Per-Profile Customization</span>
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Customize separate headline, bio, and location details for Public, Professional, or Private presentation modes, or edit the shared default.
+                </p>
+              </div>
+
+              {/* Mode Selector Buttons */}
+              <div className="flex items-center gap-1 p-1 bg-muted/60 rounded-xl border border-border shadow-2xs self-start sm:self-auto flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setActiveProfileMode('ALL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    activeProfileMode === 'ALL'
+                      ? 'bg-primary text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Shared Default
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveProfileMode('PUBLIC')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    activeProfileMode === 'PUBLIC'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Public
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveProfileMode('PROFESSIONAL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    activeProfileMode === 'PROFESSIONAL'
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Professional
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveProfileMode('PRIVATE')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    activeProfileMode === 'PRIVATE'
+                      ? 'bg-purple-600 text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Private
+                </button>
+              </div>
+            </div>
+
+            {/* Status & Reset Banner */}
+            {activeProfileMode !== 'ALL' ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs bg-muted/30 p-3 rounded-2xl border border-border">
+                <span className="text-foreground/90 font-medium">
+                  {modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline || modeData[activeProfileMode]?.location?.city || modeData[activeProfileMode]?.location?.country ? (
+                    <span className="text-primary font-semibold flex items-center gap-1.5">
+                      ✨ Custom {activeProfileMode.toLowerCase()} profile details active
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Currently showing shared details. Typing below creates a custom {activeProfileMode.toLowerCase()} version.
+                    </span>
+                  )}
+                </span>
+                {(modeData[activeProfileMode]?.bio || modeData[activeProfileMode]?.headline || modeData[activeProfileMode]?.location?.city || modeData[activeProfileMode]?.location?.country) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModeData((prev) => ({
+                        ...prev,
+                        [activeProfileMode]: {},
+                      }))
+                      toast.info(`Reset to shared details for ${activeProfileMode.toLowerCase()} profile`)
+                    }}
+                    className="text-xs text-destructive hover:underline font-semibold cursor-pointer shrink-0"
+                  >
+                    Reset to Shared
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="p-3 rounded-2xl bg-primary/5 border border-primary/20 text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">Editing Shared Default:</span> Values configured here are displayed whenever a visitor doesn't match an active specialized mode override.
+              </div>
+            )}
+
+            {/* Override Inputs for this Mode */}
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>
+                    Headline {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Mode)` : '(Shared Default)'}
+                  </span>
+                  {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.headline && (
+                    <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                  )}
+                </label>
+                <Input
+                  value={currentHeadline}
+                  onChange={(e) => handleHeadlineChange(e.target.value)}
+                  placeholder={
+                    activeProfileMode !== 'ALL'
+                      ? `Specialized ${activeProfileMode.toLowerCase()} headline...`
+                      : "e.g. Principal Systems Architect • Building Distributed Identity"
+                  }
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <span>
+                      About / Bio {activeProfileMode !== 'ALL' ? `(${activeProfileMode} Mode)` : '(Shared Default)'}
+                    </span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.bio && (
+                      <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                    )}
+                  </label>
+                  <span className={`text-[11px] font-mono ${currentBio.length > 500 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                    {currentBio.length} / 500
+                  </span>
+                </div>
+                <Textarea
+                  value={currentBio}
+                  maxLength={500}
+                  onChange={(e) => handleBioChange(e.target.value)}
+                  placeholder={
+                    activeProfileMode !== 'ALL'
+                      ? `Specialized ${activeProfileMode.toLowerCase()} bio for visitors in ${activeProfileMode.toLowerCase()} mode...`
+                      : "Tell your story, background, and what drives your work..."
+                  }
+                  rows={4}
+                  className="text-xs sm:text-sm leading-relaxed"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Keep it brief and engaging (up to 500 characters).
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>City {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.city && (
+                      <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                    )}
+                  </label>
+                  <Input
+                    value={currentCity}
+                    onChange={(e) => handleCityChange(e.target.value)}
+                    placeholder="Bangalore, San Francisco, etc."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>Country {activeProfileMode !== 'ALL' ? `(${activeProfileMode})` : ''}</span>
+                    {activeProfileMode !== 'ALL' && modeData[activeProfileMode]?.location?.country && (
+                      <span className="text-[10px] text-primary font-bold">Custom Override</span>
+                    )}
+                  </label>
+                  <Input
+                    value={currentCountry}
+                    onChange={(e) => handleCountryChange(e.target.value)}
+                    placeholder="India, USA, Germany..."
+                  />
                 </div>
               </div>
             </div>
