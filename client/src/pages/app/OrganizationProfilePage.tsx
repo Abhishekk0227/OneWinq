@@ -16,7 +16,7 @@ import {
   UploadCloud,
   Camera,
   Trash2,
-  Sparkles,
+  Laptop,
   Plus,
   Package,
   Award,
@@ -276,11 +276,12 @@ export default function OrganizationProfilePage() {
 
   // New item inputs
   const [newProduct, setNewProduct] = React.useState({ name: '', description: '', linkUrl: '', tag: '', category: '', badge: '' });
-  const [newProject, setNewProject] = React.useState({ title: '', description: '', client: '', linkUrl: '', metrics: '', status: 'completed' as const });
+  const [newProject, setNewProject] = React.useState({ title: '', description: '', client: '', linkUrl: '', metrics: '', status: 'completed' as const, imageUrl: '' });
+  const [uploadingProjectImg, setUploadingProjectImg] = React.useState(false);
   const [newAchievement, setNewAchievement] = React.useState({ title: '', issuer: '', year: '', description: '', metric: '' });
   const [newMedia, setNewMedia] = React.useState({ title: '', url: '', caption: '', type: 'photo' as const, date: '' });
   const [newMetric, setNewMetric] = React.useState({ label: '', value: '' });
-  const [newValue, setNewValue] = React.useState({ title: '', description: '', icon: 'Sparkles' });
+  const [newValue, setNewValue] = React.useState({ title: '', description: '', icon: 'ShieldCheck' });
 
   const logoFileInputRef = React.useRef<HTMLInputElement>(null);
   const bannerFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -403,6 +404,27 @@ export default function OrganizationProfilePage() {
   };
 
   // Project Handlers
+  const handleOrgProjectImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (JPG, PNG, WebP)');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size cannot exceed 10MB');
+      return;
+    }
+    try {
+      setUploadingProjectImg(true);
+      const res = await mediaApi.uploadFile(file, 'PROFILE_SECTION');
+      setNewProject((prev) => ({ ...prev, imageUrl: res.publicUrl }));
+      toast.success('Project image uploaded successfully!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to upload project image');
+    } finally {
+      setUploadingProjectImg(false);
+    }
+  };
+
   const handleAddProject = () => {
     if (!newProject.title.trim()) {
       toast.error(`${taxonomy.projectSingular} title is required`);
@@ -410,7 +432,7 @@ export default function OrganizationProfilePage() {
     }
     const updated = [...projects, { ...newProject, isVisible: true, order: projects.length }];
     setProjects(updated);
-    setNewProject({ title: '', description: '', client: '', linkUrl: '', metrics: '', status: 'completed' });
+    setNewProject({ title: '', description: '', client: '', linkUrl: '', metrics: '', status: 'completed', imageUrl: '' });
     setShowcaseDirty(true);
     toast.success('Project added to list! Click "Save Projects" to publish it.');
   };
@@ -503,7 +525,7 @@ export default function OrganizationProfilePage() {
       return;
     }
     setValues((prev) => [...prev, { ...newValue }]);
-    setNewValue({ title: '', description: '', icon: 'Sparkles' });
+    setNewValue({ title: '', description: '', icon: 'ShieldCheck' });
     setShowcaseDirty(true);
   };
 
@@ -1372,7 +1394,7 @@ export default function OrganizationProfilePage() {
 
                   <div className="grid grid-cols-3 gap-2 pt-1">
                     {[
-                      { id: 'system', label: 'System Default', icon: Sparkles },
+                      { id: 'system', label: 'System Default', icon: Laptop },
                       { id: 'light', label: 'Always Light', icon: Sun },
                       { id: 'dark', label: 'Always Dark', icon: Moon },
                     ].map((item) => {
@@ -1530,36 +1552,67 @@ export default function OrganizationProfilePage() {
               <CardContent className="space-y-4">
                 {projects.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {projects.map((proj, idx) => (
-                      <div key={idx} className="p-3.5 rounded-xl border border-border bg-card flex items-start justify-between gap-3 shadow-2xs">
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm truncate">{proj.title}</span>
-                            {proj.client && <Badge variant="secondary" className="text-[10px] py-0">{proj.client}</Badge>}
+                    {projects.map((proj, idx) => {
+                      const projectImg = proj.imageUrl || proj.coverUrl;
+                      return (
+                        <div key={idx} className="p-3.5 rounded-xl border border-border bg-card flex flex-col justify-between gap-3 shadow-2xs">
+                          <div className="space-y-2 min-w-0">
+                            {projectImg && (
+                              <div className="w-full aspect-[16/9] max-h-36 rounded-lg overflow-hidden bg-muted/40 border border-border/60">
+                                <img
+                                  src={projectImg}
+                                  alt={proj.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-sm truncate">{proj.title}</span>
+                              {proj.client && <Badge variant="secondary" className="text-[10px] py-0">{proj.client}</Badge>}
+                            </div>
+                            {proj.description && <p className="text-xs text-muted-foreground line-clamp-2">{proj.description}</p>}
+                            {proj.linkUrl && (
+                              <a href={proj.linkUrl} target="_blank" rel="noreferrer" className="text-[11px] text-primary hover:underline inline-flex items-center gap-1">
+                                View Project <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            )}
                           </div>
-                          {proj.description && <p className="text-xs text-muted-foreground line-clamp-2">{proj.description}</p>}
-                          {proj.linkUrl && (
-                            <a href={proj.linkUrl} target="_blank" rel="noreferrer" className="text-[11px] text-primary hover:underline inline-flex items-center gap-1">
-                              View Project <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          )}
+                          <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                            {projectImg ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...projects];
+                                  updated[idx] = { ...updated[idx], imageUrl: null, coverUrl: null };
+                                  setProjects(updated);
+                                  setShowcaseDirty(true);
+                                }}
+                                className="text-[10px] text-destructive hover:underline font-semibold"
+                              >
+                                Remove Image
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground">No image attached</span>
+                            )}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveProject(idx)}
+                              className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 shrink-0"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveProject(idx)}
-                          className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 shrink-0"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
                 {/* Add project form */}
-                <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3">
+                <div className="p-4 rounded-xl border border-dashed border-border/80 bg-muted/20 space-y-3.5">
                   <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <Plus className="h-3.5 w-3.5 text-primary" /> Add {taxonomy.projectSingular}
                   </span>
@@ -1587,7 +1640,65 @@ export default function OrganizationProfilePage() {
                       onChange={(e) => setNewProject({ ...newProject, linkUrl: e.target.value })}
                     />
                   </div>
-                  <div className="flex justify-end">
+
+                  {/* Project Image: Upload File or Direct URL */}
+                  <div className="space-y-2 pt-1 border-t border-border/60">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                        <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                        Project Image / Thumbnail
+                      </label>
+                      {newProject.imageUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setNewProject((prev) => ({ ...prev, imageUrl: '' }))}
+                          className="text-[10px] text-destructive hover:underline font-semibold"
+                        >
+                          Remove Image
+                        </button>
+                      )}
+                    </div>
+
+                    {newProject.imageUrl && (
+                      <div className="relative rounded-xl overflow-hidden border border-border h-32 max-w-xs bg-muted/30">
+                        <img
+                          src={newProject.imageUrl}
+                          alt="Project thumbnail preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                        <UploadCloud className="h-3.5 w-3.5" />
+                        <span>
+                          {uploadingProjectImg
+                            ? 'Uploading...'
+                            : (newProject.imageUrl ? 'Replace File' : 'Upload Image')}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={uploadingProjectImg}
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleOrgProjectImageUpload(f);
+                          }}
+                        />
+                      </label>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">or Image URL:</span>
+                      <Input
+                        value={newProject.imageUrl}
+                        onChange={(e) => setNewProject({ ...newProject, imageUrl: e.target.value })}
+                        placeholder="https://.../project-thumbnail.png"
+                        className="text-xs h-9 flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
                     <Button type="button" size="sm" variant="outline" onClick={handleAddProject} className="text-xs">
                       <Plus className="h-3.5 w-3.5 mr-1" /> Add {taxonomy.projectSingular}
                     </Button>

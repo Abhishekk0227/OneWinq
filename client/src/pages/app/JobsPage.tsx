@@ -42,6 +42,7 @@ import {
   EMPLOYMENT_TYPE,
   WORKPLACE_TYPE,
 } from '@/constants/app.constants';
+import { cn } from '@/lib/utils/cn';
 import type { Job, JobApplication } from '@/types/organization.types';
 
 const applySchema = z.object({

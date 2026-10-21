@@ -2757,64 +2757,52 @@ export default function ProfileEditPage() {
                         )}
                       </div>
 
-                      {(proj.imageUrl || (proj.mediaUrls && proj.mediaUrls[0])) ? (
+                      {/* Image Preview if present */}
+                      {(proj.imageUrl || (proj.mediaUrls && proj.mediaUrls[0])) && (
                         <div className="relative rounded-xl overflow-hidden border border-border h-36 max-w-sm bg-muted/30 group">
                           <img
                             src={proj.imageUrl || proj.mediaUrls![0]}
                             alt={proj.title || 'Project preview'}
                             className="w-full h-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <label className="px-2.5 py-1 rounded-lg bg-background/90 text-[11px] font-semibold text-foreground cursor-pointer hover:bg-background">
-                              Change Image
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const f = e.target.files?.[0]
-                                  if (f) handleProjectImageUpload(idx, f)
-                                }}
-                              />
-                            </label>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                          <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold cursor-pointer transition-colors shrink-0">
-                            <Upload className="h-3.5 w-3.5" />
-                            <span>
-                              {uploadingProjectId === (proj.id || String(idx))
-                                ? 'Uploading...'
-                                : 'Upload Image'}
-                            </span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              disabled={uploadingProjectId === (proj.id || String(idx))}
-                              className="hidden"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0]
-                                if (f) handleProjectImageUpload(idx, f)
-                              }}
-                            />
-                          </label>
-                          <span className="text-[10px] text-muted-foreground">or URL:</span>
-                          <Input
-                            value={proj.imageUrl || ''}
-                            onChange={(e) => {
-                              const updated = [...projects]
-                              updated[idx].imageUrl = e.target.value
-                              if (e.target.value) {
-                                updated[idx].mediaUrls = [e.target.value]
-                              }
-                              setProjects(updated)
-                            }}
-                            placeholder="https://.../project-thumbnail.png"
-                            className="text-xs h-9"
-                          />
                         </div>
                       )}
+
+                      {/* Upload Image and Image URL controls side by side */}
+                      <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                          <Upload className="h-3.5 w-3.5" />
+                          <span>
+                            {uploadingProjectId === (proj.id || String(idx))
+                              ? 'Uploading...'
+                              : (proj.imageUrl ? 'Replace File' : 'Upload Image')}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={uploadingProjectId === (proj.id || String(idx))}
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) handleProjectImageUpload(idx, f)
+                            }}
+                          />
+                        </label>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">or Image URL:</span>
+                        <Input
+                          value={proj.imageUrl || ''}
+                          onChange={(e) => {
+                            const updated = [...projects]
+                            updated[idx].imageUrl = e.target.value
+                            if (e.target.value) {
+                              updated[idx].mediaUrls = [e.target.value]
+                            }
+                            setProjects(updated)
+                          }}
+                          placeholder="https://.../project-thumbnail.png"
+                          className="text-xs h-9 flex-1"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
