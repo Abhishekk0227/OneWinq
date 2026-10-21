@@ -18,6 +18,7 @@ function mapTypeToPrefKey(type) {
       return 'profileViews';
     case NOTIFICATION_TYPE.POST_LIKE:
     case NOTIFICATION_TYPE.POST_COMMENT:
+    case NOTIFICATION_TYPE.NEW_POST:
       return 'social';
     case NOTIFICATION_TYPE.ORDER_UPDATE:
     case NOTIFICATION_TYPE.CARD_ACTIVATED:
@@ -63,6 +64,8 @@ function resolveNotificationLink(n) {
     case 'POST_LIKE':
     case 'POST_COMMENT':
       return n.entityId ? `/app?postId=${n.entityId}` : '/app';
+    case 'NEW_POST':
+      return '/app/feed';
     case 'SECURITY_ALERT':
       return '/app/settings';
     case 'ORGANIZATION_INVITATION':

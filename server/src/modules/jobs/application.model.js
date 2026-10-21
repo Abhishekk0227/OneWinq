@@ -100,7 +100,7 @@ applicationSchema.methods.toSafeObject = function () {
     applicantId: this.applicantId?.toString ? this.applicantId.toString() : this.applicantId,
     status: this.status,
     resumeUrl: this.resumeUrl,
-    oneWinqProfileUrl: this.oneWinqProfileUrl || (this.applicantSnapshot?.oneWinqProfileUrl || (this.applicantSnapshot?.username ? `/u/${this.applicantSnapshot.username}` : null)),
+    oneWinqProfileUrl: this.applicantSnapshot?.shareProfile === false ? null : (this.oneWinqProfileUrl || this.applicantSnapshot?.oneWinqProfileUrl || null),
     coverLetter: this.coverLetter,
     applicantSnapshot: this.applicantSnapshot,
     internalNotes: this.internalNotes,

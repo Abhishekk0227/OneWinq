@@ -19,6 +19,7 @@ import {
   Building2,
   Loader2,
   Send,
+  Lock,
 } from 'lucide-react';
 import { useOrganizationContextStore } from '@/stores/organizationContextStore';
 import { jobsApi } from '@/features/jobs/api/jobs.api';
@@ -309,20 +310,32 @@ export default function OrganizationApplicationsPage() {
               </div>
 
               {/* Profile Link Showcase */}
-              {(selectedApp.oneWinqProfileUrl || selectedApp.applicant?.username) && (
+              {selectedApp.oneWinqProfileUrl ? (
                 <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-3">
                   <div className="text-xs">
                     <span className="font-semibold text-foreground block">Verified OneWinq Digital Identity</span>
                     <span className="text-muted-foreground text-[11px]">Direct public profile, credentials & showcase</span>
                   </div>
                   <a
-                    href={selectedApp.oneWinqProfileUrl || `/u/${selectedApp.applicant?.username}`}
+                    href={selectedApp.oneWinqProfileUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:brightness-105 transition-all shadow-xs shrink-0"
                   >
                     <User className="h-3.5 w-3.5" /> View OneWinq Profile <ExternalLink className="h-3 w-3" />
                   </a>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-border/60 flex items-center justify-between gap-3">
+                  <div className="text-xs">
+                    <span className="font-semibold text-muted-foreground block flex items-center gap-1.5">
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" /> OneWinq Digital Profile Kept Private
+                    </span>
+                    <span className="text-muted-foreground/80 text-[11px]">Candidate applied with Resume document only</span>
+                  </div>
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border shrink-0">
+                    Resume Only
+                  </span>
                 </div>
               )}
 

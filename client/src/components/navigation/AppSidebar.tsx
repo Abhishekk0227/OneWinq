@@ -193,9 +193,9 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Prominent Action Button: Post a Job (Org) vs New Post (Personal) */}
-      <div className={cn('px-3 pt-4 pb-1', isSidebarCollapsed && 'px-2')}>
-        {isOrgMode ? (
+      {/* Prominent Action Button: Post a Job (Org) */}
+      {isOrgMode && (
+        <div className={cn('px-3 pt-4 pb-1', isSidebarCollapsed && 'px-2')}>
           <div className="space-y-1.5">
             <div className={cn('grid gap-1.5', isSidebarCollapsed ? 'grid-cols-1' : 'grid-cols-2')}>
               <button
@@ -245,23 +245,8 @@ export function AppSidebar() {
               {!isSidebarCollapsed && <span className="truncate">Exit to Personal</span>}
             </button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => openModal('CREATE_POST')}
-            className={cn(
-              'flex items-center justify-center gap-2 rounded-2xl font-bold transition-all active:scale-95 cursor-pointer',
-              'bg-transparent border border-black text-black hover:bg-black/5 shadow-none',
-              isSidebarCollapsed ? 'h-11 w-11 mx-auto' : 'w-full py-2.5 px-4 text-sm'
-            )}
-            title="Create New Post"
-            aria-label="Create New Post"
-          >
-            <Plus className={cn('h-5 w-5 stroke-[2.5]', !isSidebarCollapsed && 'h-4 w-4')} />
-            {!isSidebarCollapsed && <span>New Post</span>}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
 
       {/* Navigation links */}

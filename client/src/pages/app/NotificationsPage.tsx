@@ -25,6 +25,7 @@ import {
   Megaphone,
   ArrowRight,
   Building2,
+  Flame,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -78,6 +79,11 @@ function getNotificationIcon(type: string): { icon: React.ReactNode; bg: string 
         icon: <MessageCircle className="h-4 w-4 text-cyan-500" />,
         bg: 'bg-cyan-500/10 border-cyan-500/20',
       }
+    case 'NEW_POST':
+      return {
+        icon: <Flame className="h-4 w-4 text-orange-500 fill-orange-500" />,
+        bg: 'bg-orange-500/10 border-orange-500/20',
+      }
     case 'TICKET_RESPONSE':
       return {
         icon: <LifeBuoy className="h-4 w-4 text-sky-500" />,
@@ -128,6 +134,8 @@ function resolveItemLink(item: any): string | null {
     case 'POST_LIKE':
     case 'POST_COMMENT':
       return item.entityId ? `/app?postId=${item.entityId}` : '/app'
+    case 'NEW_POST':
+      return item.entityId ? `/app?postId=${item.entityId}` : '/app/feed'
     case 'TICKET_RESPONSE':
       return '/app/support'
     case 'REPORT_RESPONSE':
@@ -169,6 +177,7 @@ function resolveActionLabel(item: any): string {
       return 'View Order'
     case 'POST_LIKE':
     case 'POST_COMMENT':
+    case 'NEW_POST':
       return 'View Post'
     case 'TICKET_RESPONSE':
       return 'View Ticket'
@@ -248,6 +257,7 @@ export default function NotificationsPage() {
           item.type === 'NEW_MESSAGE' ||
           item.type === 'POST_LIKE' ||
           item.type === 'POST_COMMENT' ||
+          item.type === 'NEW_POST' ||
           item.type === 'PROFILE_VIEW' ||
           (item as any).entityType === 'connection' ||
           (item as any).entityType === 'conversation' ||

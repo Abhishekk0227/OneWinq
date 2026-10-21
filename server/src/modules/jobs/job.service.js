@@ -346,19 +346,23 @@ export async function applyToJob(jobId, applicantUserId, applicationData) {
   ]);
 
   const profileSlug = applicantUser?.username || applicantUserId.toString();
-  const oneWinqProfileUrl = applicationData.oneWinqProfileUrl || `/u/${profileSlug}`;
+  const shareProfile = applicationData.shareProfile !== false && Boolean(applicationData.oneWinqProfileUrl);
+  const oneWinqProfileUrl = shareProfile
+    ? (applicationData.oneWinqProfileUrl || `/u/${profileSlug}`)
+    : null;
 
   const applicantSnapshot = {
     displayName: applicantUser?.displayName || '',
-    username: applicantUser?.username || '',
+    username: shareProfile ? (applicantUser?.username || '') : '',
     email: applicantUser?.email || '',
-    avatarUrl: applicantUser?.avatarUrl || null,
+    avatarUrl: shareProfile ? (applicantUser?.avatarUrl || null) : null,
     oneWinqProfileUrl,
-    headline: applicantProfile?.headline || '',
-    bio: applicantProfile?.bio || '',
-    skills: (applicantProfile?.skills || []).map((s) => (typeof s === 'string' ? s : s.name)),
-    experience: applicantProfile?.experience || [],
-    education: applicantProfile?.education || [],
+    shareProfile,
+    headline: shareProfile ? (applicantProfile?.headline || '') : '',
+    bio: shareProfile ? (applicantProfile?.bio || '') : '',
+    skills: shareProfile ? (applicantProfile?.skills || []).map((s) => (typeof s === 'string' ? s : s.name)) : [],
+    experience: shareProfile ? (applicantProfile?.experience || []) : [],
+    education: shareProfile ? (applicantProfile?.education || []) : [],
   };
 
   const application = await Application.create({
@@ -413,6 +417,9 @@ export async function listJobApplications(organizationId, jobId, { page = 1, lim
     applications: applications.map((a) => {
       const applicant = a.applicantId || {};
       const job = a.jobId || {};
+      const isProfileShared = a.applicantSnapshot?.shareProfile !== false && Boolean(a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl);
+      const resolvedProfileUrl = isProfileShared ? (a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || null) : null;
+
       return {
         id: a._id.toString(),
         jobId: job._id?.toString() || null,
@@ -420,16 +427,16 @@ export async function listJobApplications(organizationId, jobId, { page = 1, lim
         applicant: {
           id: applicant._id?.toString() || null,
           displayName: applicant.displayName || a.applicantSnapshot?.displayName || 'Applicant',
-          username: applicant.username || a.applicantSnapshot?.username || '',
+          username: isProfileShared ? (applicant.username || a.applicantSnapshot?.username || '') : '',
           email: applicant.email || a.applicantSnapshot?.email || '',
-          avatarUrl: applicant.avatarUrl || a.applicantSnapshot?.avatarUrl || null,
+          avatarUrl: isProfileShared ? (applicant.avatarUrl || a.applicantSnapshot?.avatarUrl || null) : null,
           headline: a.applicantSnapshot?.headline || '',
           skills: a.applicantSnapshot?.skills || [],
-          oneWinqProfileUrl: a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || (applicant.username ? `/u/${applicant.username}` : null),
+          oneWinqProfileUrl: resolvedProfileUrl,
         },
         status: a.status,
         resumeUrl: a.resumeUrl,
-        oneWinqProfileUrl: a.oneWinqProfileUrl || a.applicantSnapshot?.oneWinqProfileUrl || (applicant.username ? `/u/${applicant.username}` : null),
+        oneWinqProfileUrl: resolvedProfileUrl,
         coverLetter: a.coverLetter,
         internalNotesCount: (a.internalNotes || []).length,
         createdAt: a.createdAt,
