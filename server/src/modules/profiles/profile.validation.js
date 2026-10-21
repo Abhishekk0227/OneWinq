@@ -225,6 +225,7 @@ export const updateProfileSchema = z.object({
         title: z.string().min(1).max(150),
         description: z.string().max(1000).optional().default(''),
         priceRange: z.string().max(50).optional().default(''),
+        imageUrl: z.string().optional().or(z.literal('')),
       }),
     )
     .optional(),

@@ -126,6 +126,7 @@ const serviceEntrySchema = new Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true, default: '' },
     priceRange: { type: String, trim: true, default: '' },
+    imageUrl: { type: String, trim: true, default: '' },
   },
   { _id: false },
 );

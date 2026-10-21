@@ -89,6 +89,7 @@ export interface ServiceItem {
   title: string
   description?: string
   priceRange?: string
+  imageUrl?: string
 }
 
 export interface AwardItem {

@@ -142,6 +142,7 @@ export default function ProfileEditPage() {
   const [privateDocuments, setPrivateDocuments] = React.useState<PrivateDocumentItem[]>([])
   const [uploadingDocId, setUploadingDocId] = React.useState<string | null>(null)
   const [uploadingProjectId, setUploadingProjectId] = React.useState<string | null>(null)
+  const [uploadingServiceId, setUploadingServiceId] = React.useState<string | null>(null)
 
   // Dynamic Tabs State
   const [searchParams] = useSearchParams()
@@ -1113,6 +1114,38 @@ export default function ProfileEditPage() {
       toast.error(err?.message || 'Failed to upload project image')
     } finally {
       setUploadingProjectId(null)
+    }
+  }
+
+  const handleServiceImageUpload = async (index: number, file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (JPG, PNG, WebP, etc.)')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size cannot exceed 10MB')
+      return
+    }
+    const srvId = services[index]?.id || String(index)
+    try {
+      setUploadingServiceId(srvId)
+      const res = await mediaApi.uploadFile(file, 'PROFILE_SECTION')
+      setServices((prev) => {
+        const updated = [...prev]
+        if (updated[index]) {
+          updated[index] = {
+            ...updated[index],
+            imageUrl: res.publicUrl,
+          }
+        }
+        return updated
+      })
+      toast.success('Service image uploaded successfully!')
+    } catch (err: any) {
+      console.error('[ServiceImageUploadError]', err)
+      toast.error(err?.message || 'Failed to upload service image')
+    } finally {
+      setUploadingServiceId(null)
     }
   }
 
@@ -2868,6 +2901,85 @@ export default function ProfileEditPage() {
                       placeholder="What is included, deliverables, timeline..."
                       rows={2}
                     />
+
+                    {/* Service Image Section */}
+                    <div className="space-y-2 pt-2 border-t border-border/50">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-semibold text-foreground flex items-center gap-1.5">
+                          <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                          Service Image / Thumbnail
+                        </label>
+                        {srv.imageUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...services]
+                              updated[idx] = { ...updated[idx], imageUrl: '' }
+                              setServices(updated)
+                            }}
+                            className="text-[10px] text-destructive hover:underline font-semibold"
+                          >
+                            Remove Image
+                          </button>
+                        )}
+                      </div>
+
+                      {srv.imageUrl ? (
+                        <div className="relative rounded-xl overflow-hidden border border-border h-36 max-w-sm bg-muted/30 group">
+                          <img
+                            src={srv.imageUrl}
+                            alt={srv.title || 'Service preview'}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <label className="px-2.5 py-1 rounded-lg bg-background/90 text-[11px] font-semibold text-foreground cursor-pointer hover:bg-background">
+                              Change Image
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0]
+                                  if (f) handleServiceImageUpload(idx, f)
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                          <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-semibold cursor-pointer transition-colors shrink-0">
+                            <Upload className="h-3.5 w-3.5" />
+                            <span>
+                              {uploadingServiceId === (srv.id || String(idx))
+                                ? 'Uploading...'
+                                : 'Upload Image'}
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={uploadingServiceId === (srv.id || String(idx))}
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0]
+                                if (f) handleServiceImageUpload(idx, f)
+                              }}
+                            />
+                          </label>
+                          <span className="text-[10px] text-muted-foreground">or URL:</span>
+                          <Input
+                            value={srv.imageUrl || ''}
+                            onChange={(e) => {
+                              const updated = [...services]
+                              updated[idx].imageUrl = e.target.value
+                              setServices(updated)
+                            }}
+                            placeholder="https://.../service-image.png"
+                            className="h-8 text-xs flex-1"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
 

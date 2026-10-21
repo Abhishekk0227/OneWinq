@@ -338,13 +338,15 @@ export default function ProfilePage() {
       { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
       ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
       ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
-      ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Briefcase className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
+      ...(projects.length > 0 ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length }] : []),
+      ...(organizations.length > 0 ? [{ id: 'ventures', label: 'Ventures & Orgs', icon: <Building2 className="h-4 w-4" />, count: organizations.length }] : []),
+      ...(services.length > 0 ? [{ id: 'services', label: 'Services', icon: <Briefcase className="h-4 w-4" />, count: services.length }] : []),
       ...(hasMedia ? [{ id: 'media', label: 'Media & Credentials', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + certifications.length + skills.length + awards.length + publications.length }] : []),
       { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
       ...(isPrivateMode ? [{ id: 'vault', label: 'Private Vault', icon: <Lock className="h-4 w-4" />, count: privateDocuments.length }] : []),
       ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
-  }, [profile, hasExperience, hasEducation, hasPortfolio, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
+  }, [profile, hasExperience, hasEducation, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
 
   if (isLoading) {
     return <LoadingScreen message="Loading your identity..." />
@@ -444,7 +446,40 @@ export default function ProfilePage() {
         </div>
 
         {/* Right Main Content Canvas */}
-        <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
+        <div className="md:col-span-9 space-y-4 min-w-0 max-w-full">
+
+          {/* Horizontal Left-Right Scrollable Navigation Tabs (Mobile & Quick Nav) */}
+          <div className="sticky top-14 z-20 bg-background/95 backdrop-blur-md py-2 border-b border-border/80 -mx-1 px-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
+              {profileTabs.map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/70'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && tab.count > 0 && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
@@ -493,89 +528,6 @@ export default function ProfilePage() {
 
                   {/* Canvas Actions Bar */}
                   <div className="flex flex-wrap items-center gap-2 pt-2">
-                    {/* Presentation Mode Pills */}
-                    <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PUBLIC)
-                          setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PUBLIC
-                            ? 'bg-card text-foreground shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Visitors see your Public profile"
-                      >
-                        <Eye className="h-3 w-3 text-primary" />
-                        <span>Public</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
-                          setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PROFESSIONAL
-                            ? 'bg-card text-primary shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Visitors see your Professional profile"
-                      >
-                        <Briefcase className="h-3 w-3 text-primary" />
-                        <span>Professional</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedMode(VISIBILITY_MODE.PRIVATE)
-                          setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
-                        }}
-                        disabled={setModeMutation.isPending}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer ${
-                          currentMode === VISIBILITY_MODE.PRIVATE
-                            ? 'bg-card text-foreground shadow-xs font-bold'
-                            : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        title="Profile is hidden / private"
-                      >
-                        <Lock className="h-3 w-3 text-primary" />
-                        <span>Private</span>
-                      </button>
-                    </div>
-
-                    {/* Temporary Mode Trigger */}
-                    {profile.temporaryMode && profile.temporaryMode.mode ? (
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
-                        <Clock className="h-3 w-3 shrink-0" />
-                        <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
-                        <button
-                          disabled={cancelTemporaryModeMutation.isPending}
-                          onClick={() => cancelTemporaryModeMutation.mutate()}
-                          className="text-destructive hover:underline ml-1 font-semibold"
-                          title="Cancel temporary mode"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsTempModalOpen(true)}
-                        className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
-                        title="Set timed presentation mode"
-                      >
-                        <Clock className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-
                     {/* Preview Live */}
                     <Button
                       variant="outline"
@@ -610,20 +562,18 @@ export default function ProfilePage() {
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                       {user?.displayName}
                     </h2>
-                    <Badge variant="subtle" className="text-xs">@{user?.username}</Badge>
-
-                    <a
-                      href={`/u/${user?.username}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary font-semibold hover:underline inline-flex items-center gap-1.5 text-xs ml-auto"
-                      title="View your public profile"
-                    >
-                      <span className="font-mono text-[11px] text-muted-foreground hover:text-primary">
-                        /u/{user?.username}
-                      </span>
-                      <ExternalLink className="h-3 w-3 shrink-0" />
-                    </a>
+                    {user?.username && (
+                      <a
+                        href={`/u/${user?.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-xs font-semibold transition-colors"
+                        title="View public profile"
+                      >
+                        <span>@{user?.username}</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
                   </div>
 
                   {displayRole ? (
@@ -721,6 +671,106 @@ export default function ProfilePage() {
           {/* Overview Cards when on Home tab */}
           {activeTab === 'home' && (
             <div className="space-y-4">
+              {/* Dedicated Profile Visibility Section */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-primary" />
+                      <span>Profile Visibility</span>
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Switch which persona visitors see when accessing your link or tapping your NFC card.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Presentation Mode Pills */}
+                    <div className="inline-flex rounded-xl bg-muted/80 p-0.5 text-xs font-semibold border border-border/50">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PUBLIC)
+                          setModeMutation.mutate(VISIBILITY_MODE.PUBLIC)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PUBLIC
+                            ? 'bg-card text-foreground shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Visitors see your Public profile"
+                      >
+                        <Eye className="h-3 w-3 text-primary" />
+                        <span>Public</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PROFESSIONAL)
+                          setModeMutation.mutate(VISIBILITY_MODE.PROFESSIONAL)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PROFESSIONAL
+                            ? 'bg-card text-primary shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Visitors see your Professional profile"
+                      >
+                        <Briefcase className="h-3 w-3 text-primary" />
+                        <span>Professional</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedMode(VISIBILITY_MODE.PRIVATE)
+                          setModeMutation.mutate(VISIBILITY_MODE.PRIVATE)
+                        }}
+                        disabled={setModeMutation.isPending}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-xs cursor-pointer ${
+                          currentMode === VISIBILITY_MODE.PRIVATE
+                            ? 'bg-card text-foreground shadow-xs font-bold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title="Profile is hidden / private"
+                      >
+                        <Lock className="h-3 w-3 text-primary" />
+                        <span>Private</span>
+                      </button>
+                    </div>
+
+                    {/* Temporary Mode Trigger */}
+                    {profile.temporaryMode && profile.temporaryMode.mode ? (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-medium border border-primary/20">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span>Temp <strong>{profile.temporaryMode.mode}</strong></span>
+                        <button
+                          disabled={cancelTemporaryModeMutation.isPending}
+                          onClick={() => cancelTemporaryModeMutation.mutate()}
+                          className="text-destructive hover:underline ml-1 font-semibold"
+                          title="Cancel temporary mode"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsTempModalOpen(true)}
+                        className="text-xs h-8 px-2.5 text-muted-foreground hover:text-foreground border border-border/60"
+                        title="Set timed presentation mode"
+                      >
+                        <Clock className="h-3.5 w-3.5 mr-1" />
+                        <span>Timer</span>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               {isPrivateMode && (
                 <div className="p-4 sm:p-5 rounded-2xl border border-purple-500/25 bg-purple-500/5 shadow-sm space-y-3">
@@ -959,7 +1009,214 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* DEDICATED TAB: Work / Portfolio */}
+          {/* DEDICATED TAB: Featured Projects */}
+          {activeTab === 'projects' && (
+            <div className="space-y-4">
+              <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-primary" />
+                    <span>Featured Projects ({projects.length})</span>
+                  </h3>
+                  <Link to="/app/profile/edit?tab=projects">
+                    <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
+                      <Edit3 className="h-3 w-3" />
+                      <span>Manage</span>
+                    </Button>
+                  </Link>
+                </div>
+
+                {projects.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {projects.map((proj: any, idx: number) => {
+                      const dateStr = formatDateRange(
+                        proj.startMonth,
+                        proj.startYear,
+                        proj.endMonth,
+                        proj.endYear,
+                        proj.current,
+                        proj.startDate,
+                        proj.endDate
+                      )
+                      const projectImg = proj.imageUrl || (proj.mediaUrls && proj.mediaUrls[0])
+                      return (
+                        <div key={proj.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2 flex flex-col justify-between hover:border-primary/40 transition-colors">
+                          <div>
+                            {projectImg && (
+                              <div className="w-full aspect-[16/9] max-h-44 rounded-lg overflow-hidden bg-muted/40 mb-2 border border-border/60">
+                                <img
+                                  src={projectImg}
+                                  alt={proj.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="font-semibold text-xs sm:text-sm text-foreground">{proj.title}</div>
+                              {proj.url && (
+                                <a
+                                  href={proj.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline text-[11px] flex items-center gap-1 shrink-0"
+                                >
+                                  <span>Link</span>
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                            </div>
+                            {dateStr && (
+                              <span className="text-[10px] font-mono text-muted-foreground block mt-0.5">
+                                {dateStr}
+                              </span>
+                            )}
+                            {proj.description && (
+                              <p className="text-[11px] text-muted-foreground pt-1 line-clamp-3 leading-relaxed">{proj.description}</p>
+                            )}
+                          </div>
+                          {proj.url && (
+                            <div className="pt-2 mt-1 border-t border-border/40 flex items-center justify-end">
+                              <a
+                                href={proj.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                              >
+                                <span>View Project</span>
+                                <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-xs text-muted-foreground">
+                    No projects added yet. <Link to="/app/profile/edit?tab=projects" className="text-primary underline">Add projects</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Ventures & Organizations */}
+          {activeTab === 'ventures' && (
+            <div className="space-y-4">
+              <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span>Ventures & Organizations ({organizations.length})</span>
+                  </h3>
+                  <Link to="/app/profile/edit?tab=ventures">
+                    <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
+                      <Edit3 className="h-3 w-3" />
+                      <span>Manage</span>
+                    </Button>
+                  </Link>
+                </div>
+
+                {organizations.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {organizations.map((org: any, idx: number) => {
+                      const orgName = org.name || org.title || 'Venture'
+                      const orgRole = org.role || org.subtitle || org.metadata?.role || ''
+                      const orgTagline = org.tagline || org.metadata?.funding || org.description || ''
+                      const orgWebsite = org.website || org.url || ''
+                      const orgStage = org.stage || org.metadata?.stage || ''
+                      return (
+                        <div key={org.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-1.5 hover:border-primary/40 transition-colors">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="font-semibold text-xs text-foreground">{orgName}</span>
+                            {orgStage && (
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary uppercase shrink-0">
+                                {orgStage}
+                              </span>
+                            )}
+                          </div>
+                          {orgRole && (
+                            <p className="text-[11px] font-medium text-foreground/80">{orgRole}</p>
+                          )}
+                          {orgTagline && (
+                            <p className="text-[11px] text-muted-foreground line-clamp-2">{orgTagline}</p>
+                          )}
+                          {orgWebsite && (
+                            <a
+                              href={orgWebsite.startsWith('http') ? orgWebsite : `https://${orgWebsite}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-0.5"
+                            >
+                              <span>Visit website</span>
+                              <ExternalLink className="h-3 w-3 shrink-0" />
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-xs text-muted-foreground">
+                    No ventures added yet. <Link to="/app/profile/edit?tab=ventures" className="text-primary underline">Add ventures</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Services Provided */}
+          {activeTab === 'services' && (
+            <div className="space-y-4">
+              <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    <span>Services Provided ({services.length})</span>
+                  </h3>
+                  <Link to="/app/profile/edit?tab=services">
+                    <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
+                      <Edit3 className="h-3 w-3" />
+                      <span>Manage</span>
+                    </Button>
+                  </Link>
+                </div>
+
+                {services.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {services.map((s: any, idx: number) => (
+                      <div key={s.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2 flex flex-col justify-between hover:border-primary/40 transition-colors">
+                        <div>
+                          {s.imageUrl && (
+                            <div className="w-full aspect-[16/9] max-h-40 rounded-lg overflow-hidden bg-muted/40 mb-2 border border-border/60">
+                              <img
+                                src={s.imageUrl}
+                                alt={s.title}
+                                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex justify-between items-center gap-2">
+                            <span className="text-xs sm:text-sm font-semibold text-foreground">{s.title}</span>
+                            {s.priceRange && <span className="text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10 shrink-0">{s.priceRange}</span>}
+                          </div>
+                          {s.description && <p className="text-[11px] text-muted-foreground mt-1 line-clamp-3 leading-relaxed">{s.description}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-xs text-muted-foreground">
+                    No services added yet. <Link to="/app/profile/edit?tab=services" className="text-primary underline">Add services</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Work / Portfolio (Fallback) */}
           {activeTab === 'portfolio' && (
             <div className="space-y-4">
               {organizations.length > 0 && (
@@ -1542,43 +1799,7 @@ export default function ProfilePage() {
         </DialogFooter>
       </Dialog>
 
-      {/* Fixed Bottom Navigation Bar for Profile Sections */}
-      {profileTabs.length > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
-          {profileTabs.slice(0, 3).map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
-                  isActive
-                    ? 'text-primary font-extrabold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
-                  {tab.icon}
-                </div>
-                <span className="truncate max-w-full">{tab.label}</span>
-              </button>
-            )
-          })}
-
-          <button
-            type="button"
-            onClick={() => setIsSectionsDrawerOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
-          >
-            <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
-              <Menu className="h-4 w-4" />
-            </div>
-            <span className="truncate max-w-full">All ({profileTabs.length})</span>
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
   )
 }
 
