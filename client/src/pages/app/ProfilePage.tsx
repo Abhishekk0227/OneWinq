@@ -339,7 +339,6 @@ export default function ProfilePage() {
     if (!profile) return []
     return [
       { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
-      { id: 'visibility', label: 'Profile Visibility', icon: <Eye className="h-4 w-4" /> },
       ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
       ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
       ...(projects.length > 0 ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length }] : []),
@@ -1672,6 +1671,46 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}
+      {profileTabs.length > 1 && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
+          {profileTabs.slice(0, 3).map((tab) => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
+                  isActive
+                    ? 'text-primary font-extrabold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
+                  {tab.icon}
+                </div>
+                <span className="truncate max-w-full">{tab.label}</span>
+              </button>
+            )
+          })}
+
+          <button
+            type="button"
+            onClick={() => setIsSectionsDrawerOpen(true)}
+            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
+          >
+            <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              <Menu className="h-4 w-4" />
+            </div>
+            <span className="truncate max-w-full">All Sections</span>
+          </button>
+        </div>
+      )}
 
       {/* All Profile Sections Sidebar Drawer */}
       <ProfileSectionsSidebar
