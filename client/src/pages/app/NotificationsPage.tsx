@@ -240,6 +240,38 @@ export default function NotificationsPage() {
   const rawNotifications = data?.data?.notifications || []
   const unreadCount = rawNotifications.filter((n) => !n.isRead).length
 
+  // Automatically mark all notifications as read when opening the page
+  const autoMarkedRef = React.useRef(false)
+  React.useEffect(() => {
+    if (!isLoading && rawNotifications.length > 0 && !autoMarkedRef.current) {
+      const hasUnread = rawNotifications.some((n) => !n.isRead)
+      if (hasUnread) {
+        autoMarkedRef.current = true
+        notificationsApi
+          .markAllAsRead()
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.notifications.unreadCount })
+            queryClient.setQueryData(queryKeys.notifications.list(), (old: any) => {
+              if (!old?.data?.notifications) return old
+              return {
+                ...old,
+                data: {
+                  ...old.data,
+                  notifications: old.data.notifications.map((item: any) => ({
+                    ...item,
+                    isRead: true,
+                  })),
+                },
+              }
+            })
+          })
+          .catch(() => {
+            // Non-blocking
+          })
+      }
+    }
+  }, [isLoading, rawNotifications, queryClient])
+
   // Filter based on active tab
   const filteredNotifications = React.useMemo(() => {
     return rawNotifications.filter((item) => {

@@ -564,6 +564,47 @@ export default function CompanyShowcasePage() {
       : []),
   ];
 
+  // Screen Touch Gesture: Swipe Left/Right to change showcase sections
+  const touchStartX = React.useRef<number | null>(null);
+  const touchStartY = React.useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {
+      return;
+    }
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      const currentIndex = profileTabs.findIndex((t) => t.id === activeTab);
+      if (currentIndex === -1) return;
+
+      if (deltaX < 0) {
+        // Swipe Left -> Next Section
+        if (currentIndex < profileTabs.length - 1) {
+          handleSelectTab(profileTabs[currentIndex + 1].id);
+        }
+      } else {
+        // Swipe Right -> Previous Section
+        if (currentIndex > 0) {
+          handleSelectTab(profileTabs[currentIndex - 1].id);
+        }
+      }
+    }
+  };
+
   // If current activeTab is not present in dynamic profileTabs, gracefully fallback to 'home'
   React.useEffect(() => {
     if (!org) return;
@@ -731,34 +772,12 @@ export default function CompanyShowcasePage() {
             </div>
           </div>
 
-          {/* Right Main Content Canvas */}
-          <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
-            {/* Mobile / Swipeable Section Tabs Header */}
-            {profileTabs.length > 1 && (
-              <div className="md:hidden sticky top-12 z-20 -mx-3 px-3 py-2 bg-background/95 backdrop-blur-md border-b border-border/80">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-                  {profileTabs.map((tab) => {
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => handleSelectTab(tab.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
-                          isActive
-                            ? 'bg-primary text-white shadow-sm'
-                            : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }`}
-                      >
-                        {tab.icon && React.cloneElement(tab.icon as React.ReactElement, { className: 'h-3.5 w-3.5 shrink-0' })}
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
+          {/* Right Main Content Canvas with Touch Swipe support */}
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="md:col-span-9 space-y-5 min-w-0 max-w-full touch-pan-y"
+          >
             {/* HOME TAB: Identity Hero Card */}
             {activeTab === 'home' && (
               <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">

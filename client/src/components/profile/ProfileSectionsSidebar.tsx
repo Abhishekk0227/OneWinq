@@ -44,6 +44,8 @@ function getDefaultTabDescription(tabId: string, label: string): string {
   switch (tabId) {
     case 'home':
       return 'Main identity card, headline & bio'
+    case 'visibility':
+      return 'Multi-profile personas & presentation mode'
     case 'experience':
       return 'Work history & career timeline'
     case 'education':
