@@ -92,7 +92,8 @@ export const listJobsQuerySchema = z.object({
 
 export const applyJobSchema = z.object({
   resumeUrl: z.string().trim().nullable().optional(),
-  oneWinqProfileUrl: z.string().trim().optional(),
+  oneWinqProfileUrl: z.string().trim().nullable().optional(),
+  shareProfile: z.boolean().optional(),
   coverLetter: z.string().trim().max(5000).default(''),
 });
 

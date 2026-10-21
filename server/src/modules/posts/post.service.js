@@ -15,10 +15,13 @@ import {
   ORGANIZATION_ROLE,
   ORGANIZATION_MEMBER_STATUS,
   ORGANIZATION_PERMISSION,
+  NOTIFICATION_TYPE,
 } from '../../config/constants.js';
 import { NotFoundError, ForbiddenError, ValidationError } from '../../shared/errors.js';
 import { eventBus } from '../../events/eventBus.js';
 import { filterToCardActive } from '../cards/cardGate.js';
+import { notificationService } from '../notifications/notification.service.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Helper to enrich an array of posts with isLiked, isSaved, followed status, and author info.
@@ -177,6 +180,76 @@ export async function createPost(userId, data) {
     .lean();
 
   const [enriched] = await enrichPosts([populated], userId);
+
+  // Dispatch background notifications to followers or connections
+  (async () => {
+    try {
+      let recipientIds = [];
+      let actorName = '';
+      let actorAvatar = null;
+
+      if (authorType === 'ORGANIZATION' && organizationId) {
+        const org = await Organization.findById(organizationId).select('name logoUrl branding').lean();
+        actorName = org?.name || 'Organization';
+        actorAvatar = org?.branding?.logoUrl || org?.logoUrl || null;
+
+        const [follows, members] = await Promise.all([
+          OrganizationFollow.find({ organizationId }).select('userId').lean(),
+          OrganizationMember.find({ organizationId, status: ORGANIZATION_MEMBER_STATUS.ACTIVE }).select('userId').lean(),
+        ]);
+
+        const allIds = [
+          ...follows.map((f) => f.userId?.toString()),
+          ...members.map((m) => m.userId?.toString()),
+        ].filter((id) => Boolean(id) && id !== userId.toString());
+
+        recipientIds = [...new Set(allIds)];
+      } else {
+        const author = await User.findById(userId).select('displayName avatarUrl').lean();
+        actorName = author?.displayName || 'A connection';
+        actorAvatar = author?.avatarUrl || null;
+
+        const connections = await Connection.find({
+          $or: [{ userLow: userId }, { userHigh: userId }],
+          state: 'CONNECTED',
+        }).select('userLow userHigh').lean();
+
+        recipientIds = connections
+          .map((c) => (c.userLow.toString() === userId.toString() ? c.userHigh.toString() : c.userLow.toString()))
+          .filter((id) => Boolean(id) && id !== userId.toString());
+      }
+
+      if (recipientIds.length > 0) {
+        const snippet = (data.content || '').slice(0, 80);
+        const bodyText = snippet
+          ? `${snippet}${data.content?.length > 80 ? '...' : ''}`
+          : `${actorName} published a new post update`;
+
+        await Promise.allSettled(
+          recipientIds.map((recipientId) =>
+            notificationService.createNotification({
+              recipientId,
+              actorId: userId,
+              type: NOTIFICATION_TYPE.NEW_POST,
+              title: `${actorName} shared a new post`,
+              body: bodyText,
+              entityType: 'post',
+              entityId: post._id,
+              linkUrl: '/app/feed',
+              metadata: {
+                authorName: actorName,
+                authorAvatar,
+                postId: post._id.toString(),
+              },
+            })
+          )
+        );
+      }
+    } catch (notifErr) {
+      logger.error('Failed to dispatch post notifications:', notifErr);
+    }
+  })();
+
   return enriched;
 }
 

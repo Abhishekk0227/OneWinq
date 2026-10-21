@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Trash2,
   ChevronDown,
+  Lock,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,6 +58,7 @@ export default function JobsPage() {
   const [applyingJob, setApplyingJob] = React.useState<Job | null>(null);
   const [uploadedResume, setUploadedResume] = React.useState<{ name: string; url: string; size?: number } | null>(null);
   const [isUploadingResume, setIsUploadingResume] = React.useState(false);
+  const [shareProfile, setShareProfile] = React.useState<boolean>(true);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { data: jobsData, isLoading } = useQuery({
@@ -143,10 +145,17 @@ export default function JobsPage() {
   const { user } = useAuthStore();
 
   const applyMutation = useMutation({
-    mutationFn: ({ jobId, values }: { jobId: string; values: ApplyFormValues }) =>
+    mutationFn: ({
+      jobId,
+      values,
+    }: {
+      jobId: string;
+      values: ApplyFormValues & { shareProfile?: boolean; oneWinqProfileUrl?: string | null };
+    }) =>
       jobsApi.apply(jobId, {
         resumeUrl: values.resumeUrl || uploadedResume?.url || null,
-        oneWinqProfileUrl: user?.username ? `/u/${user.username}` : undefined,
+        shareProfile: values.shareProfile,
+        oneWinqProfileUrl: values.oneWinqProfileUrl,
         coverLetter: values.coverLetter || '',
       }),
     onSuccess: () => {
@@ -154,6 +163,7 @@ export default function JobsPage() {
       queryClient.invalidateQueries({ queryKey: ['myApplications'] });
       setApplyingJob(null);
       setUploadedResume(null);
+      setShareProfile(true);
       reset();
       toast.success('Your application has been submitted successfully!');
     },
@@ -364,15 +374,29 @@ export default function JobsPage() {
           if (!open) {
             setApplyingJob(null);
             setUploadedResume(null);
+            setShareProfile(true);
           }
         }}
         className="max-w-xl"
       >
         {applyingJob && (
           <form
-            onSubmit={handleSubmit((values) =>
-              applyMutation.mutate({ jobId: applyingJob.id, values })
-            )}
+            onSubmit={handleSubmit((values) => {
+              const resume = values.resumeUrl || uploadedResume?.url;
+              if (!shareProfile && !resume) {
+                toast.error('Please upload your Resume or provide a document link when keeping your profile private.');
+                return;
+              }
+              applyMutation.mutate({
+                jobId: applyingJob.id,
+                values: {
+                  ...values,
+                  resumeUrl: resume || null,
+                  shareProfile,
+                  oneWinqProfileUrl: shareProfile && user?.username ? `/u/${user.username}` : null,
+                },
+              });
+            })}
             className="space-y-4"
           >
             <DialogHeader>
@@ -382,47 +406,130 @@ export default function JobsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            {/* Candidate OneWinq Profile Showcase */}
-            <div className="p-3.5 rounded-xl border border-primary/25 bg-primary/5 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-primary flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> Verified OneWinq Profile Attached
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                  Auto-Shared
-                </span>
-              </div>
-              <div className="flex items-center gap-3 pt-0.5">
-                <Avatar
-                  src={user?.avatarUrl}
-                  fallback={user?.displayName}
-                  alt={user?.displayName}
-                  size="md"
-                  className="rounded-full ring-2 ring-primary/20 shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="font-bold text-sm text-foreground truncate">
-                    {user?.displayName}
-                  </div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    @{user?.username} • {user?.headline || 'OneWinq Professional Profile'}
+            {/* Candidate Profile Sharing & Privacy Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">
+                Profile & Identity Sharing Preference
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Option 1: Attach OneWinq Profile */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setShareProfile(true)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShareProfile(true); }}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between text-left ${
+                    shareProfile
+                      ? 'border-primary bg-primary/5 shadow-2xs ring-1 ring-primary/20'
+                      : 'border-border bg-card hover:bg-muted/30 text-muted-foreground'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-lg ${shareProfile ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                        <CheckCircle2 className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-foreground">Share OneWinq Profile</div>
+                        <div className="text-[10px] text-muted-foreground">Attach digital identity & showcase</div>
+                      </div>
+                    </div>
+                    <div className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${shareProfile ? 'border-primary bg-primary text-white' : 'border-border'}`}>
+                      {shareProfile && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    </div>
                   </div>
                 </div>
-                {user?.username && (
-                  <a
-                    href={`/u/${user.username}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 shrink-0 bg-background px-2.5 py-1.5 rounded-lg border border-border shadow-2xs"
-                  >
-                    <span>View Profile</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
+
+                {/* Option 2: Apply with Resume Only */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setShareProfile(false)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShareProfile(false); }}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between text-left ${
+                    !shareProfile
+                      ? 'border-primary bg-primary/5 shadow-2xs ring-1 ring-primary/20'
+                      : 'border-border bg-card hover:bg-muted/30 text-muted-foreground'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-lg ${!shareProfile ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                        <Lock className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-foreground">Resume Only (Private)</div>
+                        <div className="text-[10px] text-muted-foreground">Do not attach OneWinq profile</div>
+                      </div>
+                    </div>
+                    <div className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${!shareProfile ? 'border-primary bg-primary text-white' : 'border-border'}`}>
+                      {!shareProfile && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-[11px] text-muted-foreground pt-1.5 border-t border-primary/15">
-                Your digital identity, work history, education, verified skills, and NFC card connections are automatically shared with this employer.
-              </p>
+
+              {/* Dynamic details for the selected mode */}
+              {shareProfile ? (
+                <div className="p-3.5 rounded-xl border border-primary/25 bg-primary/5 space-y-2.5 mt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-primary flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-primary" /> Verified OneWinq Profile Attached
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${user?.appearInDiscovery === false ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'}`}>
+                      {user?.appearInDiscovery === false ? 'Private Account (Shared for this Job)' : 'Public Profile Attached'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 pt-0.5">
+                    <Avatar
+                      src={user?.avatarUrl}
+                      fallback={user?.displayName}
+                      alt={user?.displayName}
+                      size="md"
+                      className="rounded-full ring-2 ring-primary/20 shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-sm text-foreground truncate">
+                        {user?.displayName}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        @{user?.username} • {user?.headline || 'OneWinq Professional Profile'}
+                      </div>
+                    </div>
+                    {user?.username && (
+                      <a
+                        href={`/u/${user.username}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 shrink-0 bg-background px-2.5 py-1.5 rounded-lg border border-border shadow-2xs"
+                      >
+                        <span>Preview</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                  {user?.appearInDiscovery === false && (
+                    <div className="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg flex items-center gap-1.5">
+                      <Lock className="h-3.5 w-3.5 shrink-0" />
+                      <span>Note: Your account is in Private Discovery mode. Selecting this option grants only this employer access to review your verified profile.</span>
+                    </div>
+                  )}
+                  <p className="text-[11px] text-muted-foreground pt-1 border-t border-primary/15">
+                    Your digital identity, work history, verified skills, and showcase credentials will be shared with this employer.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl border border-border bg-muted/30 space-y-1.5 mt-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                    <Lock className="h-3.5 w-3.5 text-primary" />
+                    <span>Profile Kept Completely Private</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Your OneWinq profile link and network connections will NOT be shared. The employer will only review your uploaded resume document and name/email.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Resume Upload or Link (Optional) */}
