@@ -10,6 +10,7 @@ import {
   Building2,
   Banknote,
   Calendar,
+  Clock,
   CheckCircle2,
   Send,
   Loader2,
@@ -56,6 +57,8 @@ export default function JobsPage() {
   const [selectedEmployment, setSelectedEmployment] = React.useState<string>('ALL');
   const [selectedWorkplace, setSelectedWorkplace] = React.useState<string>('ALL');
   const [applyingJob, setApplyingJob] = React.useState<Job | null>(null);
+  const [viewingJobDetails, setViewingJobDetails] = React.useState<Job | null>(null);
+  const [expandedJobDescId, setExpandedJobDescId] = React.useState<string | null>(null);
   const [uploadedResume, setUploadedResume] = React.useState<{ name: string; url: string; size?: number } | null>(null);
   const [isUploadingResume, setIsUploadingResume] = React.useState(false);
   const [shareProfile, setShareProfile] = React.useState<boolean>(true);
@@ -285,6 +288,15 @@ export default function JobsPage() {
                             Easy Apply
                           </Badge>
                         )}
+                        {job.expiresAt ? (
+                          <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25 flex items-center gap-1 font-semibold">
+                            <Calendar className="h-2.5 w-2.5" /> Closes: {new Date(job.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] sm:text-[11px] py-0 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25 flex items-center gap-1 font-medium">
+                            <Clock className="h-2.5 w-2.5" /> Open
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
@@ -311,9 +323,32 @@ export default function JobsPage() {
                       </div>
 
                       {job.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
-                          {job.description}
-                        </p>
+                        <div className="space-y-1 pt-0.5">
+                          <p className={cn(
+                            "text-xs text-muted-foreground leading-relaxed whitespace-pre-line",
+                            expandedJobDescId === job.id ? "" : "line-clamp-2"
+                          )}>
+                            {job.description}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            {job.description.length > 110 && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedJobDescId(expandedJobDescId === job.id ? null : job.id)}
+                                className="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                              >
+                                {expandedJobDescId === job.id ? 'Show less' : 'Read more'}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setViewingJobDetails(job)}
+                              className="text-[11px] font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                            >
+                              View full details <ArrowRight className="h-2.5 w-2.5" />
+                            </button>
+                          </div>
+                        </div>
                       )}
 
                       {job.skills && job.skills.length > 0 && (
@@ -403,8 +438,26 @@ export default function JobsPage() {
               <DialogTitle>Apply for {applyingJob.title}</DialogTitle>
               <DialogDescription>
                 at <span className="font-semibold text-foreground">{applyingJob.organization?.name}</span>
+                {applyingJob.expiresAt && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-semibold ml-2">
+                    • <Calendar className="h-3 w-3" /> Last Date: {new Date(applyingJob.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                )}
               </DialogDescription>
             </DialogHeader>
+
+            {/* Quick Job Overview Box */}
+            <div className="p-3 rounded-xl bg-muted/40 border border-border/70 space-y-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-foreground">
+                <span>Role Summary</span>
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  {applyingJob.employmentType.replace('_', ' ')} • {applyingJob.workplaceType.replace('_', ' ')}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed whitespace-pre-line">
+                {applyingJob.description}
+              </p>
+            </div>
 
             {/* Candidate Profile Sharing & Privacy Selection */}
             <div className="space-y-2">
@@ -653,6 +706,135 @@ export default function JobsPage() {
               </Button>
             </DialogFooter>
           </form>
+        )}
+      </Dialog>
+
+      {/* Full Job Details Modal */}
+      <Dialog
+        open={!!viewingJobDetails}
+        onOpenChange={(open) => {
+          if (!open) setViewingJobDetails(null);
+        }}
+        className="max-w-2xl max-h-[90vh] flex flex-col"
+      >
+        {viewingJobDetails && (
+          <div className="space-y-4 flex flex-col min-h-0">
+            <DialogHeader>
+              <div className="flex items-start gap-3">
+                <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/80 flex items-center justify-center text-primary font-bold overflow-hidden shrink-0 p-1">
+                  {viewingJobDetails.organization?.logoUrl ? (
+                    <img
+                      src={viewingJobDetails.organization.logoUrl}
+                      alt={viewingJobDetails.organization.name}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <Building2 className="h-6 w-6 text-primary/80" />
+                  )}
+                </div>
+                <div className="space-y-1 min-w-0 flex-1">
+                  <DialogTitle className="text-lg font-bold">
+                    {viewingJobDetails.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-foreground">{viewingJobDetails.organization?.name}</span>
+                    {viewingJobDetails.location?.city && (
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        • <MapPin className="h-3 w-3" /> {viewingJobDetails.location.city}
+                      </span>
+                    )}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {/* Badges / Highlights */}
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Badge variant="outline" className="py-0.5 px-2 font-medium">
+                {viewingJobDetails.employmentType.replace('_', ' ')}
+              </Badge>
+              <Badge variant="outline" className="py-0.5 px-2 bg-primary/5 text-primary font-medium">
+                {viewingJobDetails.workplaceType.replace('_', ' ')}
+              </Badge>
+              {viewingJobDetails.salary && viewingJobDetails.salary.min && viewingJobDetails.salary.isDisclosed && (
+                <Badge variant="outline" className="py-0.5 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold flex items-center gap-1">
+                  <Banknote className="h-3 w-3" />
+                  {getCurrencySymbol(viewingJobDetails.salary.currency)} {viewingJobDetails.salary.min.toLocaleString()}
+                  {viewingJobDetails.salary.max ? ` - ${viewingJobDetails.salary.max.toLocaleString()}` : '+'} / {viewingJobDetails.salary.period?.toLowerCase()}
+                </Badge>
+              )}
+              {viewingJobDetails.expiresAt ? (
+                <Badge variant="outline" className="py-0.5 px-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25 flex items-center gap-1 font-semibold">
+                  <Calendar className="h-3 w-3" /> Last Date: {new Date(viewingJobDetails.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="py-0.5 px-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1 font-medium">
+                  <Clock className="h-3 w-3" /> Open Applications
+                </Badge>
+              )}
+            </div>
+
+            {/* Scrollable Description Body */}
+            <div className="space-y-3 overflow-y-auto max-h-[45vh] pr-1 py-1 custom-scrollbar">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Job Description & Responsibilities
+                </h4>
+                <div className="text-xs text-foreground/90 whitespace-pre-line leading-relaxed bg-muted/20 p-3.5 rounded-xl border border-border/60">
+                  {viewingJobDetails.description}
+                </div>
+              </div>
+
+              {viewingJobDetails.skills && viewingJobDetails.skills.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    Required Skills
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {viewingJobDetails.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 text-xs font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="pt-2 border-t border-border/60 flex items-center justify-between sm:justify-end gap-2">
+              <Button variant="outline" onClick={() => setViewingJobDetails(null)}>
+                Close
+              </Button>
+              {viewingJobDetails.hasApplied || appliedJobIds.has(viewingJobDetails.id) ? (
+                <Button disabled variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 font-semibold gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Already Applied
+                </Button>
+              ) : viewingJobDetails.applicationMethod === 'EXTERNAL' && viewingJobDetails.externalApplyUrl ? (
+                <Button
+                  onClick={() => window.open(viewingJobDetails.externalApplyUrl!, '_blank', 'noopener,noreferrer')}
+                  className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 font-semibold"
+                >
+                  Apply via External Form <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    const job = viewingJobDetails;
+                    setViewingJobDetails(null);
+                    setApplyingJob(job);
+                    setUploadedResume(null);
+                    reset();
+                  }}
+                  className="gap-1.5 font-semibold"
+                >
+                  Apply Now <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </DialogFooter>
+          </div>
         )}
       </Dialog>
     </div>

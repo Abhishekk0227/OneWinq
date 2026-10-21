@@ -91,6 +91,14 @@ export default function VerifyEmailPage() {
           We sent a 6-digit verification code to{' '}
           <strong className="text-foreground">{currentEmail || 'your email'}</strong>.
         </p>
+        <div className="pt-0.5">
+          <Link
+            to="/register"
+            className="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1"
+          >
+            Entered the wrong email? Re-register or change email
+          </Link>
+        </div>
       </div>
 
       {serverError && (

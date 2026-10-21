@@ -292,10 +292,8 @@ export function PostCard({ post, onRefresh }: { post: Post; onRefresh: () => voi
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/80 pt-0.5">
               <span>{timeAgo(post.createdAt)}</span>
               {post.editedAt && <span>• (edited)</span>}
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Globe className="h-3 w-3" />
-                <span>Public</span>
+              <span className="flex items-center gap-1 text-muted-foreground/70" title="Public post">
+                • <Globe className="h-3 w-3 inline opacity-70" />
               </span>
               {post.state === 'ARCHIVED' && (
                 <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-amber-500/40 text-amber-500 ml-1">

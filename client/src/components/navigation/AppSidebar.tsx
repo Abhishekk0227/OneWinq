@@ -62,14 +62,14 @@ export function AppSidebar() {
 
   const personalNavItems = [
     { label: 'Home Feed', to: '/app', icon: Home, end: true },
-    { label: 'Discover & Network', to: '/app/network', icon: Compass },
-    { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
-    { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },
     { label: 'My Profile', to: '/app/profile', icon: UserCircle },
-    { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate },
+    { label: 'Discover & Network', to: '/app/network', icon: Compass },
     { label: 'Connections', to: '/app/connections', icon: Users },
     { label: 'Messages', to: '/app/messages', icon: MessageSquare },
     { label: 'Notifications', to: '/app/notifications', icon: Bell },
+    { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
+    { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },
+    { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate },
     { label: 'Analytics', to: '/app/analytics', icon: BarChart3 },
     { label: 'Manage Cards', to: '/app/cards', icon: CreditCard },
     { label: 'Orders', to: '/app/orders', icon: Package },

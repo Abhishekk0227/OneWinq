@@ -9,6 +9,20 @@ import { authApi } from '@/features/auth/api/auth.api'
 import { toast } from '@/stores/toastStore'
 import { Mail, Lock, User, ArrowRight, AtSign } from 'lucide-react'
 
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+const COMMON_TYPO_DOMAINS: Record<string, string> = {
+  'gmai.com': 'gmail.com',
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'gmaill.com': 'gmail.com',
+  'gmaik.com': 'gmail.com',
+  'yaho.com': 'yahoo.com',
+  'yahooo.com': 'yahoo.com',
+  'hotmial.com': 'hotmail.com',
+  'hotmai.com': 'hotmail.com',
+  'outlok.com': 'outlook.com',
+}
+
 const registerSchema = z
   .object({
     displayName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
@@ -18,7 +32,20 @@ const registerSchema = z
       .max(30, 'Username must be at most 30 characters')
       .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, 'Username must be lowercase letters, numbers, or hyphens')
       .transform((v) => v.toLowerCase().trim()),
-    email: z.string().email('Please enter a valid email address'),
+    email: z
+      .string()
+      .min(1, 'Email address is required')
+      .email('Please enter a valid email address')
+      .regex(EMAIL_REGEX, 'Please enter a valid email address with a domain (e.g. name@example.com)')
+      .superRefine((val, ctx) => {
+        const domain = val.split('@')[1]?.toLowerCase()
+        if (domain && COMMON_TYPO_DOMAINS[domain]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Did you mean @${COMMON_TYPO_DOMAINS[domain]}? Please verify your email domain.`,
+          })
+        }
+      }),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')
