@@ -390,7 +390,9 @@ export default function PublicProfilePage() {
     { id: 'home', label: 'Home', icon: <Home className="h-4 w-4" /> },
     ...(hasExperience ? [{ id: 'experience', label: 'Experience', icon: <Briefcase className="h-4 w-4" />, count: experiences.length }] : []),
     ...(hasEducation ? [{ id: 'education', label: 'Education', icon: <GraduationCap className="h-4 w-4" />, count: education.length }] : []),
-    ...(hasPortfolio ? [{ id: 'portfolio', label: 'Work', icon: <Briefcase className="h-4 w-4" />, count: projects.length + services.length + organizations.length }] : []),
+    ...(projects.length > 0 ? [{ id: 'projects', label: 'Projects', icon: <Layers className="h-4 w-4" />, count: projects.length }] : []),
+    ...(organizations.length > 0 ? [{ id: 'ventures', label: 'Ventures & Orgs', icon: <Building2 className="h-4 w-4" />, count: organizations.length }] : []),
+    ...(services.length > 0 ? [{ id: 'services', label: 'Services', icon: <Briefcase className="h-4 w-4" />, count: services.length }] : []),
     ...(hasMedia ? [{ id: 'media', label: 'Media & Pubs', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + publications.length }] : []),
     ...(hasPrivateDocs ? [{ id: 'documents', label: 'Documents', icon: <FileText className="h-4 w-4" />, count: privateDocuments.length }] : []),
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
@@ -638,6 +640,41 @@ export default function PublicProfilePage() {
           {/* Right Main Content Canvas */}
           <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
 
+            {/* Horizontal Left-Right Scrollable Navigation Tab Bar (Mobile & Desktop Quick-Nav) */}
+            {profileTabs.length > 1 && (
+              <div className="sticky top-14 z-20 bg-background/95 backdrop-blur-md py-2 border-b border-border/80 -mx-1 px-1">
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth px-1">
+                  {profileTabs.map((tab) => {
+                    const isActive = activeTab === tab.id
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                          isActive
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/70'
+                        }`}
+                      >
+                        {tab.icon}
+                        <span>{tab.label}</span>
+                        {tab.count !== undefined && tab.count > 0 && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                              isActive ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {tab.count}
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Profile Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
             {activeTab === 'home' && (
               <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
@@ -786,43 +823,6 @@ export default function PublicProfilePage() {
               </div>
             )}
 
-        {/* Fixed Bottom Navigation Bar for Profile Sections */}
-        {profileTabs.length > 1 && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
-            {profileTabs.slice(0, 3).map((tab) => {
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
-                    isActive
-                      ? 'text-primary font-extrabold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
-                    {tab.icon}
-                  </div>
-                  <span className="truncate max-w-full">{tab.label}</span>
-                </button>
-              )
-            })}
-
-            <button
-              type="button"
-              onClick={() => setIsSectionsDrawerOpen(true)}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
-            >
-              <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
-                <Menu className="h-4 w-4" />
-              </div>
-              <span className="truncate max-w-full">All ({profileTabs.length})</span>
-            </button>
-          </div>
-        )}
-
         {/* Dynamic Sections Content */}
         <div className="space-y-4">
             {/* Experience Section — LinkedIn-style Timeline */}
@@ -937,10 +937,10 @@ export default function PublicProfilePage() {
             )}
 
             {/* Projects Section */}
-            {(activeTab === 'all' || activeTab === 'portfolio') && projects.length > 0 && (
+            {(activeTab === 'all' || activeTab === 'projects') && projects.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="pb-2 border-b border-border min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects & Work</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects ({projects.length})</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
                   {projects.map((proj: any, idx: number) => {
@@ -1016,30 +1016,93 @@ export default function PublicProfilePage() {
               </div>
             )}
 
-            {/* Services Section */}
-            {(activeTab === 'all' || activeTab === 'portfolio') && services.length > 0 && (
+            {/* Ventures & Organizations Section */}
+            {(activeTab === 'all' || activeTab === 'ventures') && organizations.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="pb-2 border-b border-border min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services & Offerings</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations ({organizations.length})</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
-                  {services.map((srv: any, idx: number) => (
-                    <div key={srv.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-1 min-w-0 max-w-full overflow-hidden">
-                      <div className="flex items-start justify-between gap-2 min-w-0">
-                        <h3 className="font-semibold text-xs text-foreground break-words [overflow-wrap:anywhere] min-w-0">{srv.title}</h3>
-                        {srv.priceRange && (
-                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
-                            {srv.priceRange}
-                          </span>
+                  {organizations.map((org: any, idx: number) => {
+                    const orgName = org.name || org.title || 'Venture'
+                    const orgRole = org.role || org.subtitle || org.metadata?.role || ''
+                    const orgTagline = org.tagline || org.metadata?.funding || org.description || ''
+                    const orgWebsite = org.website || org.url || ''
+                    const orgStage = org.stage || org.metadata?.stage || ''
+                    return (
+                      <div key={org.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3.5 space-y-1.5 hover:border-primary/40 transition-colors">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-semibold text-xs text-foreground">{orgName}</span>
+                          {orgStage && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary uppercase shrink-0">
+                              {orgStage}
+                            </span>
+                          )}
+                        </div>
+                        {orgRole && (
+                          <p className="text-[11px] font-medium text-foreground/80">{orgRole}</p>
+                        )}
+                        {orgTagline && (
+                          <p className="text-[11px] text-muted-foreground line-clamp-2">{orgTagline}</p>
+                        )}
+                        {orgWebsite && (
+                          <a
+                            href={orgWebsite.startsWith('http') ? orgWebsite : `https://${orgWebsite}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleLinkClick(orgWebsite, orgName)}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline pt-0.5"
+                          >
+                            <span>Visit website</span>
+                            <ExternalLink className="h-3 w-3 shrink-0" />
+                          </a>
                         )}
                       </div>
-                      {srv.description && (
-                        <p className="text-[11px] text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere] min-w-0">
-                          {srv.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Services Section */}
+            {(activeTab === 'all' || activeTab === 'services') && services.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
+                <div className="pb-2 border-b border-border min-w-0">
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services Provided ({services.length})</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
+                  {services.map((srv: any, idx: number) => {
+                    const srvImg = srv.imageUrl
+                    return (
+                      <div key={srv.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3 space-y-2 min-w-0 max-w-full overflow-hidden flex flex-col justify-between">
+                        <div>
+                          {srvImg && (
+                            <div className="w-full aspect-[16/9] max-h-40 rounded-lg overflow-hidden bg-muted/40 mb-2 border border-border/60">
+                              <img
+                                src={srvImg}
+                                alt={srv.title}
+                                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          <div className="flex items-start justify-between gap-2 min-w-0">
+                            <h3 className="font-semibold text-xs text-foreground break-words [overflow-wrap:anywhere] min-w-0">{srv.title}</h3>
+                            {srv.priceRange && (
+                              <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
+                                {srv.priceRange}
+                              </span>
+                            )}
+                          </div>
+                          {srv.description && (
+                            <p className="text-[11px] text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere] min-w-0 pt-1">
+                              {srv.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

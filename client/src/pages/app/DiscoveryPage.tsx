@@ -240,7 +240,7 @@ export default function DiscoveryPage() {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-2.5 p-2.5 sm:p-3 rounded-xl bg-card border border-border shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 sm:p-3.5 rounded-2xl bg-card border border-border/80 shadow-xs">
         <div className="relative flex-1 w-full">
           <Input
             value={searchTerm}
@@ -250,19 +250,19 @@ export default function DiscoveryPage() {
                 ? 'Search by name, role, skills...'
                 : 'Search companies by name, tagline, or industry...'
             }
-            leftIcon={<Search className="h-3.5 w-3.5" />}
-            className="w-full h-8.5 text-xs"
+            leftIcon={<Search className="h-4 w-4" />}
+            className="w-full h-10 text-xs sm:text-sm rounded-xl"
           />
         </div>
 
         {activeTab === 'PEOPLE' ? (
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <label className="flex items-center gap-1.5 text-xs font-medium text-foreground/80 cursor-pointer select-none px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/80">
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-foreground/80 cursor-pointer select-none px-3.5 py-2 rounded-xl bg-muted/40 border border-border/80 hover:bg-muted/60 transition-colors w-full sm:w-auto justify-center">
               <input
                 type="checkbox"
                 checked={remoteOnly}
                 onChange={(e) => setRemoteOnly(e.target.checked)}
-                className="rounded text-primary focus:ring-primary h-3.5 w-3.5"
+                className="rounded text-primary focus:ring-primary h-4 w-4"
               />
               <span>Remote Only</span>
             </label>
@@ -272,7 +272,7 @@ export default function DiscoveryPage() {
             <select
               value={orgTypeFilter}
               onChange={(e) => setOrgTypeFilter(e.target.value)}
-              className="h-8.5 px-2.5 py-1 rounded-lg bg-muted/40 border border-border text-xs font-medium text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 w-full sm:w-auto cursor-pointer"
+              className="h-10 px-3.5 rounded-xl bg-background border border-border/80 text-xs sm:text-sm font-medium text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 w-full sm:w-56 cursor-pointer shadow-2xs"
             >
               {ORG_TYPE_FILTERS.map((f) => (
                 <option key={f.value} value={f.value}>

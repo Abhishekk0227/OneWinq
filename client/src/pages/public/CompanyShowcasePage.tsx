@@ -733,6 +733,32 @@ export default function CompanyShowcasePage() {
 
           {/* Right Main Content Canvas */}
           <div className="md:col-span-9 space-y-5 min-w-0 max-w-full">
+            {/* Mobile / Swipeable Section Tabs Header */}
+            {profileTabs.length > 1 && (
+              <div className="md:hidden sticky top-12 z-20 -mx-3 px-3 py-2 bg-background/95 backdrop-blur-md border-b border-border/80">
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
+                  {profileTabs.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => handleSelectTab(tab.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                      >
+                        {tab.icon && React.cloneElement(tab.icon as React.ReactElement, { className: 'h-3.5 w-3.5 shrink-0' })}
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* HOME TAB: Identity Hero Card */}
             {activeTab === 'home' && (
               <div className="rounded-3xl border border-border bg-card shadow-card text-left relative overflow-hidden">
