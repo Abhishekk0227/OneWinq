@@ -1142,36 +1142,51 @@ export default function CompanyShowcasePage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {projects.map((proj, idx) => (
-                      <div key={idx} className="p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-3 hover:border-primary/40 transition-all shadow-xs">
-                        <div className="flex items-start justify-between gap-2">
+                    {projects.map((proj, idx) => {
+                      const projectImg = proj.imageUrl || proj.coverUrl;
+                      return (
+                        <div key={idx} className="p-4 sm:p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-muted/40 space-y-3 hover:border-primary/40 transition-all shadow-xs flex flex-col justify-between">
                           <div>
-                            <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{proj.title}</h3>
-                            {proj.client && (
-                              <span className="text-xs text-primary font-medium">For {proj.client}</span>
+                            {projectImg && (
+                              <div className="w-full aspect-[16/9] max-h-48 rounded-xl overflow-hidden bg-muted/40 mb-3 border border-border/60">
+                                <img
+                                  src={projectImg}
+                                  alt={proj.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h3 className="font-bold text-base text-foreground break-words [overflow-wrap:anywhere]">{proj.title}</h3>
+                                {proj.client && (
+                                  <span className="text-xs text-primary font-medium">For {proj.client}</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {proj.description && (
+                              <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere] mt-2">
+                                {proj.description}
+                              </p>
                             )}
                           </div>
+
+                          {proj.linkUrl && (
+                            <a
+                              href={proj.linkUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
+                              className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
+                            >
+                              View Project <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
                         </div>
-
-                        {proj.description && (
-                          <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
-                            {proj.description}
-                          </p>
-                        )}
-
-                        {proj.linkUrl && (
-                          <a
-                            href={proj.linkUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={() => handleTrackLink(proj.linkUrl, proj.title || 'Project')}
-                            className="inline-flex items-center gap-1 text-xs text-primary font-semibold hover:underline pt-1"
-                          >
-                            View Project <ExternalLink className="h-3 w-3" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </section>

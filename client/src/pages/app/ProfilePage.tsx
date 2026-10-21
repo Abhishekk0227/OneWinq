@@ -495,42 +495,6 @@ export default function ProfilePage() {
           onTouchEnd={handleTouchEnd}
           className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y"
         >
-          {/* Mobile Horizontal Tabs (Sticky / Scrollable matching Org Profile) */}
-          {profileTabs.length > 1 && (
-            <div className="md:hidden sticky top-14 z-30 -mx-3 px-3 py-2 bg-background/95 backdrop-blur-md border-b border-border/60">
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-                {profileTabs.map((tab) => {
-                  const isActive = activeTab === tab.id
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(tab.id)
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
-                      }}
-                      className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                        isActive
-                          ? 'bg-primary text-white shadow-xs font-bold'
-                          : 'bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <span>{tab.label}</span>
-                      {tab.count !== undefined && (
-                        <span
-                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-background text-muted-foreground'
-                          }`}
-                        >
-                          {tab.count}
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
