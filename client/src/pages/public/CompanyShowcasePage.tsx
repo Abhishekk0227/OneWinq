@@ -642,17 +642,6 @@ export default function CompanyShowcasePage() {
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-2.5 transition-colors min-w-0">
         <div className="container mx-auto flex max-w-6xl items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           <div className="flex items-center gap-1.5 shrink-0">
-            {profileTabs.length > 1 && (
-              <button
-                type="button"
-                onClick={() => setIsSectionsDrawerOpen(true)}
-                className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground transition-colors md:hidden shrink-0 cursor-pointer"
-                title="Open Organization Sections Sidebar"
-                aria-label="Open Organization Sections Sidebar"
-              >
-                <Menu className="h-4 w-4 text-primary" />
-              </button>
-            )}
             <BrandLogo to="/" className="inline-flex shrink-0" imgClassName="h-5 sm:h-6" />
           </div>
 
