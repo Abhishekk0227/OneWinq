@@ -1,5 +1,5 @@
-// OneWinq Service Worker v14 - Clean Visibility Rules modal button and restored header
-const CACHE_NAME = 'onewinq-v14';
+// OneWinq Service Worker v15 - Standard app bottom navigation and public view profile link
+const CACHE_NAME = 'onewinq-v15';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
