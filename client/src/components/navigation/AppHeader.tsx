@@ -266,18 +266,6 @@ export function AppHeader() {
                   </Link>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsUserMenuOpen(false)
-                    setMobileMenuOpen(true)
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-foreground/80 hover:bg-primary-soft hover:text-primary transition-colors lg:hidden text-left"
-                >
-                  <Menu className="h-4 w-4" />
-                  <span>All Sections & Menu</span>
-                </button>
-
                 <Link
                   to="/app/settings"
                   onClick={() => setIsUserMenuOpen(false)}
