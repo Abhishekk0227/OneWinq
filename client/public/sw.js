@@ -1,5 +1,5 @@
-// OneWinq Service Worker v17 - Clean top profile banner
-const CACHE_NAME = 'onewinq-v17';
+// OneWinq Service Worker v18 - Enable standard mobile bottom navigation on my profile
+const CACHE_NAME = 'onewinq-v18';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
