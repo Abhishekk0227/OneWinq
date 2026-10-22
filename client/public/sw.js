@@ -1,5 +1,5 @@
-// OneWinq Service Worker v5 - Profile Visibility, blank touch swipe fix, and swipe animation
-const CACHE_NAME = 'onewinq-v5';
+// OneWinq Service Worker v6 - Fix React hooks render order in ProfilePage and PublicProfilePage
+const CACHE_NAME = 'onewinq-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

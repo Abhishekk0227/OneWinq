@@ -195,6 +195,27 @@ export default function PublicProfilePage() {
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
 
+  // Mobile Animated Swipe Prompt state & auto-dismiss
+  const [showSwipeHint, setShowSwipeHint] = React.useState(() => {
+    if (typeof window === 'undefined') return false
+    return !sessionStorage.getItem('onewinq_swipe_hint_seen')
+  })
+
+  const dismissSwipeHint = React.useCallback(() => {
+    setShowSwipeHint(false)
+    try {
+      sessionStorage.setItem('onewinq_swipe_hint_seen', 'true')
+    } catch {}
+  }, [])
+
+  React.useEffect(() => {
+    if (!showSwipeHint) return
+    const timer = setTimeout(() => {
+      setShowSwipeHint(false)
+    }, 7000)
+    return () => clearTimeout(timer)
+  }, [showSwipeHint])
+
   // Global Theme integration (Light / Dark)
   const { resolvedTheme, toggleTheme } = useTheme()
 
@@ -401,27 +422,6 @@ export default function PublicProfilePage() {
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
     ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
-
-  // Screen Touch Gesture & Mobile Swipe Prompt handlers
-  const [showSwipeHint, setShowSwipeHint] = React.useState(() => {
-    if (typeof window === 'undefined') return false
-    return !sessionStorage.getItem('onewinq_swipe_hint_seen')
-  })
-
-  const dismissSwipeHint = React.useCallback(() => {
-    setShowSwipeHint(false)
-    try {
-      sessionStorage.setItem('onewinq_swipe_hint_seen', 'true')
-    } catch {}
-  }, [])
-
-  React.useEffect(() => {
-    if (!showSwipeHint) return
-    const timer = setTimeout(() => {
-      setShowSwipeHint(false)
-    }, 7000)
-    return () => clearTimeout(timer)
-  }, [showSwipeHint])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null
