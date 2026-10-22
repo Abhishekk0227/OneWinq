@@ -1,5 +1,5 @@
-// OneWinq Service Worker v16 - Clean profile menu
-const CACHE_NAME = 'onewinq-v16';
+// OneWinq Service Worker v17 - Clean top profile banner
+const CACHE_NAME = 'onewinq-v17';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
