@@ -184,20 +184,12 @@ export default function ProfilePage() {
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
 
-  // Mobile Animated Swipe Prompt state & auto-dismiss (always triggers on profile open)
-  const [showSwipeHint, setShowSwipeHint] = React.useState(true)
+  // Mobile Animated Swipe Prompt state & auto-dismiss
+  const [showSwipeHint, setShowSwipeHint] = React.useState(false)
 
   const dismissSwipeHint = React.useCallback(() => {
     setShowSwipeHint(false)
   }, [])
-
-  React.useEffect(() => {
-    if (!showSwipeHint) return
-    const timer = setTimeout(() => {
-      setShowSwipeHint(false)
-    }, 2500)
-    return () => clearTimeout(timer)
-  }, [showSwipeHint])
 
   // State for Temporary Mode Modal
   const [isTempModalOpen, setIsTempModalOpen] = React.useState(false)
@@ -370,6 +362,18 @@ export default function ProfilePage() {
       ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
   }, [profile, hasExperience, hasEducation, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
+
+  // Show swipe arrows briefly when profile is ready and has multiple tabs
+  const hasLoadedProfile = !isLoading && Boolean(profile) && profileTabs.length > 1
+  React.useEffect(() => {
+    if (hasLoadedProfile) {
+      setShowSwipeHint(true)
+      const timer = setTimeout(() => {
+        setShowSwipeHint(false)
+      }, 3500)
+      return () => clearTimeout(timer)
+    }
+  }, [hasLoadedProfile])
 
   if (isLoading) {
     return <LoadingScreen message="Loading your identity..." />
@@ -1680,20 +1684,20 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Subtle Transparent White Swipe Arrows on Screen Edges (Fades out quickly) */}
+      {/* Sleek, Minimal Transparent White Edge Arrows (Auto-fades after viewing profile) */}
       {showSwipeHint && profileTabs.length > 1 && (
         <div
           data-no-swipe="true"
-          className="md:hidden fixed inset-y-0 left-0 right-0 pointer-events-none z-50 flex items-center justify-between px-1.5 select-none transition-opacity duration-300"
+          className="fixed inset-y-0 left-0 right-0 pointer-events-none z-[100] flex items-center justify-between px-2 sm:px-4 select-none transition-opacity duration-500 animate-in fade-in"
         >
           {/* Transparent white arrow on minimum left edge */}
-          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-            <ChevronLeft className="h-7 w-7 stroke-[2.5]" />
+          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/45 backdrop-blur-md text-white/90 border border-white/20 shadow-2xl animate-pulse">
+            <ChevronLeft className="h-6 w-6 stroke-[3]" />
           </div>
 
           {/* Transparent white arrow on minimum right edge */}
-          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-            <ChevronRight className="h-7 w-7 stroke-[2.5]" />
+          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/45 backdrop-blur-md text-white/90 border border-white/20 shadow-2xl animate-pulse">
+            <ChevronRight className="h-6 w-6 stroke-[3]" />
           </div>
         </div>
       )}

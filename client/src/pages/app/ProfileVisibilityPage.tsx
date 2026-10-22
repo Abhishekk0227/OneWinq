@@ -9,7 +9,6 @@ import {
   Clock,
   Check,
   AlertCircle,
-  Eye,
   Camera,
   Layers,
   Sparkles,
@@ -20,7 +19,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  RefreshCw,
   XCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -65,11 +63,6 @@ export function ProfileVisibilityPage() {
     'contact.address': ['PRIVATE'],
     'contact.website': ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'],
   })
-
-  // Live Preview state
-  const [previewMode, setPreviewMode] = React.useState<VisibilityMode>(currentMode)
-  const [previewData, setPreviewData] = React.useState<any>(null)
-  const [isPreviewLoading, setIsPreviewLoading] = React.useState(false)
 
   // Sync profile visibility settings when loaded
   React.useEffect(() => {
@@ -123,28 +116,6 @@ export function ProfileVisibilityPage() {
     const timer = setInterval(updateCountdown, 1000)
     return () => clearInterval(timer)
   }, [temporaryMode, queryClient])
-
-  // Fetch Live Preview when previewMode changes
-  React.useEffect(() => {
-    let isMounted = true
-    setIsPreviewLoading(true)
-    profileApi
-      .getPreview(previewMode)
-      .then((res) => {
-        if (isMounted) {
-          setPreviewData(res.data?.preview || null)
-        }
-      })
-      .catch(() => {
-        if (isMounted) setPreviewData(null)
-      })
-      .finally(() => {
-        if (isMounted) setIsPreviewLoading(false)
-      })
-    return () => {
-      isMounted = false
-    }
-  }, [previewMode])
 
   // Mutations
   const setActiveModeMutation = useMutation({
@@ -857,62 +828,6 @@ export function ProfileVisibilityPage() {
             <span>Save Visibility Rules</span>
           </Button>
         </div>
-      </div>
-
-      {/* ================= SECTION 4: LIVE PREVIEW SNAPSHOT ================= */}
-      <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
-          <div>
-            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Eye className="h-4 w-4 text-primary" />
-              <span>Live Persona Simulation</span>
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Inspect how visitors see your identity right now across each mode.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-muted text-xs font-bold">
-            {(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'] as VisibilityMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setPreviewMode(mode)}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  previewMode === mode
-                    ? 'bg-card text-foreground shadow-xs font-bold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {isPreviewLoading ? (
-          <div className="p-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-            <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-            <span>Generating live snapshot...</span>
-          </div>
-        ) : previewData ? (
-          <div className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-foreground">Snapshot for mode: <strong>{previewMode}</strong></span>
-              <span className="text-muted-foreground">
-                Visible sections: {Object.keys(previewData?.sections || {}).length}
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground leading-relaxed">
-              Bio displayed: {previewData?.bio || 'None'}<br />
-              Headline displayed: {previewData?.headline || 'None'}<br />
-              Email shown: {previewData?.contact?.email || 'Hidden / Restricted'}
-            </div>
-          </div>
-        ) : (
-          <div className="p-6 text-center text-xs text-muted-foreground">
-            Switch modes above to preview what visitors see.
-          </div>
-        )}
       </div>
     </div>
   )

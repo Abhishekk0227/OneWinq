@@ -1,5 +1,5 @@
-// OneWinq Service Worker v8 - Minimal transparent edge arrows and clean section headings
-const CACHE_NAME = 'onewinq-v8';
+// OneWinq Service Worker v9 - High contrast swipe indicators and removed live persona simulation
+const CACHE_NAME = 'onewinq-v9';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
