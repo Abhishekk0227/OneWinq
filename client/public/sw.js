@@ -1,5 +1,5 @@
-// OneWinq Service Worker v15 - Standard app bottom navigation and public view profile link
-const CACHE_NAME = 'onewinq-v15';
+// OneWinq Service Worker v17 - Clean top profile banner
+const CACHE_NAME = 'onewinq-v17';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

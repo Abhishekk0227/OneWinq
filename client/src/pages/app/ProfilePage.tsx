@@ -521,51 +521,6 @@ export default function ProfilePage() {
         <div
           className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y flex-1 min-h-[60vh]"
         >
-          {/* Mobile Profile Sections Horizontal Scroll Navigation */}
-          {profileTabs.length > 1 && (
-            <div className="md:hidden sticky top-14 z-20 bg-background/95 backdrop-blur-md -mx-3.5 px-3.5 py-2 border-b border-border/60">
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-                {profileTabs.map((tab) => {
-                  const isActive = activeTab === tab.id
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(tab.id)
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
-                      }}
-                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                        isActive
-                          ? 'bg-primary text-white shadow-xs'
-                          : 'bg-muted/70 text-foreground/80 hover:bg-muted hover:text-foreground border border-border/50'
-                      }`}
-                    >
-                      <span className="shrink-0">{tab.icon}</span>
-                      <span>{tab.label}</span>
-                      {tab.count !== undefined && (
-                        <span
-                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
-                          }`}
-                        >
-                          {tab.count}
-                        </span>
-                      )}
-                    </button>
-                  )
-                })}
-                <button
-                  type="button"
-                  onClick={() => setIsSectionsDrawerOpen(true)}
-                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/25 cursor-pointer whitespace-nowrap"
-                >
-                  <Menu className="h-3.5 w-3.5" />
-                  <span>All</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
