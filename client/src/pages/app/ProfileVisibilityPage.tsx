@@ -9,6 +9,7 @@ import {
   Clock,
   Check,
   AlertCircle,
+  Eye,
   Camera,
   Layers,
   Sparkles,
