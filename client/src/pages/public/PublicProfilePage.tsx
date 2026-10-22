@@ -52,6 +52,7 @@ import {
   User,
   Layers,
   Home,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   Menu,
@@ -206,7 +207,7 @@ export default function PublicProfilePage() {
     if (!showSwipeHint) return
     const timer = setTimeout(() => {
       setShowSwipeHint(false)
-    }, 6000)
+    }, 2500)
     return () => clearTimeout(timer)
   }, [showSwipeHint])
 
@@ -958,7 +959,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'projects') && projects.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="pb-2 border-b border-border min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects ({projects.length})</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Featured Projects</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
                   {projects.map((proj: any, idx: number) => {
@@ -1038,7 +1039,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'ventures') && organizations.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="pb-2 border-b border-border min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations ({organizations.length})</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Ventures & Organizations</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
                   {organizations.map((org: any, idx: number) => {
@@ -1086,7 +1087,7 @@ export default function PublicProfilePage() {
             {(activeTab === 'all' || activeTab === 'services') && services.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
                 <div className="pb-2 border-b border-border min-w-0">
-                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services Provided ({services.length})</h2>
+                  <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">Services Provided</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 min-w-0">
                   {services.map((srv: any, idx: number) => {
@@ -1537,38 +1538,20 @@ export default function PublicProfilePage() {
         </div>
       </Dialog>
 
-      {/* Floating Animated Swipe Prompt on Mobile */}
+      {/* Subtle Transparent White Swipe Arrows on Screen Edges (Fades out quickly) */}
       {showSwipeHint && profileTabs.length > 1 && (
         <div
           data-no-swipe="true"
-          className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none"
+          className="md:hidden fixed inset-y-0 left-0 right-0 pointer-events-none z-50 flex items-center justify-between px-1.5 select-none transition-opacity duration-300"
         >
-          <div
-            onClick={dismissSwipeHint}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/25 backdrop-blur-md animate-bounce cursor-pointer transition-all"
-          >
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground animate-pulse text-sm">👈</span>
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent font-black tracking-wide">
-                Swipe to see more
-              </span>
-              <span className="text-muted-foreground animate-pulse text-sm">👉</span>
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                dismissSwipeHint()
-              }}
-              className="ml-1 text-muted-foreground hover:text-foreground text-xs rounded-full p-0.5"
-              aria-label="Dismiss swipe prompt"
-            >
-              ✕
-            </button>
+          {/* Transparent white arrow on minimum left edge */}
+          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+            <ChevronLeft className="h-7 w-7 stroke-[2.5]" />
+          </div>
+
+          {/* Transparent white arrow on minimum right edge */}
+          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+            <ChevronRight className="h-7 w-7 stroke-[2.5]" />
           </div>
         </div>
       )}

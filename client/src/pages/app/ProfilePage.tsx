@@ -44,6 +44,8 @@ import {
   ShieldCheck,
   FileKey,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { useUIStore } from '@/stores/uiStore'
 import { cardsApi } from '@/features/cards/api/cards.api'
@@ -193,7 +195,7 @@ export default function ProfilePage() {
     if (!showSwipeHint) return
     const timer = setTimeout(() => {
       setShowSwipeHint(false)
-    }, 6000)
+    }, 2500)
     return () => clearTimeout(timer)
   }, [showSwipeHint])
 
@@ -1085,7 +1087,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
                   <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
                     <Layers className="h-4 w-4 text-primary" />
-                    <span>Featured Projects ({projects.length})</span>
+                    <span>Featured Projects</span>
                   </h3>
                   <Link to="/app/profile/edit?tab=projects">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1177,7 +1179,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
                   <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-primary" />
-                    <span>Ventures & Organizations ({organizations.length})</span>
+                    <span>Ventures & Organizations</span>
                   </h3>
                   <Link to="/app/profile/edit?tab=ventures">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1242,7 +1244,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
                   <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
                     <Briefcase className="h-4 w-4 text-primary" />
-                    <span>Services Provided ({services.length})</span>
+                    <span>Services Provided</span>
                   </h3>
                   <Link to="/app/profile/edit?tab=services">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1678,38 +1680,20 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Floating Animated Swipe Prompt on Mobile */}
+      {/* Subtle Transparent White Swipe Arrows on Screen Edges (Fades out quickly) */}
       {showSwipeHint && profileTabs.length > 1 && (
         <div
           data-no-swipe="true"
-          className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none"
+          className="md:hidden fixed inset-y-0 left-0 right-0 pointer-events-none z-50 flex items-center justify-between px-1.5 select-none transition-opacity duration-300"
         >
-          <div
-            onClick={dismissSwipeHint}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/25 backdrop-blur-md animate-bounce cursor-pointer transition-all"
-          >
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground animate-pulse text-sm">👈</span>
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent font-black tracking-wide">
-                Swipe to see more
-              </span>
-              <span className="text-muted-foreground animate-pulse text-sm">👉</span>
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                dismissSwipeHint()
-              }}
-              className="ml-1 text-muted-foreground hover:text-foreground text-xs rounded-full p-0.5"
-              aria-label="Dismiss swipe prompt"
-            >
-              ✕
-            </button>
+          {/* Transparent white arrow on minimum left edge */}
+          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+            <ChevronLeft className="h-7 w-7 stroke-[2.5]" />
+          </div>
+
+          {/* Transparent white arrow on minimum right edge */}
+          <div className="p-1.5 text-white/55 animate-pulse drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+            <ChevronRight className="h-7 w-7 stroke-[2.5]" />
           </div>
         </div>
       )}

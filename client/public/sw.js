@@ -1,5 +1,5 @@
-// OneWinq Service Worker v7 - Mobile post button integration, persistent swipe animation, unified mode customization
-const CACHE_NAME = 'onewinq-v7';
+// OneWinq Service Worker v8 - Minimal transparent edge arrows and clean section headings
+const CACHE_NAME = 'onewinq-v8';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
