@@ -61,6 +61,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
+import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 
@@ -1544,20 +1545,7 @@ export default function PublicProfilePage() {
 
       {/* Sleek, Minimal Transparent White Edge Arrows (Auto-fades after viewing profile) */}
       {showSwipeHint && profileTabs.length > 1 && (
-        <div
-          data-no-swipe="true"
-          className="fixed inset-y-0 left-0 right-0 pointer-events-none z-[100] flex items-center justify-between px-2 sm:px-4 select-none transition-opacity duration-500 animate-in fade-in"
-        >
-          {/* Transparent white arrow on minimum left edge */}
-          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/45 backdrop-blur-md text-white/90 border border-white/20 shadow-2xl animate-pulse">
-            <ChevronLeft className="h-6 w-6 stroke-[3]" />
-          </div>
-
-          {/* Transparent white arrow on minimum right edge */}
-          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/45 backdrop-blur-md text-white/90 border border-white/20 shadow-2xl animate-pulse">
-            <ChevronRight className="h-6 w-6 stroke-[3]" />
-          </div>
-        </div>
+        <SwipeHintIndicator />
       )}
 
       {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}

@@ -73,4 +73,35 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Swipe Hint Cascading Fade In/Out Keyframes */
+  @keyframes swipeFadeInOutLeft {
+    0%, 100% {
+      opacity: 0.3;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 0.95;
+      transform: translateX(-6px);
+    }
+  }
+
+  @keyframes swipeFadeInOutRight {
+    0%, 100% {
+      opacity: 0.3;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 0.95;
+      transform: translateX(6px);
+    }
+  }
+
+  .animate-swipe-hint-left {
+    animation: swipeFadeInOutLeft 1.4s ease-in-out infinite;
+  }
+
+  .animate-swipe-hint-right {
+    animation: swipeFadeInOutRight 1.4s ease-in-out infinite;
+  }
 }

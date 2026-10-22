@@ -56,6 +56,7 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { BrandLogo } from '@/components/navigation/BrandLogo';
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar';
+import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator';
 import { useTheme } from '@/app/providers/ThemeProvider';
 import { getCurrencySymbol } from '@/constants/app.constants';
 import type {
@@ -588,6 +589,7 @@ export default function CompanyShowcasePage() {
     touchStartY.current = null;
 
     if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      dismissSwipeHint();
       const currentIndex = profileTabs.findIndex((t) => t.id === activeTab);
       if (currentIndex === -1) return;
 
@@ -604,6 +606,25 @@ export default function CompanyShowcasePage() {
       }
     }
   };
+
+  // Mobile Animated Swipe Prompt state & auto-dismiss
+  const [showSwipeHint, setShowSwipeHint] = React.useState(false);
+
+  const dismissSwipeHint = React.useCallback(() => {
+    setShowSwipeHint(false);
+  }, []);
+
+  // Show swipe arrows briefly once organization data is loaded
+  const hasLoadedOrg = !isOrgLoading && Boolean(org);
+  React.useEffect(() => {
+    if (hasLoadedOrg) {
+      setShowSwipeHint(true);
+      const timer = setTimeout(() => {
+        setShowSwipeHint(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [hasLoadedOrg]);
 
   // If current activeTab is not present in dynamic profileTabs, gracefully fallback to 'home'
   React.useEffect(() => {
@@ -1537,6 +1558,11 @@ export default function CompanyShowcasePage() {
             <span className="truncate max-w-full">All Sections</span>
           </button>
         </div>
+      )}
+
+      {/* Sleek, Minimal Transparent White Edge Arrows (Auto-fades after viewing profile) */}
+      {showSwipeHint && profileTabs.length > 1 && (
+        <SwipeHintIndicator />
       )}
 
       {/* 4. Mobile Slide-Out Sections Drawer */}
