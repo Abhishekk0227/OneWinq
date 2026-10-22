@@ -365,7 +365,27 @@ export default function ProfilePage() {
     )
   }
 
-  // Screen Touch Gesture handlers
+  // Screen Touch Gesture & Mobile Swipe Prompt handlers
+  const [showSwipeHint, setShowSwipeHint] = React.useState(() => {
+    if (typeof window === 'undefined') return false
+    return !sessionStorage.getItem('onewinq_swipe_hint_seen')
+  })
+
+  const dismissSwipeHint = React.useCallback(() => {
+    setShowSwipeHint(false)
+    try {
+      sessionStorage.setItem('onewinq_swipe_hint_seen', 'true')
+    } catch {}
+  }, [])
+
+  React.useEffect(() => {
+    if (!showSwipeHint) return
+    const timer = setTimeout(() => {
+      setShowSwipeHint(false)
+    }, 7000)
+    return () => clearTimeout(timer)
+  }, [showSwipeHint])
+
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null
     if (target?.closest('input, textarea, select, button, a, [data-no-swipe]')) {
@@ -386,6 +406,7 @@ export default function ProfilePage() {
     touchStartY.current = null
 
     if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY) * 1.3) {
+      dismissSwipeHint()
       const currentIndex = profileTabs.findIndex((t) => t.id === activeTab)
       if (currentIndex === -1) return
 
@@ -406,7 +427,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6 text-left max-w-6xl mx-auto pb-24 transition-colors duration-300">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="space-y-6 text-left max-w-6xl mx-auto pb-28 min-h-[calc(100dvh-5rem)] flex flex-col transition-colors duration-300 touch-pan-y"
+    >
       {/* Slim Top Alert: Card Activation Required (Only if card not active) */}
       {!activeUserCard && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-950 dark:text-amber-200 shadow-xs">
@@ -490,9 +515,7 @@ export default function ProfilePage() {
 
         {/* Right Main Content Canvas with Touch Swipe support */}
         <div
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y"
+          className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y flex-1 min-h-[60vh]"
         >
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
@@ -542,20 +565,6 @@ export default function ProfilePage() {
 
                   {/* Canvas Actions Bar */}
                   <div className="flex flex-wrap items-center gap-2 pt-2">
-                    {/* Preview Live */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsPreviewOpen(true)
-                        refetchPreview()
-                      }}
-                      leftIcon={<Eye className="h-3.5 w-3.5" />}
-                      className="text-xs h-8"
-                    >
-                      Preview
-                    </Button>
-
                     {/* Edit Profile */}
                     <Link to="/app/profile/edit">
                       <Button
@@ -1671,6 +1680,42 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Floating Animated Swipe Prompt on Mobile */}
+      {showSwipeHint && profileTabs.length > 1 && (
+        <div
+          data-no-swipe="true"
+          className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-auto select-none"
+        >
+          <div
+            onClick={dismissSwipeHint}
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/20 backdrop-blur-md animate-bounce cursor-pointer transition-all"
+          >
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground animate-pulse text-sm">👈</span>
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent font-black tracking-wide">
+                Swipe to see more
+              </span>
+              <span className="text-muted-foreground animate-pulse text-sm">👉</span>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                dismissSwipeHint()
+              }}
+              className="ml-1 text-muted-foreground hover:text-foreground text-xs rounded-full p-0.5"
+              aria-label="Dismiss swipe prompt"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}
       {profileTabs.length > 1 && (

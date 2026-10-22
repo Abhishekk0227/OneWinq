@@ -25,6 +25,7 @@ import {
   KeyRound,
   ArrowLeft,
   FileText,
+  ShieldCheck,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { notificationsApi } from '@/features/notifications/api/notifications.api'
@@ -61,8 +62,9 @@ export function AppSidebar() {
   const activeCardCode = activeCard?.cardCode?.toLowerCase() || activeCard?.cardUid?.toLowerCase()
 
   const personalNavItems = [
-    { label: 'Home Feed', to: '/app', icon: Home, end: true },
+    { label: 'Home', to: '/app', icon: Home, end: true },
     { label: 'My Profile', to: '/app/profile', icon: UserCircle },
+    { label: 'Profile Visibility', to: '/app/visibility', icon: ShieldCheck },
     { label: 'Discover & Network', to: '/app/network', icon: Compass },
     { label: 'Connections', to: '/app/connections', icon: Users },
     { label: 'Messages', to: '/app/messages', icon: MessageSquare },

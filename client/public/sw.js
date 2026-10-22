@@ -1,5 +1,5 @@
-// OneWinq Service Worker v4 - Invalidate stale profile navigation caches
-const CACHE_NAME = 'onewinq-v4';
+// OneWinq Service Worker v5 - Profile Visibility, blank touch swipe fix, and swipe animation
+const CACHE_NAME = 'onewinq-v5';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

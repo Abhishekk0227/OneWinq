@@ -30,6 +30,7 @@ import {
   KeyRound,
   ArrowLeft,
   FileText,
+  ShieldCheck,
 } from 'lucide-react'
 import { triggerPWAInstall } from '@/components/pwa/InstallAppPrompt'
 import { useAuthStore } from '@/stores/authStore'
@@ -223,10 +224,11 @@ export function MobileMenuDrawer() {
     {
       title: 'Workspace',
       items: [
-        { label: 'Home Feed', to: '/app', icon: Home, end: true },
+        { label: 'Home', to: '/app', icon: Home, end: true },
+        { label: 'My Profile', to: '/app/profile', icon: UserCircle },
+        { label: 'Profile Visibility', to: '/app/visibility', icon: ShieldCheck },
         { label: 'Jobs & Careers', to: '/app/jobs', icon: Briefcase },
         { label: 'My Applications', to: '/app/my-applications', icon: FileCheck },
-        { label: 'My Profile', to: '/app/profile', icon: UserCircle },
         { label: 'Profile Templates', to: '/app/templates', icon: LayoutTemplate, highlight: true },
       ],
     },

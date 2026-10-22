@@ -26,6 +26,9 @@ const ResetPasswordPage = lazyWithRetry(() => import('@/pages/auth/ResetPassword
 const DashboardPage = lazyWithRetry(() => import('@/pages/app/DashboardPage'))
 const ProfilePage = lazyWithRetry(() => import('@/pages/app/ProfilePage'))
 const ProfileEditPage = lazyWithRetry(() => import('@/pages/app/ProfileEditPage'))
+const ProfileVisibilityPage = lazyWithRetry(() =>
+  import('@/pages/app/ProfileVisibilityPage').then((m) => ({ default: m.ProfileVisibilityPage }))
+)
 const ProfileTemplatesPage = lazyWithRetry(() => import('@/pages/app/ProfileTemplatesPage'))
 const FeedPage = lazyWithRetry(() => import('@/pages/app/FeedPage'))
 const DiscoveryPage = lazyWithRetry(() => import('@/pages/app/DiscoveryPage'))
@@ -282,6 +285,18 @@ export const router = createBrowserRouter([
                     <ProfileEditPage />
                   </Suspended>
                 ),
+              },
+              {
+                path: 'visibility',
+                element: (
+                  <Suspended>
+                    <ProfileVisibilityPage />
+                  </Suspended>
+                ),
+              },
+              {
+                path: 'profile/visibility',
+                element: <Navigate to="/app/visibility" replace />,
               },
               {
                 path: 'templates',

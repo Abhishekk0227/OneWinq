@@ -735,7 +735,6 @@ export default function ProfileEditPage() {
       { id: 'awards', label: 'Awards & Papers', icon: Star },
       { id: 'custom-blocks', label: 'Custom Sections', icon: FileText },
       { id: 'private-docs', label: 'Private Docs', icon: Lock },
-      { id: 'privacy', label: 'Visibility Rules', icon: Shield },
     ]
   }, [])
 
@@ -3741,237 +3740,25 @@ export default function ProfileEditPage() {
           )}
         </TabsContent>
 
-        {/* ================= TAB: VISIBILITY RULES ================= */}
+        {/* ================= TAB: VISIBILITY RULES (Moved to /app/visibility) ================= */}
         <TabsContent value="privacy" className="space-y-6">
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
-              <div>
-                <h3 className="text-base font-bold text-foreground">Multi-Profile Visibility Control</h3>
-                <p className="text-xs text-muted-foreground">
-                  Select exactly which profiles (Public, Professional, Private) each section and sensitive detail will appear on.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    const allKeys = ['about', 'experience', 'education', 'skills', 'projects', 'media', 'ventures', 'services', 'certifications', 'socialLinks', 'contact']
-                    const updated: Record<string, MultiModeVisibility> = {}
-                    allKeys.forEach((k) => {
-                      updated[k] = ['PUBLIC', 'PROFESSIONAL', 'PRIVATE']
-                    })
-                    setSectionVisibility(updated)
-                    setAvatarVisibility(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])
-                    toast.success('Enabled all sections on all 3 profile modes!')
-                  }}
-                  className="text-xs h-8"
-                >
-                  Show Everything Everywhere
-                </Button>
-              </div>
+          <div className="rounded-3xl border border-border bg-card p-8 sm:p-10 shadow-sm text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+              <ShieldCheck className="h-6 w-6" />
             </div>
-
-            <div className="space-y-4">
-              {/* Avatar Visibility Row */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-border bg-muted/20 gap-3 text-xs">
-                <div>
-                  <div className="font-bold text-foreground flex items-center gap-1.5">
-                    <Camera className="h-3.5 w-3.5 text-primary" />
-                    <span>Avatar Photo Visibility</span>
-                  </div>
-                  <div className="text-muted-foreground text-[11px]">Select which profiles your photo appears on</div>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => toggleAvatarMode('PUBLIC')}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                      isModeActive(avatarVisibility, 'PUBLIC')
-                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
-                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {isModeActive(avatarVisibility, 'PUBLIC') && <Check className="h-3 w-3" />}
-                    <span>Public</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleAvatarMode('PROFESSIONAL')}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                      isModeActive(avatarVisibility, 'PROFESSIONAL')
-                        ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
-                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {isModeActive(avatarVisibility, 'PROFESSIONAL') && <Check className="h-3 w-3" />}
-                    <span>Professional</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleAvatarMode('PRIVATE')}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                      isModeActive(avatarVisibility, 'PRIVATE')
-                        ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
-                        : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {isModeActive(avatarVisibility, 'PRIVATE') && <Check className="h-3 w-3" />}
-                    <span>Private</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAvatarVisibility(['PUBLIC', 'PROFESSIONAL', 'PRIVATE'])}
-                    className="px-2 py-1 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors underline"
-                  >
-                    All Modes
-                  </button>
-                </div>
-              </div>
-
-              {/* Sections Multi-Mode Visibility */}
-              {[
-                { key: 'about', label: 'About / Bio' },
-                { key: 'experience', label: 'Work Experience' },
-                { key: 'education', label: 'Education & Academics' },
-                { key: 'skills', label: 'Skills & Tech Stack' },
-                { key: 'projects', label: 'Projects & Portfolio' },
-                { key: 'media', label: 'Media & Channels' },
-                { key: 'ventures', label: 'Ventures & Organizations' },
-                { key: 'services', label: 'Services & Pricing' },
-                { key: 'certifications', label: 'Certifications' },
-                { key: 'socialLinks', label: 'Social Profiles' },
-                { key: 'contact', label: 'Contact Card (General)' },
-              ].map((item) => {
-                const isPub = isModeActive(sectionVisibility[item.key], 'PUBLIC')
-                const isProf = isModeActive(sectionVisibility[item.key], 'PROFESSIONAL')
-                const isPriv = isModeActive(sectionVisibility[item.key], 'PRIVATE')
-
-                return (
-                  <div
-                    key={item.key}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border border-border bg-muted/20 gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="font-bold text-foreground">{item.label}</div>
-                      <div className="text-muted-foreground text-[11px]">Choose which profiles display this section</div>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => toggleSectionMode(item.key, 'PUBLIC')}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                          isPub
-                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
-                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        {isPub && <Check className="h-3 w-3" />}
-                        <span>Public</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => toggleSectionMode(item.key, 'PROFESSIONAL')}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                          isProf
-                            ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
-                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        {isProf && <Check className="h-3 w-3" />}
-                        <span>Professional</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => toggleSectionMode(item.key, 'PRIVATE')}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                          isPriv
-                            ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
-                            : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                        }`}
-                      >
-                        {isPriv && <Check className="h-3 w-3" />}
-                        <span>Private</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAllSectionModes(item.key)}
-                        className="px-2 py-1 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors underline"
-                      >
-                        All Modes
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-
-              {/* Sensitive Contact Fields */}
-              <div className="pt-4 border-t border-border space-y-3">
-                <div className="font-bold text-xs text-foreground uppercase tracking-wider text-muted-foreground">
-                  Sensitive Contact Fields
-                </div>
-                {[
-                  { key: 'contact.phone', label: 'Direct Phone Number', def: ['PRIVATE'] },
-                  { key: 'contact.email', label: 'Email Address', def: ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'] },
-                  { key: 'contact.website', label: 'Portfolio Website', def: ['PUBLIC', 'PROFESSIONAL', 'PRIVATE'] },
-                  { key: 'contact.address', label: 'Physical Address', def: ['PRIVATE'] },
-                ].map((item) => {
-                  const val = fieldVisibility[item.key] ?? item.def
-                  const isPub = isModeActive(val, 'PUBLIC')
-                  const isProf = isModeActive(val, 'PROFESSIONAL')
-                  const isPriv = isModeActive(val, 'PRIVATE')
-
-                  return (
-                    <div
-                      key={item.key}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl border border-border bg-muted/20 gap-3 text-xs"
-                    >
-                      <div>
-                        <div className="font-bold text-foreground">{item.label}</div>
-                        <div className="text-muted-foreground text-[11px]">Select profiles where this field is shown</div>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <button
-                          type="button"
-                          onClick={() => toggleFieldMode(item.key, 'PUBLIC')}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                            isPub
-                              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-bold'
-                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          {isPub && <Check className="h-3 w-3" />}
-                          <span>Public</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleFieldMode(item.key, 'PROFESSIONAL')}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                            isProf
-                              ? 'bg-blue-500/15 border-blue-500/40 text-blue-600 dark:text-blue-400 font-bold'
-                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          {isProf && <Check className="h-3 w-3" />}
-                          <span>Professional</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleFieldMode(item.key, 'PRIVATE')}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                            isPriv
-                              ? 'bg-purple-500/15 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold'
-                              : 'bg-background/80 border-border text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          {isPriv && <Check className="h-3 w-3" />}
-                          <span>Private</span>
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Profile Visibility & Rules</h3>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
+                Profile presentation modes (Public, Professional, Private), timed temporary mode, and multi-profile visibility rules are now managed on the dedicated Profile Visibility page.
+              </p>
+            </div>
+            <div className="pt-2">
+              <Link to="/app/visibility">
+                <Button size="sm" className="gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Open Profile Visibility</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </TabsContent>

@@ -57,6 +57,8 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedEmployment, setSelectedEmployment] = React.useState<string>('ALL');
   const [selectedWorkplace, setSelectedWorkplace] = React.useState<string>('ALL');
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const activeFilterCount = (selectedEmployment !== 'ALL' ? 1 : 0) + (selectedWorkplace !== 'ALL' ? 1 : 0);
   const [applyingJob, setApplyingJob] = React.useState<Job | null>(null);
   const [viewingJobDetails, setViewingJobDetails] = React.useState<Job | null>(null);
   const [expandedJobDescId, setExpandedJobDescId] = React.useState<string | null>(null);
@@ -191,50 +193,99 @@ export default function JobsPage() {
         </p>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs">
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search title, skills, keywords..."
-            className="pl-10 h-10 text-xs sm:text-sm rounded-xl"
-          />
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
-          {/* Employment Type */}
-          <div className="relative flex-1 sm:flex-initial min-w-0">
-            <select
-              value={selectedEmployment}
-              onChange={(e) => setSelectedEmployment(e.target.value)}
-              className="w-full sm:w-48 h-10 pl-3.5 pr-8 rounded-xl border border-border/80 bg-background hover:bg-muted/40 text-xs sm:text-sm font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
-            >
-              <option value="ALL">All Employment Types</option>
-              <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
-              <option value={EMPLOYMENT_TYPE.PART_TIME}>Part Time</option>
-              <option value={EMPLOYMENT_TYPE.CONTRACT}>Contract</option>
-              <option value={EMPLOYMENT_TYPE.INTERNSHIP}>Internship</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      {/* Search and Compact Filter Toggle */}
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl border border-border/80 bg-card shadow-xs">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search title, skills, keywords..."
+              className="pl-10 h-10 text-xs sm:text-sm rounded-xl border-border/60 bg-background/50 focus:bg-background"
+            />
           </div>
 
-          {/* Workplace Type */}
-          <div className="relative flex-1 sm:flex-initial min-w-0">
-            <select
-              value={selectedWorkplace}
-              onChange={(e) => setSelectedWorkplace(e.target.value)}
-              className="w-full sm:w-44 h-10 pl-3.5 pr-8 rounded-xl border border-border/80 bg-background hover:bg-muted/40 text-xs sm:text-sm font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
-            >
-              <option value="ALL">All Workplaces</option>
-              <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
-              <option value={WORKPLACE_TYPE.HYBRID}>Hybrid</option>
-              <option value={WORKPLACE_TYPE.ON_SITE}>On-Site</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          </div>
+          <Button
+            type="button"
+            variant={isFilterOpen || activeFilterCount > 0 ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="h-10 px-3 sm:px-3.5 rounded-xl shrink-0 flex items-center gap-1.5 transition-all text-xs font-semibold cursor-pointer"
+            title="Toggle filters"
+          >
+            <Filter className="h-4 w-4" />
+            <span className="hidden sm:inline">Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-white text-primary">
+                {activeFilterCount}
+              </span>
+            )}
+          </Button>
         </div>
+
+        {/* Collapsible Filter Panel */}
+        {isFilterOpen && (
+          <div className="p-3.5 sm:p-4 rounded-2xl border border-border bg-card shadow-sm space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-border/60">
+              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-primary" />
+                Filter Opportunities
+              </span>
+              {activeFilterCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEmployment('ALL');
+                    setSelectedWorkplace('ALL');
+                  }}
+                  className="text-[11px] text-primary hover:underline font-semibold cursor-pointer"
+                >
+                  Reset filters
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Employment Type */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Employment Type</label>
+                <div className="relative">
+                  <select
+                    value={selectedEmployment}
+                    onChange={(e) => setSelectedEmployment(e.target.value)}
+                    className="w-full h-10 pl-3.5 pr-8 rounded-xl border border-border/80 bg-background hover:bg-muted/40 text-xs sm:text-sm font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
+                  >
+                    <option value="ALL">All Employment Types</option>
+                    <option value={EMPLOYMENT_TYPE.FULL_TIME}>Full Time</option>
+                    <option value={EMPLOYMENT_TYPE.PART_TIME}>Part Time</option>
+                    <option value={EMPLOYMENT_TYPE.CONTRACT}>Contract</option>
+                    <option value={EMPLOYMENT_TYPE.INTERNSHIP}>Internship</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Workplace Type */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Workplace Policy</label>
+                <div className="relative">
+                  <select
+                    value={selectedWorkplace}
+                    onChange={(e) => setSelectedWorkplace(e.target.value)}
+                    className="w-full h-10 pl-3.5 pr-8 rounded-xl border border-border/80 bg-background hover:bg-muted/40 text-xs sm:text-sm font-medium text-foreground appearance-none cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
+                  >
+                    <option value="ALL">All Workplaces</option>
+                    <option value={WORKPLACE_TYPE.REMOTE}>Remote</option>
+                    <option value={WORKPLACE_TYPE.HYBRID}>Hybrid</option>
+                    <option value={WORKPLACE_TYPE.ON_SITE}>On-Site</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Jobs Feed */}
