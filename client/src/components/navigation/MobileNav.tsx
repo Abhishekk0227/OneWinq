@@ -18,6 +18,11 @@ export function MobileNav() {
   const { openModal } = useUIStore()
   const { activeContext } = useOrganizationContextStore()
 
+  // On personal Profile page, ProfilePage renders its own bottom section switcher with an integrated Post button
+  if (location.pathname === '/app/profile' || location.pathname === '/app/profile/') {
+    return null
+  }
+
   const isOrgRoute =
     location.pathname.startsWith('/app/org/') ||
     location.pathname === '/app/org'

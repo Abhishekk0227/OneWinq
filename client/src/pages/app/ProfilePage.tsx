@@ -43,7 +43,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   FileKey,
+  Plus,
 } from 'lucide-react'
+import { useUIStore } from '@/stores/uiStore'
 import { cardsApi } from '@/features/cards/api/cards.api'
 import { postsApi } from '@/features/posts/api/posts.api'
 import { PostCard } from '@/components/posts/PostCard'
@@ -169,6 +171,7 @@ function SocialBrandIcon({ platform, url, className = "h-4 w-4" }: { platform?: 
 
 export default function ProfilePage() {
   const { user } = useAuthStore()
+  const { openModal } = useUIStore()
   const queryClient = useQueryClient()
 
   // Active Section Tab Tracker
@@ -179,24 +182,18 @@ export default function ProfilePage() {
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
 
-  // Mobile Animated Swipe Prompt state & auto-dismiss
-  const [showSwipeHint, setShowSwipeHint] = React.useState(() => {
-    if (typeof window === 'undefined') return false
-    return !sessionStorage.getItem('onewinq_swipe_hint_seen')
-  })
+  // Mobile Animated Swipe Prompt state & auto-dismiss (always triggers on profile open)
+  const [showSwipeHint, setShowSwipeHint] = React.useState(true)
 
   const dismissSwipeHint = React.useCallback(() => {
     setShowSwipeHint(false)
-    try {
-      sessionStorage.setItem('onewinq_swipe_hint_seen', 'true')
-    } catch {}
   }, [])
 
   React.useEffect(() => {
     if (!showSwipeHint) return
     const timer = setTimeout(() => {
       setShowSwipeHint(false)
-    }, 7000)
+    }, 6000)
     return () => clearTimeout(timer)
   }, [showSwipeHint])
 
@@ -1685,11 +1682,11 @@ export default function ProfilePage() {
       {showSwipeHint && profileTabs.length > 1 && (
         <div
           data-no-swipe="true"
-          className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-auto select-none"
+          className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none"
         >
           <div
             onClick={dismissSwipeHint}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/20 backdrop-blur-md animate-bounce cursor-pointer transition-all"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/25 backdrop-blur-md animate-bounce cursor-pointer transition-all"
           >
             <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
@@ -1717,45 +1714,99 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}
-      {profileTabs.length > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
-          {profileTabs.slice(0, 3).map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }}
-                className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer flex-1 max-w-[100px] ${
-                  isActive
-                    ? 'text-primary font-extrabold'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <div className={`p-1 rounded-lg transition-colors ${isActive ? 'bg-primary/15 text-primary' : ''}`}>
-                  {tab.icon}
-                </div>
-                <span className="truncate max-w-full">{tab.label}</span>
-              </button>
-            )
-          })}
-
+      {/* Fixed Bottom Navigation Bar for Mobile with Integrated Center Post Button */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around gap-1 min-w-0 md:hidden">
+        {/* Slot 1: Home Tab */}
+        {profileTabs[0] && (
           <button
+            key={profileTabs[0].id}
             type="button"
-            onClick={() => setIsSectionsDrawerOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-[10px] sm:text-xs font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[100px]"
+            onClick={() => {
+              setActiveTab(profileTabs[0].id)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
+              activeTab === profileTabs[0].id
+                ? 'text-primary font-extrabold'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
           >
-            <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
-              <Menu className="h-4 w-4" />
+            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[0].id ? 'bg-primary/15 text-primary' : ''}`}>
+              {profileTabs[0].icon}
             </div>
-            <span className="truncate max-w-full">All Sections</span>
+            <span className="truncate max-w-full">{profileTabs[0].label}</span>
           </button>
-        </div>
-      )}
+        )}
+
+        {/* Slot 2: First Section Tab (e.g. Experience) */}
+        {profileTabs[1] && (
+          <button
+            key={profileTabs[1].id}
+            type="button"
+            onClick={() => {
+              setActiveTab(profileTabs[1].id)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
+              activeTab === profileTabs[1].id
+                ? 'text-primary font-extrabold'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[1].id ? 'bg-primary/15 text-primary' : ''}`}>
+              {profileTabs[1].icon}
+            </div>
+            <span className="truncate max-w-full">{profileTabs[1].label}</span>
+          </button>
+        )}
+
+        {/* Slot 3: Center Floating Post Action Button (Elevated & Never Hidden) */}
+        <button
+          type="button"
+          onClick={() => openModal('CREATE_POST')}
+          className="flex flex-col items-center justify-center -mt-5 cursor-pointer shrink-0 z-50 px-1"
+          title="Create New Post"
+          aria-label="Create New Post"
+        >
+          <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-primary via-primary-600 to-primary-700 text-white flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-card active:scale-95 transition-all">
+            <Plus className="h-6 w-6 stroke-[2.5]" />
+          </div>
+        </button>
+
+        {/* Slot 4: Second Section Tab (e.g. Education) */}
+        {profileTabs[2] && (
+          <button
+            key={profileTabs[2].id}
+            type="button"
+            onClick={() => {
+              setActiveTab(profileTabs[2].id)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
+              activeTab === profileTabs[2].id
+                ? 'text-primary font-extrabold'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[2].id ? 'bg-primary/15 text-primary' : ''}`}>
+              {profileTabs[2].icon}
+            </div>
+            <span className="truncate max-w-full">{profileTabs[2].label}</span>
+          </button>
+        )}
+
+        {/* Slot 5: All Sections Drawer Button */}
+        <button
+          type="button"
+          onClick={() => setIsSectionsDrawerOpen(true)}
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[85px]"
+        >
+          <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+            <Menu className="h-4 w-4" />
+          </div>
+          <span className="truncate max-w-full">All Sections</span>
+        </button>
+      </div>
 
       {/* All Profile Sections Sidebar Drawer */}
       <ProfileSectionsSidebar

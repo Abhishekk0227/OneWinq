@@ -1,5 +1,5 @@
-// OneWinq Service Worker v6 - Fix React hooks render order in ProfilePage and PublicProfilePage
-const CACHE_NAME = 'onewinq-v6';
+// OneWinq Service Worker v7 - Mobile post button integration, persistent swipe animation, unified mode customization
+const CACHE_NAME = 'onewinq-v7';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

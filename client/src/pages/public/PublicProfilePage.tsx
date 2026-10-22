@@ -195,24 +195,18 @@ export default function PublicProfilePage() {
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
 
-  // Mobile Animated Swipe Prompt state & auto-dismiss
-  const [showSwipeHint, setShowSwipeHint] = React.useState(() => {
-    if (typeof window === 'undefined') return false
-    return !sessionStorage.getItem('onewinq_swipe_hint_seen')
-  })
+  // Mobile Animated Swipe Prompt state & auto-dismiss (always triggers on profile open)
+  const [showSwipeHint, setShowSwipeHint] = React.useState(true)
 
   const dismissSwipeHint = React.useCallback(() => {
     setShowSwipeHint(false)
-    try {
-      sessionStorage.setItem('onewinq_swipe_hint_seen', 'true')
-    } catch {}
   }, [])
 
   React.useEffect(() => {
     if (!showSwipeHint) return
     const timer = setTimeout(() => {
       setShowSwipeHint(false)
-    }, 7000)
+    }, 6000)
     return () => clearTimeout(timer)
   }, [showSwipeHint])
 
@@ -1547,11 +1541,11 @@ export default function PublicProfilePage() {
       {showSwipeHint && profileTabs.length > 1 && (
         <div
           data-no-swipe="true"
-          className="md:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-auto select-none"
+          className="md:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 pointer-events-auto select-none"
         >
           <div
             onClick={dismissSwipeHint}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/20 backdrop-blur-md animate-bounce cursor-pointer transition-all"
+            className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-950/95 dark:bg-zinc-900/95 border border-purple-500/50 text-foreground text-xs font-bold shadow-2xl shadow-purple-500/25 backdrop-blur-md animate-bounce cursor-pointer transition-all"
           >
             <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
@@ -1581,7 +1575,7 @@ export default function PublicProfilePage() {
 
       {/* Fixed Bottom Navigation Bar for Mobile (Matching Org Profile) */}
       {profileTabs.length > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 flex items-center justify-around gap-1 min-w-0 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-3 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around gap-1 min-w-0 md:hidden">
           {profileTabs.slice(0, 3).map((tab) => {
             const isActive = activeTab === tab.id
             return (
