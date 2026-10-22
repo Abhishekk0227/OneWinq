@@ -1,5 +1,5 @@
-// OneWinq Service Worker v12 - Transparent fading white chevron swipe indicators for user and org profiles
-const CACHE_NAME = 'onewinq-v12';
+// OneWinq Service Worker v13 - Visibility rules modal and cleaned heading icons
+const CACHE_NAME = 'onewinq-v13';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

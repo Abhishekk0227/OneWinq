@@ -1090,9 +1090,8 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Layers className="h-4 w-4 text-primary" />
-                    <span>Featured Projects</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                    Featured Projects
                   </h3>
                   <Link to="/app/profile/edit?tab=projects">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1182,9 +1181,8 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    <span>Ventures & Organizations</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                    Ventures & Organizations
                   </h3>
                   <Link to="/app/profile/edit?tab=ventures">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1247,9 +1245,8 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-border min-w-0">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-                    <Briefcase className="h-4 w-4 text-primary" />
-                    <span>Services Provided</span>
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                    Services Provided
                   </h3>
                   <Link to="/app/profile/edit?tab=services">
                     <Button size="xs" variant="ghost" className="text-xs h-7 gap-1 text-primary">
@@ -1994,9 +1991,8 @@ function ProfilePostsSection() {
   return (
     <div id="section-posts" className="scroll-mt-28 space-y-4 pt-6 border-t border-border">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-          <Flame className="h-4 w-4 text-primary" />
-          <span>Activity & Posts</span>
+        <h3 className="text-base font-bold text-foreground">
+          Activity & Posts
         </h3>
 
         {/* Post filters: My Posts, Saved, Archived */}
