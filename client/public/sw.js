@@ -1,5 +1,5 @@
-// OneWinq Service Worker v9 - High contrast swipe indicators and removed live persona simulation
-const CACHE_NAME = 'onewinq-v9';
+// OneWinq Service Worker v10 - Fix React hook order in public profile
+const CACHE_NAME = 'onewinq-v10';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

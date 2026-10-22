@@ -327,6 +327,18 @@ export default function PublicProfilePage() {
     setTimeout(() => setIsCopied(false), 2500)
   }
 
+  // Trigger swipe hint briefly once profile has loaded
+  const hasLoadedProfile = !isLoading && Boolean(data?.data?.profile)
+  React.useEffect(() => {
+    if (hasLoadedProfile) {
+      setShowSwipeHint(true)
+      const timer = setTimeout(() => {
+        setShowSwipeHint(false)
+      }, 3500)
+      return () => clearTimeout(timer)
+    }
+  }, [hasLoadedProfile])
+
   if (isLoading) {
     return <LoadingScreen message={`Loading @${username}'s digital identity...`} />
   }
@@ -409,17 +421,6 @@ export default function PublicProfilePage() {
     ...(hasPosts ? [{ id: 'posts', label: 'Posts', icon: <MessageSquare className="h-4 w-4" />, count: userPosts.length }] : []),
     ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
   ]
-
-  // Show swipe arrows briefly when profile is loaded and has multiple tabs
-  React.useEffect(() => {
-    if (profileTabs.length > 1) {
-      setShowSwipeHint(true)
-      const timer = setTimeout(() => {
-        setShowSwipeHint(false)
-      }, 3500)
-      return () => clearTimeout(timer)
-    }
-  }, [profileTabs.length])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.target as HTMLElement | null
