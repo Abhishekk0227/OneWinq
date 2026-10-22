@@ -28,6 +28,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription } from '@/componen
 import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { ErrorState } from '@/components/common/ErrorState'
 import { toast } from '@/stores/toastStore'
+import { useAuthStore } from '@/stores/authStore'
 import { profileApi } from '@/features/profile/api/profile.api'
 import { VISIBILITY_MODE, SECTION_VISIBILITY } from '@/constants/app.constants'
 import type { VisibilityMode } from '@/constants/app.constants'
@@ -35,9 +36,17 @@ import type { MultiModeVisibility, ProfileVisibilitySettings } from '@/types/pro
 
 export function ProfileVisibilityPage() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   // State for Visibility Rules Dialog Modal
   const [isRulesModalOpen, setIsRulesModalOpen] = React.useState(false)
+
+  // State for mobile view more in mode descriptions
+  const [expandedModes, setExpandedModes] = React.useState<Record<string, boolean>>({})
+  const toggleModeExpanded = (modeKey: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setExpandedModes((prev) => ({ ...prev, [modeKey]: !prev[modeKey] }))
+  }
 
   // Fetch Current Profile
   const {
@@ -51,6 +60,7 @@ export function ProfileVisibilityPage() {
   })
 
   const profile = profileData?.data?.profile
+  const publicUsername = profile?.username || user?.username
   const currentMode = (profile?.activeMode || VISIBILITY_MODE.PUBLIC) as VisibilityMode
   const temporaryMode = profile?.temporaryMode
 
@@ -310,10 +320,6 @@ export function ProfileVisibilityPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div>
-          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-1">
-            <ShieldCheck className="h-4 w-4" />
-            <span>Profile Visibility & Multi-Mode Studio</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
             Profile Visibility Control
           </h1>
@@ -323,7 +329,7 @@ export function ProfileVisibilityPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
-          <Link to="/app/profile">
+          <Link to={publicUsername ? `/u/${publicUsername}` : '/app/profile'}>
             <Button variant="outline" size="sm" className="gap-2 text-xs h-9">
               <Eye className="h-4 w-4" />
               <span>View Profile</span>
@@ -366,9 +372,18 @@ export function ProfileVisibilityPage() {
                   <Badge className="bg-emerald-600 text-white text-[10px] uppercase font-bold">Active</Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Open to anyone. Best for public marketing, social media bios, QR codes, and general networking.
-              </p>
+              <div className="space-y-1">
+                <p className={`text-xs text-muted-foreground leading-relaxed ${!expandedModes[VISIBILITY_MODE.PUBLIC] ? 'line-clamp-1 md:line-clamp-none' : ''}`}>
+                  Open to anyone. Best for public marketing, social media bios, QR codes, and general networking.
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => toggleModeExpanded(VISIBILITY_MODE.PUBLIC, e)}
+                  className="md:hidden text-[11px] font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-0.5 pt-0.5"
+                >
+                  {expandedModes[VISIBILITY_MODE.PUBLIC] ? 'View less' : 'View more'}
+                </button>
+              </div>
             </div>
             <div className="pt-4 border-t border-border/40 mt-4 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               <span>{currentMode === VISIBILITY_MODE.PUBLIC ? 'Currently Active' : 'Switch to Public'}</span>
@@ -392,9 +407,18 @@ export function ProfileVisibilityPage() {
                   <Badge className="bg-blue-600 text-white text-[10px] uppercase font-bold">Active</Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Curated career & portfolio view. Shows verified credentials, work history, and ventures while hiding personal contact.
-              </p>
+              <div className="space-y-1">
+                <p className={`text-xs text-muted-foreground leading-relaxed ${!expandedModes[VISIBILITY_MODE.PROFESSIONAL] ? 'line-clamp-1 md:line-clamp-none' : ''}`}>
+                  Curated career & portfolio view. Shows verified credentials, work history, and ventures while hiding personal contact.
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => toggleModeExpanded(VISIBILITY_MODE.PROFESSIONAL, e)}
+                  className="md:hidden text-[11px] font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-0.5 pt-0.5"
+                >
+                  {expandedModes[VISIBILITY_MODE.PROFESSIONAL] ? 'View less' : 'View more'}
+                </button>
+              </div>
             </div>
             <div className="pt-4 border-t border-border/40 mt-4 flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400">
               <span>{currentMode === VISIBILITY_MODE.PROFESSIONAL ? 'Currently Active' : 'Switch to Professional'}</span>
@@ -418,9 +442,18 @@ export function ProfileVisibilityPage() {
                   <Badge className="bg-purple-600 text-white text-[10px] uppercase font-bold">Active</Badge>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Confidential mode. Only exposes allowed vault documents and restricted contact to verified close connections.
-              </p>
+              <div className="space-y-1">
+                <p className={`text-xs text-muted-foreground leading-relaxed ${!expandedModes[VISIBILITY_MODE.PRIVATE] ? 'line-clamp-1 md:line-clamp-none' : ''}`}>
+                  Confidential mode. Only exposes allowed vault documents and restricted contact to verified close connections.
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => toggleModeExpanded(VISIBILITY_MODE.PRIVATE, e)}
+                  className="md:hidden text-[11px] font-semibold text-primary hover:underline cursor-pointer inline-flex items-center gap-0.5 pt-0.5"
+                >
+                  {expandedModes[VISIBILITY_MODE.PRIVATE] ? 'View less' : 'View more'}
+                </button>
+              </div>
             </div>
             <div className="pt-4 border-t border-border/40 mt-4 flex items-center justify-between text-xs font-semibold text-purple-600 dark:text-purple-400">
               <span>{currentMode === VISIBILITY_MODE.PRIVATE ? 'Currently Active' : 'Switch to Private'}</span>

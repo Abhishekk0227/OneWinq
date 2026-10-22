@@ -521,6 +521,51 @@ export default function ProfilePage() {
         <div
           className="md:col-span-9 space-y-4 min-w-0 max-w-full touch-pan-y flex-1 min-h-[60vh]"
         >
+          {/* Mobile Profile Sections Horizontal Scroll Navigation */}
+          {profileTabs.length > 1 && (
+            <div className="md:hidden sticky top-14 z-20 bg-background/95 backdrop-blur-md -mx-3.5 px-3.5 py-2 border-b border-border/60">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                {profileTabs.map((tab) => {
+                  const isActive = activeTab === tab.id
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.id)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
+                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'bg-muted/70 text-foreground/80 hover:bg-muted hover:text-foreground border border-border/50'
+                      }`}
+                    >
+                      <span className="shrink-0">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                      {tab.count !== undefined && (
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
+                          }`}
+                        >
+                          {tab.count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
+                <button
+                  type="button"
+                  onClick={() => setIsSectionsDrawerOpen(true)}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/25 cursor-pointer whitespace-nowrap"
+                >
+                  <Menu className="h-3.5 w-3.5" />
+                  <span>All</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Intro / Hero Card (ONLY SHOWN ON HOME TAB) */}
           {activeTab === 'home' && (
@@ -1687,99 +1732,6 @@ export default function ProfilePage() {
         <SwipeHintIndicator />
       )}
 
-      {/* Fixed Bottom Navigation Bar for Mobile with Integrated Center Post Button */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-2xl px-2 py-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around gap-1 min-w-0 md:hidden">
-        {/* Slot 1: Home Tab */}
-        {profileTabs[0] && (
-          <button
-            key={profileTabs[0].id}
-            type="button"
-            onClick={() => {
-              setActiveTab(profileTabs[0].id)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
-              activeTab === profileTabs[0].id
-                ? 'text-primary font-extrabold'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[0].id ? 'bg-primary/15 text-primary' : ''}`}>
-              {profileTabs[0].icon}
-            </div>
-            <span className="truncate max-w-full">{profileTabs[0].label}</span>
-          </button>
-        )}
-
-        {/* Slot 2: First Section Tab (e.g. Experience) */}
-        {profileTabs[1] && (
-          <button
-            key={profileTabs[1].id}
-            type="button"
-            onClick={() => {
-              setActiveTab(profileTabs[1].id)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
-              activeTab === profileTabs[1].id
-                ? 'text-primary font-extrabold'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[1].id ? 'bg-primary/15 text-primary' : ''}`}>
-              {profileTabs[1].icon}
-            </div>
-            <span className="truncate max-w-full">{profileTabs[1].label}</span>
-          </button>
-        )}
-
-        {/* Slot 3: Center Floating Post Action Button (Elevated & Never Hidden) */}
-        <button
-          type="button"
-          onClick={() => openModal('CREATE_POST')}
-          className="flex flex-col items-center justify-center -mt-5 cursor-pointer shrink-0 z-50 px-1"
-          title="Create New Post"
-          aria-label="Create New Post"
-        >
-          <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-primary via-primary-600 to-primary-700 text-white flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-card active:scale-95 transition-all">
-            <Plus className="h-6 w-6 stroke-[2.5]" />
-          </div>
-        </button>
-
-        {/* Slot 4: Second Section Tab (e.g. Education) */}
-        {profileTabs[2] && (
-          <button
-            key={profileTabs[2].id}
-            type="button"
-            onClick={() => {
-              setActiveTab(profileTabs[2].id)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-            }}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex-1 max-w-[85px] ${
-              activeTab === profileTabs[2].id
-                ? 'text-primary font-extrabold'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <div className={`p-1 rounded-lg transition-colors ${activeTab === profileTabs[2].id ? 'bg-primary/15 text-primary' : ''}`}>
-              {profileTabs[2].icon}
-            </div>
-            <span className="truncate max-w-full">{profileTabs[2].label}</span>
-          </button>
-        )}
-
-        {/* Slot 5: All Sections Drawer Button */}
-        <button
-          type="button"
-          onClick={() => setIsSectionsDrawerOpen(true)}
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-xl text-[10px] font-bold text-primary hover:text-primary/90 transition-all cursor-pointer flex-1 max-w-[85px]"
-        >
-          <div className="p-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
-            <Menu className="h-4 w-4" />
-          </div>
-          <span className="truncate max-w-full">All Sections</span>
-        </button>
-      </div>
 
       {/* All Profile Sections Sidebar Drawer */}
       <ProfileSectionsSidebar
