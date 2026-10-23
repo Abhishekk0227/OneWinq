@@ -449,10 +449,15 @@ export default function ProfileEditPage() {
   const tabsScrollRef = React.useRef<HTMLDivElement>(null)
   const bottomTabsScrollRef = React.useRef<HTMLDivElement>(null)
   const scrollTabs = (direction: 'left' | 'right') => {
-    if (tabsScrollRef.current) {
-      const amount = direction === 'left' ? -240 : 240
-      tabsScrollRef.current.scrollBy({ left: amount, behavior: 'smooth' })
-    }
+    const root = tabsScrollRef.current
+    if (!root) return
+    const scrollTarget =
+      (root.querySelector('.overflow-x-auto') as HTMLElement) ||
+      (root.firstElementChild as HTMLElement) ||
+      root
+    const amount = direction === 'left' ? -280 : 280
+    scrollTarget.scrollBy({ left: amount, behavior: 'smooth' })
+    root.scrollBy({ left: amount, behavior: 'smooth' })
   }
   const scrollBottomTabs = (direction: 'left' | 'right') => {
     if (bottomTabsScrollRef.current) {
@@ -736,7 +741,7 @@ export default function ProfileEditPage() {
       { id: 'certifications', label: 'Certifications', icon: ShieldCheck },
       { id: 'awards', label: 'Awards & Papers', icon: Star },
       { id: 'custom-blocks', label: 'Custom Sections', icon: FileText },
-      { id: 'private-docs', label: 'Private Docs', icon: Lock },
+      { id: 'private-docs', label: 'Documents', icon: FileText },
     ]
   }, [])
 
@@ -1397,12 +1402,12 @@ export default function ProfileEditPage() {
               </TabsList>
             </div>
 
-            {/* Scroll navigation arrows for desktop */}
-            <div className="hidden sm:flex items-center gap-1 pl-2 shrink-0">
+            {/* Scroll navigation arrows */}
+            <div className="flex items-center gap-1 pl-2 shrink-0">
               <button
                 type="button"
                 onClick={() => scrollTabs('left')}
-                className="p-1.5 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-2xs"
+                className="p-1.5 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-2xs cursor-pointer active:scale-95"
                 title="Scroll tabs left"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -1410,7 +1415,7 @@ export default function ProfileEditPage() {
               <button
                 type="button"
                 onClick={() => scrollTabs('right')}
-                className="p-1.5 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-2xs"
+                className="p-1.5 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-2xs cursor-pointer active:scale-95"
                 title="Scroll tabs right"
               >
                 <ChevronRight className="h-3.5 w-3.5" />
@@ -2259,18 +2264,18 @@ export default function ProfileEditPage() {
                       />
                     </div>
 
-                    {/* Logo Upload or URL */}
+                    {/* Image Upload or URL */}
                     <div className="space-y-1.5 p-3 rounded-xl border border-border/80 bg-background/50">
                       <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                         <ImageIcon className="h-3.5 w-3.5 text-primary" />
-                        <span>Venture Logo (Upload file or paste Image URL)</span>
+                        <span>Upload / Add Image (Upload file or paste image URL)</span>
                       </label>
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                         {org.imageUrl ? (
                           <div className="relative w-12 h-12 rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden shrink-0">
                             <img
                               src={org.imageUrl}
-                              alt={org.title || 'Venture Logo'}
+                              alt={org.title || 'Venture Image'}
                               className="w-full h-full object-contain"
                               onError={(e) => {
                                 (e.currentTarget as HTMLElement).style.display = 'none'
@@ -2312,7 +2317,7 @@ export default function ProfileEditPage() {
                           leftIcon={<Upload className="h-3.5 w-3.5" />}
                           className="text-xs h-9 shrink-0"
                         >
-                          {org.imageUrl ? 'Change Logo' : 'Upload Logo'}
+                          {org.imageUrl ? 'Change Image' : 'Upload Image'}
                         </Button>
                         <Input
                           value={org.imageUrl || ''}
@@ -3381,25 +3386,25 @@ export default function ProfileEditPage() {
             </div>
           </TabsContent>
 
-        {/* ================= TAB: PRIVATE DOCUMENTS (PRIVATE MODE ONLY) ================= */}
+        {/* ================= TAB 13: DOCUMENTS HUB ================= */}
         <TabsContent value="private-docs" className="space-y-6">
-          <div className="rounded-3xl border border-purple-500/25 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent p-5 sm:p-7 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-purple-600/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs border border-purple-500/20">
-                  <Lock className="h-6 w-6" />
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
+              <div className="flex items-start gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <FileText className="h-6 w-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base sm:text-lg font-bold text-foreground">
-                      Private Documents Vault
+                      Documents & Credentials
                     </h3>
-                    <Badge variant="outline" className="text-[10px] bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30 font-bold uppercase tracking-wider">
-                      Private Mode Only
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20 font-bold uppercase tracking-wider">
+                      Public & Vault
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-                    Upload sensitive documents like Aadhaar, PAN card, driving license, passport, or degree marksheets in <strong>Private Mode only</strong>. For each document, choose whether to show it on your profile in Private Mode or keep it in your private vault only.
+                    Upload your <strong>Resume / CV</strong>, portfolio documents, academic certificates, or private identity proofs. For each document, you can set visibility to <strong>Public</strong> (to display on your profile), <strong>Professional</strong>, or <strong>Private Vault</strong>.
                   </p>
                 </div>
               </div>
@@ -3407,47 +3412,31 @@ export default function ProfileEditPage() {
                 type="button"
                 onClick={handleAddPrivateDocument}
                 leftIcon={<Plus className="h-4 w-4" />}
-                className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm shrink-0 self-start sm:self-center"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shrink-0 self-start sm:self-center"
               >
-                Add Document
+                + Upload Document
               </Button>
             </div>
 
-            {/* Private Mode Context Callout */}
-            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-background/80 border border-purple-500/20 text-xs">
-              <div className="flex items-center gap-2 text-foreground/90">
-                <ShieldCheck className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                <span>
-                  Active Profile Mode: <strong>{activeProfileMode}</strong>
-                  {activeProfileMode !== 'PRIVATE' && (
-                    <span className="text-muted-foreground ml-1.5 hidden sm:inline">
-                      (Documents added here will only appear when your profile is set to Private mode)
-                    </span>
-                  )}
-                </span>
-              </div>
-              {activeProfileMode !== 'PRIVATE' && (
-                <button
-                  type="button"
-                  onClick={() => setActiveProfileMode('PRIVATE')}
-                  className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline shrink-0"
-                >
-                  Switch to Private Mode &rarr;
-                </button>
-              )}
+            {/* Document Visibility Guide Callout */}
+            <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-muted/30 border border-border text-xs text-muted-foreground">
+              <FileText className="h-4 w-4 text-primary shrink-0" />
+              <span>
+                <strong>Visibility Control:</strong> Documents set to <strong className="text-emerald-600 dark:text-emerald-400">Public</strong> will appear on your public profile. Sensitive identity documents can be kept in your <strong className="text-purple-600 dark:text-purple-400">Private Vault</strong>.
+              </span>
             </div>
           </div>
 
           {/* List of Documents */}
           {privateDocuments.length === 0 ? (
             <div className="p-10 rounded-3xl border border-dashed border-border bg-card text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto">
-                <Lock className="h-6 w-6" />
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                <FileText className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-foreground">No Private Documents Added</h4>
+                <h4 className="text-sm font-bold text-foreground">No Documents Uploaded Yet</h4>
                 <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                  Add your Aadhaar card, PAN card, marksheets, driving license, or certificates. You control whether each document is displayed on your profile in Private Mode.
+                  Upload your Resume / CV, certificates, portfolio files, or identity proofs. You control whether each document is public or private.
                 </p>
               </div>
               <Button
@@ -3457,7 +3446,7 @@ export default function ProfileEditPage() {
                 onClick={handleAddPrivateDocument}
                 leftIcon={<Plus className="h-3.5 w-3.5" />}
               >
-                + Add Private Document
+                + Upload Document (Resume, Certificate, etc.)
               </Button>
             </div>
           ) : (
@@ -3470,12 +3459,12 @@ export default function ProfileEditPage() {
                 return (
                   <div
                     key={docId}
-                    className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-xs space-y-4 transition-all hover:border-purple-500/30"
+                    className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-xs space-y-4 transition-all hover:border-primary/30"
                   >
                     {/* Header with numbering and remove button */}
                     <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/70">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-6 h-6 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 text-xs font-bold flex items-center justify-center">
+                        <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">
                           {idx + 1}
                         </span>
                         <h4 className="text-sm font-bold text-foreground">
@@ -3750,7 +3739,7 @@ export default function ProfileEditPage() {
                   leftIcon={<Plus className="h-4 w-4" />}
                   className="w-full py-3 rounded-2xl border-dashed text-xs font-semibold"
                 >
-                  + Add Another Private Document
+                  + Upload / Add Another Document
                 </Button>
               </div>
             </div>
