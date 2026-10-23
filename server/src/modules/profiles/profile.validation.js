@@ -372,6 +372,9 @@ export const updateProfileSchema = z.object({
           tagline: z.string().max(500).optional(),
           url: z.string().optional().default(''),
           website: z.string().optional(),
+          imageUrl: z.string().optional().default(''),
+          logoUrl: z.string().optional(),
+          logo: z.string().optional(),
           month: monthSchema,
           year: yearSchema,
           date: z.coerce.date().nullable().optional(),
@@ -384,6 +387,7 @@ export const updateProfileSchema = z.object({
           subtitle: item.subtitle || item.role || '',
           description: item.description || item.tagline || '',
           url: item.url || item.website || '',
+          imageUrl: item.imageUrl || item.logoUrl || item.logo || '',
         })),
     )
     .optional(),
@@ -417,6 +421,7 @@ export const updateProfileSchema = z.object({
           year: yearSchema,
           date: z.coerce.date().nullable().optional(),
           showOnProfile: z.boolean().optional().default(false),
+          visibility: z.string().optional().default('PRIVATE'),
           metadata: z.record(z.any()).optional().default({}),
         })
         .passthrough(),

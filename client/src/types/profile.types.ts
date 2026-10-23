@@ -150,6 +150,7 @@ export interface OrganizationItem {
   subtitle?: string
   description?: string
   url?: string
+  imageUrl?: string
   month?: number | null
   year?: number | null
   date?: string | null
@@ -158,6 +159,8 @@ export interface OrganizationItem {
     stage?: string
     status?: string
     funding?: string
+    imageUrl?: string
+    [key: string]: any
   }
 }
 
@@ -171,8 +174,10 @@ export interface PrivateDocumentItem {
   year?: number | null
   date?: string | null
   showOnProfile?: boolean
+  visibility?: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE' | 'HIDDEN' | string
   metadata?: {
     showOnProfile?: boolean
+    visibility?: 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE' | 'HIDDEN' | string
     docType?: string
     docNumber?: string
     originalFilename?: string

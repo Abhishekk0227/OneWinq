@@ -1,5 +1,5 @@
-// OneWinq Service Worker v18 - Enable standard mobile bottom navigation on my profile
-const CACHE_NAME = 'onewinq-v18';
+// OneWinq Service Worker v19 - Documents visibility, rectangular document cards, and venture logos
+const CACHE_NAME = 'onewinq-v19';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

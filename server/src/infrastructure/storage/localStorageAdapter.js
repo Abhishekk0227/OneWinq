@@ -30,6 +30,8 @@ export class LocalStorageAdapter extends StorageAdapter {
   getBaseUrl() {
     if (process.env.SERVER_URL) return process.env.SERVER_URL.replace(/\/+$/, '');
     if (process.env.BACKEND_URL) return process.env.BACKEND_URL.replace(/\/+$/, '');
+    if (process.env.APP_URL) return process.env.APP_URL.replace(/\/+$/, '');
+    if (process.env.NODE_ENV === 'production') return 'https://www.onewinq.com';
     const port = process.env.PORT || 5000;
     return `http://localhost:${port}`;
   }

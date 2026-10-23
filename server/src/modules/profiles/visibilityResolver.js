@@ -286,18 +286,51 @@ export function filterProfileByVisibility(profileSnapshot, forcedMode = null) {
     });
   }
 
-  // Private Documents: strictly visible ONLY in PRIVATE mode, and only if showOnProfile is true
-  if (effectiveMode === VISIBILITY_MODE.PRIVATE && Array.isArray(profileSnapshot.privateDocuments)) {
-    const visibleDocs = profileSnapshot.privateDocuments.filter(
-      (item) => item && (item.showOnProfile === true || item.metadata?.showOnProfile === true)
-    );
-    result.privateDocuments = visibleDocs;
-    if (!result.sections) result.sections = {};
-    result.sections.privateDocuments = visibleDocs;
+  // Documents Visibility Resolution: supports PUBLIC, PROFESSIONAL, and PRIVATE modes
+  if (Array.isArray(profileSnapshot.privateDocuments) && profileSnapshot.privateDocuments.length > 0) {
+    const visibleDocs = profileSnapshot.privateDocuments.filter((item) => {
+      if (!item) return false;
+      const docVisibility = String(item.visibility || item.metadata?.visibility || '').toUpperCase();
+      const legacyShow = item.showOnProfile === true || item.metadata?.showOnProfile === true;
+
+      // In PUBLIC mode: show documents marked as PUBLIC
+      if (effectiveMode === VISIBILITY_MODE.PUBLIC) {
+        return docVisibility === 'PUBLIC';
+      }
+      // In PROFESSIONAL mode: show documents marked as PUBLIC or PROFESSIONAL
+      if (effectiveMode === VISIBILITY_MODE.PROFESSIONAL) {
+        return docVisibility === 'PUBLIC' || docVisibility === 'PROFESSIONAL';
+      }
+      // In PRIVATE mode: show PUBLIC, PROFESSIONAL, or PRIVATE, or legacy showOnProfile
+      if (effectiveMode === VISIBILITY_MODE.PRIVATE) {
+        if (docVisibility === 'PUBLIC' || docVisibility === 'PROFESSIONAL' || docVisibility === 'PRIVATE') {
+          return true;
+        }
+        return legacyShow && docVisibility !== 'HIDDEN' && docVisibility !== 'VAULT';
+      }
+      return false;
+    });
+
+    if (visibleDocs.length > 0) {
+      result.privateDocuments = visibleDocs;
+      result.documents = visibleDocs;
+      if (!result.sections) result.sections = {};
+      result.sections.privateDocuments = visibleDocs;
+      result.sections.documents = visibleDocs;
+    } else {
+      delete result.privateDocuments;
+      delete result.documents;
+      if (result.sections) {
+        delete result.sections.privateDocuments;
+        delete result.sections.documents;
+      }
+    }
   } else {
     delete result.privateDocuments;
+    delete result.documents;
     if (result.sections) {
       delete result.sections.privateDocuments;
+      delete result.sections.documents;
     }
   }
 

@@ -56,6 +56,7 @@ import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
+import { resolveDocumentUrl } from '@/utils/documentUrl'
 
 const BIO_LIMIT = 300
 
@@ -328,10 +329,18 @@ export default function ProfilePage() {
   const projects = profile?.projects || profile?.sections?.projects || []
   const services = profile?.services || profile?.sections?.services || []
   const organizations = profile?.organizations || profile?.sections?.organizations || []
-  const privateDocuments = profile?.privateDocuments || []
-  const profileVisibleDocs = privateDocuments.filter(
-    (d: any) => d && (d.showOnProfile === true || d.metadata?.showOnProfile === true)
-  )
+  const privateDocuments = (profile?.documents && profile?.documents.length > 0 ? profile.documents : profile?.privateDocuments) || []
+  const profileVisibleDocs = privateDocuments.filter((d: any) => {
+    if (!d) return false
+    const vis = d.visibility || d.metadata?.visibility
+    if (currentMode === VISIBILITY_MODE.PUBLIC) {
+      return vis === 'PUBLIC'
+    }
+    if (currentMode === VISIBILITY_MODE.PROFESSIONAL) {
+      return vis === 'PUBLIC' || vis === 'PROFESSIONAL'
+    }
+    return vis === 'PUBLIC' || vis === 'PROFESSIONAL' || vis === 'PRIVATE' || d.showOnProfile === true || d.metadata?.showOnProfile === true
+  })
   const certifications = profile?.certifications || profile?.sections?.certifications || []
   const skills = profile?.skills || profile?.sections?.skills || []
   const awards = profile?.awards || profile?.sections?.awards || []
@@ -699,108 +708,89 @@ export default function ProfilePage() {
           {activeTab === 'home' && (
             <div className="space-y-4">
 
-              {isPrivateMode && (
-                <div className="p-4 sm:p-5 rounded-2xl border border-purple-500/25 bg-purple-500/5 shadow-sm space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {profileVisibleDocs.length > 0 && (
+                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                        <Lock className="h-4 w-4" />
+                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <FileText className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-xs sm:text-sm font-bold text-foreground">
-                            {profileVisibleDocs.length > 0
-                              ? `Private Documents on Profile (${profileVisibleDocs.length})`
-                              : `Private Documents Vault (${privateDocuments.length})`}
+                            Documents ({profileVisibleDocs.length})
                           </h3>
-                          <Badge variant="outline" className="text-[10px] bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30">
-                            Private Mode Active
-                          </Badge>
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {profileVisibleDocs.length > 0
-                            ? 'These documents are configured to be visible on your profile when viewed in Private Mode.'
-                            : 'Documents added here are locked in Private Mode. Toggle "Show on profile" to display them on your profile.'}
+                          Verified credentials and published documents on your profile.
                         </p>
                       </div>
                     </div>
                     <Link
-                      to="/app/profile/edit?tab=private-docs&mode=private"
+                      to="/app/profile/edit?tab=private-docs"
                       className="text-xs font-semibold text-primary hover:underline shrink-0"
                     >
                       Manage Documents &rarr;
                     </Link>
                   </div>
 
-                  {profileVisibleDocs.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                      {profileVisibleDocs.map((doc: any, idx: number) => (
-                        <div key={doc.id || idx} className="p-3 rounded-xl border border-border bg-card flex items-center justify-between gap-2 shadow-2xs">
-                          <div className="min-w-0">
-                            <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">{doc.subtitle || 'Document'}</span>
-                              {doc.metadata?.docNumber && (
-                                <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
-                              )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {profileVisibleDocs.map((doc: any, idx: number) => {
+                      const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
+                      const isImg = doc.metadata?.mimeType?.startsWith('image/')
+                      const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+                      return (
+                        <div key={doc.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2.5 shadow-2xs">
+                          <div className="flex items-start gap-2.5">
+                            <div className="w-9 h-11 rounded-lg bg-gradient-to-br from-primary/15 to-muted border border-primary/20 flex flex-col items-center justify-center shrink-0">
+                              <FileText className="h-4 w-4 text-primary" />
+                              <span className="text-[8px] font-bold text-primary">{docTag}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[10px] text-primary font-medium">{doc.subtitle || 'Document'}</span>
+                                {doc.metadata?.docNumber && (
+                                  <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {doc.url && (
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
-                            >
-                              <span>View</span>
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
+                            <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                              <a
+                                href={resolveDocumentUrl(doc.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
+                              >
+                                <span>Open Document</span>
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
+                                <ShieldCheck className="h-3 w-3 text-primary" />
+                                <span>Verified</span>
+                              </span>
+                            </div>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  ) : privateDocuments.length > 0 ? (
-                    <div className="p-3 rounded-xl bg-background/60 border border-border/80 text-center space-y-1">
-                      <div className="text-xs font-semibold text-foreground">
-                        {privateDocuments.length} document(s) in Private Vault
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        None of your vault documents are currently marked to show on your profile in Private Mode.
-                      </p>
-                      <Link to="/app/profile/edit?tab=private-docs&mode=private">
-                        <Button size="xs" variant="ghost" className="text-xs text-primary mt-1">
-                          Choose documents to show on profile &rarr;
-                        </Button>
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 border border-dashed border-border/80 rounded-xl space-y-1">
-                      <div className="text-xs font-semibold text-foreground">No Private Documents Yet</div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Add Aadhaar, PAN card, driving license, or marksheets in Private Mode.
-                      </p>
-                      <Link to="/app/profile/edit?tab=private-docs&mode=private">
-                        <Button size="xs" variant="outline" className="text-xs mt-1">
-                          + Add Private Documents
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-
-                  {profileVisibleDocs.length > 0 && privateDocuments.length > profileVisibleDocs.length && (
-                    <div className="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-purple-500/15">
-                      <span>
-                        + {privateDocuments.length - profileVisibleDocs.length} other document(s) stored in Private Vault (hidden from profile)
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('vault')}
-                        className="text-primary hover:underline font-medium cursor-pointer"
-                      >
-                        View Vault &rarr;
-                      </button>
-                    </div>
-                  )}
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {profileVisibleDocs.length > 0 && privateDocuments.length > profileVisibleDocs.length && (
+                <div className="text-[11px] text-muted-foreground flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
+                  <span>
+                    + {privateDocuments.length - profileVisibleDocs.length} other document(s) stored in your Private Vault
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('vault')}
+                    className="text-primary hover:underline font-medium cursor-pointer"
+                  >
+                    View Vault &rarr;
+                  </button>
                 </div>
               )}
             </div>
@@ -1303,20 +1293,31 @@ export default function ProfilePage() {
                       const orgRole = org.role || org.subtitle || org.metadata?.role || ''
                       const orgTagline = org.tagline || org.metadata?.funding || org.description || ''
                       const orgWebsite = org.website || org.url || ''
-                      const orgStage = org.stage || org.metadata?.stage || ''
+                      const orgLogo = org.imageUrl || org.metadata?.imageUrl || org.logoUrl
                       return (
-                        <div key={org.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-1.5 hover:border-primary/40 transition-colors">
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="font-semibold text-xs text-foreground">{orgName}</span>
-                            {orgStage && (
-                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary uppercase shrink-0">
-                                {orgStage}
-                              </span>
+                        <div key={org.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2 hover:border-primary/40 transition-colors">
+                          <div className="flex items-start gap-2.5">
+                            {orgLogo ? (
+                              <img
+                                src={orgLogo}
+                                alt={orgName}
+                                className="w-9 h-9 rounded-lg object-contain bg-background border border-border p-1 shrink-0"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLElement).style.display = 'none'
+                                }}
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                                <Building2 className="h-4 w-4" />
+                              </div>
                             )}
+                            <div className="min-w-0 flex-1">
+                              <span className="font-semibold text-xs text-foreground block truncate">{orgName}</span>
+                              {orgRole && (
+                                <p className="text-[11px] font-medium text-foreground/80 truncate">{orgRole}</p>
+                              )}
+                            </div>
                           </div>
-                          {orgRole && (
-                            <p className="text-[11px] font-medium text-foreground/80">{orgRole}</p>
-                          )}
                           {orgTagline && (
                             <p className="text-[11px] text-muted-foreground line-clamp-2">{orgTagline}</p>
                           )}
@@ -1646,7 +1647,7 @@ export default function ProfilePage() {
                         {doc.url && (
                           <div className="pt-2 border-t border-border flex items-center justify-between">
                             <a
-                              href={doc.url}
+                              href={resolveDocumentUrl(doc.url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
