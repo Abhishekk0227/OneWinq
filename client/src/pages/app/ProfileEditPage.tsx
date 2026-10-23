@@ -76,6 +76,7 @@ import { TemplateCard } from '@/components/profile/TemplateCard'
 import { sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'
+import { getDocumentTypeMeta } from '@/utils/documentIcon'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
@@ -3455,6 +3456,12 @@ export default function ProfileEditPage() {
                 const docId = doc.id || String(idx)
                 const isUploading = uploadingDocId === docId
                 const isDocVisible = Boolean(doc.showOnProfile || doc.metadata?.showOnProfile)
+                const typeMeta = getDocumentTypeMeta(
+                  doc.subtitle || doc.metadata?.docType,
+                  doc.metadata?.mimeType,
+                  doc.url
+                )
+                const IconComponent = typeMeta.icon
 
                 return (
                   <div
@@ -3464,9 +3471,12 @@ export default function ProfileEditPage() {
                     {/* Header with numbering and remove button */}
                     <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/70">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">
-                          {idx + 1}
-                        </span>
+                        <div className={cn(
+                          "w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 shadow-2xs",
+                          typeMeta.colorClass
+                        )}>
+                          <IconComponent className="h-4 w-4" />
+                        </div>
                         <h4 className="text-sm font-bold text-foreground">
                           {doc.title || doc.subtitle || `Document #${idx + 1}`}
                         </h4>
@@ -3501,7 +3511,13 @@ export default function ProfileEditPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Document Type Dropdown */}
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">Document Type</label>
+                        <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                          <span>Document Type</span>
+                          <span className="text-[11px] font-medium text-primary flex items-center gap-1">
+                            <IconComponent className="h-3 w-3" />
+                            <span>{typeMeta.label}</span>
+                          </span>
+                        </label>
                         <select
                           value={doc.subtitle || doc.metadata?.docType || 'Aadhaar Card'}
                           onChange={(e) => {

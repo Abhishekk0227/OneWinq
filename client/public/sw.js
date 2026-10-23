@@ -1,5 +1,5 @@
-// OneWinq Service Worker v21 - Tab scrolling fix, venture image upload labels, and Documents tab
-const CACHE_NAME = 'onewinq-v21';
+// OneWinq Service Worker v22 - Respective document icons, clickable document tiles, and discovery clean-up
+const CACHE_NAME = 'onewinq-v22';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

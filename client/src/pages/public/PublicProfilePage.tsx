@@ -62,9 +62,9 @@ import { cn } from '@/lib/utils/cn'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
-import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'
+import { getDocumentTypeMeta } from '@/utils/documentIcon'
 
 const BIO_LIMIT = 300
 
@@ -1340,36 +1340,60 @@ export default function PublicProfilePage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
                   {privateDocuments.map((doc: any, idx: number) => {
-                    const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
-                    const isImg = doc.metadata?.mimeType?.startsWith('image/')
-                    const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+                    const typeMeta = getDocumentTypeMeta(
+                      doc.subtitle || doc.metadata?.docType,
+                      doc.metadata?.mimeType,
+                      doc.url
+                    )
+                    const IconComponent = typeMeta.icon
+                    const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
+                    const CardTag = docHref ? 'a' : 'div'
+                    const cardProps = docHref
+                      ? {
+                          href: docHref,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          role: 'button',
+                          title: `Open ${doc.title || typeMeta.label}`,
+                        }
+                      : {}
 
                     return (
-                      <div
+                      <CardTag
                         key={doc.id || idx}
-                        className="p-4 rounded-2xl border border-border bg-card shadow-xs hover:border-primary/40 hover:shadow-sm transition-all space-y-3"
+                        {...cardProps}
+                        className={cn(
+                          "group relative p-3.5 sm:p-4 rounded-2xl border border-border bg-card shadow-xs transition-all flex items-center justify-between gap-3 text-left min-w-0",
+                          docHref && "cursor-pointer hover:border-primary/50 hover:shadow-md hover:bg-muted/10 active:scale-[0.99]"
+                        )}
                       >
-                        <div className="flex items-start gap-3">
-                          {/* Sleek Rectangle Document Badge */}
-                          <div className="w-11 h-14 rounded-xl bg-gradient-to-br from-primary/15 via-primary/10 to-muted border border-primary/25 flex flex-col items-center justify-center shrink-0 shadow-2xs">
-                            <FileText className="h-5 w-5 text-primary" />
-                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-primary/90 mt-1">
-                              {docTag}
+                        {/* Left Side: Respective Icon + Details */}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* Sleek Respective Icon Badge */}
+                          <div className={cn(
+                            "w-11 h-13 rounded-xl bg-gradient-to-br border flex flex-col items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105",
+                            typeMeta.colorClass
+                          )}>
+                            <IconComponent className="h-5 w-5" />
+                            <span className="text-[8px] font-extrabold uppercase tracking-wider mt-0.5">
+                              {typeMeta.tag}
                             </span>
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <h3 className="font-bold text-xs sm:text-sm text-foreground truncate">{doc.title}</h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                                {doc.title}
+                              </h3>
                               {doc.metadata?.docNumber && (
-                                <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md shrink-0">
+                                <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md shrink-0">
                                   {doc.metadata.docNumber}
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                               <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
-                                {doc.subtitle || 'Document'}
+                                {doc.subtitle || typeMeta.label}
                               </span>
                               {doc.metadata?.fileSize && (
                                 <span className="text-[10px] text-muted-foreground">
@@ -1378,31 +1402,27 @@ export default function PublicProfilePage() {
                               )}
                             </div>
                             {doc.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mt-1">
+                              <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed mt-1">
                                 {doc.description}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        {doc.url && (
-                          <div className="pt-2 border-t border-border flex items-center justify-between">
-                            <a
-                              href={resolveDocumentUrl(doc.url)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline group"
-                            >
-                              <span>Open Document</span>
-                              <ExternalLink className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                            </a>
-                            <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
-                              <ShieldCheck className="h-3 w-3 text-primary" />
-                              <span>Verified</span>
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                        {/* Right Side: Verified Badge & Open Indicator */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            <ShieldCheck className="h-3 w-3" />
+                            <span>Verified</span>
+                          </span>
+
+                          {docHref && (
+                            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0 shadow-2xs">
+                              <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                            </div>
+                          )}
+                        </div>
+                      </CardTag>
                     )
                   })}
                 </div>
@@ -1489,35 +1509,56 @@ export default function PublicProfilePage() {
                     </div>
                     <div className="space-y-2">
                       {privateDocuments.slice(0, 3).map((doc: any, idx: number) => {
-                        const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
-                        const isImg = doc.metadata?.mimeType?.startsWith('image/')
-                        const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+                        const typeMeta = getDocumentTypeMeta(
+                          doc.subtitle || doc.metadata?.docType,
+                          doc.metadata?.mimeType,
+                          doc.url
+                        )
+                        const IconComponent = typeMeta.icon
+                        const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
+                        const CardTag = docHref ? 'a' : 'div'
+                        const cardProps = docHref
+                          ? {
+                              href: docHref,
+                              target: '_blank',
+                              rel: 'noopener noreferrer',
+                              role: 'button',
+                              title: `Open ${doc.title || typeMeta.label}`,
+                            }
+                          : {}
+
                         return (
-                          <div key={doc.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 flex items-center justify-between gap-3 shadow-2xs">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-9 rounded-lg bg-primary/10 border border-primary/20 flex flex-col items-center justify-center shrink-0">
-                                <FileText className="h-3.5 w-3.5 text-primary" />
-                                <span className="text-[7px] font-bold text-primary">{docTag}</span>
+                          <CardTag
+                            key={doc.id || idx}
+                            {...cardProps}
+                            className={cn(
+                              "group p-3 rounded-xl border border-border bg-muted/10 flex items-center justify-between gap-3 shadow-2xs transition-all",
+                              docHref && "cursor-pointer hover:border-primary/50 hover:bg-muted/20 active:scale-[0.99]"
+                            )}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className={cn(
+                                "w-8 h-9 rounded-lg border flex flex-col items-center justify-center shrink-0",
+                                typeMeta.colorClass
+                              )}>
+                                <IconComponent className="h-4 w-4" />
+                                <span className="text-[7px] font-bold">{typeMeta.tag}</span>
                               </div>
-                              <div className="min-w-0">
-                                <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-xs text-foreground truncate group-hover:text-primary transition-colors">
+                                  {doc.title}
+                                </div>
                                 <div className="text-[10px] text-primary/80 font-medium">
-                                  {doc.subtitle || 'Document'}
+                                  {doc.subtitle || typeMeta.label}
                                 </div>
                               </div>
                             </div>
-                            {doc.url && (
-                              <a
-                                href={resolveDocumentUrl(doc.url)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
-                              >
-                                <span>View</span>
+                            {docHref && (
+                              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
                                 <ExternalLink className="h-3 w-3" />
-                              </a>
+                              </div>
                             )}
-                          </div>
+                          </CardTag>
                         )
                       })}
                     </div>
