@@ -1,5 +1,5 @@
-// OneWinq Service Worker v20 - Fix cn import in ProfileEditPage
-const CACHE_NAME = 'onewinq-v20';
+// OneWinq Service Worker v21 - Tab scrolling fix, venture image upload labels, and Documents tab
+const CACHE_NAME = 'onewinq-v21';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
