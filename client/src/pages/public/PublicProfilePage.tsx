@@ -375,6 +375,26 @@ export default function PublicProfilePage() {
   )
   const profileUrl = window.location.href
 
+  const handleShareProfile = async () => {
+    const title = `${profileUser?.displayName || 'Profile'} | OneWinq`
+    const text = profile?.headline || `Check out @${profileUser?.username}'s profile on OneWinq`
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text,
+          url: profileUrl,
+        })
+        return
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    setIsShareModalOpen(true)
+  }
+
   if (!profile) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
@@ -502,7 +522,7 @@ export default function PublicProfilePage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsShareModalOpen(true)}
+              onClick={handleShareProfile}
               leftIcon={<Share2 className="h-3.5 w-3.5" />}
               className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 shrink-0"
             >
@@ -1703,7 +1723,7 @@ export default function PublicProfilePage() {
           headline: profile.headline,
         }}
         isSelf={isSelf}
-        onShareClick={() => setIsShareModalOpen(true)}
+        onShareClick={handleShareProfile}
       />
     </div>
   )

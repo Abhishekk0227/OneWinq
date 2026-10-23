@@ -58,6 +58,7 @@ import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSide
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'
 import { getDocumentTypeMeta } from '@/utils/documentIcon'
+import { cn } from '@/lib/utils/cn'
 
 const BIO_LIMIT = 300
 
@@ -440,6 +441,34 @@ export default function ProfilePage() {
     }
   }
 
+  const handleShareProfile = async () => {
+    const profileUrl = user?.username
+      ? `${window.location.origin}/u/${user.username}`
+      : window.location.href
+    const title = `${user?.displayName || 'Profile'} | OneWinq`
+    const text = profile?.headline || `Connect with ${user?.displayName || 'me'} on OneWinq`
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text,
+          url: profileUrl,
+        })
+        return
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(profileUrl)
+      toast.success('Public profile link copied to clipboard!')
+    } catch {
+      toast.error('Could not copy link')
+    }
+  }
+
   return (
     <div
       onTouchStart={handleTouchStart}
@@ -590,6 +619,17 @@ export default function ProfilePage() {
                         Edit Profile
                       </Button>
                     </Link>
+
+                    {/* Share Profile */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleShareProfile}
+                      leftIcon={<Share2 className="h-3.5 w-3.5" />}
+                      className="text-xs h-8"
+                    >
+                      Share
+                    </Button>
                   </div>
                 </div>
 
@@ -1760,12 +1800,7 @@ export default function ProfilePage() {
           headline: profile.headline,
         }}
         isSelf={true}
-        onShareClick={() => {
-          if (user?.username) {
-            navigator.clipboard.writeText(`${window.location.origin}/u/${user.username}`)
-            toast.success('Public profile link copied to clipboard!')
-          }
-        }}
+        onShareClick={handleShareProfile}
         editProfileUrl="/app/profile/edit"
       />
 
