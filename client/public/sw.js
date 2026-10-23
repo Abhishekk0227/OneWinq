@@ -1,5 +1,5 @@
-// OneWinq Service Worker v22 - Respective document icons, clickable document tiles, and discovery clean-up
-const CACHE_NAME = 'onewinq-v22';
+// OneWinq Service Worker v23 - Fix cn import in ProfilePage and enable native Web Share sheet
+const CACHE_NAME = 'onewinq-v23';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
