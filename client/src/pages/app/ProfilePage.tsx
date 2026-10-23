@@ -370,10 +370,11 @@ export default function ProfilePage() {
       ...(services.length > 0 ? [{ id: 'services', label: 'Services', icon: <Briefcase className="h-4 w-4" />, count: services.length }] : []),
       ...(hasMedia ? [{ id: 'media', label: 'Media & Credentials', icon: <Video className="h-4 w-4" />, count: mediaGallery.length + certifications.length + skills.length + awards.length + publications.length }] : []),
       { id: 'posts', label: 'Posts & Activity', icon: <Flame className="h-4 w-4" /> },
+      ...(profileVisibleDocs.length > 0 ? [{ id: 'documents', label: 'Documents', icon: <FileText className="h-4 w-4" />, count: profileVisibleDocs.length }] : []),
       ...(isPrivateMode ? [{ id: 'vault', label: 'Private Vault', icon: <Lock className="h-4 w-4" />, count: privateDocuments.length }] : []),
       ...(hasCustom ? [{ id: 'custom', label: 'Custom', icon: <Layers className="h-4 w-4" />, count: customSections.length }] : []),
     ]
-  }, [profile, hasExperience, hasEducation, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
+  }, [profile, hasExperience, hasEducation, hasMedia, hasCustom, isPrivateMode, experiences.length, education.length, projects.length, services.length, organizations.length, profileVisibleDocs.length, privateDocuments.length, mediaGallery.length, certifications.length, skills.length, awards.length, publications.length, customSections.length])
 
   // Show swipe arrows briefly when profile is ready and has multiple tabs
   const hasLoadedProfile = !isLoading && Boolean(profile) && profileTabs.length > 1
@@ -745,123 +746,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Overview Cards when on Home tab */}
-          {activeTab === 'home' && (
-            <div className="space-y-4">
 
-              {profileVisibleDocs.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-xs sm:text-sm font-bold text-foreground">
-                            Documents ({profileVisibleDocs.length})
-                          </h3>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Verified credentials and published documents on your profile.
-                        </p>
-                      </div>
-                    </div>
-                    <Link
-                      to="/app/profile/edit?tab=private-docs"
-                      className="text-xs font-semibold text-primary hover:underline shrink-0"
-                    >
-                      Manage Documents &rarr;
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    {profileVisibleDocs.map((doc: any, idx: number) => {
-                      const typeMeta = getDocumentTypeMeta(
-                        doc.subtitle || doc.metadata?.docType,
-                        doc.metadata?.mimeType,
-                        doc.url
-                      )
-                      const IconComponent = typeMeta.icon
-                      const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
-                      const CardTag = docHref ? 'a' : 'div'
-                      const cardProps = docHref
-                        ? {
-                            href: docHref,
-                            target: '_blank',
-                            rel: 'noopener noreferrer',
-                            role: 'button',
-                            title: `Open ${doc.title || typeMeta.label}`,
-                          }
-                        : {}
-
-                      return (
-                        <CardTag
-                          key={doc.id || idx}
-                          {...cardProps}
-                          className={cn(
-                            "group p-3.5 rounded-2xl border border-border bg-muted/10 shadow-2xs transition-all flex items-center justify-between gap-3 text-left min-w-0",
-                            docHref && "cursor-pointer hover:border-primary/50 hover:bg-muted/20 hover:shadow-sm active:scale-[0.99]"
-                          )}
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className={cn(
-                              "w-11 h-13 rounded-xl bg-gradient-to-br border flex flex-col items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105",
-                              typeMeta.colorClass
-                            )}>
-                              <IconComponent className="h-5 w-5" />
-                              <span className="text-[8px] font-extrabold uppercase tracking-wider mt-0.5">
-                                {typeMeta.tag}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                                {doc.title}
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                                <span className="text-[10px] text-primary font-medium">
-                                  {doc.subtitle || typeMeta.label}
-                                </span>
-                                {doc.metadata?.docNumber && (
-                                  <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                              <ShieldCheck className="h-3 w-3" />
-                              <span>Verified</span>
-                            </span>
-                            {docHref && (
-                              <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </div>
-                            )}
-                          </div>
-                        </CardTag>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-              {profileVisibleDocs.length > 0 && privateDocuments.length > profileVisibleDocs.length && (
-                <div className="text-[11px] text-muted-foreground flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
-                  <span>
-                    + {privateDocuments.length - profileVisibleDocs.length} other document(s) stored in your Private Vault
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('vault')}
-                    className="text-primary hover:underline font-medium cursor-pointer"
-                  >
-                    View Vault &rarr;
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* DEDICATED TAB: Profile Visibility Section */}
           {activeTab === 'visibility' && (
@@ -1648,6 +1533,107 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* DEDICATED TAB: Documents Section */}
+          {activeTab === 'documents' && (
+            <div className="space-y-4">
+              <div className="p-5 sm:p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-bold text-foreground">
+                        Documents ({profileVisibleDocs.length})
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Verified credentials, resumes, certificates, and published documents on your profile.
+                      </p>
+                    </div>
+                  </div>
+                  <Link to="/app/profile/edit?tab=private-docs">
+                    <Button size="sm" leftIcon={<FileText className="h-3.5 w-3.5" />}>
+                      Upload / Manage Documents
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                  {profileVisibleDocs.map((doc: any, idx: number) => {
+                    const typeMeta = getDocumentTypeMeta(
+                      doc.subtitle || doc.metadata?.docType,
+                      doc.metadata?.mimeType,
+                      doc.url
+                    )
+                    const IconComponent = typeMeta.icon
+                    const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
+                    const CardTag = docHref ? 'a' : 'div'
+                    const cardProps = docHref
+                      ? {
+                          href: docHref,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          role: 'button',
+                          title: `Open ${doc.title || typeMeta.label}`,
+                        }
+                      : {}
+
+                    return (
+                      <CardTag
+                        key={doc.id || idx}
+                        {...cardProps}
+                        className={cn(
+                          "group p-3.5 sm:p-4 rounded-2xl border border-border bg-card shadow-xs transition-all flex items-center justify-between gap-3 text-left min-w-0",
+                          docHref && "cursor-pointer hover:border-primary/50 hover:shadow-md hover:bg-muted/10 active:scale-[0.99]"
+                        )}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className={cn(
+                            "w-11 h-13 rounded-xl bg-gradient-to-br border flex flex-col items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105",
+                            typeMeta.colorClass
+                          )}>
+                            <IconComponent className="h-5 w-5" />
+                            <span className="text-[8px] font-extrabold uppercase tracking-wider mt-0.5">
+                              {typeMeta.tag}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                              {doc.title}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="text-[10px] text-primary font-medium">
+                                {doc.subtitle || typeMeta.label}
+                              </span>
+                              {doc.metadata?.docNumber && (
+                                <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
+                              )}
+                            </div>
+                            {doc.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{doc.description}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            <ShieldCheck className="h-3 w-3" />
+                            <span>Verified</span>
+                          </span>
+                          {docHref && (
+                            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0 shadow-2xs">
+                              <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                            </div>
+                          )}
+                        </div>
+                      </CardTag>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           )}
 

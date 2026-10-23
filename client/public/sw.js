@@ -1,5 +1,5 @@
-// OneWinq Service Worker v23 - Fix cn import in ProfilePage and enable native Web Share sheet
-const CACHE_NAME = 'onewinq-v23';
+// OneWinq Service Worker v24 - Fix ProfileSectionsSidebar import and separate Documents into dedicated tab
+const CACHE_NAME = 'onewinq-v24';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
