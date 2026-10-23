@@ -1,5 +1,5 @@
-// OneWinq Service Worker v19 - Documents visibility, rectangular document cards, and venture logos
-const CACHE_NAME = 'onewinq-v19';
+// OneWinq Service Worker v20 - Fix cn import in ProfileEditPage
+const CACHE_NAME = 'onewinq-v20';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
