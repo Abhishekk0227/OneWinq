@@ -61,7 +61,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
-import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
+import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'
 import { getDocumentTypeMeta } from '@/utils/documentIcon'
@@ -1505,82 +1505,6 @@ export default function PublicProfilePage() {
                           <div className="text-muted-foreground text-[11px] break-words [overflow-wrap:anywhere] min-w-0">{cert.issuer}</div>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Documents Overview Card */}
-                {hasPrivateDocs && (
-                  <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                    <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary shrink-0" />
-                        <h2 className="text-xs sm:text-sm font-bold text-foreground">
-                          Documents ({privateDocuments.length})
-                        </h2>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('documents')}
-                        className="text-xs text-primary font-semibold hover:underline cursor-pointer"
-                      >
-                        View all &rarr;
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {privateDocuments.slice(0, 3).map((doc: any, idx: number) => {
-                        const typeMeta = getDocumentTypeMeta(
-                          doc.subtitle || doc.metadata?.docType,
-                          doc.metadata?.mimeType,
-                          doc.url
-                        )
-                        const IconComponent = typeMeta.icon
-                        const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
-                        const CardTag = docHref ? 'a' : 'div'
-                        const cardProps = docHref
-                          ? {
-                              href: docHref,
-                              target: '_blank',
-                              rel: 'noopener noreferrer',
-                              role: 'button',
-                              title: `Open ${doc.title || typeMeta.label}`,
-                            }
-                          : {}
-
-                        return (
-                          <CardTag
-                            key={doc.id || idx}
-                            {...cardProps}
-                            className={cn(
-                              "group p-3 rounded-xl border border-border bg-muted/10 flex items-center justify-between gap-3 shadow-2xs transition-all",
-                              docHref && "cursor-pointer hover:border-primary/50 hover:bg-muted/20 active:scale-[0.99]"
-                            )}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <div className={cn(
-                                "w-8 h-9 rounded-lg border flex flex-col items-center justify-center shrink-0",
-                                typeMeta.colorClass
-                              )}>
-                                <IconComponent className="h-4 w-4" />
-                                <span className="text-[7px] font-bold">{typeMeta.tag}</span>
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="font-semibold text-xs text-foreground truncate group-hover:text-primary transition-colors">
-                                  {doc.title}
-                                </div>
-                                <div className="text-[10px] text-primary/80 font-medium">
-                                  {doc.subtitle || typeMeta.label}
-                                </div>
-                              </div>
-                            </div>
-                            {docHref && (
-                              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
-                                <ExternalLink className="h-3 w-3" />
-                              </div>
-                            )}
-                          </CardTag>
-                        )
-                      })}
                     </div>
                   </div>
                 )}
