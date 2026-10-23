@@ -57,6 +57,7 @@ import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'
+import { getDocumentTypeMeta } from '@/utils/documentIcon'
 
 const BIO_LIMIT = 300
 
@@ -736,44 +737,70 @@ export default function ProfilePage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     {profileVisibleDocs.map((doc: any, idx: number) => {
-                      const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
-                      const isImg = doc.metadata?.mimeType?.startsWith('image/')
-                      const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+                      const typeMeta = getDocumentTypeMeta(
+                        doc.subtitle || doc.metadata?.docType,
+                        doc.metadata?.mimeType,
+                        doc.url
+                      )
+                      const IconComponent = typeMeta.icon
+                      const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
+                      const CardTag = docHref ? 'a' : 'div'
+                      const cardProps = docHref
+                        ? {
+                            href: docHref,
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                            role: 'button',
+                            title: `Open ${doc.title || typeMeta.label}`,
+                          }
+                        : {}
+
                       return (
-                        <div key={doc.id || idx} className="p-3.5 rounded-xl border border-border bg-muted/10 space-y-2.5 shadow-2xs">
-                          <div className="flex items-start gap-2.5">
-                            <div className="w-9 h-11 rounded-lg bg-gradient-to-br from-primary/15 to-muted border border-primary/20 flex flex-col items-center justify-center shrink-0">
-                              <FileText className="h-4 w-4 text-primary" />
-                              <span className="text-[8px] font-bold text-primary">{docTag}</span>
+                        <CardTag
+                          key={doc.id || idx}
+                          {...cardProps}
+                          className={cn(
+                            "group p-3.5 rounded-2xl border border-border bg-muted/10 shadow-2xs transition-all flex items-center justify-between gap-3 text-left min-w-0",
+                            docHref && "cursor-pointer hover:border-primary/50 hover:bg-muted/20 hover:shadow-sm active:scale-[0.99]"
+                          )}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className={cn(
+                              "w-11 h-13 rounded-xl bg-gradient-to-br border flex flex-col items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105",
+                              typeMeta.colorClass
+                            )}>
+                              <IconComponent className="h-5 w-5" />
+                              <span className="text-[8px] font-extrabold uppercase tracking-wider mt-0.5">
+                                {typeMeta.tag}
+                              </span>
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[10px] text-primary font-medium">{doc.subtitle || 'Document'}</span>
+                              <div className="font-semibold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                                {doc.title}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                <span className="text-[10px] text-primary font-medium">
+                                  {doc.subtitle || typeMeta.label}
+                                </span>
                                 {doc.metadata?.docNumber && (
                                   <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
                                 )}
                               </div>
                             </div>
                           </div>
-                          {doc.url && (
-                            <div className="pt-2 border-t border-border/60 flex items-center justify-between">
-                              <a
-                                href={resolveDocumentUrl(doc.url)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
-                              >
-                                <span>Open Document</span>
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                              <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
-                                <ShieldCheck className="h-3 w-3 text-primary" />
-                                <span>Verified</span>
-                              </span>
-                            </div>
-                          )}
-                        </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                              <ShieldCheck className="h-3 w-3" />
+                              <span>Verified</span>
+                            </span>
+                            {docHref && (
+                              <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                          </div>
+                        </CardTag>
                       )
                     })}
                   </div>
@@ -1617,48 +1644,78 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {privateDocuments.map((doc: any, idx: number) => {
                     const isDocVisible = Boolean(doc.showOnProfile || doc.metadata?.showOnProfile)
+                    const typeMeta = getDocumentTypeMeta(
+                      doc.subtitle || doc.metadata?.docType,
+                      doc.metadata?.mimeType,
+                      doc.url
+                    )
+                    const IconComponent = typeMeta.icon
+                    const docHref = doc.url ? resolveDocumentUrl(doc.url) : undefined
+                    const CardTag = docHref ? 'a' : 'div'
+                    const cardProps = docHref
+                      ? {
+                          href: docHref,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          role: 'button',
+                          title: `Open ${doc.title || typeMeta.label}`,
+                        }
+                      : {}
+
                     return (
-                      <div key={doc.id || idx} className="p-4 rounded-2xl border border-border bg-card shadow-xs space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{doc.title}</h4>
+                      <CardTag
+                        key={doc.id || idx}
+                        {...cardProps}
+                        className={cn(
+                          "group p-4 rounded-2xl border border-border bg-card shadow-xs transition-all flex items-center justify-between gap-3 text-left min-w-0",
+                          docHref && "cursor-pointer hover:border-primary/50 hover:shadow-md hover:bg-muted/10 active:scale-[0.99]"
+                        )}
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className={cn(
+                            "w-11 h-13 rounded-xl bg-gradient-to-br border flex flex-col items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105",
+                            typeMeta.colorClass
+                          )}>
+                            <IconComponent className="h-5 w-5" />
+                            <span className="text-[8px] font-extrabold uppercase tracking-wider mt-0.5">
+                              {typeMeta.tag}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                              {doc.title}
+                            </h4>
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                              <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
-                                {doc.subtitle || 'Private Document'}
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
+                                {doc.subtitle || typeMeta.label}
                               </span>
                               {doc.metadata?.docNumber && (
                                 <span className="text-[10px] font-mono text-muted-foreground">· {doc.metadata.docNumber}</span>
                               )}
                             </div>
+                            {doc.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{doc.description}</p>
+                            )}
                           </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
                           {isDocVisible ? (
                             <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold shrink-0">
-                              Visible on Profile
+                              On Profile
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground border-border font-semibold shrink-0">
-                              Vault Only (Hidden)
+                              Vault Only
                             </Badge>
                           )}
+                          {docHref && (
+                            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </div>
+                          )}
                         </div>
-                        {doc.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">{doc.description}</p>
-                        )}
-                        {doc.url && (
-                          <div className="pt-2 border-t border-border flex items-center justify-between">
-                            <a
-                              href={resolveDocumentUrl(doc.url)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                            >
-                              <span>Open Document</span>
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                            <span className="text-[10px] font-mono text-muted-foreground">🔒 Vault Protected</span>
-                          </div>
-                        )}
-                      </div>
+                      </CardTag>
                     )
                   })}
                 </div>

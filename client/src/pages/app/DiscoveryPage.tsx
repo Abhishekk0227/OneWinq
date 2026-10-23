@@ -50,7 +50,6 @@ export default function DiscoveryPage() {
   const [activeTab, setActiveTab] = React.useState<'PEOPLE' | 'COMPANIES'>('PEOPLE')
   const [searchTerm, setSearchTerm] = React.useState('')
   const [debouncedSearch, setDebouncedSearch] = React.useState('')
-  const [remoteOnly, setRemoteOnly] = React.useState(false)
   const [orgTypeFilter, setOrgTypeFilter] = React.useState('ALL')
   const [startingChatUserId, setStartingChatUserId] = React.useState<string | null>(null)
 
@@ -84,11 +83,10 @@ export default function DiscoveryPage() {
   }, [searchTerm])
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.discovery.search({ q: debouncedSearch, remoteOnly }),
+    queryKey: queryKeys.discovery.search({ q: debouncedSearch }),
     queryFn: () =>
       discoveryApi.search({
         q: debouncedSearch || undefined,
-        remoteOnly: remoteOnly || undefined,
         limit: 20,
       }),
   })
@@ -255,19 +253,7 @@ export default function DiscoveryPage() {
           />
         </div>
 
-        {activeTab === 'PEOPLE' ? (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-foreground/80 cursor-pointer select-none px-3.5 py-2 rounded-xl bg-muted/40 border border-border/80 hover:bg-muted/60 transition-colors w-full sm:w-auto justify-center">
-              <input
-                type="checkbox"
-                checked={remoteOnly}
-                onChange={(e) => setRemoteOnly(e.target.checked)}
-                className="rounded text-primary focus:ring-primary h-4 w-4"
-              />
-              <span>Remote Only</span>
-            </label>
-          </div>
-        ) : (
+        {activeTab === 'COMPANIES' && (
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <select
               value={orgTypeFilter}
