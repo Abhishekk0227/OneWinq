@@ -14,6 +14,7 @@ import {
   ERROR_CODE,
 } from '../../config/constants.js';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../../shared/errors.js';
+import { getAppBaseUrl } from './organizationMember.service.js';
 import logger from '../../utils/logger.js';
 
 function getTransferEmailHtml({ organizationName, fromName, toName, transferUrl }) {
@@ -140,7 +141,7 @@ export const organizationTransferService = {
     });
 
     const fromUser = await User.findById(fromUserId);
-    const clientBaseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const clientBaseUrl = getAppBaseUrl();
     const transferUrl = `${clientBaseUrl}/app/organizations/transfer?token=${token}`;
 
     // 1. Send in-app notification to target user

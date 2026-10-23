@@ -74,6 +74,7 @@ import { MonthYearPicker } from '@/components/common/MonthYearPicker'
 import { TemplateCard } from '@/components/profile/TemplateCard'
 import { sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
+import { resolveDocumentUrl } from '@/utils/documentUrl'
 
 export default function ProfileEditPage() {
   const navigate = useNavigate()
@@ -143,6 +144,7 @@ export default function ProfileEditPage() {
   const [uploadingDocId, setUploadingDocId] = React.useState<string | null>(null)
   const [uploadingProjectId, setUploadingProjectId] = React.useState<string | null>(null)
   const [uploadingServiceId, setUploadingServiceId] = React.useState<string | null>(null)
+  const [uploadingOrgId, setUploadingOrgId] = React.useState<string | null>(null)
 
   // Dynamic Tabs State
   const [searchParams] = useSearchParams()
@@ -1021,13 +1023,46 @@ export default function ProfileEditPage() {
       ...prev,
       {
         id: Math.random().toString(36).substring(2, 9),
-        title: 'Venture / Startup Name',
+        title: '',
         subtitle: 'Founder & CEO',
         description: '',
         url: '',
-        metadata: { role: 'Founder', stage: 'Early Stage', status: 'Active' },
+        imageUrl: '',
+        metadata: { role: 'Founder', status: 'Active' },
       },
     ])
+  }
+
+  const handleOrgLogoUpload = async (index: number, file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (JPG, PNG, WebP, SVG)')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Logo image cannot exceed 10MB')
+      return
+    }
+    const orgId = organizations[index]?.id || String(index)
+    try {
+      setUploadingOrgId(orgId)
+      const res = await mediaApi.uploadFile(file, 'PROFILE_SECTION')
+      setOrganizations((prev) => {
+        const updated = [...prev]
+        if (updated[index]) {
+          updated[index] = {
+            ...updated[index],
+            imageUrl: res.publicUrl,
+          }
+        }
+        return updated
+      })
+      toast.success('Venture logo uploaded successfully!')
+    } catch (err: any) {
+      console.error('[OrgLogoUploadError]', err)
+      toast.error(err?.message || 'Failed to upload logo image')
+    } finally {
+      setUploadingOrgId(null)
+    }
   }
 
   const handleAddPrivateDocument = () => {
@@ -1035,15 +1070,17 @@ export default function ProfileEditPage() {
       ...prev,
       {
         id: Math.random().toString(36).substring(2, 9),
-        title: 'Aadhaar Card',
-        subtitle: 'Aadhaar Card',
+        title: 'Resume',
+        subtitle: 'Resume / CV',
         description: '',
         url: '',
-        showOnProfile: false,
+        visibility: 'PUBLIC',
+        showOnProfile: true,
         metadata: {
-          docType: 'Aadhaar Card',
+          docType: 'Resume / CV',
           docNumber: '',
-          showOnProfile: false,
+          visibility: 'PUBLIC',
+          showOnProfile: true,
         },
       },
     ])
@@ -2196,7 +2233,7 @@ export default function ProfileEditPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         value={org.url || ''}
                         onChange={(e) => {
@@ -2206,27 +2243,6 @@ export default function ProfileEditPage() {
                         }}
                         placeholder="Website (https://...)"
                       />
-
-                      <select
-                        value={org.metadata?.stage || 'Bootstrapped'}
-                        onChange={(e) => {
-                          const updated = [...organizations]
-                          updated[idx].metadata = {
-                            ...(updated[idx].metadata || {}),
-                            stage: e.target.value,
-                          }
-                          setOrganizations(updated)
-                        }}
-                        className="rounded-xl border border-input bg-background px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary w-full"
-                      >
-                        <option value="Idea">Idea Stage</option>
-                        <option value="Pre-Seed">Pre-Seed</option>
-                        <option value="Seed">Seed</option>
-                        <option value="Series A+">Series A / Growth</option>
-                        <option value="Bootstrapped">Bootstrapped</option>
-                        <option value="Acquired">Acquired / Exited</option>
-                        <option value="Non-Profit">Non-Profit</option>
-                      </select>
 
                       <Input
                         value={org.metadata?.funding || ''}
@@ -2240,6 +2256,74 @@ export default function ProfileEditPage() {
                         }}
                         placeholder="Tagline or Pitch (e.g. Autonomous Identity)"
                       />
+                    </div>
+
+                    {/* Logo Upload or URL */}
+                    <div className="space-y-1.5 p-3 rounded-xl border border-border/80 bg-background/50">
+                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                        <span>Venture Logo (Upload file or paste Image URL)</span>
+                      </label>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {org.imageUrl ? (
+                          <div className="relative w-12 h-12 rounded-xl border border-border bg-card flex items-center justify-center overflow-hidden shrink-0">
+                            <img
+                              src={org.imageUrl}
+                              alt={org.title || 'Venture Logo'}
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none'
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...organizations]
+                                updated[idx].imageUrl = ''
+                                setOrganizations(updated)
+                              }}
+                              className="absolute top-0 right-0 p-0.5 bg-black/70 text-white rounded-bl hover:bg-destructive"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl border border-dashed border-border bg-muted/40 flex items-center justify-center shrink-0">
+                            <Building2 className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                        <input
+                          type="file"
+                          id={`org-logo-upload-${org.id || idx}`}
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) handleOrgLogoUpload(idx, file)
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          isLoading={uploadingOrgId === (org.id || String(idx))}
+                          onClick={() => document.getElementById(`org-logo-upload-${org.id || idx}`)?.click()}
+                          leftIcon={<Upload className="h-3.5 w-3.5" />}
+                          className="text-xs h-9 shrink-0"
+                        >
+                          {org.imageUrl ? 'Change Logo' : 'Upload Logo'}
+                        </Button>
+                        <Input
+                          value={org.imageUrl || ''}
+                          onChange={(e) => {
+                            const updated = [...organizations]
+                            updated[idx].imageUrl = e.target.value
+                            setOrganizations(updated)
+                          }}
+                          placeholder="Or paste image URL (https://...)"
+                          className="text-xs h-9 flex-1"
+                        />
+                      </div>
                     </div>
 
                     <Textarea
@@ -3453,14 +3537,16 @@ export default function ProfileEditPage() {
                           }}
                           className="w-full h-9 rounded-xl border border-input bg-background px-3 py-1 text-xs font-medium text-foreground shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         >
+                          <option value="Resume / CV">Resume / CV</option>
+                          <option value="Portfolio Document">Portfolio Document</option>
+                          <option value="Degree / Diploma Certificate">Degree / Diploma Certificate</option>
+                          <option value="Marksheet / Academic Transcript">Marksheet / Academic Transcript</option>
                           <option value="Aadhaar Card">Aadhaar Card</option>
                           <option value="PAN Card">PAN Card</option>
-                          <option value="Marksheet / Academic Transcript">Marksheet / Academic Transcript</option>
                           <option value="Driving License">Driving License</option>
                           <option value="Passport">Passport</option>
                           <option value="Voter ID Card">Voter ID Card</option>
-                          <option value="Degree / Diploma Certificate">Degree / Diploma Certificate</option>
-                          <option value="Other Private Document">Other Private Document</option>
+                          <option value="Other Document">Other Document</option>
                         </select>
                       </div>
 
@@ -3535,7 +3621,7 @@ export default function ProfileEditPage() {
                           </Button>
                           {doc.url && (
                             <a
-                              href={doc.url}
+                              href={resolveDocumentUrl(doc.url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3 h-9 rounded-xl border border-border bg-muted/40 hover:bg-muted text-xs font-semibold text-primary flex items-center gap-1.5 shrink-0"
@@ -3575,56 +3661,81 @@ export default function ProfileEditPage() {
                             return updated
                           })
                         }}
-                        placeholder="e.g. Government issued identity, verified record"
+                        placeholder="e.g. Current CV, verified credentials, portfolio attachment"
                       />
                     </div>
 
-                    {/* THE OPTION: Show on user profile or not */}
-                    <div className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                      isDocVisible
-                        ? 'bg-purple-500/10 border-purple-500/30'
-                        : 'bg-muted/40 border-border'
-                    }`}>
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                          {isDocVisible ? (
-                            <Eye className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-                          ) : (
-                            <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                    {/* Document Visibility Setting */}
+                    <div className="p-3.5 rounded-2xl border border-border bg-muted/30 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <Eye className="h-3.5 w-3.5 text-primary" />
+                          <span>Document Visibility</span>
+                        </label>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px] font-semibold",
+                            doc.visibility === 'PUBLIC'
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                              : doc.visibility === 'PROFESSIONAL'
+                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30"
+                              : doc.visibility === 'PRIVATE' || (doc.showOnProfile && !doc.visibility)
+                              ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30"
+                              : "bg-muted text-muted-foreground border-border"
                           )}
-                          <span>Show on profile in Private Mode</span>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground">
-                          {isDocVisible
-                            ? 'Selected: This document will be displayed on your profile when viewed in Private Mode.'
-                            : 'Unselected: This document stays confidential in your private vault only.'}
-                        </p>
+                        >
+                          {doc.visibility === 'PUBLIC'
+                            ? 'Public (All Modes)'
+                            : doc.visibility === 'PROFESSIONAL'
+                            ? 'Professional & Private'
+                            : doc.visibility === 'PRIVATE' || (doc.showOnProfile && !doc.visibility)
+                            ? 'Private Mode Only'
+                            : 'Vault Only (Hidden)'}
+                        </Badge>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={isDocVisible}
-                          onChange={(e) => {
-                            const checked = e.target.checked
-                            setPrivateDocuments((prev) => {
-                              const updated = [...prev]
-                              if (updated[idx]) {
-                                updated[idx] = {
-                                  ...updated[idx],
-                                  showOnProfile: checked,
-                                  metadata: {
-                                    ...(updated[idx].metadata || {}),
-                                    showOnProfile: checked,
-                                  },
-                                }
+
+                      <select
+                        value={
+                          doc.visibility || (doc.showOnProfile || doc.metadata?.showOnProfile ? 'PRIVATE' : 'HIDDEN')
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value as 'PUBLIC' | 'PROFESSIONAL' | 'PRIVATE' | 'HIDDEN'
+                          const willShow = val !== 'HIDDEN'
+                          setPrivateDocuments((prev) => {
+                            const updated = [...prev]
+                            if (updated[idx]) {
+                              updated[idx] = {
+                                ...updated[idx],
+                                visibility: val,
+                                showOnProfile: willShow,
+                                metadata: {
+                                  ...(updated[idx].metadata || {}),
+                                  visibility: val,
+                                  showOnProfile: willShow,
+                                },
                               }
-                              return updated
-                            })
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
-                      </label>
+                            }
+                            return updated
+                          })
+                        }}
+                        className="w-full h-9 rounded-xl border border-input bg-background px-3 py-1 text-xs font-medium text-foreground shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      >
+                        <option value="PUBLIC">Public (Visible on Public & Professional profile — Ideal for Resume & Portfolio)</option>
+                        <option value="PROFESSIONAL">Professional (Visible in Professional and Private Modes)</option>
+                        <option value="PRIVATE">Private Mode Only (Visible only when your profile is viewed in Private Mode)</option>
+                        <option value="HIDDEN">Vault Only (Confidential — Stored safely in your vault, hidden from public)</option>
+                      </select>
+
+                      <p className="text-[11px] text-muted-foreground">
+                        {doc.visibility === 'PUBLIC'
+                          ? 'Anyone visiting your profile can view and download this document.'
+                          : doc.visibility === 'PROFESSIONAL'
+                          ? 'Visible to recruiters and colleagues in Professional & Private profile modes.'
+                          : doc.visibility === 'PRIVATE' || (doc.showOnProfile && !doc.visibility)
+                          ? 'Visible only when someone views your profile in Private Mode.'
+                          : 'This document remains confidential in your private vault only and will never appear on any public profile.'}
+                      </p>
                     </div>
                   </div>
                 )

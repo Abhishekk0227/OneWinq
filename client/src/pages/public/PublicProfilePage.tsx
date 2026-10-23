@@ -64,6 +64,7 @@ import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
 import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
+import { resolveDocumentUrl } from '@/utils/documentUrl'
 
 const BIO_LIMIT = 300
 
@@ -399,7 +400,7 @@ export default function PublicProfilePage() {
   const publications = profile.publications || profile.sections?.publications || []
   const organizations = profile.organizations || profile.sections?.organizations || []
   const mediaGallery = profile.mediaGallery || profile.sections?.mediaGallery || []
-  const privateDocuments = profile.privateDocuments || profile.sections?.privateDocuments || []
+  const privateDocuments = (profile.documents && profile.documents.length > 0 ? profile.documents : profile.privateDocuments) || profile.sections?.documents || profile.sections?.privateDocuments || []
   const customSections = profile.customSections || []
 
   const hasExperience = experiences.length > 0
@@ -1052,20 +1053,31 @@ export default function PublicProfilePage() {
                     const orgRole = org.role || org.subtitle || org.metadata?.role || ''
                     const orgTagline = org.tagline || org.metadata?.funding || org.description || ''
                     const orgWebsite = org.website || org.url || ''
-                    const orgStage = org.stage || org.metadata?.stage || ''
+                    const orgLogo = org.imageUrl || org.metadata?.imageUrl || org.logoUrl
                     return (
-                      <div key={org.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3.5 space-y-1.5 hover:border-primary/40 transition-colors">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="font-semibold text-xs text-foreground">{orgName}</span>
-                          {orgStage && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary uppercase shrink-0">
-                              {orgStage}
-                            </span>
+                      <div key={org.id || idx} className="rounded-xl border border-border/80 bg-muted/20 p-3.5 space-y-2 hover:border-primary/40 transition-colors">
+                        <div className="flex items-start gap-2.5">
+                          {orgLogo ? (
+                            <img
+                              src={orgLogo}
+                              alt={orgName}
+                              className="w-9 h-9 rounded-lg object-contain bg-background border border-border p-1 shrink-0"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                              <Building2 className="h-4 w-4" />
+                            </div>
                           )}
+                          <div className="min-w-0 flex-1">
+                            <span className="font-semibold text-xs text-foreground block truncate">{orgName}</span>
+                            {orgRole && (
+                              <p className="text-[11px] font-medium text-foreground/80 truncate">{orgRole}</p>
+                            )}
+                          </div>
                         </div>
-                        {orgRole && (
-                          <p className="text-[11px] font-medium text-foreground/80">{orgRole}</p>
-                        )}
                         {orgTagline && (
                           <p className="text-[11px] text-muted-foreground line-clamp-2">{orgTagline}</p>
                         )}
@@ -1182,20 +1194,31 @@ export default function PublicProfilePage() {
                     const orgRole = org.role || org.subtitle || org.metadata?.role || ''
                     const orgTagline = org.tagline || org.description || ''
                     const orgWebsite = org.website || org.url || ''
-                    const orgStage = org.stage || org.metadata?.stage || ''
+                    const orgLogo = org.imageUrl || org.metadata?.imageUrl || org.logoUrl
                     return (
-                      <div key={org.id || idx} className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-1 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
-                        <div className="flex items-start justify-between gap-2 min-w-0">
-                          <span className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0">{orgName}</span>
-                          {orgStage && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary uppercase shrink-0">
-                              {orgStage}
-                            </span>
+                      <div key={org.id || idx} className="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-2 hover:border-primary/40 transition-colors min-w-0 max-w-full overflow-hidden">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          {orgLogo ? (
+                            <img
+                              src={orgLogo}
+                              alt={orgName}
+                              className="w-8 h-8 rounded-lg object-contain bg-background border border-border p-1 shrink-0"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                              <Building2 className="h-4 w-4" />
+                            </div>
                           )}
+                          <div className="min-w-0 flex-1">
+                            <span className="font-semibold text-foreground text-xs break-words [overflow-wrap:anywhere] min-w-0 block truncate">{orgName}</span>
+                            {orgRole && (
+                              <p className="text-[11px] font-medium text-foreground/80 break-words [overflow-wrap:anywhere] min-w-0 truncate">{orgRole}</p>
+                            )}
+                          </div>
                         </div>
-                        {orgRole && (
-                          <p className="text-[11px] font-medium text-foreground/80 break-words [overflow-wrap:anywhere] min-w-0">{orgRole}</p>
-                        )}
                         {orgTagline && (
                           <p className="text-[11px] text-muted-foreground line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0">{orgTagline}</p>
                         )}
@@ -1302,60 +1325,86 @@ export default function PublicProfilePage() {
               </div>
             )}
 
-            {/* Private Documents Section (Visible only when in Private Mode and owner selected to show) */}
+            {/* Documents Section */}
             {(activeTab === 'all' || activeTab === 'documents') && hasPrivateDocs && (
-              <div className="rounded-2xl border border-purple-500/25 bg-card p-4 sm:p-6 shadow-sm space-y-4 min-w-0 max-w-full">
+              <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm space-y-4 min-w-0 max-w-full">
                 <div className="flex items-center justify-between gap-2 pb-3 border-b border-border min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 shrink-0">
-                      <Lock className="h-4 w-4" />
+                    <div className="p-1.5 rounded-lg bg-primary/15 text-primary shrink-0">
+                      <FileText className="h-4 w-4" />
                     </div>
                     <h2 className="text-xs sm:text-sm font-bold text-foreground break-words [overflow-wrap:anywhere] min-w-0">
-                      Private Documents ({privateDocuments.length})
+                      Documents ({privateDocuments.length})
                     </h2>
                   </div>
-                  <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30 font-semibold">
-                    Private Mode
-                  </Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
-                  {privateDocuments.map((doc: any, idx: number) => (
-                    <div key={doc.id || idx} className="p-4 rounded-2xl border border-border bg-muted/10 space-y-2 shadow-2xs hover:border-purple-500/40 transition-colors">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h3 className="font-bold text-xs sm:text-sm text-foreground truncate">{doc.title}</h3>
-                          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
-                            {doc.subtitle || 'Document'}
-                          </span>
+                  {privateDocuments.map((doc: any, idx: number) => {
+                    const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
+                    const isImg = doc.metadata?.mimeType?.startsWith('image/')
+                    const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+
+                    return (
+                      <div
+                        key={doc.id || idx}
+                        className="p-4 rounded-2xl border border-border bg-card shadow-xs hover:border-primary/40 hover:shadow-sm transition-all space-y-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Sleek Rectangle Document Badge */}
+                          <div className="w-11 h-14 rounded-xl bg-gradient-to-br from-primary/15 via-primary/10 to-muted border border-primary/25 flex flex-col items-center justify-center shrink-0 shadow-2xs">
+                            <FileText className="h-5 w-5 text-primary" />
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-primary/90 mt-1">
+                              {docTag}
+                            </span>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-bold text-xs sm:text-sm text-foreground truncate">{doc.title}</h3>
+                              {doc.metadata?.docNumber && (
+                                <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md shrink-0">
+                                  {doc.metadata.docNumber}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
+                                {doc.subtitle || 'Document'}
+                              </span>
+                              {doc.metadata?.fileSize && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  · {(doc.metadata.fileSize / 1024).toFixed(0)} KB
+                                </span>
+                              )}
+                            </div>
+                            {doc.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mt-1">
+                                {doc.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        {doc.metadata?.docNumber && (
-                          <span className="text-[10px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md">
-                            {doc.metadata.docNumber}
-                          </span>
+
+                        {doc.url && (
+                          <div className="pt-2 border-t border-border flex items-center justify-between">
+                            <a
+                              href={resolveDocumentUrl(doc.url)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline group"
+                            >
+                              <span>Open Document</span>
+                              <ExternalLink className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                            </a>
+                            <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
+                              <ShieldCheck className="h-3 w-3 text-primary" />
+                              <span>Verified</span>
+                            </span>
+                          </div>
                         )}
                       </div>
-                      {doc.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{doc.description}</p>
-                      )}
-                      {doc.url && (
-                        <div className="pt-2 border-t border-border/60 flex items-center justify-between">
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-                          >
-                            <span>Open Document</span>
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                          <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
-                            <ShieldCheck className="h-3 w-3 text-purple-600 dark:text-purple-400" />
-                            <span>Verified</span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -1420,14 +1469,14 @@ export default function PublicProfilePage() {
                   </div>
                 )}
 
-                {/* Verified Documents Overview Card */}
+                {/* Documents Overview Card */}
                 {hasPrivateDocs && (
-                  <div className="rounded-2xl border border-purple-500/25 bg-purple-500/5 p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
-                    <div className="flex items-center justify-between gap-2 border-b border-purple-500/20 pb-2">
+                  <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm space-y-3 min-w-0 max-w-full">
+                    <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
                       <div className="flex items-center gap-2">
-                        <Lock className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
                         <h2 className="text-xs sm:text-sm font-bold text-foreground">
-                          Verified Documents ({privateDocuments.length})
+                          Documents ({privateDocuments.length})
                         </h2>
                       </div>
                       <button
@@ -1439,27 +1488,38 @@ export default function PublicProfilePage() {
                       </button>
                     </div>
                     <div className="space-y-2">
-                      {privateDocuments.slice(0, 3).map((doc: any, idx: number) => (
-                        <div key={doc.id || idx} className="p-3 rounded-xl border border-border bg-card flex items-center justify-between gap-2 shadow-2xs">
-                          <div className="min-w-0">
-                            <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
-                            <div className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">
-                              {doc.subtitle || 'Document'}
+                      {privateDocuments.slice(0, 3).map((doc: any, idx: number) => {
+                        const isPdf = doc.metadata?.mimeType?.includes('pdf') || doc.url?.toLowerCase().endsWith('.pdf')
+                        const isImg = doc.metadata?.mimeType?.startsWith('image/')
+                        const docTag = isPdf ? 'PDF' : isImg ? 'IMG' : 'DOC'
+                        return (
+                          <div key={doc.id || idx} className="p-3 rounded-xl border border-border bg-muted/10 flex items-center justify-between gap-3 shadow-2xs">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-8 h-9 rounded-lg bg-primary/10 border border-primary/20 flex flex-col items-center justify-center shrink-0">
+                                <FileText className="h-3.5 w-3.5 text-primary" />
+                                <span className="text-[7px] font-bold text-primary">{docTag}</span>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-semibold text-xs text-foreground truncate">{doc.title}</div>
+                                <div className="text-[10px] text-primary/80 font-medium">
+                                  {doc.subtitle || 'Document'}
+                                </div>
+                              </div>
                             </div>
+                            {doc.url && (
+                              <a
+                                href={resolveDocumentUrl(doc.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
+                              >
+                                <span>View</span>
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
                           </div>
-                          {doc.url && (
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[11px] text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0"
-                            >
-                              <span>View</span>
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          )}
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )}
