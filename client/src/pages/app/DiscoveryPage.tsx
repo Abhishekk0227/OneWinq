@@ -435,11 +435,10 @@ export default function DiscoveryPage() {
         <EmptyState
           icon={<Compass className="h-6 w-6" />}
           title="No people found"
-          description="Try broadening your search keywords or removing the remote filter."
-          actionLabel="Clear Filters"
+          description="Try broadening your search keywords."
+          actionLabel="Clear Search"
           onAction={() => {
             setSearchTerm('')
-            setRemoteOnly(false)
           }}
         />
       ) : (
