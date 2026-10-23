@@ -13,6 +13,7 @@ import { LoadingScreen } from '@/components/common/LoadingScreen'
 import { toast } from '@/stores/toastStore'
 import { useAuthStore } from '@/stores/authStore'
 import { SECTION_VISIBILITY, type SectionVisibility } from '@/constants/app.constants'
+import { cn } from '@/lib/utils/cn'
 import type {
   Profile,
   ProfessionalIdentity,
