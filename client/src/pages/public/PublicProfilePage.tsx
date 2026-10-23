@@ -61,6 +61,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { formatDateRange, formatMonthYear, sortExperiencesByDate, sortEducationByDate } from '@/utils/dateFormatter'
 import { MediaVideoPostCard } from '@/components/profile/MediaVideoPostCard'
+import { SwipeHintIndicator } from '@/components/common/SwipeHintIndicator'
 import { ProfileSectionsSidebar } from '@/components/profile/ProfileSectionsSidebar'
 import { OrgPositionCurvedBadge } from '@/components/profile/OrgPositionCurvedBadge'
 import { resolveDocumentUrl } from '@/utils/documentUrl'

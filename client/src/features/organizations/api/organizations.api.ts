@@ -7,6 +7,10 @@ import type {
   Department,
   OrganizationInvitationItem,
   InvitationPreviewData,
+  ProfileApproval,
+  EnterpriseEvent,
+  EventTicketPass,
+  OrganizationRoleItem,
 } from '@/types/organization.types';
 
 export const organizationsApi = {
