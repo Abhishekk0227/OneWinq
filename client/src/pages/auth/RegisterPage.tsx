@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { authApi } from '@/features/auth/api/auth.api'
 import { toast } from '@/stores/toastStore'
-import { Mail, Lock, User, ArrowRight, AtSign } from 'lucide-react'
+import { Mail, Lock, User, ArrowRight, AtSign, Eye, EyeOff } from 'lucide-react'
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const COMMON_TYPO_DOMAINS: Record<string, string> = {
@@ -65,6 +65,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function RegisterPage() {
   const navigate = useNavigate()
   const [serverError, setServerError] = React.useState<string | null>(null)
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
   const {
     register,
@@ -193,14 +195,22 @@ export default function RegisterPage() {
           </label>
           <Input
             {...register('password')}
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             placeholder="Min. 8 chars with upper, lower, number & symbol"
             leftIcon={<Lock className="h-4 w-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 cursor-pointer focus:outline-none"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
             error={errors.password?.message}
           />
-          <p className="text-[11px] text-muted-foreground pt-0.5">
-            Requires at least 8 characters, uppercase, lowercase, number, and special character.
-          </p>
         </div>
 
         <div className="space-y-1">
@@ -209,11 +219,25 @@ export default function RegisterPage() {
           </label>
           <Input
             {...register('confirmPassword')}
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             placeholder="Re-enter your password"
             leftIcon={<Lock className="h-4 w-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 cursor-pointer focus:outline-none"
+                tabIndex={-1}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
             error={errors.confirmPassword?.message}
           />
+          <p className="text-[11px] text-muted-foreground pt-0.5">
+            Requires at least 8 characters, uppercase, lowercase, number, and special character.
+          </p>
         </div>
 
         <Button
