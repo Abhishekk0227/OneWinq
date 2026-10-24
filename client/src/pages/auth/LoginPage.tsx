@@ -9,7 +9,7 @@ import { authApi } from '@/features/auth/api/auth.api'
 import { useAuthStore } from '@/stores/authStore'
 import { connectSocket } from '@/lib/socket/socketClient'
 import { toast } from '@/stores/toastStore'
-import { Mail, Lock, ArrowRight } from 'lucide-react'
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const loginSchema = z.object({
   login: z.string().min(1, 'Email or username is required'),
@@ -23,6 +23,7 @@ export default function LoginPage() {
   const location = useLocation()
   const { setAuth } = useAuthStore()
   const [serverError, setServerError] = React.useState<string | null>(null)
+  const [showPassword, setShowPassword] = React.useState(false)
 
   const {
     register,
@@ -105,9 +106,20 @@ export default function LoginPage() {
           </div>
           <Input
             {...register('password')}
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             leftIcon={<Lock className="h-4 w-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 cursor-pointer focus:outline-none"
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
             error={errors.password?.message}
             autoComplete="current-password"
           />

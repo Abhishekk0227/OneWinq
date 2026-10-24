@@ -1,5 +1,5 @@
-// OneWinq Service Worker v25 - Fix SwipeHintIndicator import and DiscoveryPage setRemoteOnly cleanup
-const CACHE_NAME = 'onewinq-v25';
+// OneWinq Service Worker v26 - Show password toggle and moved password description after confirm password
+const CACHE_NAME = 'onewinq-v26';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

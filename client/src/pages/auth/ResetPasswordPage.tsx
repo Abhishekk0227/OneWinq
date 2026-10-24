@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { authApi } from '@/features/auth/api/auth.api'
 import { toast } from '@/stores/toastStore'
-import { KeyRound, Lock, ArrowRight } from 'lucide-react'
+import { KeyRound, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const resetSchema = z
   .object({
@@ -33,6 +33,8 @@ export default function ResetPasswordPage() {
   const emailParam = searchParams.get('email') || ''
 
   const [serverError, setServerError] = React.useState<string | null>(null)
+  const [showNewPassword, setShowNewPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
   const {
     register,
@@ -109,9 +111,20 @@ export default function ResetPasswordPage() {
           </label>
           <Input
             {...register('newPassword')}
-            type="password"
+            type={showNewPassword ? 'text' : 'password'}
             placeholder="Min. 8 chars with uppercase & number"
             leftIcon={<Lock className="h-4 w-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 cursor-pointer focus:outline-none"
+                tabIndex={-1}
+                aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+              >
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
             error={errors.newPassword?.message}
           />
         </div>
@@ -122,9 +135,20 @@ export default function ResetPasswordPage() {
           </label>
           <Input
             {...register('confirmPassword')}
-            type="password"
+            type={showConfirmPassword ? 'text' : 'password'}
             placeholder="Confirm new password"
             leftIcon={<Lock className="h-4 w-4" />}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1 cursor-pointer focus:outline-none"
+                tabIndex={-1}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
             error={errors.confirmPassword?.message}
           />
         </div>
