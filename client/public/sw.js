@@ -1,5 +1,5 @@
-// OneWinq Service Worker v26 - Show password toggle and moved password description after confirm password
-const CACHE_NAME = 'onewinq-v26';
+// OneWinq Service Worker v27 - Remove Follow and Manage Org buttons from org showcase top bar
+const CACHE_NAME = 'onewinq-v27';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

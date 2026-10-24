@@ -698,41 +698,7 @@ export default function CompanyShowcasePage() {
               <span className="hidden sm:inline">Share</span>
             </Button>
 
-            {/* Quick Follow button in top bar */}
-            <Button
-              size="sm"
-              variant={followState.isFollowing ? 'secondary' : 'default'}
-              onClick={() => {
-                if (!user) {
-                  navigate('/login');
-                  return;
-                }
-                followMutation.mutate();
-              }}
-              disabled={followMutation.isPending}
-              className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-3 font-semibold shadow-xs shrink-0"
-            >
-              {followState.isFollowing ? (
-                <>
-                  <UserCheck className="h-3.5 w-3.5 sm:mr-1 text-primary shrink-0" />
-                  <span className="hidden sm:inline">Following</span>
-                </>
-              ) : (
-                <>
-                  <Bell className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Follow</span>
-                </>
-              )}
-            </Button>
 
-            {isOwnerOrAdmin && (
-              <Link to="/app/org/profile" className="shrink-0">
-                <Button size="sm" variant="subtle" className="h-7 sm:h-8 text-[11px] sm:text-xs px-2 sm:px-2.5 whitespace-nowrap">
-                  <Settings className="h-3.5 w-3.5 sm:mr-1 shrink-0" />
-                  <span className="hidden sm:inline">Manage Org</span>
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
       </header>
