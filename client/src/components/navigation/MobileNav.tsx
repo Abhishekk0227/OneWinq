@@ -18,6 +18,16 @@ export function MobileNav() {
   const { openModal } = useUIStore()
   const { activeContext } = useOrganizationContextStore()
 
+  const isMobileActiveChat =
+    location.pathname.startsWith('/app/messages') &&
+    Boolean(new URLSearchParams(location.search).get('cid'))
+
+  // Hide mobile bottom navigation bar when inside an active conversation to avoid
+  // crowding the chat input and getting pushed above the virtual keyboard.
+  if (isMobileActiveChat) {
+    return null
+  }
+
   const isOrgRoute =
     location.pathname.startsWith('/app/org/') ||
     location.pathname === '/app/org'
