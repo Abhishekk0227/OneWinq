@@ -328,7 +328,10 @@ export async function getMessages(userId, conversationId, { cursor, limit = 20 }
   const userMap = new Map(users.map((u) => [u._id.toString(), u]));
   const profileMap = new Map(profiles.map((p) => [p.userId.toString(), p]));
 
-  const messages = docs.map((m) => {
+  // Reverse docs so messages are returned in chronological order (oldest to newest)
+  const chronologicalDocs = [...docs].reverse();
+
+  const messages = chronologicalDocs.map((m) => {
     const sId = String(m.senderId);
     const u = userMap.get(sId);
     const p = profileMap.get(sId);

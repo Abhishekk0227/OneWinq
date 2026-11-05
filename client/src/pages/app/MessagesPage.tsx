@@ -161,15 +161,20 @@ export default function MessagesPage() {
 
   const messages = messagesData?.data?.messages || []
 
-  // Ensure unique messages by ID so duplicate sockets/optimistic updates never render twice
+  // Ensure unique messages by ID and sort chronologically (oldest first, newest at bottom)
   const uniqueMessages = React.useMemo(() => {
     const seen = new Set<string>()
-    return messages.filter((m) => {
+    const deduplicated = messages.filter((m) => {
       const id = m._id || m.id
       if (!id) return true
       if (seen.has(id)) return false
       seen.add(id)
       return true
+    })
+    return deduplicated.sort((a, b) => {
+      const timeA = new Date(a.createdAt || 0).getTime()
+      const timeB = new Date(b.createdAt || 0).getTime()
+      return timeA - timeB
     })
   }, [messages])
 
