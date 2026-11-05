@@ -40,6 +40,7 @@ import {
   FolderPlus,
   Settings,
 } from 'lucide-react'
+import { cn } from '@/lib/utils/cn'
 
 import type { Message, ChatFolder } from '@/types/messaging.types'
 
@@ -440,8 +441,15 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="rounded-3xl border border-border bg-card shadow-sm overflow-hidden h-[calc(100vh-8.5rem)] flex flex-col text-left">
-      <div className="flex flex-1 overflow-hidden">
+    <div
+      className={cn(
+        'bg-card flex flex-col text-left transition-all',
+        activeConversationId
+          ? 'h-[100dvh] md:h-[calc(100vh-8.5rem)] rounded-none md:rounded-3xl border-0 md:border md:border-border shadow-none md:shadow-sm overflow-hidden'
+          : 'h-[calc(100vh-8.5rem)] rounded-3xl border border-border shadow-sm overflow-hidden'
+      )}
+    >
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Left Conversation List Pane */}
         <div
           className={`w-full md:w-80 lg:w-96 border-r border-border flex flex-col bg-card shrink-0 ${
@@ -694,9 +702,9 @@ export default function MessagesPage() {
 
         {/* Right Active Chat Pane */}
         {activeConversationId ? (
-          <div className="flex-1 flex flex-col min-w-0 bg-muted/15">
+          <div className="flex-1 flex flex-col min-w-0 bg-muted/15 h-full min-h-0">
             {/* Chat Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+            <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => setSearchParams({})}
@@ -787,7 +795,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Stream */}
-            <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 custom-scrollbar">
+            <div className="flex-1 p-3.5 sm:p-6 overflow-y-auto space-y-4 custom-scrollbar min-h-0">
               {isMessagesLoading ? (
                 <div className="flex justify-center p-8">
                   <div className="text-xs text-muted-foreground">Loading chat history...</div>
@@ -974,7 +982,7 @@ export default function MessagesPage() {
             {/* Input Bar */}
             <form
               onSubmit={handleSendMessage}
-              className="p-3 sm:p-4 border-t border-border bg-card flex items-center gap-2"
+              className="p-3 sm:p-4 border-t border-border bg-card flex items-center gap-2 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
             >
               <input
                 type="file"
@@ -996,6 +1004,11 @@ export default function MessagesPage() {
               <Input
                 value={messageInput}
                 onChange={handleInputChange}
+                onFocus={() => {
+                  setTimeout(() => {
+                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+                  }, 150)
+                }}
                 placeholder="Type your message..."
                 className="flex-1 rounded-xl"
               />
